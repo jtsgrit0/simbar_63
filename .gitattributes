@@ -1,0 +1,31 @@
+* text=auto
+.gitattributes text eol=lf
+.gitignore text eol=lf
+*.cs text eol=lf
+*.py text eol=lf
+*.md text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.html text eol=lf
+*.css text eol=lf
+*.js text eol=lf
+*.unity text eol=lf
+*.prefab text eol=lf
+*.asset text eol=lf
+*.meta text eol=lf
+# Unity writes empty serialized properties with trailing spaces.
+*.meta whitespace=-blank-at-eol
+*.asset whitespace=-blank-at-eol
+*.unity whitespace=-blank-at-eol
+*.prefab whitespace=-blank-at-eol
+*.mat whitespace=-blank-at-eol
+*.anim whitespace=-blank-at-eol
+*.fbx binary
+*.blend binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.otf binary
+*.ttf binary
+*.wasm binary
+*.data binary

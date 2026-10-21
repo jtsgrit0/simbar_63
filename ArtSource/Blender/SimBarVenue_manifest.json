@@ -1,0 +1,562 @@
+{
+  "generator": "create_simbar_venue.py",
+  "blender": "5.2.2 LTS",
+  "units": "meters",
+  "unityBounds": {
+    "x": [
+      -10.5,
+      10.5
+    ],
+    "y": [
+      -0.2,
+      6.6
+    ],
+    "z": [
+      -7.75,
+      7.75
+    ]
+  },
+  "layout": {
+    "bar": {
+      "center": [
+        -6,
+        0,
+        -1.5
+      ],
+      "counterTop": 1.55
+    },
+    "stage": {
+      "center": [
+        5.4,
+        0.62,
+        4.4
+      ],
+      "size": [
+        7.8,
+        0.62,
+        4.2
+      ]
+    },
+    "drums": [
+      6,
+      0.62,
+      5.2
+    ],
+    "vocal": [
+      5.5,
+      0.62,
+      2.7
+    ],
+    "guitarLeft": [
+      3,
+      0.62,
+      3.8
+    ],
+    "guitarRight": [
+      8,
+      0.62,
+      3.8
+    ]
+  },
+  "materials": {
+    "CreamTile": {
+      "color": [
+        0.78,
+        0.67,
+        0.52
+      ],
+      "roughness": 0.66,
+      "metallic": 0,
+      "emission": 0
+    },
+    "IvoryTile": {
+      "color": [
+        0.91,
+        0.82,
+        0.65
+      ],
+      "roughness": 0.64,
+      "metallic": 0,
+      "emission": 0
+    },
+    "FloorGrout": {
+      "color": [
+        0.42,
+        0.34,
+        0.29
+      ],
+      "roughness": 0.8,
+      "metallic": 0,
+      "emission": 0
+    },
+    "WallMortar": {
+      "color": [
+        0.39,
+        0.18,
+        0.12
+      ],
+      "roughness": 0.9,
+      "metallic": 0,
+      "emission": 0
+    },
+    "BrickTerracotta": {
+      "color": [
+        0.55,
+        0.18,
+        0.1
+      ],
+      "roughness": 0.88,
+      "metallic": 0,
+      "emission": 0
+    },
+    "BrickWarm": {
+      "color": [
+        0.67,
+        0.23,
+        0.13
+      ],
+      "roughness": 0.86,
+      "metallic": 0,
+      "emission": 0
+    },
+    "BrickBurnt": {
+      "color": [
+        0.43,
+        0.11,
+        0.065
+      ],
+      "roughness": 0.9,
+      "metallic": 0,
+      "emission": 0
+    },
+    "BrickPeach": {
+      "color": [
+        0.73,
+        0.3,
+        0.17
+      ],
+      "roughness": 0.9,
+      "metallic": 0,
+      "emission": 0
+    },
+    "DarkWalnut": {
+      "color": [
+        0.16,
+        0.055,
+        0.025
+      ],
+      "roughness": 0.35,
+      "metallic": 0,
+      "emission": 0
+    },
+    "WarmOak": {
+      "color": [
+        0.43,
+        0.16,
+        0.055
+      ],
+      "roughness": 0.32,
+      "metallic": 0,
+      "emission": 0
+    },
+    "HoneyWood": {
+      "color": [
+        0.59,
+        0.28,
+        0.1
+      ],
+      "roughness": 0.36,
+      "metallic": 0,
+      "emission": 0
+    },
+    "WoodHighlight": {
+      "color": [
+        0.72,
+        0.36,
+        0.14
+      ],
+      "roughness": 0.4,
+      "metallic": 0,
+      "emission": 0
+    },
+    "UpholsteryRed": {
+      "color": [
+        0.38,
+        0.045,
+        0.055
+      ],
+      "roughness": 0.7,
+      "metallic": 0,
+      "emission": 0
+    },
+    "UpholsteryHighlight": {
+      "color": [
+        0.54,
+        0.075,
+        0.08
+      ],
+      "roughness": 0.7,
+      "metallic": 0,
+      "emission": 0
+    },
+    "LeatherBlack": {
+      "color": [
+        0.021,
+        0.026,
+        0.032
+      ],
+      "roughness": 0.7,
+      "metallic": 0,
+      "emission": 0
+    },
+    "StageBlack": {
+      "color": [
+        0.026,
+        0.032,
+        0.052
+      ],
+      "roughness": 0.65,
+      "metallic": 0,
+      "emission": 0
+    },
+    "MetalBlack": {
+      "color": [
+        0.035,
+        0.041,
+        0.052
+      ],
+      "roughness": 0.4,
+      "metallic": 0.68,
+      "emission": 0
+    },
+    "Chrome": {
+      "color": [
+        0.55,
+        0.66,
+        0.68
+      ],
+      "roughness": 0.2,
+      "metallic": 0.83,
+      "emission": 0
+    },
+    "Brass": {
+      "color": [
+        0.76,
+        0.48,
+        0.13
+      ],
+      "roughness": 0.28,
+      "metallic": 0.72,
+      "emission": 0
+    },
+    "BeerGold": {
+      "color": [
+        0.95,
+        0.46,
+        0.025
+      ],
+      "roughness": 0.24,
+      "metallic": 0,
+      "emission": 0
+    },
+    "BeerFoam": {
+      "color": [
+        0.99,
+        0.9,
+        0.65
+      ],
+      "roughness": 0.75,
+      "metallic": 0,
+      "emission": 0
+    },
+    "GlassPale": {
+      "color": [
+        0.72,
+        0.88,
+        0.87
+      ],
+      "roughness": 0.17,
+      "metallic": 0.25,
+      "emission": 0
+    },
+    "BottleGreen": {
+      "color": [
+        0.055,
+        0.3,
+        0.11
+      ],
+      "roughness": 0.21,
+      "metallic": 0,
+      "emission": 0
+    },
+    "BottleTeal": {
+      "color": [
+        0.025,
+        0.5,
+        0.43
+      ],
+      "roughness": 0.21,
+      "metallic": 0,
+      "emission": 0
+    },
+    "BottleAmber": {
+      "color": [
+        0.48,
+        0.14,
+        0.025
+      ],
+      "roughness": 0.22,
+      "metallic": 0,
+      "emission": 0
+    },
+    "BottleBlue": {
+      "color": [
+        0.035,
+        0.27,
+        0.55
+      ],
+      "roughness": 0.2,
+      "metallic": 0,
+      "emission": 0
+    },
+    "BottleClear": {
+      "color": [
+        0.57,
+        0.77,
+        0.74
+      ],
+      "roughness": 0.2,
+      "metallic": 0,
+      "emission": 0
+    },
+    "LabelCream": {
+      "color": [
+        0.97,
+        0.84,
+        0.55
+      ],
+      "roughness": 0.8,
+      "metallic": 0,
+      "emission": 0
+    },
+    "LabelRed": {
+      "color": [
+        0.68,
+        0.055,
+        0.04
+      ],
+      "roughness": 0.8,
+      "metallic": 0,
+      "emission": 0
+    },
+    "LabelNavy": {
+      "color": [
+        0.045,
+        0.08,
+        0.14
+      ],
+      "roughness": 0.7,
+      "metallic": 0,
+      "emission": 0
+    },
+    "Pink": {
+      "color": [
+        0.95,
+        0.055,
+        0.34
+      ],
+      "roughness": 0.35,
+      "metallic": 0,
+      "emission": 0
+    },
+    "DrumRed": {
+      "color": [
+        0.58,
+        0.025,
+        0.1
+      ],
+      "roughness": 0.3,
+      "metallic": 0.35,
+      "emission": 0
+    },
+    "DrumHead": {
+      "color": [
+        0.91,
+        0.88,
+        0.78
+      ],
+      "roughness": 0.72,
+      "metallic": 0,
+      "emission": 0
+    },
+    "Foliage": {
+      "color": [
+        0.13,
+        0.4,
+        0.055
+      ],
+      "roughness": 0.75,
+      "metallic": 0,
+      "emission": 0
+    },
+    "FoliageLight": {
+      "color": [
+        0.3,
+        0.57,
+        0.075
+      ],
+      "roughness": 0.72,
+      "metallic": 0,
+      "emission": 0
+    },
+    "Ceramic": {
+      "color": [
+        0.78,
+        0.6,
+        0.38
+      ],
+      "roughness": 0.7,
+      "metallic": 0,
+      "emission": 0
+    },
+    "PosterPaper": {
+      "color": [
+        0.95,
+        0.79,
+        0.57
+      ],
+      "roughness": 0.7,
+      "metallic": 0,
+      "emission": 0
+    },
+    "PosterPurple": {
+      "color": [
+        0.29,
+        0.065,
+        0.33
+      ],
+      "roughness": 0.7,
+      "metallic": 0,
+      "emission": 0
+    },
+    "PosterOrange": {
+      "color": [
+        0.94,
+        0.28,
+        0.05
+      ],
+      "roughness": 0.7,
+      "metallic": 0,
+      "emission": 0
+    },
+    "PosterTeal": {
+      "color": [
+        0.035,
+        0.62,
+        0.54
+      ],
+      "roughness": 0.7,
+      "metallic": 0,
+      "emission": 0
+    },
+    "NeonCyan": {
+      "color": [
+        0.025,
+        0.78,
+        1
+      ],
+      "roughness": 0.24,
+      "metallic": 0,
+      "emission": 3
+    },
+    "NeonPink": {
+      "color": [
+        1,
+        0.035,
+        0.51
+      ],
+      "roughness": 0.24,
+      "metallic": 0,
+      "emission": 3
+    },
+    "NeonGold": {
+      "color": [
+        1,
+        0.62,
+        0.08
+      ],
+      "roughness": 0.24,
+      "metallic": 0,
+      "emission": 2
+    },
+    "WarmBulb": {
+      "color": [
+        1,
+        0.7,
+        0.27
+      ],
+      "roughness": 0.25,
+      "metallic": 0,
+      "emission": 2
+    }
+  },
+  "meshes": {
+    "SimBar_Floor": {
+      "vertices": 18984,
+      "triangles": 36612,
+      "nonTriangleFaces": 0
+    },
+    "SimBar_BrickWalls": {
+      "vertices": 35672,
+      "triangles": 68796,
+      "nonTriangleFaces": 0
+    },
+    "SimBar_BackBar": {
+      "vertices": 40448,
+      "triangles": 79012,
+      "nonTriangleFaces": 0
+    },
+    "SimBar_BarCounter": {
+      "vertices": 12180,
+      "triangles": 23968,
+      "nonTriangleFaces": 0
+    },
+    "SimBar_BoothsAndTables": {
+      "vertices": 5616,
+      "triangles": 10896,
+      "nonTriangleFaces": 0
+    },
+    "SimBar_Stage": {
+      "vertices": 3652,
+      "triangles": 7184,
+      "nonTriangleFaces": 0
+    },
+    "SimBar_TrussAndNeon": {
+      "vertices": 31515,
+      "triangles": 62602,
+      "nonTriangleFaces": 0
+    },
+    "SimBar_DrumKit": {
+      "vertices": 18424,
+      "triangles": 36536,
+      "nonTriangleFaces": 0
+    },
+    "SimBar_MicrophonesAndInstruments": {
+      "vertices": 17986,
+      "triangles": 35504,
+      "nonTriangleFaces": 0
+    },
+    "SimBar_PlantsAndWallArt": {
+      "vertices": 46312,
+      "triangles": 91540,
+      "nonTriangleFaces": 0
+    }
+  },
+  "fbxAxis": {
+    "forward": "-Z",
+    "up": "Y",
+    "baked": true,
+    "workingScene": "X=Unity X, Y=Unity Z, Z=Unity Y"
+  },
+  "tessellation": "Explicit triangles, welded duplicate vertices, degenerate edges dissolved, normals recalculated"
+}

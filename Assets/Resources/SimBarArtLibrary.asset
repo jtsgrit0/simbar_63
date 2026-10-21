@@ -1,0 +1,191 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: de138805ff4c19c469c0c08f4adbbcf8, type: 3}
+  m_Name: SimBarArtLibrary
+  m_EditorClassIdentifier: Assembly-CSharp::SimBarArtLibrary
+  characters:
+  - key: Punk
+    role: guest
+    sourceModel: {fileID: 919132149155446097, guid: dd52170bd4a627642a38e4c6deccd277, type: 3}
+    sourceAnimation: {fileID: 0}
+    performanceAnimation: {fileID: 0}
+    height: 1.87
+    rotation: {x: 0, y: 0, z: 0}
+  - key: Punk
+    role: guest
+    sourceModel: {fileID: 919132149155446097, guid: dd52170bd4a627642a38e4c6deccd277, type: 3}
+    sourceAnimation: {fileID: 0}
+    performanceAnimation: {fileID: 0}
+    height: 1.82
+    rotation: {x: 0, y: 0, z: 0}
+  - key: Punk
+    role: guest
+    sourceModel: {fileID: 919132149155446097, guid: dd52170bd4a627642a38e4c6deccd277, type: 3}
+    sourceAnimation: {fileID: 0}
+    performanceAnimation: {fileID: 0}
+    height: 1.9
+    rotation: {x: 0, y: 0, z: 0}
+  - key: Casual
+    role: guest
+    sourceModel: {fileID: 919132149155446097, guid: 79ed37e87273d234b834169b08c43e83, type: 3}
+    sourceAnimation: {fileID: 0}
+    performanceAnimation: {fileID: 0}
+    height: 1.82
+    rotation: {x: 0, y: 0, z: 0}
+  - key: Casual2
+    role: guest
+    sourceModel: {fileID: 919132149155446097, guid: 46a1c0447302c4f46aaef0a4f5991787, type: 3}
+    sourceAnimation: {fileID: 0}
+    performanceAnimation: {fileID: 0}
+    height: 1.88
+    rotation: {x: 0, y: 0, z: 0}
+  - key: Suit
+    role: guest
+    sourceModel: {fileID: 919132149155446097, guid: 73431c85f8fefda4a98ea1990cbb7734, type: 3}
+    sourceAnimation: {fileID: 0}
+    performanceAnimation: {fileID: 0}
+    height: 1.9
+    rotation: {x: 0, y: 0, z: 0}
+  - key: Casual
+    role: seated
+    sourceModel: {fileID: 919132149155446097, guid: 79ed37e87273d234b834169b08c43e83, type: 3}
+    sourceAnimation: {fileID: 0}
+    performanceAnimation: {fileID: 0}
+    height: 1.82
+    rotation: {x: 0, y: 0, z: 0}
+  - key: Casual2
+    role: seated
+    sourceModel: {fileID: 919132149155446097, guid: 46a1c0447302c4f46aaef0a4f5991787, type: 3}
+    sourceAnimation: {fileID: 0}
+    performanceAnimation: {fileID: 0}
+    height: 1.88
+    rotation: {x: 0, y: 0, z: 0}
+  - key: Suit
+    role: seated
+    sourceModel: {fileID: 919132149155446097, guid: 73431c85f8fefda4a98ea1990cbb7734, type: 3}
+    sourceAnimation: {fileID: 0}
+    performanceAnimation: {fileID: 0}
+    height: 1.9
+    rotation: {x: 0, y: 0, z: 0}
+  - key: Punk
+    role: seated
+    sourceModel: {fileID: 919132149155446097, guid: dd52170bd4a627642a38e4c6deccd277, type: 3}
+    sourceAnimation: {fileID: 0}
+    performanceAnimation: {fileID: 0}
+    height: 1.87
+    rotation: {x: 0, y: 0, z: 0}
+  - key: Suit
+    role: bartender
+    sourceModel: {fileID: 919132149155446097, guid: 73431c85f8fefda4a98ea1990cbb7734, type: 3}
+    sourceAnimation: {fileID: 0}
+    performanceAnimation: {fileID: 0}
+    height: 1.86
+    rotation: {x: 0, y: 0, z: 0}
+  - key: Punk
+    role: singer
+    sourceModel: {fileID: 919132149155446097, guid: dd52170bd4a627642a38e4c6deccd277, type: 3}
+    sourceAnimation: {fileID: -203655887218126122, guid: 5757a8ee45eb69841a1858cb7aac9872, type: 3}
+    performanceAnimation: {fileID: 7400000, guid: 4e9f3f9a0f1400748bae3a7f7a173bf2, type: 2}
+    height: 1.88
+    rotation: {x: 0, y: 0, z: 0}
+  - key: Casual2
+    role: guitarist
+    sourceModel: {fileID: 919132149155446097, guid: 46a1c0447302c4f46aaef0a4f5991787, type: 3}
+    sourceAnimation: {fileID: -203655887218126122, guid: e40d3e62cad8c14479c6e081d673d3da, type: 3}
+    performanceAnimation: {fileID: 7400000, guid: f178c8b2f93eea84082b6d31d28a2d0f, type: 2}
+    height: 1.88
+    rotation: {x: 0, y: 0, z: 0}
+  - key: Punk
+    role: bassist
+    sourceModel: {fileID: 919132149155446097, guid: dd52170bd4a627642a38e4c6deccd277, type: 3}
+    sourceAnimation: {fileID: -203655887218126122, guid: e40d3e62cad8c14479c6e081d673d3da, type: 3}
+    performanceAnimation: {fileID: 7400000, guid: 4d982b9db913e0a4db5a8ff2374247e4, type: 2}
+    height: 1.87
+    rotation: {x: 0, y: 0, z: 0}
+  - key: Punk
+    role: drummer
+    sourceModel: {fileID: 919132149155446097, guid: dd52170bd4a627642a38e4c6deccd277, type: 3}
+    sourceAnimation: {fileID: 0}
+    performanceAnimation: {fileID: 0}
+    height: 1.84
+    rotation: {x: 0, y: 0, z: 0}
+  materials:
+  - original: {fileID: -1580535799172915004, guid: dd52170bd4a627642a38e4c6deccd277, type: 3}
+    universal: {fileID: 2100000, guid: d854f24004d89a148a0f6385c0117312, type: 2}
+  - original: {fileID: -8848810374240701247, guid: dd52170bd4a627642a38e4c6deccd277, type: 3}
+    universal: {fileID: 2100000, guid: c3f56535597ed8a42a15f78191ad1f3a, type: 2}
+  - original: {fileID: 4835078630258379571, guid: dd52170bd4a627642a38e4c6deccd277, type: 3}
+    universal: {fileID: 2100000, guid: 3b3992abc544f754897784e1faf26332, type: 2}
+  - original: {fileID: 3535187320743644074, guid: dd52170bd4a627642a38e4c6deccd277, type: 3}
+    universal: {fileID: 2100000, guid: d3d2179025ce9d940ad525ab91b5bd6b, type: 2}
+  - original: {fileID: 6115622254929881671, guid: dd52170bd4a627642a38e4c6deccd277, type: 3}
+    universal: {fileID: 2100000, guid: c7ec4311fc83d5042929051fbc23ef1f, type: 2}
+  - original: {fileID: -382652638819485698, guid: dd52170bd4a627642a38e4c6deccd277, type: 3}
+    universal: {fileID: 2100000, guid: 1562e824867a6d94cba8e3cc289cd938, type: 2}
+  - original: {fileID: -5319564673281973831, guid: dd52170bd4a627642a38e4c6deccd277, type: 3}
+    universal: {fileID: 2100000, guid: 1f65f418609653745838f3a132950725, type: 2}
+  - original: {fileID: 3511325375820423461, guid: dd52170bd4a627642a38e4c6deccd277, type: 3}
+    universal: {fileID: 2100000, guid: ebb83d50f501e1f40a76f16e16e06173, type: 2}
+  - original: {fileID: -91986665691257589, guid: dd52170bd4a627642a38e4c6deccd277, type: 3}
+    universal: {fileID: 2100000, guid: fd88279dae491a04f8f604548918b917, type: 2}
+  - original: {fileID: 4913911580219713836, guid: 79ed37e87273d234b834169b08c43e83, type: 3}
+    universal: {fileID: 2100000, guid: 8f88225e53cfa8b43b04ab6d503b2f78, type: 2}
+  - original: {fileID: 4835078630258379571, guid: 79ed37e87273d234b834169b08c43e83, type: 3}
+    universal: {fileID: 2100000, guid: 22a4426d07c66ca4ba4a236a757e60ef, type: 2}
+  - original: {fileID: -8848810374240701247, guid: 79ed37e87273d234b834169b08c43e83, type: 3}
+    universal: {fileID: 2100000, guid: da7ef15375ebb6848b26050d83fab573, type: 2}
+  - original: {fileID: -5319564673281973831, guid: 79ed37e87273d234b834169b08c43e83, type: 3}
+    universal: {fileID: 2100000, guid: f6024edf6a3a2584eafd6754f6556b97, type: 2}
+  - original: {fileID: 3511325375820423461, guid: 79ed37e87273d234b834169b08c43e83, type: 3}
+    universal: {fileID: 2100000, guid: 9c1178096264f324cac32ae0eb66875d, type: 2}
+  - original: {fileID: -4288583467269203127, guid: 79ed37e87273d234b834169b08c43e83, type: 3}
+    universal: {fileID: 2100000, guid: edb0c8f7b2ab3bc43ae7ec8862659bcd, type: 2}
+  - original: {fileID: -91986665691257589, guid: 79ed37e87273d234b834169b08c43e83, type: 3}
+    universal: {fileID: 2100000, guid: 8b2e89ebaf643b74ebf93b3f00da2bbc, type: 2}
+  - original: {fileID: 3765266259533036548, guid: 46a1c0447302c4f46aaef0a4f5991787, type: 3}
+    universal: {fileID: 2100000, guid: 5633f5426c17fcd43bf08c97770ffe51, type: 2}
+  - original: {fileID: 4835078630258379571, guid: 46a1c0447302c4f46aaef0a4f5991787, type: 3}
+    universal: {fileID: 2100000, guid: ff2bed22f4e35864f8e50b45e19eb230, type: 2}
+  - original: {fileID: -8848810374240701247, guid: 46a1c0447302c4f46aaef0a4f5991787, type: 3}
+    universal: {fileID: 2100000, guid: 4ad47a0213f360349b89c6cc55960272, type: 2}
+  - original: {fileID: 3535187320743644074, guid: 46a1c0447302c4f46aaef0a4f5991787, type: 3}
+    universal: {fileID: 2100000, guid: 01c1d4419a9325b408cdc39b13830171, type: 2}
+  - original: {fileID: 3910869675629311857, guid: 46a1c0447302c4f46aaef0a4f5991787, type: 3}
+    universal: {fileID: 2100000, guid: 15f90d1520e849b47bcd98bc13e0f4e9, type: 2}
+  - original: {fileID: -5319564673281973831, guid: 46a1c0447302c4f46aaef0a4f5991787, type: 3}
+    universal: {fileID: 2100000, guid: 6dba33e4fa7a5c94b812408f387a1f59, type: 2}
+  - original: {fileID: 3511325375820423461, guid: 46a1c0447302c4f46aaef0a4f5991787, type: 3}
+    universal: {fileID: 2100000, guid: 5fc159df0c67aba46a54748317f2ce09, type: 2}
+  - original: {fileID: -4288583467269203127, guid: 46a1c0447302c4f46aaef0a4f5991787, type: 3}
+    universal: {fileID: 2100000, guid: cf66c5246351b5847968206f563046c3, type: 2}
+  - original: {fileID: -91986665691257589, guid: 46a1c0447302c4f46aaef0a4f5991787, type: 3}
+    universal: {fileID: 2100000, guid: 4fa8a4de7dbde7f459d8662a026b7370, type: 2}
+  - original: {fileID: 2740491068722401411, guid: 73431c85f8fefda4a98ea1990cbb7734, type: 3}
+    universal: {fileID: 2100000, guid: 417413da63a0ff846966f9ab2aa474e5, type: 2}
+  - original: {fileID: -8848810374240701247, guid: 73431c85f8fefda4a98ea1990cbb7734, type: 3}
+    universal: {fileID: 2100000, guid: 12088c955d9e4d04e9f78d39f49370cd, type: 2}
+  - original: {fileID: 8194571427525936509, guid: 73431c85f8fefda4a98ea1990cbb7734, type: 3}
+    universal: {fileID: 2100000, guid: 8cf530c164d598245a3b509c9984b409, type: 2}
+  - original: {fileID: 4835078630258379571, guid: 73431c85f8fefda4a98ea1990cbb7734, type: 3}
+    universal: {fileID: 2100000, guid: 449f0b822c7e16c4fbe99e4c47d69a89, type: 2}
+  - original: {fileID: -1580535799172915004, guid: 73431c85f8fefda4a98ea1990cbb7734, type: 3}
+    universal: {fileID: 2100000, guid: 067dacafbb270924b9741668fbbd9fc4, type: 2}
+  - original: {fileID: -4288583467269203127, guid: 73431c85f8fefda4a98ea1990cbb7734, type: 3}
+    universal: {fileID: 2100000, guid: b8c5acb3175dd85428fd859cc486da8b, type: 2}
+  - original: {fileID: -5319564673281973831, guid: 73431c85f8fefda4a98ea1990cbb7734, type: 3}
+    universal: {fileID: 2100000, guid: 0027ea22a7c49114098b40b7388179f5, type: 2}
+  - original: {fileID: 3511325375820423461, guid: 73431c85f8fefda4a98ea1990cbb7734, type: 3}
+    universal: {fileID: 2100000, guid: 5767b2e8e7b9a014994b7fb478a3e730, type: 2}
+  - original: {fileID: 3077099320039476051, guid: 711a3c684e898b74e998bf48a6ed020b, type: 3}
+    universal: {fileID: 2100000, guid: bf459842b92c3d041bf1a3270fc86ad5, type: 2}
+  originalGuitarAssetPath: Assets/Model/gibson.fbx
+  stageGuitar: {fileID: 919132149155446097, guid: 711a3c684e898b74e998bf48a6ed020b, type: 3}

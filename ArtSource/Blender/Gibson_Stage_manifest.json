@@ -1,0 +1,22 @@
+{
+  "source": "E:\\simbar_63\\Assets\\Model\\gibson.fbx",
+  "sourceTriangles": 485297,
+  "outputTriangles": 28465,
+  "originalBounds": {
+    "min": [
+      -0.0004401200858410448,
+      -0.0030715896282345057,
+      -0.008701149374246597
+    ],
+    "max": [
+      0.0447947196662426,
+      0.004083043430000544,
+      0.008701151236891747
+    ]
+  },
+  "normalizedMaxDimensionMeters": 1.2,
+  "output": "E:\\simbar_63\\Assets\\Resources\\SimBarArt\\Gibson_Stage.fbx",
+  "materials": [
+    "Material_003_1001"
+  ]
+}
