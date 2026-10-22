@@ -6,7 +6,7 @@ using UnityEngine.Rendering.Universal;
 /// <summary>Warm readable house lighting with colored concert pools and visible stage shafts.</summary>
 public static class SimBarReferenceLighting
 {
-    public static List<Light> Build(Transform parent, Camera camera)
+    public static List<Light> Build(Transform parent, Camera camera, List<Renderer> beams = null)
     {
         var animated = new List<Light>();
         RenderSettings.ambientMode = AmbientMode.Flat;
@@ -31,7 +31,8 @@ public static class SimBarReferenceLighting
             spot.innerSpotAngle = 20f;
             spot.transform.LookAt(ends[i]);
             animated.Add(spot);
-            Beam(parent, starts[i], ends[i], colors[i], 1.25f);
+            Renderer beam = Beam(parent, starts[i], ends[i], colors[i], 1.25f);
+            if (beams != null) beams.Add(beam);
         }
         if (camera != null)
         {
@@ -76,7 +77,7 @@ public static class SimBarReferenceLighting
         return light;
     }
 
-    private static void Beam(Transform parent, Vector3 start, Vector3 end, Color color, float radius)
+    private static Renderer Beam(Transform parent, Vector3 start, Vector3 end, Color color, float radius)
     {
         var go = new GameObject("Translucent concert beam");
         go.transform.SetParent(parent, false);
@@ -113,5 +114,6 @@ public static class SimBarReferenceLighting
         renderer.sharedMaterial = material;
         renderer.shadowCastingMode = ShadowCastingMode.Off;
         renderer.receiveShadows = false;
+        return renderer;
     }
 }

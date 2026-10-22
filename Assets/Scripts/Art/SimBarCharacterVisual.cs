@@ -28,7 +28,7 @@ public sealed partial class SimBarCharacterVisual : MonoBehaviour
     public static GameObject Create(string role, Transform parent, Vector3 localPosition, Color outfit, int variant = 0)
     {
         if (library == null) library = Resources.Load<SimBarArtLibrary>("SimBarArtLibrary");
-        var entry = library != null ? library.Find(role, variant) : null;
+        var entry = library != null ? library.Find(role == "barseated" ? "seated" : role, variant) : null;
         // A missing art library is an explicit null so callers may retain their existing fallback.
         if (entry == null) return null;
         var root = new GameObject("FBX_" + role + "_" + entry.key);
@@ -42,6 +42,7 @@ public sealed partial class SimBarCharacterVisual : MonoBehaviour
     private void Initialize(SimBarArtLibrary.CharacterAsset entry, string characterRole, Color outfit, int characterVariant)
     {
         role = characterRole;
+        if (role == "barseated") seatHeight = 1.12f;
         variant = characterVariant;
         phase = characterVariant * 1.618f + (role == "guest" ? 0.3f : 1.1f);
         pivot = new GameObject("Performance").transform;
@@ -102,7 +103,7 @@ public sealed partial class SimBarCharacterVisual : MonoBehaviour
         // The FBX's full-body rotation curves are sampled on its own exact skeleton, never on the scaled wrapper.
         if (clip != null) clip.SampleAnimation(model, Mathf.Repeat(phase, Mathf.Max(0.01f, clip.length)));
         else ApplyProceduralPose(0f);
-        if (role == "seated" && bones.TryGetValue("upperlegl", out var hip))
+        if ((role == "seated" || role == "barseated") && bones.TryGetValue("upperlegl", out var hip))
         {
             standingHipHeight = pivot.InverseTransformPoint(hip.position).y;
             pivot.localPosition = new Vector3(0f, seatHeight - standingHipHeight, 0f);
@@ -139,8 +140,6 @@ public sealed partial class SimBarCharacterVisual : MonoBehaviour
     private void ApplyProceduralPose(float t)
     {
         bool guitar = role == "guitarist" || role == "bassist";
-        bool dance = role == "guest";
-        bool raised = dance && variant % 3 == 0;
         if (guitar)
         {
             Aim("upperarml", "lowerarml", new Vector3(-0.65f, -0.3f, 0.65f));
@@ -166,13 +165,19 @@ public sealed partial class SimBarCharacterVisual : MonoBehaviour
             Aim("lowerlegl", "footl", Vector3.down);
             Aim("lowerlegr", "footr", Vector3.down);
         }
+        else if (role == "guest")
+        {
+            Aim("upperarml", "lowerarml", new Vector3(-0.10f, -1f, 0.035f));
+            Aim("upperarmr", "lowerarmr", new Vector3(0.12f, -1f, 0.025f));
+            Aim("lowerarml", "handl", new Vector3(0.025f, -1f, 0.13f));
+            Aim("lowerarmr", "handr", new Vector3(-0.02f, -1f, 0.11f));
+        }
         else
         {
-            float rhythm = Mathf.Sin(t);
-            Aim("upperarml", "lowerarml", raised ? new Vector3(-0.6f, 0.6f, 0.15f) : new Vector3(-0.15f, -1f, 0.1f));
-            Aim("upperarmr", "lowerarmr", raised ? new Vector3(0.6f, 0.55f + rhythm * 0.2f, 0.15f) : new Vector3(0.15f, -1f, 0.15f));
-            Aim("lowerarml", "handl", dance ? new Vector3(-0.12f, raised ? 1f : 0.15f, 0.7f) : new Vector3(-0.1f, -0.5f, 0.65f));
-            Aim("lowerarmr", "handr", dance ? new Vector3(0.1f, raised ? 1f : 0.35f + rhythm * 0.2f, 0.6f) : new Vector3(0.1f, -0.4f, 0.65f));
+            Aim("upperarml", "lowerarml", new Vector3(-0.15f, -1f, 0.1f));
+            Aim("upperarmr", "lowerarmr", new Vector3(0.15f, -1f, 0.15f));
+            Aim("lowerarml", "handl", new Vector3(-0.1f, -0.5f, 0.65f));
+            Aim("lowerarmr", "handr", new Vector3(0.1f, -0.4f, 0.65f));
         }
         if (role == "seated")
         {
@@ -181,6 +186,7 @@ public sealed partial class SimBarCharacterVisual : MonoBehaviour
             Aim("lowerlegl", "footl", new Vector3(0f, -1f, 0.08f));
             Aim("lowerlegr", "footr", new Vector3(0f, -1f, 0.08f));
         }
+        else if (role == "barseated") ApplyBarSeatedLegPose();
     }
 
     private void Aim(string boneName, string childName, Vector3 localDirection)
@@ -240,6 +246,7 @@ public sealed partial class SimBarCharacterVisual : MonoBehaviour
             rightStick = Primitive("Right drumstick", PrimitiveType.Cylinder, new Vector3(0.014f, 0.23f, 0.014f), new Color(0.78f, 0.58f, 0.31f));
         }
         else if (role == "bartender") CreateServingAccessory();
+        else if (role == "barseated") CreateDrinkingAccessory();
     }
 
     private void CreateLightweightGuitar(Transform instrument, Color color)
@@ -268,6 +275,7 @@ public sealed partial class SimBarCharacterVisual : MonoBehaviour
         PositionStick(leftStick, "handl", leftDrumLift);
         PositionStick(rightStick, "handr", rightDrumLift);
         UpdateServingAccessory();
+        UpdateDrinkingAccessory();
     }
 
     private void PositionStick(Transform stick, string handName, float lift)

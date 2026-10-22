@@ -59,21 +59,27 @@ public sealed partial class SimBarCharacterVisual
         presentationInitialized = true;
         lastPresentationTime = timeSeconds;
         float beat = timeSeconds * (Mathf.PI * 4f);
-        float rhythm = beat + phase;
+        float rhythm = (role == "guest" || role == "barseated" ? beat / 3f : beat) + phase;
 
         // Always restore before sampling: unanimated finger/arm tracks must not
         // retain an additive pose from the previous frame.
         foreach (var pair in restRotations)
             if (pair.Key != null) pair.Key.localRotation = pair.Value;
-        if (clip != null && clip.length > 0f)
+        if (clip != null && clip.length > 0f && role != "guest" && role != "barseated")
             clip.SampleAnimation(model, Mathf.Repeat(clipPresentationTime, clip.length));
         else ApplyProceduralPose(rhythm);
 
         PoseVisualPivot(rhythm, energy);
-        if (walkingBlend > 0.001f && role != "seated") ApplyWalkingPose();
+        if (walkingBlend > 0.001f && role != "seated" && role != "barseated") ApplyWalkingPose();
         if (role == "singer") ApplyVocalPerformance(rhythm, energy);
         else if (role == "guitarist" || role == "bassist") ApplyStringPerformance(rhythm, energy);
         else if (role == "drummer") ApplyDrumPerformance(beat, energy);
+        else if (role == "barseated") ApplyBarSeatedPresentation(timeSeconds, rhythm);
+        else if (role == "guest")
+        {
+            ApplyRelaxedGuestPresentation(rhythm);
+            if (servingBlend > 0.001f) ApplyServicePose(rhythm);
+        }
         else if (role == "bartender" || servingBlend > 0.001f) ApplyServicePose(rhythm);
         UpdateAccessories(timeSeconds, energy);
     }
@@ -84,7 +90,11 @@ public sealed partial class SimBarCharacterVisual
         float pulse = Mathf.Abs(Mathf.Sin(beat));
         Vector3 position = Vector3.zero;
         Vector3 rotation = Vector3.zero;
-        if (role == "seated")
+        if (role == "barseated")
+        {
+            position.y = seatHeight - standingHipHeight;
+        }
+        else if (role == "seated")
         {
             position.y = seatHeight - standingHipHeight;
             rotation = new Vector3(0f, side * 1.2f, Mathf.Sin(beat) * 0.5f);
@@ -108,13 +118,19 @@ public sealed partial class SimBarCharacterVisual
             position = new Vector3(0f, pulse * 0.004f * (1f - walkingBlend), servingBlend * 0.025f);
             rotation = new Vector3(servingBlend * 5f, side * (1f - walkingBlend), 0f);
         }
+        else if (role == "guest")
+        {
+            float idle = 1f - walkingBlend;
+            position = new Vector3(side * 0.012f * idle, 0f, Mathf.Sin(beat * 0.27f) * 0.003f * idle);
+            rotation = new Vector3(Mathf.Sin(beat * 0.35f) * 0.6f * idle, side * 1.5f * idle, Mathf.Sin(beat * 0.5f) * 0.6f * idle);
+        }
         else
         {
             float idle = 1f - walkingBlend;
             position = new Vector3(side * 0.018f * energy * idle, pulse * Mathf.Lerp(0.02f, 0.055f, energy) * idle, 0f);
             rotation = new Vector3(0f, side * 6f * energy * idle, Mathf.Sin(beat) * 3f * energy * idle);
         }
-        if (role != "seated" && role != "drummer")
+        if (role != "seated" && role != "barseated" && role != "drummer")
         {
             position.y += Mathf.Abs(Mathf.Sin(gaitPhase)) * 0.025f * walkingBlend;
             position.x += Mathf.Sin(gaitPhase) * 0.01f * walkingBlend;

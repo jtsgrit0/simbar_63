@@ -56,6 +56,8 @@ public sealed partial class SimBarExperience : MonoBehaviour
     private readonly List<Patron> patrons = new List<Patron>();
     private readonly Queue<Patron> orderQueue = new Queue<Patron>();
     private readonly List<Light> stageLights = new List<Light>();
+    private readonly List<Renderer> stageBeams = new List<Renderer>();
+    private MaterialPropertyBlock stageBeamProperties;
     private readonly List<Image> playlistRows = new List<Image>();
 
     private Transform worldRoot;
@@ -308,7 +310,7 @@ public sealed partial class SimBarExperience : MonoBehaviour
         CreatePerson("Bartender", new Vector3(-7.3f, 0f, -0.565f), Color.white, Color.black, false, guests, "bartender");
         CreatePerson("Server", new Vector3(-4.2f, 0f, -0.565f), Color.white, Color.black, false, guests, "bartender");
         for (int i = 0; i < 4; i++)
-            CreatePerson("Bar Guest " + i, new Vector3(-8.1f + i * 1.65f, 0f, -3.05f), DrinkColors[i % 3], Color.black, false, guests, "guest");
+            CreatePerson("Bar Guest " + i, new Vector3(-7.55f + i * 1.55f, 0f, -3.15f), DrinkColors[i % 3], Color.black, false, guests, "barseated");
         Vector3[] seats = {
             new Vector3(-8.55f, 0f, 6.4f), new Vector3(-7f, 0f, 6.4f),
             new Vector3(-4.45f, 0f, 6.4f), new Vector3(-2.95f, 0f, 6.4f),
@@ -474,7 +476,8 @@ public sealed partial class SimBarExperience : MonoBehaviour
 
     private void CreateLights()
     {
-        stageLights.AddRange(SimBarReferenceLighting.Build(worldRoot, Camera.main));
+        stageBeamProperties = new MaterialPropertyBlock();
+        stageLights.AddRange(SimBarReferenceLighting.Build(worldRoot, Camera.main, stageBeams));
         return;
         /* Original prototype lighting retained below for layout history.
         Light key = CreateLight("Warm House Light", new Vector3(-3f, 7.0f, -1f), new Color(1f, 0.58f, 0.30f), 5f, 17f, LightType.Point);
@@ -516,8 +519,9 @@ public sealed partial class SimBarExperience : MonoBehaviour
         {
             imported.name = name + " — FBX";
             if (role == "seated") imported.GetComponent<SimBarCharacterVisual>().seatHeight = 0.52f;
+            if (role == "barseated") imported.GetComponent<SimBarCharacterVisual>().seatHeight = 1.12f;
             float yaw = role == "singer" || role == "guitarist" || role == "bassist" || role == "drummer" || role == "bartender" ? 180f : facing;
-            yaw += UnityEngine.Random.Range(-12f, 12f);
+            if (role != "barseated") yaw += UnityEngine.Random.Range(-12f, 12f);
             imported.transform.localRotation = Quaternion.Euler(0f, yaw, 0f);
             Patron person = new Patron { name = name, root = imported.transform, baseY = position.y, baseYaw = yaw,
                 phase = UnityEngine.Random.value * Mathf.PI * 2f, isDancing = dancing };
@@ -773,11 +777,28 @@ public sealed partial class SimBarExperience : MonoBehaviour
     private void AnimateVenue(float delta)
     {
         TickVenueMotion(delta);
+    }
+
+    private void ApplyStageLighting()
+    {
         for (int i = 0; i < stageLights.Count; i++)
         {
             Light stageLight = stageLights[i];
-            if (stageLight != null)
-                stageLight.intensity = 8f + Mathf.Abs(Mathf.Sin(beat + i * 1.9f)) * 8f * performance;
+            if (stageLight == null) continue;
+            // Opposite banks answer on each 120 BPM beat, with a soft rise/fall.
+            // The room's warm practical lights remain steady.
+            float phase = Mathf.Repeat(motionClock + .12f + (i % 2) * .5f, 1f);
+            float rise = Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0f, .08f, phase));
+            float fall = 1f - Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(.30f, .48f, phase));
+            float pulse = rise * fall;
+            stageLight.intensity = 2f + pulse * Mathf.Lerp(18f, 28f, Mathf.Clamp01(performance));
+            if (i >= stageBeams.Count || stageBeams[i] == null) continue;
+            Color tint = stageLight.color;
+            tint.a = Mathf.Lerp(.007f, .105f, pulse);
+            stageBeamProperties.Clear();
+            stageBeamProperties.SetColor("_BaseColor", tint);
+            stageBeamProperties.SetColor("_Color", tint);
+            stageBeams[i].SetPropertyBlock(stageBeamProperties);
         }
     }
 

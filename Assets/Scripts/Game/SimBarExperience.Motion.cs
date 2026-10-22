@@ -57,6 +57,7 @@ public sealed partial class SimBarExperience
     {
         motionNavigation = new SimBarVenueNavigation();
         motionReady = true; motionOrdersDirty = true;
+        ApplyStageLighting();
     }
 
     // Movement never enqueues, serves or removes an order. Only the existing game loop owns those actions.
@@ -118,6 +119,7 @@ public sealed partial class SimBarExperience
             if (actor.person.orderMarker != null && actor.person.orderMarker.activeSelf)
                 actor.person.orderMarker.transform.localPosition = new Vector3(0, 2.48f + Mathf.Abs(Mathf.Sin(motionClock * 4f + actor.index)) * .12f, 0);
         }
+        ApplyStageLighting();
     }
 
     private void RefreshMotionOrders()
@@ -182,7 +184,7 @@ public sealed partial class SimBarExperience
             if (actor.state == MotionState.ToOrder) actor.state = MotionState.Waiting;
             if (actor.state == MotionState.Wandering) { actor.state = MotionState.Resting; actor.wait = 2f + actor.index % 3; }
             if (actor.state == MotionState.Returning) { actor.state = MotionState.Idle; actor.wait = 3f + actor.index % 7; }
-            float facing = actor.queueIndex >= 0 ? 270f : actor.kind == MotionKind.BarStaff ? 180f : actor.person.baseYaw + Mathf.Sin(motionClock * 1.1f + actor.person.phase) * 8f;
+            float facing = actor.queueIndex >= 0 ? 270f : actor.kind == MotionKind.BarStaff ? 180f : actor.person.baseYaw + Mathf.Sin(motionClock * .35f + actor.person.phase) * 3f;
             actor.person.root.rotation = Quaternion.RotateTowards(actor.person.root.rotation, worldRoot.rotation * Quaternion.Euler(0, facing, 0), 160f * delta);
             return;
         }
@@ -238,8 +240,8 @@ public sealed partial class SimBarExperience
     private static float FlatDistance(Vector3 a, Vector3 b) { a.y = b.y = 0; return Vector3.Distance(a, b); }
     private void PoseFallbackMotion(MotionActor actor)
     {
-        float wave = Mathf.Sin(motionClock * 7f + actor.index);
-        if (actor.person.leftArm != null) actor.person.leftArm.localRotation = Quaternion.Euler(actor.moving ? wave * 30f : 0, 0, -25f - (actor.moving ? 0 : wave * 30f));
-        if (actor.person.rightArm != null) actor.person.rightArm.localRotation = Quaternion.Euler(actor.moving ? -wave * 30f : 0, 0, 25f + (actor.moving ? 0 : wave * 30f));
+        float wave = Mathf.Sin(motionClock * (actor.moving ? 7f : .8f) + actor.index);
+        if (actor.person.leftArm != null) actor.person.leftArm.localRotation = Quaternion.Euler(actor.moving ? wave * 30f : 0, 0, -12f - (actor.moving ? 0 : wave * 4f));
+        if (actor.person.rightArm != null) actor.person.rightArm.localRotation = Quaternion.Euler(actor.moving ? -wave * 30f : 0, 0, 12f + (actor.moving ? 0 : wave * 4f));
     }
 }

@@ -44,6 +44,9 @@ public static class SimBarMotionVerification
             CheckManualHold(report, host, actors);
             CheckTravel(report, host, actors);
             report.Check(gameplay.Matches(host), "Motion alone preserves queue identity/order, drinks, patience, economy, timers and career state.");
+            CheckSeatedBarGuests(report, host, actors);
+            CheckRelaxedGuests(report, Read<Transform>(host, "worldRoot"));
+            CheckStageLighting(report, host);
             CheckFrozen(report, host, "paused");
             CheckFrozen(report, host, "lobby");
             CheckFrozen(report, host, "management");
@@ -244,15 +247,177 @@ public static class SimBarMotionVerification
         bool paused = Read<bool>(host, "paused"), managing = Read<bool>(host, "opMenuOpen");
         object phase = Read<object>(host, "journeyPhase");
         var pose = CapturePose(Read<Transform>(host, "worldRoot"));
+        var lighting = new LightingState(host);
         float clock = Read<float>(host, "motionClock");
         if (context == "lobby") { SetPhase(host, "Lobby"); Write(host, "paused", false); }
         else { Write(host, "paused", true); Write(host, "opMenuOpen", context == "management"); }
         try
         {
             Call(host, "TickVenueMotion", 1f);
-            report.Check(Read<float>(host, "motionClock") == clock && SamePose(pose), context + " freezes routes, bones and held props on the same presentation clock.");
+            report.Check(Read<float>(host, "motionClock") == clock && SamePose(pose) && lighting.Matches(), context + " freezes routes, seated drinking, bones, held props, stage lights and visible beams on the same presentation clock.");
         }
         finally { Write(host, "paused", paused); Write(host, "opMenuOpen", managing); Write(host, "journeyPhase", phase); }
+    }
+
+    private static void CheckSeatedBarGuests(SimBarRuntimeVerification.Report report, SimBarExperience host, List<Actor> actors)
+    {
+        Transform world = Read<Transform>(host, "worldRoot");
+        int count = 0;
+        foreach (Actor actor in actors)
+        {
+            if (!Read<string>(actor.person, "name").StartsWith("Bar Guest ", StringComparison.Ordinal)) continue;
+            count++;
+            SimBarCharacterVisual visual = actor.visual;
+            bool seated = visual != null && visual.Role == "barseated";
+            report.Check(seated && actor.Kind == "Stationary" && Mathf.Abs(visual.seatHeight - 1.12f) < 0.01f
+                && actor.distance < 0.001f, actor.root.name + " remains seated on its bar stool at the configured seat height.");
+            if (!seated) continue;
+            var bones = Read<Dictionary<string, Transform>>(visual, "bones");
+            Transform pivot = Read<Transform>(visual, "pivot");
+            Transform cup = Property<Transform>(visual, "DrinkingCup");
+            Transform rim = Property<Transform>(visual, "DrinkingCupRim");
+            report.Check(cup != null && rim != null && cup.IsChildOf(visual.transform), actor.root.name + " has a persistent drinking cup and rim anchor.");
+            if (cup == null || rim == null) continue;
+            Vector3 rootPosition = actor.root.position;
+            float minSip = 1f, maxSip = 0f, minHandToHead = float.PositiveInfinity, maxHandToHead = 0f;
+            float greatestCupHandOffset = 0f, smallestMouthError = float.PositiveInfinity, largestHipError = 0f;
+            float lowestRestCup = float.PositiveInfinity;
+            Vector3 lowestRestCupPosition = Vector3.zero;
+            var peakCupPositions = new List<Vector3>();
+            bool bentLegs = true, cupVisible = true;
+            for (int frame = 0; frame <= 260; frame++)
+            {
+                visual.ApplyPresentation(frame * 0.05f, 0.95f, 0f, 0f);
+                float sip = Property<float>(visual, "SipAmount");
+                minSip = Mathf.Min(minSip, sip); maxSip = Mathf.Max(maxSip, sip);
+                Transform hand = bones["handr"], head = bones["head"], hip = bones["upperlegl"];
+                float handDistance = Vector3.Distance(hand.position, head.position);
+                minHandToHead = Mathf.Min(minHandToHead, handDistance); maxHandToHead = Mathf.Max(maxHandToHead, handDistance);
+                greatestCupHandOffset = Mathf.Max(greatestCupHandOffset, Vector3.Distance(cup.position, hand.position));
+                largestHipError = Mathf.Max(largestHipError, Mathf.Abs(world.InverseTransformPoint(hip.position).y
+                    - world.InverseTransformPoint(rootPosition).y - visual.seatHeight));
+                if (sip > 0.9f)
+                {
+                    Vector3 mouth = head.position + pivot.TransformVector(new Vector3(0f, -0.055f, 0.11f));
+                    smallestMouthError = Mathf.Min(smallestMouthError, Vector3.Distance(rim.position, mouth));
+                    peakCupPositions.Add(cup.position);
+                }
+                if (sip < 0.1f && Vector3.Dot(cup.position, world.up) < lowestRestCup)
+                {
+                    lowestRestCup = Vector3.Dot(cup.position, world.up);
+                    lowestRestCupPosition = cup.position;
+                }
+                foreach (string side in new[] { "l", "r" })
+                {
+                    Transform thigh = bones["upperleg" + side], knee = bones["lowerleg" + side], foot = bones["foot" + side];
+                    Vector3 leg = (knee.position - thigh.position).normalized;
+                    bentLegs &= Mathf.Abs(Vector3.Dot(leg, world.up)) < 0.55f && Vector3.Dot(foot.position - knee.position, world.up) < -0.08f;
+                }
+                cupVisible &= cup.gameObject.activeInHierarchy;
+            }
+            report.Check(Vector3.Distance(rootPosition, actor.root.position) < 0.00001f && largestHipError < 0.10f && bentLegs,
+                actor.root.name + " keeps a fixed root, seated hips and bent knees throughout its drinking cycle.");
+            float cupTravel = 0f, cupHeightDelta = 0f;
+            if (!float.IsPositiveInfinity(lowestRestCup))
+                foreach (Vector3 peak in peakCupPositions)
+                {
+                    float travel = Vector3.Distance(lowestRestCupPosition, peak);
+                    if (travel <= cupTravel) continue;
+                    cupTravel = travel;
+                    cupHeightDelta = Vector3.Dot(peak - lowestRestCupPosition, world.up);
+                }
+            report.Check(minSip < 0.1f && maxSip > 0.9f && maxHandToHead - minHandToHead >= 0.12f && cupTravel >= 0.12f && cupHeightDelta >= 0.035f,
+                actor.root.name + " periodically raises its hand to drink and returns to rest. minSip=" + minSip.ToString("F3")
+                + ", maxSip=" + maxSip.ToString("F3") + ", handToHeadRange=" + (maxHandToHead - minHandToHead).ToString("F3")
+                + " m, cupTravel=" + cupTravel.ToString("F3") + " m, cupHeightDelta=" + cupHeightDelta.ToString("F3") + " m.");
+            report.Check(cupVisible && greatestCupHandOffset < 0.16f && smallestMouthError < 0.16f,
+                actor.root.name + " keeps its cup attached to the hand and brings the rim near the mouth.");
+        }
+        report.Check(count == 4, "Exactly four guests occupy the bar stools.");
+    }
+
+    private static void CheckRelaxedGuests(SimBarRuntimeVerification.Report report, Transform world)
+    {
+        int count = 0;
+        float maximumVerticalRange = 0f, maximumSideRange = 0f;
+        var raised = new List<string>();
+        foreach (SimBarCharacterVisual visual in world.GetComponentsInChildren<SimBarCharacterVisual>(true))
+        {
+            if (visual.Role != "guest") continue;
+            count++;
+            Transform pivot = Read<Transform>(visual, "pivot");
+            var bones = Read<Dictionary<string, Transform>>(visual, "bones");
+            Vector3 minimum = new Vector3(float.PositiveInfinity, float.PositiveInfinity, float.PositiveInfinity);
+            Vector3 maximum = new Vector3(float.NegativeInfinity, float.NegativeInfinity, float.NegativeInfinity);
+            bool handsLow = true;
+            for (int frame = 0; frame <= 120; frame++)
+            {
+                visual.ApplyPresentation(frame / 30f, 1f, 0f, 0f);
+                minimum = Vector3.Min(minimum, pivot.localPosition); maximum = Vector3.Max(maximum, pivot.localPosition);
+                foreach (string side in new[] { "l", "r" })
+                    handsLow &= Vector3.Dot(bones["hand" + side].position - bones["upperarm" + side].position, world.up) <= 0.10f;
+            }
+            maximumVerticalRange = Mathf.Max(maximumVerticalRange, maximum.y - minimum.y);
+            maximumSideRange = Mathf.Max(maximumSideRange, maximum.x - minimum.x);
+            if (!handsLow) raised.Add(visual.name);
+        }
+        report.Check(count > 0 && maximumVerticalRange <= 0.015f && maximumSideRange <= 0.035f,
+            "Standing guests use a relaxed idle without dance bouncing; vertical range=" + maximumVerticalRange.ToString("F3") + " m, side range=" + maximumSideRange.ToString("F3") + " m.");
+        report.Check(raised.Count == 0, "Idle guest hands remain below shoulder height instead of using raised dance poses. " + string.Join(", ", raised));
+    }
+
+    private static void CheckStageLighting(SimBarRuntimeVerification.Report report, SimBarExperience host)
+    {
+        var lights = Read<List<Light>>(host, "stageLights");
+        var beams = Read<List<Renderer>>(host, "stageBeams");
+        float clock = Read<float>(host, "motionClock");
+        var colors = new Color[lights.Count];
+        var minimum = new float[lights.Count]; var maximum = new float[lights.Count];
+        var first = new float[lights.Count]; var opposite = new float[lights.Count];
+        var minAlpha = new float[beams.Count]; var maxAlpha = new float[beams.Count];
+        bool bounded = true, colorsPreserved = true, beamColorsMatch = true;
+        for (int i = 0; i < lights.Count; i++) { colors[i] = lights[i].color; minimum[i] = float.PositiveInfinity; }
+        for (int i = 0; i < beams.Count; i++) minAlpha[i] = float.PositiveInfinity;
+        try
+        {
+            for (int frame = 0; frame <= 32; frame++)
+            {
+                Write(host, "motionClock", frame / 32f); Call(host, "ApplyStageLighting");
+                for (int i = 0; i < lights.Count; i++)
+                {
+                    float value = lights[i].intensity;
+                    minimum[i] = Mathf.Min(minimum[i], value); maximum[i] = Mathf.Max(maximum[i], value);
+                    bounded &= value >= 1.99f && value <= 30.01f;
+                    colorsPreserved &= ColorClose(lights[i].color, colors[i]);
+                    if (frame == 0) first[i] = value;
+                    if (frame == 16) opposite[i] = value;
+                }
+                for (int i = 0; i < beams.Count; i++)
+                {
+                    Color tint = BeamTint(beams[i]);
+                    minAlpha[i] = Mathf.Min(minAlpha[i], tint.a); maxAlpha[i] = Mathf.Max(maxAlpha[i], tint.a);
+                    bounded &= tint.a >= 0.0069f && tint.a <= 0.1051f;
+                    if (i < lights.Count) beamColorsMatch &= Mathf.Abs(tint.r - lights[i].color.r) < 0.001f
+                        && Mathf.Abs(tint.g - lights[i].color.g) < 0.001f && Mathf.Abs(tint.b - lights[i].color.b) < 0.001f;
+                }
+            }
+            bool pulsing = lights.Count >= 2, alternating = false, visibleBeamsPulse = beams.Count > 0;
+            for (int i = 0; i < lights.Count; i++)
+            {
+                pulsing &= maximum[i] - minimum[i] > 8f;
+                for (int j = i + 1; j < lights.Count; j++) alternating |= (opposite[i] - first[i]) * (opposite[j] - first[j]) < -4f;
+            }
+            for (int i = 0; i < beams.Count; i++) visibleBeamsPulse &= maxAlpha[i] - minAlpha[i] > 0.05f;
+            report.Check(pulsing && alternating && bounded, "Stage light banks alternate their brightness rhythmically within the intended intensity/beam-alpha bounds.");
+            report.Check(colorsPreserved && beamColorsMatch && visibleBeamsPulse, "Original stage colors remain intact while visible beam opacity pulses with the matching lights.");
+            Write(host, "motionClock", 0.125f); Call(host, "ApplyStageLighting");
+            var repeated = new LightingState(host);
+            Call(host, "ApplyStageLighting");
+            bool deterministic = repeated.Matches();
+            Write(host, "motionClock", 1.125f); Call(host, "ApplyStageLighting");
+            report.Check(deterministic && repeated.Matches(), "Lighting is deterministic at the same clock and repeats on its one-second bank cycle.");
+        }
+        finally { Write(host, "motionClock", clock); Call(host, "ApplyStageLighting"); }
     }
 
     private static void CheckBandPresentation(SimBarRuntimeVerification.Report report, Transform world)
@@ -365,13 +530,59 @@ public static class SimBarMotionVerification
         public void Restore() { if (mesh == null) return; mesh.vertices = vertices; mesh.normals = normals; mesh.bounds = bounds; }
     }
 
+    private sealed class LightState
+    {
+        private readonly Light target;
+        private readonly float intensity, range, spotAngle;
+        private readonly Color color;
+        private readonly bool enabled;
+        public LightState(Light target) { this.target = target; intensity = target.intensity; color = target.color; enabled = target.enabled; range = target.range; spotAngle = target.spotAngle; }
+        public bool Matches() => target != null && Mathf.Abs(target.intensity - intensity) < 0.0001f && ColorClose(target.color, color)
+            && target.enabled == enabled && Mathf.Abs(target.range - range) < 0.0001f && Mathf.Abs(target.spotAngle - spotAngle) < 0.0001f;
+        public void Restore() { if (target == null) return; target.intensity = intensity; target.color = color; target.enabled = enabled; target.range = range; target.spotAngle = spotAngle; }
+    }
+
+    private sealed class BeamState
+    {
+        private readonly Renderer target;
+        private readonly MaterialPropertyBlock properties = new MaterialPropertyBlock();
+        private readonly MaterialPropertyBlock scratch = new MaterialPropertyBlock();
+        private readonly Color baseColor, color;
+        private readonly bool enabled;
+        public BeamState(Renderer target)
+        {
+            this.target = target; enabled = target.enabled;
+            target.GetPropertyBlock(properties); baseColor = properties.GetColor("_BaseColor"); color = properties.GetColor("_Color");
+        }
+        public bool Matches()
+        {
+            if (target == null || target.enabled != enabled) return false;
+            target.GetPropertyBlock(scratch);
+            return ColorClose(scratch.GetColor("_BaseColor"), baseColor) && ColorClose(scratch.GetColor("_Color"), color);
+        }
+        public void Restore() { if (target == null) return; target.enabled = enabled; target.SetPropertyBlock(properties); }
+    }
+
+    private sealed class LightingState
+    {
+        private readonly List<LightState> lights = new List<LightState>();
+        private readonly List<BeamState> beams = new List<BeamState>();
+        public LightingState(SimBarExperience host)
+        {
+            foreach (Light light in Read<List<Light>>(host, "stageLights")) if (light != null) lights.Add(new LightState(light));
+            foreach (Renderer beam in Read<List<Renderer>>(host, "stageBeams")) if (beam != null) beams.Add(new BeamState(beam));
+        }
+        public bool Matches() { foreach (LightState light in lights) if (!light.Matches()) return false; foreach (BeamState beam in beams) if (!beam.Matches()) return false; return true; }
+    }
+
     private sealed class Snapshot
     {
         private readonly ObjectState hostFields;
         private readonly List<ObjectState> objects = new List<ObjectState>();
         private readonly List<TransformState> transforms;
         private readonly List<MeshState> meshes = new List<MeshState>();
-        private readonly List<KeyValuePair<Light, float>> lights = new List<KeyValuePair<Light, float>>();
+        private readonly List<LightState> lights = new List<LightState>();
+        private readonly List<BeamState> beams = new List<BeamState>();
         private readonly Array queue;
         private readonly object journey;
         private readonly string journeyJson;
@@ -396,7 +607,8 @@ public static class SimBarMotionVerification
                 objects.Add(new ObjectState(guitar, true));
                 Mesh strap = Read<Mesh>(guitar, "strapMesh"); if (strap != null) meshes.Add(new MeshState(strap));
             }
-            foreach (Light light in world.GetComponentsInChildren<Light>(true)) lights.Add(new KeyValuePair<Light, float>(light, light.intensity));
+            foreach (Light light in world.GetComponentsInChildren<Light>(true)) lights.Add(new LightState(light));
+            foreach (Renderer beam in Read<List<Renderer>>(host, "stageBeams")) if (beam != null) beams.Add(new BeamState(beam));
             foreach (string key in new[] { SimBarExperience.OperationsSaveKey, SimBarLocalization.LanguageKey }) preferences[key] = PlayerPrefs.HasKey(key) ? PlayerPrefs.GetString(key) : null;
             hadSize = PlayerPrefs.HasKey(SimBarReadability.TextSizeKey); textSize = PlayerPrefs.GetInt(SimBarReadability.TextSizeKey);
         }
@@ -415,7 +627,8 @@ public static class SimBarMotionVerification
             object liveQueue = Read<object>(host, "orderQueue"); Call(liveQueue, "Clear"); foreach (object person in queue) Call(liveQueue, "Enqueue", person);
             foreach (TransformState state in transforms) state.Restore();
             foreach (MeshState state in meshes) state.Restore();
-            foreach (var light in lights) if (light.Key != null) light.Key.intensity = light.Value;
+            foreach (LightState light in lights) light.Restore();
+            foreach (BeamState beam in beams) beam.Restore();
             foreach (var preference in preferences) { if (preference.Value == null) PlayerPrefs.DeleteKey(preference.Key); else PlayerPrefs.SetString(preference.Key, preference.Value); }
             if (hadSize) PlayerPrefs.SetInt(SimBarReadability.TextSizeKey, textSize); else PlayerPrefs.DeleteKey(SimBarReadability.TextSizeKey);
             PlayerPrefs.Save();
@@ -431,9 +644,12 @@ public static class SimBarMotionVerification
         var first = new Vector4(a.x, a.y, a.z, a.w); var second = new Vector4(b.x, b.y, b.z, b.w);
         return Mathf.Min((first - second).sqrMagnitude, (first + second).sqrMagnitude) < 0.00000001f;
     }
+    private static Color BeamTint(Renderer renderer) { var block = new MaterialPropertyBlock(); renderer.GetPropertyBlock(block); return block.GetColor("_BaseColor"); }
+    private static bool ColorClose(Color a, Color b) => Mathf.Abs(a.r - b.r) < 0.0001f && Mathf.Abs(a.g - b.g) < 0.0001f && Mathf.Abs(a.b - b.b) < 0.0001f && Mathf.Abs(a.a - b.a) < 0.0001f;
     private static float FlatDistance(Vector3 a, Vector3 b) => Vector2.Distance(new Vector2(a.x, a.z), new Vector2(b.x, b.z));
     private static Array QueueContents(SimBarExperience host) => (Array)Call(Read<object>(host, "orderQueue"), "ToArray");
     private static T Read<T>(object target, string name) => (T)target.GetType().GetField(name, Fields).GetValue(target);
+    private static T Property<T>(object target, string name) => (T)target.GetType().GetProperty(name, Fields).GetValue(target);
     private static void Write(object target, string name, object value) => target.GetType().GetField(name, Fields).SetValue(target, value);
     private static object Call(object target, string name, params object[] args) => target.GetType().GetMethod(name, Fields).Invoke(target, args);
     private static void SetPhase(SimBarExperience host, string phase) { FieldInfo field = host.GetType().GetField("journeyPhase", Fields); field.SetValue(host, Enum.Parse(field.FieldType, phase)); }
