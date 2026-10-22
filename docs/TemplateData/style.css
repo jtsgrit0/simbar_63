@@ -1,18 +1,81 @@
-body { padding: 0; margin: 0 }
-#unity-container { position: absolute }
-#unity-container.unity-desktop { left: 50%; top: 50%; transform: translate(-50%, -50%) }
-#unity-container.unity-mobile { position: fixed; width: 100%; height: 100% }
-.unity-mobile #unity-fullscreen-container { width: 100%; height: 100% }
-#unity-fullscreen-container { position: relative; }
-#unity-canvas { position: absolute; width: 100%; height: 100%; background: #231F20 }
-#unity-loading-container { position: absolute; width: 100%; height: 100%; backdrop-filter: blur(5px); display: none; }
-#unity-loading-bar { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); }
-#unity-logo { width: 154px; height: 130px; background: url('unity-logo-dark.png') no-repeat center }
-#unity-progress-bar-empty { width: 141px; height: 18px; margin-top: 10px; margin-left: 6.5px; background: url('progress-bar-empty-dark.png') no-repeat center }
-#unity-progress-bar-full { width: 0%; height: 18px; margin-top: 10px; background: url('progress-bar-full-dark.png') no-repeat center }
-#unity-footer { position: relative }
-.unity-mobile #unity-footer { display: none }
-#unity-logo-title-footer { float:left; width: 102px; height: 38px; background: url('unity-logo-title-footer.png') no-repeat center }
-#unity-build-title { float: right; margin-right: 10px; line-height: 38px; font-family: arial; font-size: 18px }
-#unity-fullscreen-button { cursor:pointer; float: right; width: 38px; height: 38px; background: url('fullscreen-button.png') no-repeat center }
-#unity-warning { position: absolute; left: 50%; top: 5%; transform: translate(-50%); background: white; padding: 10px; display: none }
+:root {
+  color-scheme: dark;
+  font-family: "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif;
+  color: #f5f2e9;
+  background: #101417;
+  --toolbar-background: #161c20;
+  --accent: #e0b873;
+}
+
+* { box-sizing: border-box; }
+html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; }
+button { font: inherit; }
+[hidden] { display: none !important; }
+
+#game-shell {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  background: #101417;
+}
+
+.game-toolbar {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: 12px;
+  min-height: 52px;
+  padding: 6px 14px;
+  border-bottom: 1px solid #343a3d;
+  background: var(--toolbar-background);
+}
+
+.game-toolbar h1 { margin: 0; font-size: 19px; font-weight: 700; letter-spacing: .02em; }
+#toolbar-status { flex: 1; min-width: 0; margin: 0; font-size: 13px; color: #e7c896; }
+button {
+  min-height: 38px;
+  padding: 7px 12px;
+  border: 1px solid #626b70;
+  border-radius: 6px;
+  background: #242d33;
+  color: #fff;
+  cursor: pointer;
+}
+button:hover { background: #35414a; }
+button:focus-visible, #unity-canvas:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; }
+button:disabled { opacity: .5; cursor: wait; }
+#fullscreen-button { flex-shrink: 0; margin-left: auto; font-size: 13px; }
+#fullscreen-button span[aria-hidden] { margin-right: 3px; font-size: 19px; vertical-align: -1px; }
+.orientation-hint { display: none; }
+
+#game-stage { position: relative; flex: 1 1 0; min-width: 0; min-height: 0; overflow: hidden; }
+#unity-canvas { display: block; width: 100%; height: 100%; background: #101417; touch-action: none; }
+#loading-panel, #error-panel { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; }
+#loading-panel { pointer-events: none; background: #101417; }
+.loading-card, .error-card { width: min(100%, 500px); text-align: center; }
+.loading-title { margin: 0 0 24px; font-size: clamp(30px, 5vw, 48px); font-weight: 700; color: var(--accent); }
+.loading-card p { line-height: 1.7; }
+progress { width: 100%; height: 14px; accent-color: var(--accent); }
+#loading-percent { font-variant-numeric: tabular-nums; }
+#error-panel { background: #101417f5; overflow-y: auto; }
+.error-card h2 { font-size: 21px; line-height: 1.5; }
+#error-message { color: #e6c9bb; font-size: 14px; line-height: 1.7; white-space: pre-wrap; overflow-wrap: anywhere; }
+noscript { position: absolute; inset: 40% 16px auto; padding: 20px; background: #252323; text-align: center; }
+
+#game-shell:fullscreen { width: 100vw; height: 100vh; height: 100dvh; }
+#game-shell:-webkit-full-screen { width: 100vw; height: 100vh; }
+
+@media (max-width: 700px) {
+  .game-toolbar { gap: 8px; min-height: 46px; padding: 4px 8px; }
+  .game-toolbar h1 { font-size: 17px; }
+  #fullscreen-button { min-height: 36px; padding: 5px 8px; font-size: 12px; }
+  #toolbar-status { font-size: 11px; }
+}
+
+@media (max-width: 700px) and (orientation: portrait) {
+  .game-toolbar { flex-wrap: wrap; }
+  .orientation-hint { display: block; flex: 0 0 100%; margin: -2px 0 2px; color: #bfc7cb; font-size: 11px; line-height: 1.4; }
+}

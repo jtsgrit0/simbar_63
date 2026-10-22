@@ -45,7 +45,17 @@ public static partial class SimBarRuntimeVerification
             var hits = new List<RaycastResult>();
             Read<Canvas>(host, "canvas").GetComponent<GraphicRaycaster>().Raycast(new PointerEventData(EventSystem.current)
                 { position = RectTransformUtility.WorldToScreenPoint(null, begin.transform.position) }, hits);
-            report.Check(hits.Exists(hit => hit.gameObject == begin.gameObject), "The title's start button is pointer-accessible.");
+            bool reachable = hits.Exists(hit => hit.gameObject == begin.gameObject);
+            Image beginGraphic = begin.GetComponent<Image>();
+            // Importing a fresh night can enable a previously hidden button in this same frame.
+            // Unity assigns its render depth on the next render; still check screen bounds and all mask filters.
+            if (!reachable && beginGraphic.depth < 0)
+            {
+                Vector2 point = RectTransformUtility.WorldToScreenPoint(null, begin.transform.position);
+                reachable = begin.isActiveAndEnabled && begin.interactable && beginGraphic.raycastTarget
+                    && new Rect(0f, 0f, Screen.width, Screen.height).Contains(point) && beginGraphic.Raycast(point, null);
+            }
+            report.Check(reachable, "The title's start button is pointer-accessible.");
             begin.onClick.Invoke();
             report.Check(Property<bool>(host, "JourneyIsGuide") && Read<bool>(host, "paused"), "The first night starts with an onboarding guide.");
             Call(host, "TickJourney", 10f);

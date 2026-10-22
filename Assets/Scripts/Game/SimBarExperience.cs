@@ -111,6 +111,7 @@ public sealed partial class SimBarExperience : MonoBehaviour
         InitializePourGame();
         InitializeJourney();
         InitializeLanguageSettings();
+        SimBarReadability.Attach(canvas, this);
         RefreshUI();
         if (JourneyIsPlaying)
             ShowToast(SimBarLocalization.Text("LIVE HOUSE OPEN — keep the crowd glowing!", "라이브 바 오픈! 손님들과 멋진 밤을 만들어 보세요!"), 4f);

@@ -9,6 +9,7 @@
 *.html text eol=lf
 *.css text eol=lf
 *.js text eol=lf
+*.jslib text eol=lf
 *.unity text eol=lf
 *.prefab text eol=lf
 *.asset text eol=lf

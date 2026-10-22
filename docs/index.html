@@ -2,150 +2,154 @@
 <html lang="ko">
   <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#101417">
     <meta name="description" content="SimBar — 한국어와 English로 즐기는 브라우저 바 운영 게임.">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>SimBar</title>
-    <link rel="shortcut icon" href="TemplateData/favicon.ico">
-    <link rel="stylesheet" href="TemplateData/style.css">
+    <link rel="icon" href="TemplateData/favicon.ico">
+    <link rel="stylesheet" href="TemplateData/style.css?v=52480e3331457c56">
   </head>
   <body>
-    <div id="unity-container" class="unity-desktop">
-      <div id="unity-fullscreen-container">
-        <canvas id="unity-canvas" width="960" height="600" tabindex="-1"></canvas>
-        <div id="unity-loading-container">
-          <div id="unity-loading-bar">
-            <div id="unity-logo"></div>
-            <div id="unity-progress-bar-empty">
-              <div id="unity-progress-bar-full"></div>
-            </div>
+    <main id="game-shell" data-player-state="loading">
+      <header class="game-toolbar">
+        <h1>SimBar</h1>
+        <p id="toolbar-status" role="status" aria-live="polite"></p>
+        <button id="fullscreen-button" type="button" aria-pressed="false" disabled>
+          <span aria-hidden="true">⛶</span> <span id="fullscreen-label">전체 화면 / Full screen</span>
+        </button>
+        <p class="orientation-hint">가로 화면에서 더 넓게 볼 수 있어요. / Rotate for more room.</p>
+      </header>
+      <div id="game-stage">
+        <canvas id="unity-canvas" width="1280" height="720" tabindex="0"
+                aria-label="SimBar 게임 화면 / SimBar game"></canvas>
+        <div id="loading-panel" role="status" aria-live="polite">
+          <div class="loading-card">
+            <p class="loading-title">SimBar</p>
+            <p>게임을 불러오는 중입니다. / Loading game…</p>
+            <progress id="loading-progress" max="100" value="0" aria-label="게임 로딩 / Game loading"></progress>
+            <p id="loading-percent">0%</p>
           </div>
         </div>
+        <section id="error-panel" aria-labelledby="error-title" role="alert" hidden>
+          <div class="error-card">
+            <h2 id="error-title">게임을 불러오지 못했습니다. / Unable to load the game.</h2>
+            <p id="error-message"></p>
+            <button id="reload-button" type="button">다시 시도 / Try again</button>
+          </div>
+        </section>
       </div>
-      <div id="unity-warning"> </div>
-      <div id="unity-footer">
-        <div id="unity-logo-title-footer"></div>
-        <div id="unity-fullscreen-button"></div>
-        <div id="unity-build-title">SimBar</div>
-      </div>
-    </div>
+      <noscript>게임을 실행하려면 JavaScript를 켜 주세요. / Enable JavaScript to play.</noscript>
+    </main>
     <script>
-      let canvas = document.querySelector("#unity-canvas");
-      let fullscreenContainer = document.querySelector("#unity-fullscreen-container");
+      (() => {
+        "use strict";
+        const build = {
+  "loaderUrl": "Build/SimBarPlayerWebGL.loader.js?v=ae55bd3fddcbc1e2",
+  "config": {
+    "dataUrl": "Build/SimBarPlayerWebGL.data?v=4e23de7172ee31cd",
+    "frameworkUrl": "Build/SimBarPlayerWebGL.framework.js?v=7b5b02a8d63d3426",
+    "codeUrl": "Build/SimBarPlayerWebGL.wasm?v=4646ecaf521c560d",
+    "streamingAssetsUrl": "StreamingAssets",
+    "arguments": [],
+    "companyName": "DefaultCompany",
+    "productName": "simbar_6",
+    "productVersion": "0.1.0"
+  }
+};
+        const shell = document.getElementById("game-shell");
+        const canvas = document.getElementById("unity-canvas");
+        const loadingPanel = document.getElementById("loading-panel");
+        const progress = document.getElementById("loading-progress");
+        const progressText = document.getElementById("loading-percent");
+        const errorPanel = document.getElementById("error-panel");
+        const toolbarStatus = document.getElementById("toolbar-status");
+        const fullscreenButton = document.getElementById("fullscreen-button");
+        const fullscreenLabel = document.getElementById("fullscreen-label");
+        let noticeTimer;
 
-      // Shows a temporary message banner/ribbon for a few seconds, or
-      // a permanent error message on top of the canvas if type=='error'.
-      // If type=='warning', a yellow highlight color is used.
-      // Modify or remove this function to customize the visually presented
-      // way that non-critical warnings and error messages are presented to the
-      // user.
-      function unityShowBanner(msg, type) {
-        var warningBanner = document.querySelector("#unity-warning");
-        function updateBannerVisibility() {
-          warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
+        function focusGame() {
+          canvas.focus({ preventScroll: true });
         }
-        var div = document.createElement('div');
-        div.innerHTML = msg;
-        warningBanner.appendChild(div);
-        if (type == 'error') div.style = 'background: red; padding: 10px;';
-        else {
-          if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
-          setTimeout(function() {
-            warningBanner.removeChild(div);
-            updateBannerVisibility();
-          }, 5000);
+
+        function notice(message) {
+          clearTimeout(noticeTimer);
+          toolbarStatus.textContent = String(message).replace(/<[^>]*>/g, " ");
+          noticeTimer = setTimeout(() => { toolbarStatus.textContent = ""; }, 8000);
         }
-        updateBannerVisibility();
-      }
 
-      var buildUrl = "Build";
-      var loaderUrl = buildUrl + "/SimBarPlayerWebGL.loader.js";
-      var config = {
-        arguments: [],
-        dataUrl: buildUrl + "/SimBarPlayerWebGL.data",
-        frameworkUrl: buildUrl + "/SimBarPlayerWebGL.framework.js",
-        codeUrl: buildUrl + "/SimBarPlayerWebGL.wasm",
-        streamingAssetsUrl: "StreamingAssets",
+        function fail(message) {
+          shell.dataset.playerState = "error";
+          loadingPanel.hidden = true;
+          errorPanel.hidden = false;
+          document.getElementById("error-message").textContent = String(message).replace(/<[^>]*>/g, " ");
+          console.error("SimBar:", message);
+        }
 
-        // If you have a custom web site structure, or want to place multiple Unity build instances on the same page,
-        // you can pass fullscreenElementID: "my-unity-fullscreen-container-id", in this configuration field to
-        // explicitly point to the element tree root that is displayed in fullscreen mode.
-        fullscreenElementID: "unity-fullscreen-container",
+        function updateFullscreen() {
+          const active = !!(document.fullscreenElement || document.webkitFullscreenElement);
+          fullscreenButton.setAttribute("aria-pressed", String(active));
+          fullscreenLabel.textContent = active ? "전체 화면 종료 / Exit full screen" : "전체 화면 / Full screen";
+        }
 
-        companyName: "DefaultCompany",
-        productName: "simbar_6",
-        productVersion: "0.1.0",
-        showBanner: unityShowBanner,
-        // errorHandler: function(err, url, line) {
-        //    alert("error " + err + " occurred at line " + line);
-        //    // Return 'true' if you handled this error and don't want Unity
-        //    // to process it further, 'false' otherwise.
-        //    return true;
-        // },
-      };
-
-      // By default, Unity keeps WebGL canvas render target size matched with
-      // the DOM size of the canvas element (scaled by window.devicePixelRatio)
-      // Set this to false if you want to decouple this synchronization from
-      // happening inside the engine, and you would instead like to size up
-      // the canvas DOM size and WebGL render target sizes yourself.
-      // config.matchWebGLToCanvasSize = false;
-
-      // If you would like all file writes inside Unity Application.persistentDataPath
-      // directory to automatically persist so that the contents are remembered when
-      // the user revisits the site the next time, uncomment the following line:
-      // config.autoSyncPersistentDataPath = true;
-      // This autosyncing is currently not the default behavior to avoid regressing
-      // existing user projects that might rely on the earlier manual
-      // JS_FileSystem_Sync() behavior, but in future Unity version, this will be
-      // expected to change.
-
-      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-        // Mobile device style: fill the whole browser client area with the game canvas:
-
-        var meta = document.createElement('meta');
-        meta.name = 'viewport';
-        meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
-        document.getElementsByTagName('head')[0].appendChild(meta);
-        document.querySelector("#unity-container").className = "unity-mobile";
-        canvas.className = "unity-mobile";
-
-        // To lower canvas resolution on mobile devices to gain some
-        // performance, uncomment the following line:
-        // config.devicePixelRatio = 1;
-
-
-      } else {
-        // Desktop style: Render the game canvas container in a window that can be maximized to fullscreen:
-        fullscreenContainer.style.width = "960px";
-        fullscreenContainer.style.height = "600px";
-      }
-
-
-      var script = document.createElement("script");
-      script.src = loaderUrl;
-      script.onload = () => {
-        const loadingContainer = document.querySelector("#unity-loading-container");
-        const progressBarFull = document.querySelector("#unity-progress-bar-full");
-
-        createUnityInstance(canvas, config, (progress) => {
-          if (progress < 1) {
-            loadingContainer.style.display = "block";
-            progressBarFull.style.width = 100 * progress + "%";
-          } else {
-            loadingContainer.style.display = "none";
+        fullscreenButton.addEventListener("click", async () => {
+          try {
+            if (document.fullscreenElement || document.webkitFullscreenElement) {
+              if (document.exitFullscreen) await document.exitFullscreen();
+              else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+            } else if (shell.requestFullscreen) {
+              await shell.requestFullscreen();
+            } else if (shell.webkitRequestFullscreen) {
+              shell.webkitRequestFullscreen();
+            }
+            focusGame();
+          } catch (error) {
+            notice("전체 화면을 켤 수 없습니다. / Full screen is unavailable.");
+            console.warn(error);
           }
-        }).then((unityInstance) => {
-                document.querySelector("#unity-fullscreen-button").onclick = () => {
-                  unityInstance.SetFullscreen(1);
-                };
+        });
+        document.addEventListener("fullscreenchange", updateFullscreen);
+        document.addEventListener("webkitfullscreenchange", updateFullscreen);
+        document.getElementById("reload-button").addEventListener("click", () => window.location.reload());
+        canvas.addEventListener("pointerdown", focusGame);
+        fullscreenButton.hidden = !(shell.requestFullscreen || shell.webkitRequestFullscreen);
 
-              }).catch((message) => {
-                alert(message);
-              });
-            };
-
-      document.body.appendChild(script);
-
+        const config = {
+          ...build.config,
+          matchWebGLToCanvasSize: true,
+          fullscreenElementID: "game-shell",
+          showBanner(message, type) {
+            if (type === "error") fail(message);
+            else notice(message);
+          }
+        };
+        const loader = document.createElement("script");
+        loader.src = build.loaderUrl;
+        // Resolves with the Unity instance after startup; rejects if the player cannot load.
+        window.simbarPlayerReady = new Promise((resolve, reject) => {
+          loader.onerror = () => reject(new Error("실행 파일을 내려받지 못했습니다. / Could not download the game loader."));
+          loader.onload = () => {
+            if (typeof createUnityInstance !== "function") {
+              reject(new Error("게임 실행 파일이 올바르지 않습니다. / Invalid game loader."));
+              return;
+            }
+            Promise.resolve().then(() => createUnityInstance(canvas, config, (value) => {
+              const percent = Math.min(100, Math.max(0, Math.round(value * 100)));
+              progress.value = percent;
+              progressText.textContent = percent + "%";
+            })).then((instance) => {
+              if (shell.dataset.playerState !== "error") {
+                shell.dataset.playerState = "ready";
+                loadingPanel.hidden = true;
+                fullscreenButton.disabled = false;
+                focusGame();
+              }
+              resolve(instance);
+            }, reject);
+          };
+        });
+        window.simbarPlayerReady.catch(fail);
+        document.body.appendChild(loader);
+      })();
     </script>
   </body>
 </html>

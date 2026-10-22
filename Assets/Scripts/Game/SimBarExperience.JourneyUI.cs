@@ -45,6 +45,15 @@ public sealed partial class SimBarExperience
     private Text juiResultXP;
     private Text juiResultRecord;
     private Text juiResultProgress;
+    private RectTransform juiLobbyContent;
+    private RectTransform juiGuideContent;
+    private RectTransform juiResultsContent;
+    private ScrollRect juiGuideScroll;
+    private RectTransform juiLobbyActions;
+    private RectTransform juiGuideActions;
+    private RectTransform juiResultsActions;
+    private Button juiGuideNext;
+    private readonly Button[] juiResultActions = new Button[3];
 
     private static readonly Color JuiGold = new Color(0.97f, 0.81f, 0.43f, 1f);
     private static readonly Color JuiGreen = new Color(0.55f, 0.93f, 0.58f, 1f);
@@ -57,15 +66,15 @@ public sealed partial class SimBarExperience
     };
     private static readonly string[] JuiGuideBodies =
     {
-        "The first guest's order appears in BAR SERVICE.\nChoose the matching drink with 1, 2 or 3, or click its button.\nServe the oldest order before the guest loses patience.",
-        "Choosing a drink starts the timing bar.\nPress SPACE or click STOP when the marker reaches the target.\nAccurate pours earn tips and build your combo.\nBuild a clean streak to ignite FEVER for bonus tips.",
-        "Complete tonight's three goals before last call.\nHire staff, upgrade your venue and book events for useful bonuses.\nManagement menus pause the timers. Earn stars and XP, then open the next night."
+        "Read the oldest order in BAR SERVICE.\nPick its drink with 1 / 2 / 3, or tap a drink.\nServe guests before their patience runs out.",
+        "Pick a drink to start the timing bar.\nPress SPACE or STOP inside the target zone.\nGold earns perfect pours, tips and combos.\nFive clean pours can trigger FEVER for extra tips.",
+        "Finish three goals before the 3-minute night ends.\nHire staff, improve facilities or book events.\nManagement menus pause every timer.\nEarn stars and XP, then open the next night."
     };
     private static readonly string[] JuiGuideExamples =
     {
-        "MINA WANTS AMBER ALE\n\n[ 1  AMBER ALE ]     2  NEON FIZZ     3  WHISKEY SOUR",
-        "CHOOSE A DRINK     >     WATCH THE MARKER     >     SPACE / STOP\n\nA good pour keeps the crowd happy. A perfect pour keeps the combo alive.",
-        "SERVE YOUR GUESTS     +     HIT YOUR GOALS     +     GROW YOUR VENUE\n\nYour cash, hired staff and facility upgrades carry into the next night."
+        "MINA: AMBER ALE\n1 AMBER ALE  /  2 NEON FIZZ  /  3 WHISKEY SOUR",
+        "CHOOSE DRINK  >  WATCH THE MARKER  >  SPACE / STOP\nAim for gold to keep your combo.",
+        "SERVE GUESTS  +  COMPLETE GOALS  +  GROW YOUR BAR\nCash, staff and upgrades carry into the next night."
     };
     private static readonly string[] JuiGuideTitlesKorean =
     {
@@ -75,15 +84,15 @@ public sealed partial class SimBarExperience
     };
     private static readonly string[] JuiGuideBodiesKorean =
     {
-        "첫 손님의 주문이 바 서비스에 표시됩니다.\n1, 2, 3 키 또는 음료 버튼으로 주문에 맞는 음료를 고르세요.\n손님이 지치기 전에 가장 오래된 주문부터 제공하세요.",
-        "음료를 고르면 타이밍 바가 시작됩니다.\n표시가 목표 구간에 도달하면 SPACE 키나 멈춤 버튼을 누르세요.\n정확하게 따르면 팁과 콤보를 얻습니다.\n실수 없이 연속으로 성공하면 피버가 발동해 팁이 늘어납니다.",
-        "영업이 끝나기 전에 오늘의 목표 세 가지를 달성하세요.\n직원 고용, 매장 업그레이드, 이벤트 예약으로 보너스를 얻을 수 있습니다.\n관리 메뉴에서는 시간이 멈춥니다. 별과 경험치를 모아 다음 날에도 영업하세요."
+        "바 서비스에서 가장 오래된 주문을 확인하세요.\n1 / 2 / 3 키나 음료 버튼으로 알맞은 음료를 고르세요.\n손님의 대기 시간이 끝나기 전에 제공하세요.",
+        "음료를 고르면 타이밍 바가 시작됩니다.\n목표 구간에서 SPACE 키나 멈춤 버튼을 누르세요.\n금색 구간을 맞추면 퍼펙트, 팁, 콤보를 얻습니다.\n5회 연속 성공하면 피버로 추가 팁을 얻을 수 있습니다.",
+        "3분 안에 오늘의 목표 세 가지를 달성하세요.\n직원 고용, 시설 개선, 이벤트로 보너스를 얻으세요.\n관리 메뉴에서는 모든 타이머가 멈춥니다.\n별과 경험치를 모아 다음 날에도 영업하세요."
     };
     private static readonly string[] JuiGuideExamplesKorean =
     {
-        "미나의 주문: 앰버 에일\n\n[ 1  앰버 에일 ]     2  네온 피즈     3  위스키 사워",
-        "음료 선택     >     표시 확인     >     SPACE / 멈춤\n\n잘 따르면 손님이 만족하고, 완벽하게 따르면 콤보가 이어집니다.",
-        "손님 응대     +     목표 달성     +     매장 성장\n\n보유 현금, 고용한 직원, 시설 업그레이드는 다음 날에도 유지됩니다."
+        "미나의 주문: 앰버 에일\n1 앰버 에일  /  2 네온 피즈  /  3 위스키 사워",
+        "음료 선택  >  표시 확인  >  SPACE / 멈춤\n금색 구간을 맞춰 콤보를 이어 가세요.",
+        "손님 응대  +  목표 달성  +  매장 성장\n현금, 직원, 업그레이드는 다음 날에도 유지됩니다."
     };
 
     private void BuildJourneyUI()
@@ -98,6 +107,7 @@ public sealed partial class SimBarExperience
         ConfigureJourneyPauseMenu();
         juiBuilt = true;
         RefreshJourneyHUD();
+        ApplyReadableModalLayout();
     }
 
     private void BuildJourneyPlayHUD()
@@ -130,7 +140,8 @@ public sealed partial class SimBarExperience
     private void BuildJourneyLobby()
     {
         Transform panel;
-        juiLobby = JourneyOverlay("Journey Lobby", new Vector2(1080f, 720f), out panel);
+        juiLobby = ReadableJourneyOverlay("Journey Lobby", out juiLobbyContent);
+        panel = juiLobbyContent;
         OpText("Journey Lobby Title", panel, "SIMBAR", 57, new Vector2(0f, 281f), new Vector2(960f, 78f), JuiGold, TextAnchor.MiddleCenter);
         OpText("Journey Lobby Subtitle", panel, "YOUR BAR. YOUR CROWD. ONE GREAT NIGHT.", 23, new Vector2(0f, 224f), new Vector2(980f, 40f), Color.white, TextAnchor.MiddleCenter);
         juiLobbyProgress = OpText("Journey Lobby Progress", panel, string.Empty, 20, new Vector2(0f, 173f), new Vector2(980f, 35f), JuiMuted, TextAnchor.MiddleCenter);
@@ -154,7 +165,8 @@ public sealed partial class SimBarExperience
         juiBegin.name = "Journey Begin Button";
         juiBegin.onClick.AddListener(() => JourneyStartNight(juiChallenge));
         OpText("Journey Lobby Carryover", panel, "Your venue, hired staff and upgrades stay with you.", 18, new Vector2(0f, -266f), new Vector2(990f, 32f), JuiMuted, TextAnchor.MiddleCenter);
-        OpText("Journey Lobby Controls", panel, "1 / 2 / 3 CHOOSE DRINK     SPACE / STOP POUR     P PAUSE", 16, new Vector2(0f, -316f), new Vector2(980f, 30f), new Color(0.54f, 0.64f, 0.78f), TextAnchor.MiddleCenter);
+        OpText("Journey Lobby Controls", panel, SimBarLocalization.Text("1 / 2 / 3 DRINK   |   SPACE / STOP   |   P PAUSE", "1 / 2 / 3 음료 선택   |   SPACE / 멈춤   |   P 일시 정지"), 18, new Vector2(0f, -316f), new Vector2(980f, 42f), new Color(0.68f, 0.75f, 0.85f), TextAnchor.MiddleCenter);
+        juiLobbyActions = CreateReadableActionFooter("Journey Lobby", juiLobbyContent, new[] { juiContinue, juiBegin });
         SelectJourneyMode(false);
     }
 
@@ -171,7 +183,9 @@ public sealed partial class SimBarExperience
     private void BuildJourneyGuide()
     {
         Transform panel;
-        juiGuide = JourneyOverlay("Journey Guide", new Vector2(1080f, 650f), out panel);
+        juiGuide = ReadableJourneyOverlay("Journey Guide", out juiGuideContent);
+        panel = juiGuideContent;
+        juiGuideScroll = panel.parent.GetComponent<ScrollRect>();
         juiGuideNumber = OpText("Journey Guide Number", panel, "WELCOME / 1 OF 3", 18, new Vector2(0f, 275f), new Vector2(980f, 32f), JuiMuted, TextAnchor.MiddleCenter);
         juiGuideTitle = OpText("Journey Guide Title", panel, string.Empty, 36, new Vector2(0f, 220f), new Vector2(990f, 60f), JuiGold, TextAnchor.MiddleCenter);
         for (int i = 0; i < 3; i++)
@@ -184,15 +198,18 @@ public sealed partial class SimBarExperience
         juiGuideExample = OpText("Journey Guide Example", example.transform, string.Empty, 20, Vector2.zero, new Vector2(914f, 110f), new Color(0.70f, 0.94f, 0.84f), TextAnchor.MiddleCenter);
         Button next = OpButton("NEXT", panel, Vector2.one * 0.5f, new Vector2(0f, -235f), new Vector2(560f, 58f), 24);
         next.name = "Journey Guide Next Button";
+        juiGuideNext = next;
         juiGuideNextLabel = next.GetComponentInChildren<Text>();
         next.onClick.AddListener(JourneyAdvanceGuide);
-        OpText("Journey Guide Footer", panel, "Take your time. The doors open after this guide.", 16, new Vector2(0f, -292f), new Vector2(980f, 30f), JuiMuted, TextAnchor.MiddleCenter);
+        OpText("Journey Guide Footer", panel, SimBarLocalization.Text("No rush. The night starts after this guide.", "천천히 읽으세요. 안내가 끝나면 영업을 시작합니다."), 18, new Vector2(0f, -292f), new Vector2(980f, 42f), JuiMuted, TextAnchor.MiddleCenter);
+        juiGuideActions = CreateReadableActionFooter("Journey Guide", juiGuideContent, new[] { juiGuideNext });
     }
 
     private void BuildJourneyResults()
     {
         Transform panel;
-        juiResults = JourneyOverlay("Journey Results", new Vector2(1080f, 780f), out panel);
+        juiResults = ReadableJourneyOverlay("Journey Results", out juiResultsContent);
+        panel = juiResultsContent;
         juiResultsTitle = OpText("Journey Results Title", panel, "LAST CALL", 39, new Vector2(0f, 333f), new Vector2(1000f, 62f), JuiGold, TextAnchor.MiddleCenter);
         juiResultsRank = OpText("Journey Results Rank", panel, string.Empty, 23, new Vector2(0f, 284f), new Vector2(1000f, 38f), Color.white, TextAnchor.MiddleCenter);
         bool starGlyph = SimBarLocalization.Font.HasCharacter('\u2605');
@@ -210,14 +227,18 @@ public sealed partial class SimBarExperience
         juiResultProgress = OpText("Journey Result Progress", panel, string.Empty, 18, new Vector2(0f, -174f), new Vector2(980f, 34f), JuiMuted, TextAnchor.MiddleCenter);
         Button retry = OpButton("RETRY THIS NIGHT", panel, Vector2.one * 0.5f, new Vector2(-322f, -257f), new Vector2(304f, 60f), 20);
         retry.name = "Journey Retry Night Button";
+        juiResultActions[0] = retry;
         retry.onClick.AddListener(JourneyRetryNight);
         Button next = OpButton("NEXT NIGHT", panel, Vector2.one * 0.5f, new Vector2(0f, -257f), new Vector2(304f, 60f), 23);
         next.name = "Journey Next Night Button";
+        juiResultActions[1] = next;
         next.onClick.AddListener(JourneyNextNight);
         Button lobby = OpButton("BACK TO LOBBY", panel, Vector2.one * 0.5f, new Vector2(322f, -257f), new Vector2(304f, 60f), 20);
         lobby.name = "Journey Back To Lobby Button";
+        juiResultActions[2] = lobby;
         lobby.onClick.AddListener(JourneyReturnToLobby);
-        OpText("Journey Results Saved", panel, "PROGRESS SAVED  /  YOUR VENUE CARRIES INTO THE NEXT NIGHT", 15, new Vector2(0f, -337f), new Vector2(1000f, 32f), JuiMuted, TextAnchor.MiddleCenter);
+        OpText("Journey Results Saved", panel, SimBarLocalization.Text("SAVED  /  CASH, STAFF AND UPGRADES CARRY OVER", "저장 완료  /  현금, 직원, 업그레이드 유지"), 18, new Vector2(0f, -337f), new Vector2(1000f, 42f), JuiMuted, TextAnchor.MiddleCenter);
+        juiResultsActions = CreateReadableActionFooter("Journey Results", juiResultsContent, juiResultActions);
     }
 
     private Text JourneyResultStat(Transform parent, string title, float x)
@@ -263,6 +284,249 @@ public sealed partial class SimBarExperience
         return overlay;
     }
 
+    private GameObject ReadableJourneyOverlay(string name, out RectTransform content)
+    {
+        Transform frame;
+        GameObject overlay = JourneyOverlay(name, new Vector2(1540f, 1000f), out frame);
+        content = CreateReadableModalContent(name, frame);
+        return overlay;
+    }
+
+    // Keep modal text at the selected readable size. Content can grow vertically
+    // instead of forcing a smaller font when the viewport or language changes.
+    private RectTransform CreateReadableModalContent(string name, Transform frame)
+    {
+        RectTransform frameRect = (RectTransform)frame;
+        GameObject viewport = CreatePanel(name + " Viewport", frame, Vector2.one * 0.5f, new Vector2(-8f, 0f),
+            frameRect.sizeDelta - new Vector2(72f, 48f), Color.clear);
+        viewport.AddComponent<RectMask2D>();
+        viewport.GetComponent<Image>().raycastTarget = true;
+        ScrollRect scroll = viewport.AddComponent<ScrollRect>();
+        scroll.viewport = viewport.GetComponent<RectTransform>();
+        scroll.horizontal = false;
+        scroll.vertical = true;
+        scroll.movementType = ScrollRect.MovementType.Clamped;
+        scroll.scrollSensitivity = 70f;
+        GameObject body = new GameObject(name + " Content", typeof(RectTransform));
+        RectTransform content = body.GetComponent<RectTransform>();
+        content.SetParent(viewport.transform, false);
+        content.anchorMin = content.anchorMax = new Vector2(0.5f, 1f);
+        content.pivot = new Vector2(0.5f, 1f);
+        content.anchoredPosition = Vector2.zero;
+        content.sizeDelta = scroll.viewport.sizeDelta - new Vector2(24f, 0f);
+        scroll.content = content;
+
+        GameObject track = CreatePanel(name + " Scroll Track", frame, new Vector2(1f, 0.5f), new Vector2(-21f, 0f),
+            new Vector2(12f, frameRect.sizeDelta.y - 60f), new Color(0.14f, 0.17f, 0.23f));
+        GameObject handle = CreatePanel(name + " Scroll Handle", track.transform, Vector2.one * 0.5f, Vector2.zero,
+            new Vector2(12f, 100f), JuiMuted);
+        Scrollbar bar = track.AddComponent<Scrollbar>();
+        bar.handleRect = handle.GetComponent<RectTransform>();
+        bar.targetGraphic = handle.GetComponent<Image>();
+        bar.direction = Scrollbar.Direction.BottomToTop;
+        bar.navigation = new Navigation { mode = Navigation.Mode.None };
+        scroll.verticalScrollbar = bar;
+        scroll.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.AutoHide;
+        scroll.verticalNormalizedPosition = 1f;
+        return content;
+    }
+
+    private RectTransform CreateReadableActionFooter(string name, RectTransform content, Button[] buttons)
+    {
+        Transform frame = content.parent.parent;
+        GameObject footer = CreatePanel(name + " Action Footer", frame, new Vector2(0.5f, 0f), new Vector2(0f, 76f),
+            new Vector2(((RectTransform)frame).rect.width - 48f, 104f), new Color(0.045f, 0.055f, 0.095f, 1f));
+        foreach (Button button in buttons)
+            if (button != null) button.transform.SetParent(footer.transform, false);
+        footer.transform.SetAsLastSibling();
+        return footer.GetComponent<RectTransform>();
+    }
+
+    private void LayoutReadableActionFooter(RectTransform content, RectTransform footer, Button[] buttons)
+    {
+        if (content == null || footer == null) return;
+        RectTransform frame = (RectTransform)footer.parent;
+        int count = 0;
+        foreach (Button button in buttons) if (button != null && button.gameObject.activeSelf) count++;
+        float innerWidth = frame.rect.width - 88f;
+        float buttonWidth = count > 1 ? (innerWidth - 20f * (count - 1)) / count : Mathf.Min(1160f, innerWidth);
+        float buttonHeight = 82f;
+        foreach (Button button in buttons)
+            if (button != null && button.gameObject.activeSelf)
+                buttonHeight = Mathf.Max(buttonHeight, ReadableButtonHeight(button, buttonWidth, 82f));
+        float footerHeight = buttonHeight + 32f;
+        SetRect(footer, new Vector2(0.5f, 0f), new Vector2(0f, 24f + footerHeight * 0.5f), new Vector2(frame.rect.width - 48f, footerHeight));
+        int index = 0;
+        foreach (Button button in buttons)
+        {
+            if (button == null || !button.gameObject.activeSelf) continue;
+            float x = (index - (count - 1) * 0.5f) * (buttonWidth + 20f);
+            ReadablePlace(button.transform, x, 16f, buttonWidth, buttonHeight);
+            index++;
+        }
+
+        // The action panel is a sibling of the masked viewport, so its buttons
+        // stay visible and receive pointer events at every scroll position.
+        RectTransform viewport = (RectTransform)content.parent;
+        float viewportHeight = Mathf.Max(120f, frame.rect.height - footerHeight - 64f);
+        float viewportY = footerHeight * 0.5f + 8f;
+        SetRect(viewport, Vector2.one * 0.5f, new Vector2(-8f, viewportY), new Vector2(frame.rect.width - 72f, viewportHeight));
+        content.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, viewport.rect.width - 24f);
+        ScrollRect scroll = viewport.GetComponent<ScrollRect>();
+        if (scroll != null && scroll.verticalScrollbar != null)
+            SetRect(scroll.verticalScrollbar.GetComponent<RectTransform>(), new Vector2(1f, 0.5f), new Vector2(-21f, viewportY), new Vector2(12f, viewportHeight - 12f));
+        footer.SetAsLastSibling();
+    }
+
+    /// <summary>Called after the shared readability controller sizes modal fonts.</summary>
+    public void ApplyReadableModalLayout()
+    {
+        if (juiBuilt)
+        {
+            LayoutReadableJourneyLobby();
+            LayoutReadableJourneyGuide();
+            LayoutReadableJourneyResults();
+        }
+        LayoutReadableOperationsModal();
+    }
+
+    private static float ReadableTextHeight(Text label, float width, float minimum)
+    {
+        if (label == null) return minimum;
+        label.horizontalOverflow = HorizontalWrapMode.Wrap;
+        label.verticalOverflow = VerticalWrapMode.Truncate;
+        label.resizeTextForBestFit = false;
+        label.rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, width);
+        return Mathf.Max(minimum, Mathf.Ceil(label.preferredHeight) + 16f);
+    }
+
+    private void ReadablePlace(Transform node, float x, float top, float width, float height)
+    {
+        if (node == null) return;
+        SetRect((RectTransform)node, new Vector2(0.5f, 1f), new Vector2(x, -top - height * 0.5f), new Vector2(width, height));
+    }
+
+    private float ReadableTextRow(Transform parent, string name, ref float top, float width, float minimum, float gap)
+    {
+        Transform node = parent.Find(name);
+        if (node == null) return 0f;
+        float height = ReadableTextHeight(node.GetComponent<Text>(), width, minimum);
+        ReadablePlace(node, 0f, top, width, height);
+        top += height + gap;
+        return height;
+    }
+
+    private float ReadableButtonHeight(Button button, float width, float minimum)
+    {
+        if (button == null) return minimum;
+        Text label = button.GetComponentInChildren<Text>(true);
+        float height = ReadableTextHeight(label, width - 36f, minimum - 20f) + 20f;
+        if (label != null) SetRect(label.rectTransform, Vector2.one * 0.5f, Vector2.zero, new Vector2(width - 36f, height - 20f));
+        return height;
+    }
+
+    private static void ReadableContentHeight(RectTransform content, float height)
+    {
+        float viewportHeight = ((RectTransform)content.parent).rect.height;
+        content.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, Mathf.Max(viewportHeight, height));
+    }
+
+    private void LayoutReadableJourneyLobby()
+    {
+        if (juiLobbyContent == null) return;
+        Transform panel = juiLobbyContent;
+        float width = juiLobbyContent.rect.width - 24f;
+        float top = 12f;
+        ReadableTextRow(panel, "Journey Lobby Title", ref top, width, 84f, 4f);
+        ReadableTextRow(panel, "Journey Lobby Subtitle", ref top, width, 48f, 12f);
+        ReadableTextRow(panel, "Journey Lobby Progress", ref top, width, 58f, 24f);
+        float cardWidth = (width - 28f) * 0.5f;
+        Text cozyTitle = juiCozyCard.transform.Find("Journey Cozy Title").GetComponent<Text>();
+        Text challengeTitle = juiChallengeCard.transform.Find("Journey Challenge Title").GetComponent<Text>();
+        Text cozyDescription = juiCozyCard.transform.Find("Journey Cozy Description").GetComponent<Text>();
+        Text challengeDescription = juiChallengeCard.transform.Find("Journey Challenge Description").GetComponent<Text>();
+        float titleHeight = Mathf.Max(ReadableTextHeight(cozyTitle, cardWidth - 40f, 64f), ReadableTextHeight(challengeTitle, cardWidth - 40f, 64f));
+        float descriptionHeight = Mathf.Max(ReadableTextHeight(cozyDescription, cardWidth - 40f, 100f), ReadableTextHeight(challengeDescription, cardWidth - 40f, 100f));
+        float cardHeight = titleHeight + descriptionHeight + 44f;
+        ReadablePlace(juiCozyCard.transform, -(cardWidth + 28f) * 0.5f, top, cardWidth, cardHeight);
+        ReadablePlace(juiChallengeCard.transform, (cardWidth + 28f) * 0.5f, top, cardWidth, cardHeight);
+        foreach (Image card in new[] { juiCozyCard, juiChallengeCard })
+        {
+            string prefix = card == juiCozyCard ? "Journey Cozy " : "Journey Challenge ";
+            ReadablePlace(card.transform.Find(prefix + "Title"), 0f, 14f, cardWidth - 40f, titleHeight);
+            ReadablePlace(card.transform.Find(prefix + "Description"), 0f, titleHeight + 24f, cardWidth - 40f, descriptionHeight);
+        }
+        top += cardHeight + 18f;
+        ReadableTextRow(panel, "Journey Selected Mode", ref top, width, 48f, 18f);
+        ReadableTextRow(panel, "Journey Lobby Carryover", ref top, width, 48f, 8f);
+        ReadableTextRow(panel, "Journey Lobby Controls", ref top, width, 48f, 16f);
+        LayoutReadableActionFooter(juiLobbyContent, juiLobbyActions, new[] { juiContinue, juiBegin });
+        ReadableContentHeight(juiLobbyContent, top);
+    }
+
+    private void LayoutReadableJourneyGuide()
+    {
+        if (juiGuideContent == null) return;
+        float width = juiGuideContent.rect.width - 24f;
+        float top = 12f;
+        ReadableTextRow(juiGuideContent, "Journey Guide Number", ref top, width, 48f, 8f);
+        ReadableTextRow(juiGuideContent, "Journey Guide Title", ref top, width, 76f, 20f);
+        for (int i = 0; i < juiGuideSteps.Length; i++)
+            ReadablePlace(juiGuideSteps[i].transform, -130f + i * 130f, top, 104f, 7f);
+        top += 35f;
+        ReadableTextRow(juiGuideContent, "Journey Guide Body", ref top, width - 32f, 190f, 24f);
+        Transform example = juiGuideContent.Find("Journey Guide Example Card");
+        float exampleHeight = ReadableTextHeight(juiGuideExample, width - 80f, 116f) + 32f;
+        ReadablePlace(example, 0f, top, width, exampleHeight);
+        ReadablePlace(juiGuideExample.transform, 0f, 16f, width - 80f, exampleHeight - 32f);
+        top += exampleHeight + 28f;
+        ReadableTextRow(juiGuideContent, "Journey Guide Footer", ref top, width, 48f, 20f);
+        LayoutReadableActionFooter(juiGuideContent, juiGuideActions, new[] { juiGuideNext });
+        ReadableContentHeight(juiGuideContent, top);
+    }
+
+    private void LayoutReadableJourneyResults()
+    {
+        if (juiResultsContent == null) return;
+        float width = juiResultsContent.rect.width - 24f;
+        float top = 12f;
+        ReadableTextRow(juiResultsContent, "Journey Results Title", ref top, width, 80f, 8f);
+        ReadableTextRow(juiResultsContent, "Journey Results Rank", ref top, width, 60f, 16f);
+        float starHeight = 100f;
+        for (int i = 0; i < juiStars.Length; i++) starHeight = Mathf.Max(starHeight, ReadableTextHeight(juiStars[i], 160f, 100f));
+        for (int i = 0; i < juiStars.Length; i++) ReadablePlace(juiStars[i].transform, -170f + i * 170f, top, 160f, starHeight);
+        top += starHeight + 16f;
+        for (int i = 0; i < juiResultGoals.Length; i++)
+        {
+            float height = ReadableTextHeight(juiResultGoals[i], width - 40f, 58f) + 12f;
+            ReadablePlace(juiResultGoals[i].transform.parent, 0f, top, width, height);
+            SetRect(juiResultGoals[i].rectTransform, Vector2.one * 0.5f, Vector2.zero, new Vector2(width - 40f, height - 12f));
+            top += height + 10f;
+        }
+        float statWidth = (width - 40f) / 3f;
+        float statHeight = 136f;
+        Text[] values = { juiResultProfit, juiResultServices, juiResultXP };
+        foreach (Text value in values)
+        {
+            Text title = value.transform.parent.Find("Journey Result Stat Title").GetComponent<Text>();
+            statHeight = Mathf.Max(statHeight, ReadableTextHeight(title, statWidth - 28f, 48f) + ReadableTextHeight(value, statWidth - 28f, 60f) + 32f);
+        }
+        for (int i = 0; i < values.Length; i++)
+        {
+            Text title = values[i].transform.parent.Find("Journey Result Stat Title").GetComponent<Text>();
+            float titleHeight = ReadableTextHeight(title, statWidth - 28f, 48f);
+            ReadablePlace(values[i].transform.parent, (i - 1) * (statWidth + 20f), top, statWidth, statHeight);
+            ReadablePlace(title.transform, 0f, 10f, statWidth - 28f, titleHeight);
+            ReadablePlace(values[i].transform, 0f, titleHeight + 16f, statWidth - 28f, statHeight - titleHeight - 28f);
+        }
+        top += statHeight + 20f;
+        ReadableTextRow(juiResultsContent, "Journey New Record", ref top, width, 56f, 8f);
+        ReadableTextRow(juiResultsContent, "Journey Result Progress", ref top, width, 64f, 20f);
+        ReadableTextRow(juiResultsContent, "Journey Results Saved", ref top, width, 52f, 20f);
+        LayoutReadableActionFooter(juiResultsContent, juiResultsActions, juiResultActions);
+        ReadableContentHeight(juiResultsContent, top);
+    }
+
     private void RefreshJourneyHUD()
     {
         if (!juiBuilt) return;
@@ -287,7 +551,6 @@ public sealed partial class SimBarExperience
             ? SimBarLocalization.Format("FEVER  {0}s", "피버  {0}초", Mathf.CeilToInt(JourneyFeverSeconds))
             : SimBarLocalization.Format("FEVER CHARGE  {0}%", "피버 충전  {0}%", Mathf.RoundToInt(JourneyFever * 100f));
         juiFever.color = fever ? JuiGold : JuiMuted;
-        juiFever.fontSize = fever ? 17 : 14;
         juiFeverFill.rectTransform.sizeDelta = new Vector2(466f * Mathf.Clamp01(JourneyFever), 5f);
         for (int i = 0; i < 3; i++)
         {
@@ -308,7 +571,6 @@ public sealed partial class SimBarExperience
             juiBegin.gameObject.SetActive(!JourneyHasActiveNight);
             juiCozyCard.GetComponent<Button>().interactable = !JourneyHasActiveNight;
             juiChallengeCard.GetComponent<Button>().interactable = !JourneyHasActiveNight;
-            juiBegin.GetComponent<RectTransform>().anchoredPosition = new Vector2(0f, JourneyHasSave ? -197f : -145f);
             Text continueLabel = juiContinue.GetComponentInChildren<Text>();
             if (continueLabel != null) continueLabel.text = JourneyHasActiveNight
                 ? SimBarLocalization.Text("CONTINUE SAVED NIGHT  /  ", "저장한 영업 이어하기  /  ") + OpTime(JourneySecondsLeft)
@@ -319,6 +581,7 @@ public sealed partial class SimBarExperience
                 juiLobbyMode.text = SimBarLocalization.Format("SAVED {0} NIGHT  /  CONTINUE WHERE YOU LEFT OFF", "저장된 {0} 모드  /  중단한 지점부터 이어서 시작", JourneyModeLabel);
             }
             else SelectJourneyMode(juiChallenge);
+            LayoutReadableJourneyLobby();
         }
         if (JourneyIsGuide && (juiGuideShown != JourneyGuideStep || juiGuideShownKorean != SimBarLocalization.IsKorean))
         {
@@ -331,6 +594,8 @@ public sealed partial class SimBarExperience
             juiGuideExample.text = SimBarLocalization.Text(JuiGuideExamples[step], JuiGuideExamplesKorean[step]);
             juiGuideNextLabel.text = step == 2 ? SimBarLocalization.Text("OPEN THE DOORS", "영업 시작") : SimBarLocalization.Text("NEXT", "다음");
             for (int i = 0; i < 3; i++) juiGuideSteps[i].color = i <= step ? JuiGold : new Color(0.24f, 0.28f, 0.36f);
+            LayoutReadableJourneyGuide();
+            if (juiGuideScroll != null) juiGuideScroll.verticalNormalizedPosition = 1f;
         }
         if (JourneyIsResults)
         {
@@ -341,12 +606,16 @@ public sealed partial class SimBarExperience
             juiResultXP.text = "+" + JourneyResultXP.ToString("N0");
             juiResultRecord.text = JourneyResultNewRecord ? SimBarLocalization.Text("NEW HIGH SCORE!", "최고 점수 경신!") : SimBarLocalization.Text("BEST SCORE  ", "최고 점수  ") + JourneyBestScore.ToString("N0");
             juiResultProgress.text = SimBarLocalization.Format("NIGHT BONUS +${0}    /    RANK {1}    /    TOTAL XP {2}", "영업 보너스 +${0}    /    등급 {1}    /    총 경험치 {2}", JourneyResultBonus.ToString("N0"), JourneyRankLabel, JourneyXP.ToString("N0"));
+            LayoutReadableJourneyResults();
         }
     }
 
     private static void JourneySetOverlay(GameObject overlay, bool active)
     {
+        bool opening = active && !overlay.activeSelf;
         if (overlay.activeSelf != active) overlay.SetActive(active);
+        if (opening)
+            foreach (ScrollRect scroll in overlay.GetComponentsInChildren<ScrollRect>(true)) scroll.verticalNormalizedPosition = 1f;
         if (active) overlay.transform.SetAsLastSibling();
     }
 }

@@ -1,19 +1,25 @@
 """Package the Unity WebGL player for static GitHub Pages hosting.
 
 Run with Python 3: python Tools/prepare_github_pages.py
+The responsive host comes from Tools/WebGLTemplate and survives Unity rebuilds.
+Use --host-only to refresh the host without recopying/decompressing game assets.
 Unity's bundled Brotli executable is discovered on Windows, or install the
 Python `brotli` package. Override discovery with --brotli /path/to/brotli.
 """
 
 import argparse
+import hashlib
 import importlib
+import json
 import os
 from pathlib import Path
+import re
 import shutil
 import subprocess
 
 
 PROJECT = Path(__file__).resolve().parent.parent
+TEMPLATE = PROJECT / "Tools/WebGLTemplate"
 
 
 def brotli_executable(override):
@@ -55,11 +61,61 @@ def decompressor(override):
     return decompress
 
 
+def file_version(path):
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()[:16]
+
+
+def write_web_host(source, output):
+    """Use our responsive host instead of Unity's generated fixed-size page."""
+    source_index = (source / "index.html").read_text(encoding="utf-8")
+
+    def asset_url(suffix):
+        candidates = [path for path in (source / "Build").iterdir()
+                      if path.is_file() and (path.name.endswith(suffix) or path.name.endswith(suffix + ".br"))]
+        if len(candidates) != 1:
+            raise RuntimeError(f"Expected one {suffix} asset in {source / 'Build'}, got {len(candidates)}")
+        relative = candidates[0].relative_to(source)
+        if relative.suffix == ".br":
+            relative = relative.with_suffix("")
+        deployed = output / relative
+        if not deployed.is_file():
+            raise FileNotFoundError(f"Missing packaged asset: {deployed}. Run without --host-only first.")
+        return relative.as_posix() + "?v=" + file_version(deployed)
+
+    config = {
+        "dataUrl": asset_url(".data"),
+        "frameworkUrl": asset_url(".framework.js"),
+        "codeUrl": asset_url(".wasm"),
+        "streamingAssetsUrl": "StreamingAssets",
+        "arguments": [],
+    }
+    for key, fallback in (("companyName", "DefaultCompany"), ("productName", "SimBar"), ("productVersion", "0.1.0")):
+        match = re.search(rf'\b{key}:\s*("(?:[^"\\]|\\.)*")', source_index)
+        config[key] = json.loads(match.group(1)) if match else fallback
+    build = {"loaderUrl": asset_url(".loader.js"), "config": config}
+    # Keep Unity's internal product metadata so saved preferences remain available.
+    encoded = json.dumps(build, ensure_ascii=False, indent=2).replace("<", "\\u003c")
+    stylesheet = output / "TemplateData/style.css"
+    stylesheet.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(TEMPLATE / "style.css", stylesheet)
+    index = (TEMPLATE / "index.html").read_text(encoding="utf-8")
+    index = index.replace("__SIMBAR_BUILD_CONFIG__", encoded)
+    index = index.replace("__SIMBAR_STYLESHEET__", "TemplateData/style.css?v=" + file_version(stylesheet))
+    (output / "index.html").write_text(index, encoding="utf-8", newline="\n")
+    (output / ".nojekyll").touch()
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source", type=Path, default=PROJECT / "Builds/SimBarPlayerWebGL")
     parser.add_argument("--output", type=Path, default=PROJECT / "docs")
     parser.add_argument("--brotli", type=Path)
+    parser.add_argument("--host-only", action="store_true",
+                        help="Update the responsive host using assets already packaged in the output folder.")
     args = parser.parse_args()
     source, output = args.source.resolve(), args.output.resolve()
     if not (source / "index.html").is_file():
@@ -69,36 +125,26 @@ def main():
     if output == source or output.is_relative_to(source) or source.is_relative_to(output):
         parser.error("Source and output folders must be separate.")
 
-    files = sorted(path for path in source.rglob("*") if path.is_file())
-    decompress = decompressor(args.brotli) if any(path.suffix == ".br" for path in files) else None
-    index = (source / "index.html").read_text(encoding="utf-8")
     output.mkdir(parents=True, exist_ok=True)
-    for path in files:
-        relative = path.relative_to(source)
-        target = output / relative
-        if path.suffix == ".br":
-            target = target.with_suffix("")
-            index = index.replace(relative.as_posix(), relative.with_suffix("").as_posix())
-            # The default Unity template concatenates buildUrl with a filename.
-            index = index.replace(path.name, target.name)
-        target.parent.mkdir(parents=True, exist_ok=True)
-        if path.suffix == ".br":
-            decompress(path, target)
-            compressed_copy = output / relative
-            if compressed_copy.is_file():
-                compressed_copy.unlink()
-        elif relative.as_posix() != "index.html":
-            shutil.copy2(path, target)
-    if ".br\"" in index or ".br'" in index:
-        raise RuntimeError("An unresolved Brotli URL remains in index.html.")
-    index = index.replace('<html lang="en-us">', '<html lang="ko">')
-    index = index.replace('<title>Unity Web Player | simbar_6</title>', '<title>SimBar</title>')
-    index = index.replace('<div id="unity-build-title">simbar_6</div>',
-                          '<div id="unity-build-title">SimBar</div>')
-    index = index.replace('<meta charset="utf-8">', '<meta charset="utf-8">\n'
-                          '    <meta name="description" content="SimBar — 한국어와 English로 즐기는 브라우저 바 운영 게임.">')
-    (output / "index.html").write_text(index, encoding="utf-8", newline="\n")
-    (output / ".nojekyll").touch()
+    if not args.host_only:
+        files = sorted(path for path in source.rglob("*") if path.is_file())
+        decompress = decompressor(args.brotli) if any(path.suffix == ".br" for path in files) else None
+        for path in files:
+            relative = path.relative_to(source)
+            if relative.as_posix() == "index.html":
+                continue
+            target = output / relative
+            if path.suffix == ".br":
+                target = target.with_suffix("")
+            target.parent.mkdir(parents=True, exist_ok=True)
+            if path.suffix == ".br":
+                decompress(path, target)
+                compressed_copy = output / relative
+                if compressed_copy.is_file():
+                    compressed_copy.unlink()
+            else:
+                shutil.copy2(path, target)
+    write_web_host(source, output)
     print(f"GitHub Pages player ready: {output}")
     for path in sorted((output / "Build").iterdir()):
         print(f"  {path.relative_to(output).as_posix()}: {path.stat().st_size:,} bytes")

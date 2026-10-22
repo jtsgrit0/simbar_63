@@ -8,6 +8,9 @@
 - 한국어 글꼴은 `Resources/Fonts/NotoSansKR-Regular.otf`에 포함되어 있습니다. 라이선스는 같은 폴더의 `OFL.txt`입니다.
 - 설정을 여는 동안 영업 시간은 멈추며, 닫기 또는 `P`로 이전 상태로 돌아갑니다. `P`의 기존 일시정지 기능도 사용할 수 있습니다.
 - Play 모드에서 `SimBar > Validation > Check Running Localization`으로 언어 전환·저장·글꼴·일시정지 복원을 검증합니다.
+- `글자 크기`는 기본·크게·아주 크게를 제공하며 기본값은 크게입니다. `SimBar.TextSize`에 영업 저장과 별도로 보관합니다. WebGL에서는 고밀도 화면의 픽셀 비율을 보정해 실제 표시 글자 크기를 유지합니다.
+- 작은 화면에서는 지도·재생 목록을 접고 주문·서빙을 우선 배치합니다. 안내·직원·시설·이벤트 화면은 확대된 글자에 맞춰 줄바꿈과 스크롤을 제공합니다.
+- `SimBar > Validation > Check Running Readability`로 현재 Game View의 최소 표시 크기, 크기 저장, 설정창 맞춤과 주요 패널 겹침을 검사할 수 있습니다.
 
 ## 프로젝트 개요
 
