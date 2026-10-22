@@ -14,10 +14,9 @@
       <header class="game-toolbar">
         <h1>SimBar</h1>
         <p id="toolbar-status" role="status" aria-live="polite"></p>
-        <button id="fullscreen-button" type="button" aria-pressed="false" disabled>
+        <button id="fullscreen-button" type="button" aria-pressed="false" aria-label="전체 화면 / Full screen" title="전체 화면 / Full screen" disabled>
           <span aria-hidden="true">⛶</span> <span id="fullscreen-label">전체 화면 / Full screen</span>
         </button>
-        <p class="orientation-hint">가로 화면에서 더 넓게 볼 수 있어요. / Rotate for more room.</p>
       </header>
       <div id="game-stage">
         <canvas id="unity-canvas" width="1280" height="720" tabindex="0"
@@ -54,6 +53,21 @@
         const fullscreenButton = document.getElementById("fullscreen-button");
         const fullscreenLabel = document.getElementById("fullscreen-label");
         let noticeTimer;
+        let viewportFrame;
+
+        function updateViewport() {
+          cancelAnimationFrame(viewportFrame);
+          viewportFrame = requestAnimationFrame(() => {
+            // Browser address bars and rotation can change the visible height without
+            // changing the layout viewport. Unity alone owns the canvas backing size.
+            const viewport = window.visualViewport;
+            const height = viewport && viewport.scale === 1 ? viewport.height : window.innerHeight;
+            if (height > 0) shell.style.setProperty("--viewport-height", height + "px");
+          });
+        }
+        window.addEventListener("resize", updateViewport, { passive: true });
+        if (window.visualViewport) window.visualViewport.addEventListener("resize", updateViewport, { passive: true });
+        updateViewport();
 
         function focusGame() {
           canvas.focus({ preventScroll: true });
@@ -77,6 +91,9 @@
           const active = !!(document.fullscreenElement || document.webkitFullscreenElement);
           fullscreenButton.setAttribute("aria-pressed", String(active));
           fullscreenLabel.textContent = active ? "전체 화면 종료 / Exit full screen" : "전체 화면 / Full screen";
+          fullscreenButton.setAttribute("aria-label", fullscreenLabel.textContent);
+          fullscreenButton.title = fullscreenLabel.textContent;
+          updateViewport();
         }
 
         fullscreenButton.addEventListener("click", async () => {

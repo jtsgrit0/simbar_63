@@ -7,6 +7,9 @@ public sealed partial class SimBarExperience
     private bool settingsWasPaused;
     private Button settingsKorean;
     private Button settingsEnglish;
+    private Text settingsTitle;
+    private Button settingsCloseButton;
+    private RectTransform settingsContent;
     private readonly Button[] settingsTextSizes = new Button[3];
     private readonly Text[] drinkButtonLabels = new Text[3];
 
@@ -16,17 +19,19 @@ public sealed partial class SimBarExperience
         SimBarReadability.Changed += RefreshTextSizeChoices;
         Transform panel;
         settingsOverlay = JourneyOverlay("Language Settings", new Vector2(780f, 660f), out panel);
+        settingsContent = CreateReadableModalContent("Language Settings", panel);
         Text title = CreateText("Settings Title", panel, "SETTINGS", 31, TextAnchor.MiddleCenter, Color.white);
+        settingsTitle = title;
         SetRect(title.rectTransform, Vector2.one * 0.5f, new Vector2(0f, 270f), new Vector2(718f, 82f));
-        Text heading = CreateText("Language Heading", panel, "LANGUAGE", 22, TextAnchor.MiddleCenter, JuiGold);
+        Text heading = CreateText("Language Heading", settingsContent, "LANGUAGE", 22, TextAnchor.MiddleCenter, JuiGold);
         SetRect(heading.rectTransform, Vector2.one * 0.5f, new Vector2(0f, 196f), new Vector2(718f, 64f));
-        settingsKorean = OpButton("한국어", panel, Vector2.one * 0.5f, new Vector2(-159f, 122f), new Vector2(302f, 80f), 25);
+        settingsKorean = OpButton("한국어", settingsContent, Vector2.one * 0.5f, new Vector2(-159f, 122f), new Vector2(302f, 80f), 25);
         settingsKorean.name = "Language Korean Button";
         settingsKorean.onClick.AddListener(() => SimBarLocalization.SetLanguage(true));
-        settingsEnglish = OpButton("English", panel, Vector2.one * 0.5f, new Vector2(159f, 122f), new Vector2(302f, 80f), 25);
+        settingsEnglish = OpButton("English", settingsContent, Vector2.one * 0.5f, new Vector2(159f, 122f), new Vector2(302f, 80f), 25);
         settingsEnglish.name = "Language English Button";
         settingsEnglish.onClick.AddListener(() => SimBarLocalization.SetLanguage(false));
-        Text textSizeHeading = CreateText("Text Size Heading", panel, "TEXT SIZE", 22, TextAnchor.MiddleCenter, JuiGold);
+        Text textSizeHeading = CreateText("Text Size Heading", settingsContent, "TEXT SIZE", 22, TextAnchor.MiddleCenter, JuiGold);
         SimBarLocalization.Bind(textSizeHeading, "TEXT SIZE", "글자 크기");
         SetRect(textSizeHeading.rectTransform, Vector2.one * 0.5f, new Vector2(0f, 36f), new Vector2(718f, 64f));
         string[] sizeNames = { "Normal", "Large", "Extra large" };
@@ -35,15 +40,16 @@ public sealed partial class SimBarExperience
         for (int i = 0; i < settingsTextSizes.Length; i++)
         {
             int mode = i;
-            Button choice = OpButton(sizeNames[i], panel, Vector2.one * 0.5f, new Vector2(-242f + i * 242f, -50f), new Vector2(226f, 80f), 22);
+            Button choice = OpButton(sizeNames[i], settingsContent, Vector2.one * 0.5f, new Vector2(-242f + i * 242f, -50f), new Vector2(226f, 80f), 22);
             choice.name = sizeButtonNames[i];
             SimBarLocalization.Bind(choice.GetComponentInChildren<Text>(true), sizeNames[i], koreanSizeNames[i]);
             choice.onClick.AddListener(() => SimBarReadability.SetSizeMode(mode));
             settingsTextSizes[i] = choice;
         }
-        Text note = CreateText("Language Save Note", panel, "Changes apply immediately and are saved for next time.", 17, TextAnchor.MiddleCenter, JuiMuted);
+        Text note = CreateText("Language Save Note", settingsContent, "Changes apply immediately and are saved for next time.", 17, TextAnchor.MiddleCenter, JuiMuted);
         SetRect(note.rectTransform, Vector2.one * 0.5f, new Vector2(0f, -147f), new Vector2(718f, 68f));
         Button close = OpButton("CLOSE", panel, Vector2.one * 0.5f, new Vector2(0f, -245f), new Vector2(400f, 72f), 22);
+        settingsCloseButton = close;
         close.name = "Language Settings Close Button";
         close.onClick.AddListener(CloseLanguageSettings);
 
@@ -64,7 +70,41 @@ public sealed partial class SimBarExperience
             settings.onClick.AddListener(OpenLanguageSettings);
         }
         RefreshTextSizeChoices();
+        LayoutReadableSettingsModal();
         RefreshLanguageUI();
+    }
+
+    private void LayoutReadableSettingsModal()
+    {
+        if (settingsContent == null || settingsTitle == null || settingsCloseButton == null) return;
+        RectTransform frame = (RectTransform)settingsTitle.transform.parent;
+        float innerWidth = Mathf.Max(160f, frame.rect.width - 32f);
+        float titleHeight = ResponsiveModalTextHeight(settingsTitle, innerWidth, 42f);
+        ReadablePlace(settingsTitle.transform, 0f, 10f, innerWidth, titleHeight);
+        float closeWidth = Mathf.Min(400f, innerWidth);
+        float closeHeight = ResponsiveModalButtonHeight(settingsCloseButton, closeWidth, 46f);
+        SetRect(settingsCloseButton.GetComponent<RectTransform>(), new Vector2(0.5f, 0f), new Vector2(0f, 12f + closeHeight * 0.5f), new Vector2(closeWidth, closeHeight));
+        ResponsiveModalViewport(settingsContent, frame, titleHeight + 24f, closeHeight + 28f);
+
+        float width = settingsContent.rect.width - 8f;
+        float top = 4f;
+        ResponsiveModalTextRow(settingsContent, "Language Heading", ref top, width, 32f, 8f);
+        float languageWidth = (width - 10f) * 0.5f;
+        float languageHeight = Mathf.Max(ResponsiveModalButtonHeight(settingsKorean, languageWidth, 46f), ResponsiveModalButtonHeight(settingsEnglish, languageWidth, 46f));
+        ReadablePlace(settingsKorean.transform, -(languageWidth + 10f) * 0.5f, top, languageWidth, languageHeight);
+        ReadablePlace(settingsEnglish.transform, (languageWidth + 10f) * 0.5f, top, languageWidth, languageHeight);
+        top += languageHeight + 24f;
+        ResponsiveModalTextRow(settingsContent, "Text Size Heading", ref top, width, 32f, 8f);
+        bool stacked = width < 440f;
+        float sizeWidth = stacked ? width : (width - 20f) / 3f;
+        float sizeHeight = 46f;
+        foreach (Button choice in settingsTextSizes) sizeHeight = Mathf.Max(sizeHeight, ResponsiveModalButtonHeight(choice, sizeWidth, 46f));
+        for (int i = 0; i < settingsTextSizes.Length; i++)
+            ReadablePlace(settingsTextSizes[i].transform, stacked ? 0f : (i - 1) * (sizeWidth + 10f), top + (stacked ? i * (sizeHeight + 8f) : 0f), sizeWidth, sizeHeight);
+        top += stacked ? settingsTextSizes.Length * (sizeHeight + 8f) + 12f : sizeHeight + 20f;
+        ResponsiveModalTextRow(settingsContent, "Language Save Note", ref top, width, 44f, 12f);
+        ReadableContentHeight(settingsContent, top);
+        settingsCloseButton.transform.SetAsLastSibling();
     }
 
     private void RefreshTextSizeChoices()
@@ -95,6 +135,9 @@ public sealed partial class SimBarExperience
         paused = true;
         settingsOverlay.SetActive(true);
         settingsOverlay.transform.SetAsLastSibling();
+        LayoutReadableSettingsModal();
+        ScrollRect scroll = settingsContent != null ? settingsContent.parent.GetComponent<ScrollRect>() : null;
+        if (scroll != null) scroll.verticalNormalizedPosition = 1f;
     }
 
     private void CloseLanguageSettings()

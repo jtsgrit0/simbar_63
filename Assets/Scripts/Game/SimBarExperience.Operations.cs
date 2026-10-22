@@ -358,16 +358,16 @@ public sealed partial class SimBarExperience
         shade.offsetMin = Vector2.zero; shade.offsetMax = Vector2.zero;
         GameObject frame = OpPanel("Operations Modal", opOverlay.transform, Vector2.one * 0.5f, Vector2.zero, new Vector2(1540f, 1000f), new Color(0.055f, 0.065f, 0.105f, 1f), true);
         opModalContent = CreateReadableModalContent("Operations Modal", frame.transform);
-        opModalTitle = OpText("Operations Title", opModalContent, "SIMBAR  /  HOUSE MANAGEMENT", 29, new Vector2(-33f, 316f), new Vector2(938f, 46f), new Color(0.99f, 0.90f, 0.65f), TextAnchor.MiddleLeft);
+        opModalTitle = OpText("Operations Title", frame.transform, "SIMBAR  /  HOUSE MANAGEMENT", 29, new Vector2(-33f, 316f), new Vector2(938f, 46f), new Color(0.99f, 0.90f, 0.65f), TextAnchor.MiddleLeft);
         opWallet = OpText("Operations Budget", opModalContent, string.Empty, 19, new Vector2(-55f, 276f), new Vector2(922f, 32f), Color.white, TextAnchor.MiddleLeft);
-        Button close = OpButton("CLOSE  X", opModalContent, Vector2.one * 0.5f, new Vector2(449f, 315f), new Vector2(138f, 42f), 17);
+        Button close = OpButton("CLOSE  X", frame.transform, Vector2.one * 0.5f, new Vector2(449f, 315f), new Vector2(138f, 42f), 17);
         opCloseButton = close;
         close.onClick.AddListener(CloseOperations);
         string[] names = { "STAFF", "FACILITIES", "EVENTS", "GUEST INFO" };
         for (int i = 0; i < names.Length; i++)
         {
             int page = i;
-            Button tab = OpButton(names[i], opModalContent, Vector2.one * 0.5f, new Vector2(-363f + i * 242f, 225f), new Vector2(226f, 45f), 18);
+            Button tab = OpButton(names[i], frame.transform, Vector2.one * 0.5f, new Vector2(-363f + i * 242f, 225f), new Vector2(226f, 45f), 18);
             opTabs[i] = tab;
             tab.onClick.AddListener(() => { opPage = page; DrawOperationsPage(); ResetReadableOperationsScroll(); });
         }
@@ -499,36 +499,45 @@ public sealed partial class SimBarExperience
     {
         if (opModalContent == null || opBody == null || opModalTitle == null || opCloseButton == null) return;
         for (int i = 0; i < opTabs.Length; i++) if (opTabs[i] == null) return;
-        float width = opModalContent.rect.width - 24f;
-        float top = 12f;
-        Transform title = opModalTitle.transform;
-        Button close = opCloseButton;
-        float closeWidth = 252f;
-        float titleWidth = width - closeWidth - 32f;
-        float headerHeight = Mathf.Max(ReadableTextHeight(opModalTitle, titleWidth, 70f), ReadableButtonHeight(close, closeWidth, 70f));
-        ReadablePlace(title, -(closeWidth + 32f) * 0.5f, top, titleWidth, headerHeight);
-        ReadablePlace(close.transform, (width - closeWidth) * 0.5f, top, closeWidth, headerHeight);
-        top += headerHeight + 12f;
-        ReadableTextRow(opModalContent, "Operations Budget", ref top, width, 70f, 18f);
-        float tabWidth = (width - 48f) * 0.25f;
-        float tabHeight = 72f;
-        foreach (Button tab in opTabs) tabHeight = Mathf.Max(tabHeight, ReadableButtonHeight(tab, tabWidth, 72f));
-        for (int i = 0; i < opTabs.Length; i++) ReadablePlace(opTabs[i].transform, (i - 1.5f) * (tabWidth + 16f), top, tabWidth, tabHeight);
-        top += tabHeight + 24f;
+        RectTransform frame = (RectTransform)opModalTitle.transform.parent;
+        float headerWidth = Mathf.Max(160f, frame.rect.width - 24f);
+        bool narrow = headerWidth < 600f;
+        SimBarLocalization.Bind(opModalTitle, narrow ? "MANAGE" : "HOUSE MANAGEMENT", "매장 관리");
+        SimBarLocalization.Bind(opCloseButton.GetComponentInChildren<Text>(true), "CLOSE", "닫기");
+        float closeWidth = Mathf.Min(110f, headerWidth * 0.28f);
+        float titleWidth = headerWidth - closeWidth - 10f;
+        float headerHeight = Mathf.Max(ResponsiveModalTextHeight(opModalTitle, titleWidth, 44f), ResponsiveModalButtonHeight(opCloseButton, closeWidth, 44f));
+        ReadablePlace(opModalTitle.transform, -(closeWidth + 10f) * 0.5f, 10f, titleWidth, headerHeight);
+        ReadablePlace(opCloseButton.transform, (headerWidth - closeWidth) * 0.5f, 10f, closeWidth, headerHeight);
+        float top = headerHeight + 20f;
+        int columns = narrow ? 2 : 4;
+        int rows = opTabs.Length / columns;
+        float tabWidth = (headerWidth - (columns - 1) * 8f) / columns;
+        float tabHeight = 44f;
+        foreach (Button tab in opTabs) tabHeight = Mathf.Max(tabHeight, ResponsiveModalButtonHeight(tab, tabWidth, 44f));
+        for (int i = 0; i < opTabs.Length; i++)
+            ReadablePlace(opTabs[i].transform, (i % columns - (columns - 1) * 0.5f) * (tabWidth + 8f), top + i / columns * (tabHeight + 8f), tabWidth, tabHeight);
+        top += rows * (tabHeight + 8f) + 4f;
+        ResponsiveModalViewport(opModalContent, frame, top, 12f);
+
+        float width = opModalContent.rect.width - 8f;
+        top = 4f;
+        ResponsiveModalTextRow(opModalContent, "Operations Budget", ref top, width, 32f, 12f);
 
         float bodyHeight = 0f;
         if (opPage == 3)
         {
-            ReadableOperationsGuestRow("Guest Overview", ref bodyHeight, width - 24f, 70f, 12f);
-            ReadableOperationsGuestRow("Guest Summary", ref bodyHeight, width - 24f, 60f, 20f);
-            ReadableOperationsGuestRow("Guest Empty", ref bodyHeight, width - 24f, 90f, 20f);
-            for (int i = 0; i < 7; i++) ReadableOperationsGuestRow("Guest Tab " + i, ref bodyHeight, width - 40f, 64f, 12f);
+            ReadableOperationsGuestRow("Guest Overview", ref bodyHeight, width - 8f, 36f, 12f);
+            ReadableOperationsGuestRow("Guest Summary", ref bodyHeight, width - 8f, 32f, 16f);
+            ReadableOperationsGuestRow("Guest Empty", ref bodyHeight, width - 8f, 44f, 16f);
+            for (int i = 0; i < 7; i++) ReadableOperationsGuestRow("Guest Tab " + i, ref bodyHeight, width - 16f, 36f, 12f);
         }
         else
         {
-            float cardWidth = width - 12f;
-            float actionWidth = Mathf.Min(440f, cardWidth * 0.29f);
-            float copyWidth = cardWidth - actionWidth - 76f;
+            float cardWidth = width;
+            bool stacked = cardWidth < 620f;
+            float actionWidth = stacked ? cardWidth - 32f : Mathf.Min(240f, cardWidth * 0.29f);
+            float copyWidth = stacked ? cardWidth - 32f : cardWidth - actionWidth - 48f;
             for (int i = 0; i < 3; i++)
             {
                 Transform card = ReadableActiveChild(opBody, "Operations Item " + i);
@@ -536,40 +545,42 @@ public sealed partial class SimBarExperience
                 Text itemTitle = card.Find("Item Title").GetComponent<Text>();
                 Text description = card.Find("Item Description").GetComponent<Text>();
                 Button action = card.GetComponentInChildren<Button>(true);
-                float titleHeight = ReadableTextHeight(itemTitle, copyWidth, 52f);
-                float descriptionHeight = ReadableTextHeight(description, copyWidth, 76f);
-                float actionHeight = ReadableButtonHeight(action, actionWidth, 90f);
-                float cardHeight = Mathf.Max(titleHeight + descriptionHeight + 44f, actionHeight + 36f);
+                float titleHeight = ResponsiveModalTextHeight(itemTitle, copyWidth, 30f);
+                float descriptionHeight = ResponsiveModalTextHeight(description, copyWidth, 40f);
+                float actionHeight = ResponsiveModalButtonHeight(action, actionWidth, 44f);
+                float cardHeight = stacked ? titleHeight + descriptionHeight + actionHeight + 58f : Mathf.Max(titleHeight + descriptionHeight + 38f, actionHeight + 32f);
                 ReadablePlace(card, 0f, bodyHeight, cardWidth, cardHeight);
-                float copyX = -cardWidth * 0.5f + 24f + copyWidth * 0.5f;
-                ReadablePlace(itemTitle.transform, copyX, 14f, copyWidth, titleHeight);
-                ReadablePlace(description.transform, copyX, titleHeight + 22f, copyWidth, descriptionHeight);
-                ReadablePlace(action.transform, cardWidth * 0.5f - 24f - actionWidth * 0.5f, (cardHeight - actionHeight) * 0.5f, actionWidth, actionHeight);
-                bodyHeight += cardHeight + 18f;
+                float copyX = stacked ? 0f : -cardWidth * 0.5f + 16f + copyWidth * 0.5f;
+                ReadablePlace(itemTitle.transform, copyX, 12f, copyWidth, titleHeight);
+                ReadablePlace(description.transform, copyX, titleHeight + 20f, copyWidth, descriptionHeight);
+                ReadablePlace(action.transform, stacked ? 0f : cardWidth * 0.5f - 16f - actionWidth * 0.5f,
+                    stacked ? titleHeight + descriptionHeight + 34f : (cardHeight - actionHeight) * 0.5f, actionWidth, actionHeight);
+                bodyHeight += cardHeight + 12f;
             }
             foreach (Transform child in opBody)
             {
                 if (!child.gameObject.activeSelf || child.name.StartsWith("Operations Item ", StringComparison.Ordinal)) continue;
                 Button pay = child.GetComponent<Button>();
                 if (pay == null) continue;
-                float payWidth = Mathf.Min(1080f, width);
-                float payHeight = ReadableButtonHeight(pay, payWidth, 74f);
+                float payWidth = width;
+                float payHeight = ResponsiveModalButtonHeight(pay, payWidth, 44f);
                 ReadablePlace(pay.transform, 0f, bodyHeight, payWidth, payHeight);
                 bodyHeight += payHeight + 16f;
             }
         }
         ReadablePlace(opBody, 0f, top, width, bodyHeight);
         top += bodyHeight + 14f;
-        ReadableTextRow(opModalContent, "Operations Feedback", ref top, width, 72f, 14f);
-        ReadableTextRow(opModalContent, "Operations Save Hint", ref top, width, 52f, 20f);
+        ResponsiveModalTextRow(opModalContent, "Operations Feedback", ref top, width, 36f, 12f);
+        ResponsiveModalTextRow(opModalContent, "Operations Save Hint", ref top, width, 32f, 12f);
         ReadableContentHeight(opModalContent, top);
+        opCloseButton.transform.SetAsLastSibling();
     }
 
     private void ReadableOperationsGuestRow(string name, ref float top, float width, float minimum, float gap)
     {
         Transform node = ReadableActiveChild(opBody, name);
         if (node == null) return;
-        float height = ReadableTextHeight(node.GetComponent<Text>(), width, minimum);
+        float height = ResponsiveModalTextHeight(node.GetComponent<Text>(), width, minimum);
         ReadablePlace(node, 0f, top, width, height);
         top += height + gap;
     }

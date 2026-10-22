@@ -95,6 +95,31 @@ public sealed partial class SimBarExperience
         "손님 응대  +  목표 달성  +  매장 성장\n현금, 직원, 업그레이드는 다음 날에도 유지됩니다."
     };
 
+    private static readonly string[] JuiCompactGuideBodies =
+    {
+        "Read the first order.\nTap the matching drink.\nServe before patience runs out.",
+        "Pick a drink.\nTap STOP on gold.\nPerfect = tips + combo.\n5 clean pours can start FEVER.",
+        "3 minutes, 3 goals.\nStaff and upgrades help.\nMenus pause the clock.\nYour venue carries over."
+    };
+    private static readonly string[] JuiCompactGuideBodiesKorean =
+    {
+        "첫 주문을 확인하세요.\n알맞은 음료를 누르세요.\n대기 시간 안에 제공하세요.",
+        "음료를 고르세요.\n금색 구간에서 멈춤!\n퍼펙트 = 팁 + 콤보\n5회 연속 성공 → 피버",
+        "3분 동안 목표 3개!\n직원·시설·이벤트 활용\n관리 중에는 시간 정지\n현금·직원·시설은 유지"
+    };
+    private static readonly string[] JuiCompactGuideExamples =
+    {
+        "MINA → AMBER ALE\nTap AMBER ALE",
+        "DRINK → GOLD → STOP",
+        "SERVE · GOALS · GROW"
+    };
+    private static readonly string[] JuiCompactGuideExamplesKorean =
+    {
+        "미나 → 앰버 에일\n앰버 에일 버튼 선택",
+        "음료 → 금색 → 멈춤",
+        "주문 제공 · 목표 달성"
+    };
+
     private void BuildJourneyUI()
     {
         if (juiBuilt || canvas == null) return;
@@ -142,19 +167,19 @@ public sealed partial class SimBarExperience
         Transform panel;
         juiLobby = ReadableJourneyOverlay("Journey Lobby", out juiLobbyContent);
         panel = juiLobbyContent;
-        OpText("Journey Lobby Title", panel, "SIMBAR", 57, new Vector2(0f, 281f), new Vector2(960f, 78f), JuiGold, TextAnchor.MiddleCenter);
+        OpText("Journey Lobby Title", panel, "SIMBAR", 32, new Vector2(0f, 281f), new Vector2(960f, 78f), JuiGold, TextAnchor.MiddleCenter);
         OpText("Journey Lobby Subtitle", panel, "YOUR BAR. YOUR CROWD. ONE GREAT NIGHT.", 23, new Vector2(0f, 224f), new Vector2(980f, 40f), Color.white, TextAnchor.MiddleCenter);
         juiLobbyProgress = OpText("Journey Lobby Progress", panel, string.Empty, 20, new Vector2(0f, 173f), new Vector2(980f, 35f), JuiMuted, TextAnchor.MiddleCenter);
         Button cozy = OpButton(string.Empty, panel, Vector2.one * 0.5f, new Vector2(-238f, 47f), new Vector2(452f, 160f), 20);
         cozy.name = "Journey Cozy Mode Button";
         juiCozyCard = cozy.GetComponent<Image>();
-        OpText("Journey Cozy Title", cozy.transform, "COZY NIGHT", 29, new Vector2(0f, 42f), new Vector2(414f, 42f), JuiGold, TextAnchor.MiddleCenter);
+        OpText("Journey Cozy Title", cozy.transform, "COZY NIGHT", 22, new Vector2(0f, 42f), new Vector2(414f, 42f), JuiGold, TextAnchor.MiddleCenter);
         OpText("Journey Cozy Description", cozy.transform, "3 min / 12 orders / 4 perfects / x5 combo\nLonger guest patience. A gentler pace.", 18, new Vector2(0f, -17f), new Vector2(412f, 66f), Color.white, TextAnchor.MiddleCenter);
         cozy.onClick.AddListener(() => SelectJourneyMode(false));
         Button challenge = OpButton(string.Empty, panel, Vector2.one * 0.5f, new Vector2(238f, 47f), new Vector2(452f, 160f), 20);
         challenge.name = "Journey Challenge Mode Button";
         juiChallengeCard = challenge.GetComponent<Image>();
-        OpText("Journey Challenge Title", challenge.transform, "CHALLENGE NIGHT", 29, new Vector2(0f, 42f), new Vector2(414f, 42f), JuiGold, TextAnchor.MiddleCenter);
+        OpText("Journey Challenge Title", challenge.transform, "CHALLENGE NIGHT", 22, new Vector2(0f, 42f), new Vector2(414f, 42f), JuiGold, TextAnchor.MiddleCenter);
         OpText("Journey Challenge Description", challenge.transform, "3 min / 20 orders / 7 perfects / x8 combo\nFaster orders. Less time per guest.", 18, new Vector2(0f, -17f), new Vector2(412f, 66f), Color.white, TextAnchor.MiddleCenter);
         challenge.onClick.AddListener(() => SelectJourneyMode(true));
         juiLobbyMode = OpText("Journey Selected Mode", panel, "COZY NIGHT SELECTED", 18, new Vector2(0f, -64f), new Vector2(960f, 34f), JuiGreen, TextAnchor.MiddleCenter);
@@ -178,6 +203,7 @@ public sealed partial class SimBarExperience
         if (juiLobbyMode != null) juiLobbyMode.text = challenge
             ? SimBarLocalization.Text("CHALLENGE NIGHT SELECTED  /  HIGHER GOALS", "도전의 밤 선택  /  더 높은 목표")
             : SimBarLocalization.Text("COZY NIGHT SELECTED  /  A GENTLER PACE", "여유로운 밤 선택  /  여유로운 진행");
+        if (juiBuilt && JourneyIsLobby) LayoutReadableJourneyLobby();
     }
 
     private void BuildJourneyGuide()
@@ -187,7 +213,7 @@ public sealed partial class SimBarExperience
         panel = juiGuideContent;
         juiGuideScroll = panel.parent.GetComponent<ScrollRect>();
         juiGuideNumber = OpText("Journey Guide Number", panel, "WELCOME / 1 OF 3", 18, new Vector2(0f, 275f), new Vector2(980f, 32f), JuiMuted, TextAnchor.MiddleCenter);
-        juiGuideTitle = OpText("Journey Guide Title", panel, string.Empty, 36, new Vector2(0f, 220f), new Vector2(990f, 60f), JuiGold, TextAnchor.MiddleCenter);
+        juiGuideTitle = OpText("Journey Guide Title", panel, string.Empty, 26, new Vector2(0f, 220f), new Vector2(990f, 60f), JuiGold, TextAnchor.MiddleCenter);
         for (int i = 0; i < 3; i++)
         {
             GameObject step = OpPanel("Journey Guide Step " + i, panel, Vector2.one * 0.5f, new Vector2(-115f + i * 115f, 166f), new Vector2(92f, 6f), new Color(0.24f, 0.28f, 0.36f), false);
@@ -210,11 +236,11 @@ public sealed partial class SimBarExperience
         Transform panel;
         juiResults = ReadableJourneyOverlay("Journey Results", out juiResultsContent);
         panel = juiResultsContent;
-        juiResultsTitle = OpText("Journey Results Title", panel, "LAST CALL", 39, new Vector2(0f, 333f), new Vector2(1000f, 62f), JuiGold, TextAnchor.MiddleCenter);
+        juiResultsTitle = OpText("Journey Results Title", panel, "LAST CALL", 26, new Vector2(0f, 333f), new Vector2(1000f, 62f), JuiGold, TextAnchor.MiddleCenter);
         juiResultsRank = OpText("Journey Results Rank", panel, string.Empty, 23, new Vector2(0f, 284f), new Vector2(1000f, 38f), Color.white, TextAnchor.MiddleCenter);
         bool starGlyph = SimBarLocalization.Font.HasCharacter('\u2605');
         for (int i = 0; i < 3; i++)
-            juiStars[i] = OpText("Journey Result Star " + i, panel, starGlyph ? "\u2605" : "STAR", starGlyph ? 70 : 31, new Vector2(-115f + i * 115f, 217f), new Vector2(112f, 90f), JuiGold, TextAnchor.MiddleCenter);
+            juiStars[i] = OpText("Journey Result Star " + i, panel, starGlyph ? "\u2605" : "STAR", 32, new Vector2(-115f + i * 115f, 217f), new Vector2(112f, 90f), JuiGold, TextAnchor.MiddleCenter);
         for (int i = 0; i < 3; i++)
         {
             GameObject goal = OpPanel("Journey Results Goal " + i, panel, Vector2.one * 0.5f, new Vector2(0f, 132f - i * 43f), new Vector2(930f, 37f), new Color(0.10f, 0.13f, 0.19f), false);
@@ -288,6 +314,8 @@ public sealed partial class SimBarExperience
     {
         Transform frame;
         GameObject overlay = JourneyOverlay(name, new Vector2(1540f, 1000f), out frame);
+        overlay.GetComponent<Image>().color = new Color(0.005f, 0.008f, 0.02f, 0.48f);
+        frame.GetComponent<Image>().color = new Color(0.045f, 0.055f, 0.095f, 0.94f);
         content = CreateReadableModalContent(name, frame);
         return overlay;
     }
@@ -320,8 +348,15 @@ public sealed partial class SimBarExperience
             new Vector2(12f, frameRect.sizeDelta.y - 60f), new Color(0.14f, 0.17f, 0.23f));
         GameObject handle = CreatePanel(name + " Scroll Handle", track.transform, Vector2.one * 0.5f, Vector2.zero,
             new Vector2(12f, 100f), JuiMuted);
+        RectTransform handleRect = handle.GetComponent<RectTransform>();
+        // Scrollbar controls the anchor span. Fixed sizeDelta would be added
+        // to that span and make the thumb extend beyond the track.
+        handleRect.anchorMin = Vector2.zero;
+        handleRect.anchorMax = Vector2.one;
+        handleRect.offsetMin = Vector2.zero;
+        handleRect.offsetMax = Vector2.zero;
         Scrollbar bar = track.AddComponent<Scrollbar>();
-        bar.handleRect = handle.GetComponent<RectTransform>();
+        bar.handleRect = handleRect;
         bar.targetGraphic = handle.GetComponent<Image>();
         bar.direction = Scrollbar.Direction.BottomToTop;
         bar.navigation = new Navigation { mode = Navigation.Mode.None };
@@ -346,36 +381,90 @@ public sealed partial class SimBarExperience
     {
         if (content == null || footer == null) return;
         RectTransform frame = (RectTransform)footer.parent;
+        bool compact = ReadableJourneyIsCompact(content);
+        float padding = compact ? 12f : 24f;
+        float gap = compact ? 10f : 20f;
+        float inset = compact ? 8f : 20f;
         int count = 0;
         foreach (Button button in buttons) if (button != null && button.gameObject.activeSelf) count++;
-        float innerWidth = frame.rect.width - 88f;
-        float buttonWidth = count > 1 ? (innerWidth - 20f * (count - 1)) / count : Mathf.Min(1160f, innerWidth);
-        float buttonHeight = 82f;
+        float innerWidth = frame.rect.width - padding * 2f - inset * 2f;
+        float buttonWidth = count > 1 ? (innerWidth - gap * (count - 1)) / count : Mathf.Min(compact ? 560f : 1160f, innerWidth);
+        float buttonHeight = compact ? 44f : 60f;
         foreach (Button button in buttons)
             if (button != null && button.gameObject.activeSelf)
-                buttonHeight = Mathf.Max(buttonHeight, ReadableButtonHeight(button, buttonWidth, 82f));
-        float footerHeight = buttonHeight + 32f;
-        SetRect(footer, new Vector2(0.5f, 0f), new Vector2(0f, 24f + footerHeight * 0.5f), new Vector2(frame.rect.width - 48f, footerHeight));
+                buttonHeight = Mathf.Max(buttonHeight, ReadableJourneyActionHeight(button, buttonWidth, buttonHeight));
+        float footerHeight = buttonHeight + inset * 2f;
+        SetRect(footer, new Vector2(0.5f, 0f), new Vector2(0f, padding + footerHeight * 0.5f), new Vector2(frame.rect.width - padding * 2f, footerHeight));
         int index = 0;
         foreach (Button button in buttons)
         {
             if (button == null || !button.gameObject.activeSelf) continue;
-            float x = (index - (count - 1) * 0.5f) * (buttonWidth + 20f);
-            ReadablePlace(button.transform, x, 16f, buttonWidth, buttonHeight);
+            float x = (index - (count - 1) * 0.5f) * (buttonWidth + gap);
+            ReadablePlace(button.transform, x, inset, buttonWidth, buttonHeight);
             index++;
         }
 
         // The action panel is a sibling of the masked viewport, so its buttons
         // stay visible and receive pointer events at every scroll position.
         RectTransform viewport = (RectTransform)content.parent;
-        float viewportHeight = Mathf.Max(120f, frame.rect.height - footerHeight - 64f);
-        float viewportY = footerHeight * 0.5f + 8f;
-        SetRect(viewport, Vector2.one * 0.5f, new Vector2(-8f, viewportY), new Vector2(frame.rect.width - 72f, viewportHeight));
-        content.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, viewport.rect.width - 24f);
+        float viewportGap = compact ? 8f : 16f;
+        float scrollbarWidth = compact ? 8f : 16f;
+        float viewportHeight = Mathf.Max(80f, frame.rect.height - footerHeight - padding * 2f - viewportGap);
+        float viewportY = (footerHeight + viewportGap) * 0.5f;
+        SetRect(viewport, Vector2.one * 0.5f, new Vector2(-scrollbarWidth * 0.5f, viewportY), new Vector2(frame.rect.width - padding * 2f - scrollbarWidth, viewportHeight));
+        content.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, viewport.rect.width - (compact ? 8f : 24f));
         ScrollRect scroll = viewport.GetComponent<ScrollRect>();
         if (scroll != null && scroll.verticalScrollbar != null)
-            SetRect(scroll.verticalScrollbar.GetComponent<RectTransform>(), new Vector2(1f, 0.5f), new Vector2(-21f, viewportY), new Vector2(12f, viewportHeight - 12f));
+        {
+            SetRect(scroll.verticalScrollbar.GetComponent<RectTransform>(), new Vector2(1f, 0.5f), new Vector2(-padding - scrollbarWidth * 0.5f, viewportY), new Vector2(compact ? 5f : 10f, viewportHeight - 8f));
+            RectTransform thumb = scroll.verticalScrollbar.handleRect;
+            if (thumb != null)
+            {
+                thumb.offsetMin = Vector2.zero;
+                thumb.offsetMax = Vector2.zero;
+            }
+        }
         footer.SetAsLastSibling();
+    }
+
+    private static bool ReadableJourneyIsCompact(RectTransform content)
+    {
+        RectTransform frame = (RectTransform)content.parent.parent;
+        return frame.rect.width < 1000f || frame.rect.height < 650f;
+    }
+
+    private float ReadableJourneyActionHeight(Button button, float width, float minimum)
+    {
+        Text label = button.GetComponentInChildren<Text>(true);
+        float height = ReadableJourneyTextHeight(label, width - 20f, minimum - 12f) + 12f;
+        if (label != null) SetRect(label.rectTransform, Vector2.one * 0.5f, Vector2.zero, new Vector2(width - 20f, height - 12f));
+        return Mathf.Max(minimum, height);
+    }
+
+    private static float ReadableJourneyTextHeight(Text label, float width, float minimum)
+    {
+        if (label == null) return minimum;
+        label.horizontalOverflow = HorizontalWrapMode.Wrap;
+        label.verticalOverflow = VerticalWrapMode.Truncate;
+        label.resizeTextForBestFit = false;
+        label.rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, Mathf.Max(20f, width));
+        return Mathf.Max(minimum, Mathf.Ceil(label.preferredHeight) + 8f);
+    }
+
+    private float ReadableJourneyTextRow(Transform parent, string name, ref float top, float width, float minimum, float gap)
+    {
+        Transform node = parent.Find(name);
+        if (node == null || !node.gameObject.activeSelf) return 0f;
+        float height = ReadableJourneyTextHeight(node.GetComponent<Text>(), width, minimum);
+        ReadablePlace(node, 0f, top, width, height);
+        top += height + gap;
+        return height;
+    }
+
+    private static void ReadableJourneyShow(Transform parent, string name, bool visible)
+    {
+        Transform node = parent.Find(name);
+        if (node != null && node.gameObject.activeSelf != visible) node.gameObject.SetActive(visible);
     }
 
     /// <summary>Called after the shared readability controller sizes modal fonts.</summary>
@@ -435,95 +524,175 @@ public sealed partial class SimBarExperience
     {
         if (juiLobbyContent == null) return;
         Transform panel = juiLobbyContent;
-        float width = juiLobbyContent.rect.width - 24f;
-        float top = 12f;
-        ReadableTextRow(panel, "Journey Lobby Title", ref top, width, 84f, 4f);
-        ReadableTextRow(panel, "Journey Lobby Subtitle", ref top, width, 48f, 12f);
-        ReadableTextRow(panel, "Journey Lobby Progress", ref top, width, 58f, 24f);
-        float cardWidth = (width - 28f) * 0.5f;
+        bool compact = ReadableJourneyIsCompact(juiLobbyContent);
+        RectTransform frame = (RectTransform)panel.parent.parent;
+        bool shortLandscape = compact && frame.rect.height < 420f && frame.rect.width > 600f;
+        Text continueLabel = juiContinue.GetComponentInChildren<Text>(true);
+        Text beginLabel = juiBegin.GetComponentInChildren<Text>(true);
+        if (compact)
+        {
+            juiLobbyProgress.text = SimBarLocalization.Format("DAY {0} · {1}\n{2} XP · BEST {3}", "{0}일 차 · {1}\n경험치 {2} · 최고 {3}", JourneyDay, JourneyRankLabel, JourneyXP.ToString("N0"), JourneyBestScore.ToString("N0"));
+            juiLobbyMode.text = JourneyHasActiveNight
+                ? SimBarLocalization.Format("SAVED {0} · {1}", "저장된 {0} · {1}", JourneyModeLabel, OpTime(JourneySecondsLeft))
+                : juiChallenge ? SimBarLocalization.Text("CHALLENGE SELECTED", "도전 모드 선택") : SimBarLocalization.Text("COZY SELECTED", "여유 모드 선택");
+            continueLabel.text = JourneyHasActiveNight ? SimBarLocalization.Text("CONTINUE ", "이어하기 ") + OpTime(JourneySecondsLeft) : SimBarLocalization.Text("RESULTS", "지난 결과");
+            beginLabel.text = SimBarLocalization.Text("START", "영업 시작");
+        }
+        else
+        {
+            juiLobbyProgress.text = SimBarLocalization.Format("DAY {0}    /    RANK {1}    /    {2} XP    /    BEST {3}", "{0}일 차    /    등급 {1}    /    경험치 {2}    /    최고 점수 {3}", JourneyDay, JourneyRankLabel, JourneyXP.ToString("N0"), JourneyBestScore.ToString("N0"));
+            continueLabel.text = JourneyHasActiveNight ? SimBarLocalization.Text("CONTINUE SAVED NIGHT  /  ", "저장한 영업 이어하기  /  ") + OpTime(JourneySecondsLeft) : SimBarLocalization.Text("REVIEW LAST NIGHT", "지난 영업 결과 보기");
+            beginLabel.text = SimBarLocalization.Text("OPEN TONIGHT", "오늘의 영업 시작");
+            juiLobbyMode.text = JourneyHasActiveNight
+                ? SimBarLocalization.Format("SAVED {0} NIGHT  /  CONTINUE WHERE YOU LEFT OFF", "저장된 {0} 모드  /  중단한 지점부터 이어서 시작", JourneyModeLabel)
+                : juiChallenge ? SimBarLocalization.Text("CHALLENGE NIGHT SELECTED  /  HIGHER GOALS", "도전의 밤 선택  /  더 높은 목표") : SimBarLocalization.Text("COZY NIGHT SELECTED  /  A GENTLER PACE", "여유로운 밤 선택  /  여유로운 진행");
+        }
+        LayoutReadableActionFooter(juiLobbyContent, juiLobbyActions, new[] { juiContinue, juiBegin });
+        float width = juiLobbyContent.rect.width - (compact ? 8f : 24f);
+        float top = compact ? 4f : 12f;
+        ReadableJourneyShow(panel, "Journey Lobby Subtitle", !compact);
+        ReadableJourneyShow(panel, "Journey Lobby Controls", !compact);
+        if (shortLandscape)
+        {
+            Text logo = panel.Find("Journey Lobby Title").GetComponent<Text>();
+            float logoWidth = Mathf.Min(180f, width * 0.28f);
+            float progressWidth = width - logoWidth - 16f;
+            float headerHeight = Mathf.Max(ReadableJourneyTextHeight(logo, logoWidth, 42f), ReadableJourneyTextHeight(juiLobbyProgress, progressWidth, 48f));
+            ReadablePlace(logo.transform, -(width - logoWidth) * 0.5f, top, logoWidth, headerHeight);
+            ReadablePlace(juiLobbyProgress.transform, (logoWidth + 16f) * 0.5f, top, progressWidth, headerHeight);
+            top += headerHeight + 12f;
+        }
+        else
+        {
+            ReadableJourneyTextRow(panel, "Journey Lobby Title", ref top, width, compact ? 42f : 60f, 4f);
+            ReadableJourneyTextRow(panel, "Journey Lobby Subtitle", ref top, width, 32f, 8f);
+            ReadableJourneyTextRow(panel, "Journey Lobby Progress", ref top, width, 36f, compact ? 12f : 20f);
+        }
+        bool stack = width < 600f;
+        float cardGap = compact ? 12f : 24f;
+        float cardWidth = stack ? width : (width - cardGap) * 0.5f;
         Text cozyTitle = juiCozyCard.transform.Find("Journey Cozy Title").GetComponent<Text>();
         Text challengeTitle = juiChallengeCard.transform.Find("Journey Challenge Title").GetComponent<Text>();
         Text cozyDescription = juiCozyCard.transform.Find("Journey Cozy Description").GetComponent<Text>();
         Text challengeDescription = juiChallengeCard.transform.Find("Journey Challenge Description").GetComponent<Text>();
-        float titleHeight = Mathf.Max(ReadableTextHeight(cozyTitle, cardWidth - 40f, 64f), ReadableTextHeight(challengeTitle, cardWidth - 40f, 64f));
-        float descriptionHeight = Mathf.Max(ReadableTextHeight(cozyDescription, cardWidth - 40f, 100f), ReadableTextHeight(challengeDescription, cardWidth - 40f, 100f));
-        float cardHeight = titleHeight + descriptionHeight + 44f;
-        ReadablePlace(juiCozyCard.transform, -(cardWidth + 28f) * 0.5f, top, cardWidth, cardHeight);
-        ReadablePlace(juiChallengeCard.transform, (cardWidth + 28f) * 0.5f, top, cardWidth, cardHeight);
-        foreach (Image card in new[] { juiCozyCard, juiChallengeCard })
+        cozyDescription.text = compact
+            ? SimBarLocalization.Text("3 min · 12 orders\n4 perfects · x5 combo\nRelaxed pace", "3분 · 주문 12개\n퍼펙트 4회 · 5콤보\n넉넉한 대기 시간")
+            : SimBarLocalization.Text("3 min / 12 orders / 4 perfects / x5 combo\nLonger guest patience. A gentler pace.", "3분 / 주문 12개 / 퍼펙트 4회 / 5콤보\n손님들이 더 오래 기다리는 여유로운 모드.");
+        challengeDescription.text = compact
+            ? SimBarLocalization.Text("3 min · 20 orders\n7 perfects · x8 combo\nFaster service", "3분 · 주문 20개\n퍼펙트 7회 · 8콤보\n빠른 주문, 짧은 대기")
+            : SimBarLocalization.Text("3 min / 20 orders / 7 perfects / x8 combo\nFaster orders. Less time per guest.", "3분 / 주문 20개 / 퍼펙트 7회 / 8콤보\n주문이 빠르게 들어오고 대기 시간이 짧은 모드.");
+        float innerWidth = cardWidth - (compact ? 24f : 40f);
+        float titleHeight = Mathf.Max(ReadableJourneyTextHeight(cozyTitle, innerWidth, 34f), ReadableJourneyTextHeight(challengeTitle, innerWidth, 34f));
+        float descriptionHeight = Mathf.Max(ReadableJourneyTextHeight(cozyDescription, innerWidth, 54f), ReadableJourneyTextHeight(challengeDescription, innerWidth, 54f));
+        float cardHeight = titleHeight + descriptionHeight + (compact ? 24f : 40f);
+        Image[] cards = { juiCozyCard, juiChallengeCard };
+        for (int i = 0; i < cards.Length; i++)
         {
+            Image card = cards[i];
+            float x = stack ? 0f : (i - 0.5f) * (cardWidth + cardGap);
+            ReadablePlace(card.transform, x, top + (stack ? i * (cardHeight + cardGap) : 0f), cardWidth, cardHeight);
             string prefix = card == juiCozyCard ? "Journey Cozy " : "Journey Challenge ";
-            ReadablePlace(card.transform.Find(prefix + "Title"), 0f, 14f, cardWidth - 40f, titleHeight);
-            ReadablePlace(card.transform.Find(prefix + "Description"), 0f, titleHeight + 24f, cardWidth - 40f, descriptionHeight);
+            ReadablePlace(card.transform.Find(prefix + "Title"), 0f, compact ? 8f : 12f, innerWidth, titleHeight);
+            ReadablePlace(card.transform.Find(prefix + "Description"), 0f, titleHeight + (compact ? 12f : 20f), innerWidth, descriptionHeight);
         }
-        top += cardHeight + 18f;
-        ReadableTextRow(panel, "Journey Selected Mode", ref top, width, 48f, 18f);
-        ReadableTextRow(panel, "Journey Lobby Carryover", ref top, width, 48f, 8f);
-        ReadableTextRow(panel, "Journey Lobby Controls", ref top, width, 48f, 16f);
-        LayoutReadableActionFooter(juiLobbyContent, juiLobbyActions, new[] { juiContinue, juiBegin });
+        top += (stack ? cardHeight * 2f + cardGap : cardHeight) + 12f;
+        ReadableJourneyTextRow(panel, "Journey Selected Mode", ref top, width, 32f, 8f);
+        ReadableJourneyTextRow(panel, "Journey Lobby Carryover", ref top, width, 32f, 4f);
+        ReadableJourneyTextRow(panel, "Journey Lobby Controls", ref top, width, 32f, 12f);
         ReadableContentHeight(juiLobbyContent, top);
     }
 
     private void LayoutReadableJourneyGuide()
     {
         if (juiGuideContent == null) return;
-        float width = juiGuideContent.rect.width - 24f;
-        float top = 12f;
-        ReadableTextRow(juiGuideContent, "Journey Guide Number", ref top, width, 48f, 8f);
-        ReadableTextRow(juiGuideContent, "Journey Guide Title", ref top, width, 76f, 20f);
-        for (int i = 0; i < juiGuideSteps.Length; i++)
-            ReadablePlace(juiGuideSteps[i].transform, -130f + i * 130f, top, 104f, 7f);
-        top += 35f;
-        ReadableTextRow(juiGuideContent, "Journey Guide Body", ref top, width - 32f, 190f, 24f);
-        Transform example = juiGuideContent.Find("Journey Guide Example Card");
-        float exampleHeight = ReadableTextHeight(juiGuideExample, width - 80f, 116f) + 32f;
-        ReadablePlace(example, 0f, top, width, exampleHeight);
-        ReadablePlace(juiGuideExample.transform, 0f, 16f, width - 80f, exampleHeight - 32f);
-        top += exampleHeight + 28f;
-        ReadableTextRow(juiGuideContent, "Journey Guide Footer", ref top, width, 48f, 20f);
+        bool compact = ReadableJourneyIsCompact(juiGuideContent);
+        int step = Mathf.Clamp(JourneyGuideStep, 0, 2);
+        juiGuideNumber.text = compact ? SimBarLocalization.Format("GUIDE {0} / 3", "안내 {0} / 3", step + 1) : SimBarLocalization.Format("WELCOME  /  {0} OF 3", "처음 오셨나요?  /  {0} / 3", step + 1);
+        juiGuideBody.text = compact ? SimBarLocalization.Text(JuiCompactGuideBodies[step], JuiCompactGuideBodiesKorean[step]) : SimBarLocalization.Text(JuiGuideBodies[step], JuiGuideBodiesKorean[step]);
+        juiGuideExample.text = compact ? SimBarLocalization.Text(JuiCompactGuideExamples[step], JuiCompactGuideExamplesKorean[step]) : SimBarLocalization.Text(JuiGuideExamples[step], JuiGuideExamplesKorean[step]);
+        juiGuideNextLabel.text = step == 2 ? (compact ? SimBarLocalization.Text("START", "영업 시작") : SimBarLocalization.Text("OPEN THE DOORS", "영업 시작")) : SimBarLocalization.Text("NEXT", "다음");
         LayoutReadableActionFooter(juiGuideContent, juiGuideActions, new[] { juiGuideNext });
+        float width = juiGuideContent.rect.width - (compact ? 8f : 24f);
+        float top = compact ? 4f : 12f;
+        ReadableJourneyTextRow(juiGuideContent, "Journey Guide Number", ref top, width, 28f, 2f);
+        ReadableJourneyTextRow(juiGuideContent, "Journey Guide Title", ref top, width, 40f, compact ? 8f : 16f);
+        float stepWidth = Mathf.Min(compact ? 60f : 104f, (width - 32f) / 3f);
+        for (int i = 0; i < juiGuideSteps.Length; i++)
+            ReadablePlace(juiGuideSteps[i].transform, (i - 1) * (stepWidth + 12f), top, stepWidth, compact ? 4f : 6f);
+        top += compact ? 20f : 30f;
+        ReadableJourneyTextRow(juiGuideContent, "Journey Guide Body", ref top, width - (compact ? 8f : 32f), compact ? 80f : 120f, compact ? 12f : 24f);
+        Transform example = juiGuideContent.Find("Journey Guide Example Card");
+        float examplePadding = compact ? 12f : 24f;
+        float exampleHeight = ReadableJourneyTextHeight(juiGuideExample, width - examplePadding * 2f, compact ? 36f : 64f) + examplePadding * 2f;
+        ReadablePlace(example, 0f, top, width, exampleHeight);
+        ReadablePlace(juiGuideExample.transform, 0f, examplePadding, width - examplePadding * 2f, exampleHeight - examplePadding * 2f);
+        top += exampleHeight + (compact ? 12f : 24f);
+        ReadableJourneyShow(juiGuideContent, "Journey Guide Footer", !compact);
+        ReadableJourneyTextRow(juiGuideContent, "Journey Guide Footer", ref top, width, 32f, 16f);
         ReadableContentHeight(juiGuideContent, top);
     }
 
     private void LayoutReadableJourneyResults()
     {
         if (juiResultsContent == null) return;
-        float width = juiResultsContent.rect.width - 24f;
-        float top = 12f;
-        ReadableTextRow(juiResultsContent, "Journey Results Title", ref top, width, 80f, 8f);
-        ReadableTextRow(juiResultsContent, "Journey Results Rank", ref top, width, 60f, 16f);
-        float starHeight = 100f;
-        for (int i = 0; i < juiStars.Length; i++) starHeight = Mathf.Max(starHeight, ReadableTextHeight(juiStars[i], 160f, 100f));
-        for (int i = 0; i < juiStars.Length; i++) ReadablePlace(juiStars[i].transform, -170f + i * 170f, top, 160f, starHeight);
-        top += starHeight + 16f;
+        bool compact = ReadableJourneyIsCompact(juiResultsContent);
+        string[] actionEnglish = compact ? new[] { "RETRY", "NEXT", "LOBBY" } : new[] { "RETRY THIS NIGHT", "NEXT NIGHT", "BACK TO LOBBY" };
+        string[] actionKorean = compact ? new[] { "재도전", "다음", "로비" } : new[] { "같은 날 다시 도전", "다음 날 영업", "로비로 돌아가기" };
+        for (int i = 0; i < juiResultActions.Length; i++)
+            juiResultActions[i].GetComponentInChildren<Text>(true).text = SimBarLocalization.Text(actionEnglish[i], actionKorean[i]);
+        if (compact)
+        {
+            juiResultsTitle.text = SimBarLocalization.Format("DAY {0} / RESULTS", "{0}일 차 결과", JourneyDay);
+            juiResultsRank.text = SimBarLocalization.Format("{0} PTS · x{1} · {2} PERFECT", "{0}점 · {1}콤보 · 퍼펙트 {2}회", JourneyScore.ToString("N0"), JourneyBestCombo, JourneyPerfects);
+            juiResultProgress.text = SimBarLocalization.Format("BONUS +${0} · {1}\nTOTAL {2} XP", "보너스 +${0} · {1}\n총 경험치 {2}", JourneyResultBonus.ToString("N0"), JourneyRankLabel, JourneyXP.ToString("N0"));
+        }
+        else
+        {
+            juiResultsTitle.text = SimBarLocalization.Format("DAY {0}  /  LAST CALL", "{0}일 차  /  영업 마감", JourneyDay);
+            juiResultsRank.text = SimBarLocalization.Format("{0} POINTS    /    BEST COMBO x{1}    /    {2} PERFECT POURS", "{0}점    /    최고 콤보 x{1}    /    퍼펙트 {2}회", JourneyScore.ToString("N0"), JourneyBestCombo, JourneyPerfects);
+            juiResultProgress.text = SimBarLocalization.Format("NIGHT BONUS +${0}    /    RANK {1}    /    TOTAL XP {2}", "영업 보너스 +${0}    /    등급 {1}    /    총 경험치 {2}", JourneyResultBonus.ToString("N0"), JourneyRankLabel, JourneyXP.ToString("N0"));
+        }
+        LayoutReadableActionFooter(juiResultsContent, juiResultsActions, juiResultActions);
+        float width = juiResultsContent.rect.width - (compact ? 8f : 24f);
+        bool stack = width < 600f;
+        float top = compact ? 4f : 12f;
+        ReadableJourneyTextRow(juiResultsContent, "Journey Results Title", ref top, width, 40f, 4f);
+        ReadableJourneyTextRow(juiResultsContent, "Journey Results Rank", ref top, width, 32f, 8f);
+        float starWidth = Mathf.Min(compact ? 72f : 112f, (width - 24f) / 3f);
+        float starHeight = 42f;
+        for (int i = 0; i < juiStars.Length; i++) starHeight = Mathf.Max(starHeight, ReadableJourneyTextHeight(juiStars[i], starWidth, 42f));
+        for (int i = 0; i < juiStars.Length; i++) ReadablePlace(juiStars[i].transform, (i - 1) * (starWidth + 12f), top, starWidth, starHeight);
+        top += starHeight + 8f;
         for (int i = 0; i < juiResultGoals.Length; i++)
         {
-            float height = ReadableTextHeight(juiResultGoals[i], width - 40f, 58f) + 12f;
+            float inset = compact ? 10f : 20f;
+            float height = ReadableJourneyTextHeight(juiResultGoals[i], width - inset * 2f, 32f) + 8f;
             ReadablePlace(juiResultGoals[i].transform.parent, 0f, top, width, height);
-            SetRect(juiResultGoals[i].rectTransform, Vector2.one * 0.5f, Vector2.zero, new Vector2(width - 40f, height - 12f));
-            top += height + 10f;
+            SetRect(juiResultGoals[i].rectTransform, Vector2.one * 0.5f, Vector2.zero, new Vector2(width - inset * 2f, height - 8f));
+            top += height + 8f;
         }
-        float statWidth = (width - 40f) / 3f;
-        float statHeight = 136f;
+        float statGap = compact ? 10f : 20f;
+        float statWidth = stack ? width : (width - statGap * 2f) / 3f;
+        float statHeight = 84f;
         Text[] values = { juiResultProfit, juiResultServices, juiResultXP };
         foreach (Text value in values)
         {
             Text title = value.transform.parent.Find("Journey Result Stat Title").GetComponent<Text>();
-            statHeight = Mathf.Max(statHeight, ReadableTextHeight(title, statWidth - 28f, 48f) + ReadableTextHeight(value, statWidth - 28f, 60f) + 32f);
+            statHeight = Mathf.Max(statHeight, ReadableJourneyTextHeight(title, statWidth - 24f, 28f) + ReadableJourneyTextHeight(value, statWidth - 24f, 40f) + 20f);
         }
         for (int i = 0; i < values.Length; i++)
         {
             Text title = values[i].transform.parent.Find("Journey Result Stat Title").GetComponent<Text>();
-            float titleHeight = ReadableTextHeight(title, statWidth - 28f, 48f);
-            ReadablePlace(values[i].transform.parent, (i - 1) * (statWidth + 20f), top, statWidth, statHeight);
-            ReadablePlace(title.transform, 0f, 10f, statWidth - 28f, titleHeight);
-            ReadablePlace(values[i].transform, 0f, titleHeight + 16f, statWidth - 28f, statHeight - titleHeight - 28f);
+            float titleHeight = ReadableJourneyTextHeight(title, statWidth - 24f, 28f);
+            ReadablePlace(values[i].transform.parent, stack ? 0f : (i - 1) * (statWidth + statGap), top + (stack ? i * (statHeight + statGap) : 0f), statWidth, statHeight);
+            ReadablePlace(title.transform, 0f, 6f, statWidth - 24f, titleHeight);
+            ReadablePlace(values[i].transform, 0f, titleHeight + 10f, statWidth - 24f, statHeight - titleHeight - 16f);
         }
-        top += statHeight + 20f;
-        ReadableTextRow(juiResultsContent, "Journey New Record", ref top, width, 56f, 8f);
-        ReadableTextRow(juiResultsContent, "Journey Result Progress", ref top, width, 64f, 20f);
-        ReadableTextRow(juiResultsContent, "Journey Results Saved", ref top, width, 52f, 20f);
-        LayoutReadableActionFooter(juiResultsContent, juiResultsActions, juiResultActions);
+        top += (stack ? statHeight * 3f + statGap * 2f : statHeight) + 12f;
+        ReadableJourneyTextRow(juiResultsContent, "Journey New Record", ref top, width, 32f, 6f);
+        ReadableJourneyTextRow(juiResultsContent, "Journey Result Progress", ref top, width, 32f, 8f);
+        ReadableJourneyShow(juiResultsContent, "Journey Results Saved", !compact);
+        ReadableJourneyTextRow(juiResultsContent, "Journey Results Saved", ref top, width, 32f, 12f);
         ReadableContentHeight(juiResultsContent, top);
     }
 

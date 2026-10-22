@@ -7,17 +7,16 @@
     <meta name="description" content="SimBar — 한국어와 English로 즐기는 브라우저 바 운영 게임.">
     <title>SimBar</title>
     <link rel="icon" href="TemplateData/favicon.ico">
-    <link rel="stylesheet" href="TemplateData/style.css?v=52480e3331457c56">
+    <link rel="stylesheet" href="TemplateData/style.css?v=aefa58239a8fcc60">
   </head>
   <body>
     <main id="game-shell" data-player-state="loading">
       <header class="game-toolbar">
         <h1>SimBar</h1>
         <p id="toolbar-status" role="status" aria-live="polite"></p>
-        <button id="fullscreen-button" type="button" aria-pressed="false" disabled>
+        <button id="fullscreen-button" type="button" aria-pressed="false" aria-label="전체 화면 / Full screen" title="전체 화면 / Full screen" disabled>
           <span aria-hidden="true">⛶</span> <span id="fullscreen-label">전체 화면 / Full screen</span>
         </button>
-        <p class="orientation-hint">가로 화면에서 더 넓게 볼 수 있어요. / Rotate for more room.</p>
       </header>
       <div id="game-stage">
         <canvas id="unity-canvas" width="1280" height="720" tabindex="0"
@@ -44,11 +43,11 @@
       (() => {
         "use strict";
         const build = {
-  "loaderUrl": "Build/SimBarPlayerWebGL.loader.js?v=ae55bd3fddcbc1e2",
+  "loaderUrl": "Build/SimBarPlayerWebGL.loader.js?v=c79cb42449f4699e",
   "config": {
-    "dataUrl": "Build/SimBarPlayerWebGL.data?v=4e23de7172ee31cd",
+    "dataUrl": "Build/SimBarPlayerWebGL.data?v=742f2ffade86e4cb",
     "frameworkUrl": "Build/SimBarPlayerWebGL.framework.js?v=7b5b02a8d63d3426",
-    "codeUrl": "Build/SimBarPlayerWebGL.wasm?v=4646ecaf521c560d",
+    "codeUrl": "Build/SimBarPlayerWebGL.wasm?v=a989232eb6d4d71a",
     "streamingAssetsUrl": "StreamingAssets",
     "arguments": [],
     "companyName": "DefaultCompany",
@@ -66,6 +65,21 @@
         const fullscreenButton = document.getElementById("fullscreen-button");
         const fullscreenLabel = document.getElementById("fullscreen-label");
         let noticeTimer;
+        let viewportFrame;
+
+        function updateViewport() {
+          cancelAnimationFrame(viewportFrame);
+          viewportFrame = requestAnimationFrame(() => {
+            // Browser address bars and rotation can change the visible height without
+            // changing the layout viewport. Unity alone owns the canvas backing size.
+            const viewport = window.visualViewport;
+            const height = viewport && viewport.scale === 1 ? viewport.height : window.innerHeight;
+            if (height > 0) shell.style.setProperty("--viewport-height", height + "px");
+          });
+        }
+        window.addEventListener("resize", updateViewport, { passive: true });
+        if (window.visualViewport) window.visualViewport.addEventListener("resize", updateViewport, { passive: true });
+        updateViewport();
 
         function focusGame() {
           canvas.focus({ preventScroll: true });
@@ -89,6 +103,9 @@
           const active = !!(document.fullscreenElement || document.webkitFullscreenElement);
           fullscreenButton.setAttribute("aria-pressed", String(active));
           fullscreenLabel.textContent = active ? "전체 화면 종료 / Exit full screen" : "전체 화면 / Full screen";
+          fullscreenButton.setAttribute("aria-label", fullscreenLabel.textContent);
+          fullscreenButton.title = fullscreenLabel.textContent;
+          updateViewport();
         }
 
         fullscreenButton.addEventListener("click", async () => {
