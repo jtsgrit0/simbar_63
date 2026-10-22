@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 
 /// <summary>FBX-backed people, grounded in metres, with source performances and fallback bone posing.</summary>
-public sealed class SimBarCharacterVisual : MonoBehaviour
+public sealed partial class SimBarCharacterVisual : MonoBehaviour
 {
     [Tooltip("Hip height above the caller's floor origin for seated guests.")]
     public float seatHeight = 0.6f;
@@ -108,7 +108,7 @@ public sealed class SimBarCharacterVisual : MonoBehaviour
             pivot.localPosition = new Vector3(0f, seatHeight - standingHipHeight, 0f);
         }
         CreateAccessories(outfit);
-        UpdateAccessories();
+        UpdateAccessories(0f, 0.65f);
     }
 
     private Material ConvertMaterial(Material source)
@@ -131,18 +131,9 @@ public sealed class SimBarCharacterVisual : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (model == null || pivot == null) return;
-        float t = Time.time * (role == "bartender" ? 1.3f : 2.6f) + phase;
-        if (clip != null && clip.length > 0f) clip.SampleAnimation(model, Mathf.Repeat(Time.time + phase, clip.length));
-        else
-        {
-            foreach (var pair in restRotations) if (pair.Key != null) pair.Key.localRotation = pair.Value;
-            ApplyProceduralPose(t);
-        }
-        float bounce = role == "guest" ? 0.035f : role == "drummer" ? 0.008f : 0.016f;
-        pivot.localPosition = new Vector3(0f, role == "seated" ? seatHeight - standingHipHeight : Mathf.Abs(Mathf.Sin(t)) * bounce, 0f);
-        pivot.localRotation = Quaternion.Euler(0f, Mathf.Sin(t * 0.53f) * (role == "seated" ? 1.5f : 3f), Mathf.Sin(t) * (role == "guest" ? 2.5f : role == "seated" ? 0.4f : 1.3f));
-        UpdateAccessories();
+        // Scene previews retain animation without a host. The game takes full
+        // ownership so a paused shift freezes bones and held props together.
+        if (!Managed) ApplyPresentation(Time.time, 0.65f, 0f, 0f);
     }
 
     private void ApplyProceduralPose(float t)
@@ -245,9 +236,10 @@ public sealed class SimBarCharacterVisual : MonoBehaviour
         }
         else if (role == "drummer")
         {
-            leftStick = Primitive("Left drumstick", PrimitiveType.Cylinder, new Vector3(0.014f, 0.18f, 0.014f), new Color(0.78f, 0.58f, 0.31f));
-            rightStick = Primitive("Right drumstick", PrimitiveType.Cylinder, new Vector3(0.014f, 0.18f, 0.014f), new Color(0.78f, 0.58f, 0.31f));
+            leftStick = Primitive("Left drumstick", PrimitiveType.Cylinder, new Vector3(0.014f, 0.23f, 0.014f), new Color(0.78f, 0.58f, 0.31f));
+            rightStick = Primitive("Right drumstick", PrimitiveType.Cylinder, new Vector3(0.014f, 0.23f, 0.014f), new Color(0.78f, 0.58f, 0.31f));
         }
+        else if (role == "bartender") CreateServingAccessory();
     }
 
     private void CreateLightweightGuitar(Transform instrument, Color color)
@@ -264,24 +256,26 @@ public sealed class SimBarCharacterVisual : MonoBehaviour
             AddPart(instrument, "Chrome pickup " + i, PrimitiveType.Cube, new Vector3(0f, -0.08f + i * 0.09f, 0.068f), new Vector3(0.13f, 0.025f, 0.025f), new Color(0.22f, 0.24f, 0.27f));
     }
 
-    private void UpdateAccessories()
+    private void UpdateAccessories(float timeSeconds, float energy)
     {
-        if (guitarPerformance != null) guitarPerformance.Apply(Time.time + phase);
+        if (guitarPerformance != null) guitarPerformance.Apply(timeSeconds + phase * 0.025f, energy);
         if (microphone != null && bones.TryGetValue("handr", out var hand))
         {
             microphone.position = hand.position;
             Vector3 head = bones.TryGetValue("head", out var headBone) ? headBone.position : pivot.TransformPoint(new Vector3(0f, 1.65f, 0f));
             microphone.rotation = Quaternion.FromToRotation(Vector3.up, (head - hand.position).normalized);
         }
-        PositionStick(leftStick, "handl");
-        PositionStick(rightStick, "handr");
+        PositionStick(leftStick, "handl", leftDrumLift);
+        PositionStick(rightStick, "handr", rightDrumLift);
+        UpdateServingAccessory();
     }
 
-    private void PositionStick(Transform stick, string handName)
+    private void PositionStick(Transform stick, string handName, float lift)
     {
         if (stick == null || !bones.TryGetValue(handName, out var hand)) return;
-        stick.position = hand.position + pivot.forward * 0.12f;
-        stick.rotation = Quaternion.FromToRotation(Vector3.up, pivot.forward + pivot.up * 0.35f);
+        Vector3 direction = (pivot.forward * Mathf.Lerp(1f, 0.25f, lift) + pivot.up * Mathf.Lerp(-0.12f, 1.25f, lift)).normalized;
+        stick.position = hand.position + direction * 0.14f;
+        stick.rotation = Quaternion.FromToRotation(Vector3.up, direction);
     }
 
     private Transform Primitive(string name, PrimitiveType type, Vector3 scale, Color color)

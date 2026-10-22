@@ -636,7 +636,7 @@ public sealed partial class SimBarExperience
     private void UpdateOperationsWorldVisuals()
     {
         if (worldRoot == null) return;
-        Vector3[] positions = { new Vector3(-5.8f, 0f, -0.3f), new Vector3(-1.2f, 0f, -2.7f), new Vector3(-8.5f, 0f, -5.7f) };
+        Vector3[] positions = { new Vector3(-5.8f, 0f, -0.565f), new Vector3(-0.4f, 0f, -4.9f), new Vector3(8.75f, 0f, -3.5f) };
         for (int i = 0; i < 3; i++)
         {
             if (opStaff[i] > 0 && opStaffVisuals[i] == null)

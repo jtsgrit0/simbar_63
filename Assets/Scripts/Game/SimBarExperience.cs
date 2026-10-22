@@ -111,6 +111,7 @@ public sealed partial class SimBarExperience : MonoBehaviour
         InitializePourGame();
         InitializeJourney();
         InitializeLanguageSettings();
+        InitializeVenueMotion();
         SimBarReadability.Attach(canvas, this);
         RefreshUI();
         if (JourneyIsPlaying)
@@ -267,6 +268,7 @@ public sealed partial class SimBarExperience : MonoBehaviour
             ?? Resources.Load<GameObject>("SimBarArt/SimBarVenue");
         if (venue != null)
         {
+            motionReferenceLayout = true;
             GameObject art = Instantiate(venue, worldRoot, false);
             art.name = "Blender Venue — Reference Layout";
             CreateReferencePerformers();
@@ -303,8 +305,8 @@ public sealed partial class SimBarExperience : MonoBehaviour
     {
         Transform guests = new GameObject("FBX Bar and Booth Guests").transform;
         guests.SetParent(worldRoot, false);
-        CreatePerson("Bartender", new Vector3(-7.3f, 0f, -0.3f), Color.white, Color.black, false, guests, "bartender");
-        CreatePerson("Server", new Vector3(-4.2f, 0f, -0.3f), Color.white, Color.black, false, guests, "bartender");
+        CreatePerson("Bartender", new Vector3(-7.3f, 0f, -0.565f), Color.white, Color.black, false, guests, "bartender");
+        CreatePerson("Server", new Vector3(-4.2f, 0f, -0.565f), Color.white, Color.black, false, guests, "bartender");
         for (int i = 0; i < 4; i++)
             CreatePerson("Bar Guest " + i, new Vector3(-8.1f + i * 1.65f, 0f, -3.05f), DrinkColors[i % 3], Color.black, false, guests, "guest");
         Vector3[] seats = {
@@ -524,6 +526,7 @@ public sealed partial class SimBarExperience : MonoBehaviour
                 person.orderMarker = CreateCylinder("OrderMarker", new Vector3(0f, 2.2f, 0f), new Vector3(0.12f, 0.035f, 0.12f), amberGlowMat, person.root);
                 person.orderMarker.SetActive(false);
             }
+            RegisterVenuePerson(person, role);
             return person;
         }
         Transform root = new GameObject(name).transform;
@@ -561,6 +564,7 @@ public sealed partial class SimBarExperience : MonoBehaviour
             marker.SetActive(false);
             patron.orderMarker = marker;
         }
+        RegisterVenuePerson(patron, role);
         return patron;
     }
 
@@ -756,7 +760,7 @@ public sealed partial class SimBarExperience : MonoBehaviour
             requestTimer = UnityEngine.Random.Range(4.5f, 7.5f) * OperationsOrderIntervalMultiplier * JourneyOrderIntervalMultiplier;
         }
 
-        AnimateVenue();
+        AnimateVenue(delta);
         UpdatePatience(delta);
         performance = Mathf.Clamp01(performance - delta * 0.0015f);
         if (toastTimer > 0f)
@@ -766,24 +770,9 @@ public sealed partial class SimBarExperience : MonoBehaviour
         RefreshUI();
     }
 
-    private void AnimateVenue()
+    private void AnimateVenue(float delta)
     {
-        for (int i = 0; i < patrons.Count; i++)
-        {
-            Patron patron = patrons[i];
-            if (patron.root == null)
-                continue;
-            float wave = Mathf.Sin(beat + patron.phase);
-            patron.root.localPosition = new Vector3(patron.root.localPosition.x, patron.baseY + (patron.isDancing ? wave * 0.075f : 0f), patron.root.localPosition.z);
-            if (patron.isDancing)
-            {
-                patron.root.localRotation = Quaternion.Euler(0f, patron.baseYaw + Mathf.Sin(beat * 0.55f + patron.phase) * 10f, Mathf.Sin(beat + patron.phase) * 2.5f);
-                if (patron.leftArm != null) patron.leftArm.localRotation = Quaternion.Euler(0f, 0f, -25f - wave * 56f);
-                if (patron.rightArm != null) patron.rightArm.localRotation = Quaternion.Euler(0f, 0f, 25f + wave * 56f);
-                if (patron.orderMarker != null && patron.orderMarker.activeSelf)
-                    patron.orderMarker.transform.localPosition = new Vector3(0f, 2.48f + Mathf.Abs(wave) * 0.18f, 0f);
-            }
-        }
+        TickVenueMotion(delta);
         for (int i = 0; i < stageLights.Count; i++)
         {
             Light stageLight = stageLights[i];
@@ -839,11 +828,13 @@ public sealed partial class SimBarExperience : MonoBehaviour
             patron.orderMarker.SetActive(true);
         }
         orderQueue.Enqueue(patron);
+        MotionOrderChanged(patron);
     }
 
     private void ClearOrder(Patron patron)
     {
         patron.drinkIndex = -1;
+        MotionOrderChanged(patron);
         if (patron.orderMarker != null)
             patron.orderMarker.SetActive(false);
     }
@@ -887,6 +878,7 @@ public sealed partial class SimBarExperience : MonoBehaviour
         satisfaction = Mathf.Clamp(satisfaction + (automatic ? 0.012f : quality >= 0.5f ? 0.01f + quality * 0.015f : -0.025f), 0.3f, 1f);
         performance = Mathf.Clamp01(performance + (automatic || quality >= 0.5f ? 0.014f : -0.008f));
         ClearOrder(patron);
+        MotionServed(patron, automatic, quality);
         TryCreateOrder();
         string verdict = automatic ? SimBarLocalization.Text("BARBACK SERVED", "바 보조가 서빙했어요")
             : quality >= 0.9f ? SimBarLocalization.Text("PERFECT POUR!", "완벽하게 따랐어요!")

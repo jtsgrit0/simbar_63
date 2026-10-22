@@ -558,5 +558,22 @@
     "baked": true,
     "workingScene": "X=Unity X, Y=Unity Z, Z=Unity Y"
   },
-  "tessellation": "Explicit triangles, welded duplicate vertices, degenerate edges dissolved, normals recalculated"
+  "tessellation": "Explicit triangles, welded duplicate vertices, degenerate edges dissolved, normals recalculated",
+  "staffAisle": {
+    "workSurfaceOffsetZ": 0.25,
+    "z": [
+      -0.88,
+      -0.25
+    ],
+    "width": 0.63,
+    "centerZ": -0.565,
+    "radius": 0.24,
+    "walkX": [
+      -9.0,
+      -2.8
+    ],
+    "sourceMesh": "SimBar_BarCounter",
+    "selectedVertices": 406,
+    "unchangedOtherMeshes": 9
+  }
 }

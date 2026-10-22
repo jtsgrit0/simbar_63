@@ -31,6 +31,9 @@ manifest = {'generator': 'create_simbar_venue.py', 'blender': bpy.app.version_st
                        'stage': {'center':[5.4,0.62,4.4], 'size':[7.8,0.62,4.2]},
                        'drums':[6,0.62,5.2], 'vocal':[5.5,0.62,2.7],
                        'guitarLeft':[3,0.62,3.8], 'guitarRight':[8,0.62,3.8]},
+            'staffAisle': {'workSurfaceOffsetZ':0.25, 'z':[-0.88,-0.25],
+                           'width':0.63, 'centerZ':-0.565, 'radius':0.24,
+                           'walkX':[-9.0,-2.8], 'sourceMesh':'SimBar_BarCounter'},
             'materials': {}}
 
 def material(name, color, roughness=0.55, metallic=0, emission=0):
@@ -231,12 +234,15 @@ box('Counter front bullnose',(-6.02,1.56,-2.25),(8.0,.12,.14),'DarkWalnut',.055)
 rod('Brass bar foot rail',(-9.7,.31,-2.58),(-2.3,.31,-2.58),.045,'Brass')
 for x in [-9.5,-7.6,-5.6,-3.4]:
     rod('Footrail bracket',(x,.16,-2.12),(x,.31,-2.58),.03,'Brass')
-# Worktop, sink, taps and beer tower.
-box('Bartender work surface',(-6.1,.99,-.15),(7.25,.12,.7),'MetalBlack',.025)
-box('Sink metal surround',(-8.1,1.065,-.16),(1.03,.03,.48),'Chrome',.045)
-box('Sink dark basin',(-8.1,1.078,-.17),(.77,.03,.33),'StageBlack',.045)
-rod('Sink faucet riser',(-8.1,1.08,.08),(-8.1,1.53,.08),.028,'Chrome')
-rod('Sink faucet spout',(-8.1,1.53,.08),(-8.1,1.53,-.19),.028,'Chrome')
+# Move the worktop and its sink +0.25 Unity Z, leaving a 0.63 m staff aisle
+# between the main counter's back edge (-0.88) and this top's front (-0.25).
+# Absolute coordinates match open_staff_aisle.py's idempotent saved-scene patch.
+box('Bartender work surface',(-6.1,.99,.10),(7.25,.12,.7),'MetalBlack',.025)
+box('Sink metal surround',(-8.1,1.065,.09),(1.03,.03,.48),'Chrome',.045)
+box('Sink dark basin',(-8.1,1.078,.08),(.77,.03,.33),'StageBlack',.045)
+rod('Sink faucet riser',(-8.1,1.08,.33),(-8.1,1.53,.33),.028,'Chrome')
+rod('Sink faucet spout',(-8.1,1.53,.33),(-8.1,1.53,.06),.028,'Chrome')
+# Taps and beer tower remain on the original customer counter.
 for x in [-5.9,-4.95]:
     cyl('Beer tower pedestal',(x,1.65,-1.13),.15,.10,'Chrome')
     rod('Beer tower vertical',(x,1.68,-1.13),(x,2.25,-1.13),.075,'Chrome')
@@ -452,6 +458,7 @@ for group,objects in groups.items():
     bmesh.ops.triangulate(bm,faces=list(bm.faces),quad_method='BEAUTY',ngon_method='BEAUTY')
     bmesh.ops.recalc_face_normals(bm,faces=list(bm.faces))
     bm.to_mesh(joined.data);bm.free();joined.data.update()
+    if group=='BarCounter': joined.data['SimBarStaffAisleOffsetZ']=0.25
     bpy.context.scene.cursor.location=(0,0,0)
     bpy.ops.object.origin_set(type='ORIGIN_CURSOR')
     counts[joined.name]={'vertices':len(joined.data.vertices),'triangles':sum(len(p.vertices)-2 for p in joined.data.polygons)}

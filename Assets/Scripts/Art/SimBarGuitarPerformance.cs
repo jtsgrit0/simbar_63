@@ -56,7 +56,15 @@ public sealed class SimBarGuitarPerformance : MonoBehaviour
     // This has no Update/LateUpdate of its own, so edit preview and Play use exactly the same ordering.
     public void Apply(float time)
     {
+        Apply(time, 0.65f);
+    }
+
+    /// <summary>Energy-scaled strumming on the same 120 BPM host clock as the band.</summary>
+    public void Apply(float time, float energy)
+    {
         if (pivot == null || Guitar == null || bones == null) return;
+        energy = float.IsNaN(energy) || float.IsInfinity(energy) ? 0.5f : Mathf.Clamp01(energy);
+        float beat = time * (Mathf.PI * 4f);
         StabilizeTorso("abdomen", 0.55f);
         StabilizeTorso("torso", 0.45f);
         StabilizeTorso("chest", 0.4f);
@@ -70,18 +78,19 @@ public sealed class SimBarGuitarPerformance : MonoBehaviour
         float bodyHeight = Mathf.Clamp(hips.y + 0.10f, shoulderHeight - 0.3f, shoulderHeight - 0.20f);
         // The guitar body sits at the upper waist; its neck rises toward the player's left hand.
         float lean = bass ? -16f : -18f;
-        Guitar.localRotation = Quaternion.Euler(0f, 0f, lean + Mathf.Sin(time * 1.3f) * 1.2f);
+        Guitar.localRotation = Quaternion.Euler(0f, Mathf.Sin(beat * 0.25f) * energy * 1.8f, lean + Mathf.Sin(beat * 0.5f) * Mathf.Lerp(1f, 3.2f, energy));
         Vector3 bodyAnchor = new Vector3(0.30f, 0f, 0f);
         Vector3 bodyPosition = new Vector3((leftShoulder.x + rightShoulder.x) * 0.5f + 0.10f, bodyHeight,
             Mathf.Max(leftShoulder.z, rightShoulder.z) + 0.15f);
         Guitar.localPosition = bodyPosition - Guitar.localRotation * bodyAnchor;
 
-        float slide = Mathf.Sin(time * 0.95f) * 0.025f;
+        float slide = Mathf.Sin(beat * 0.125f) * Mathf.Lerp(0.018f, 0.04f, energy);
         // The stylized palm is about 15 cm long: the wrist belongs BELOW the neck,
         // with its palm crossing the fingerboard, rather than its wrist sitting on the strings.
         FrettingTarget.localPosition = FitFretTarget((bass ? -0.15f : -0.18f) + slide);
-        float stroke = Mathf.Sin(time * (bass ? 7f : 11f));
-        PickingTarget.localPosition = new Vector3(0.27f, 0.09f + stroke * (bass ? 0.012f : 0.022f), 0.10f);
+        float stroke = Mathf.Sin(beat * (bass ? 0.5f : 1f));
+        float strokeWidth = bass ? Mathf.Lerp(0.01f, 0.024f, energy) : Mathf.Lerp(0.018f, 0.04f, energy);
+        PickingTarget.localPosition = new Vector3(0.27f + Mathf.Cos(beat) * 0.006f * energy, 0.09f + stroke * strokeWidth, 0.10f);
 
         Vector3 leftHint = new Vector3(leftShoulder.x - 0.20f, leftShoulder.y - 0.20f, leftShoulder.z + 0.015f);
         Vector3 rightHint = new Vector3(rightShoulder.x + 0.15f, rightShoulder.y - 0.23f, rightShoulder.z + 0.015f);
