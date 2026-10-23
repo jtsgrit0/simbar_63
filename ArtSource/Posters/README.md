@@ -1,19 +1,27 @@
-# Music wall posters
+# Music wall collage
+
+The collage also uses a [worn gig-paper texture](PaperWear.md) for creases, faded photocopy ink and glue stains.
 
 Six original illustrated music posters generated with the built-in `image_gen` tool on 2026-10-24. They use artist-name typography and original instrument/concert graphics rather than portraits, official logos or reproduced album covers.
 
-## Saved assets and placement
+## Saved artwork textures
 
-| Asset | Wall |
-| --- | --- |
-| `Assets/Resources/SimBarArt/Posters/Nirvana.png` | Back, left frame |
-| `Assets/Resources/SimBarArt/Posters/TheBeatles.png` | Back, middle frame |
-| `Assets/Resources/SimBarArt/Posters/Blackpink.png` | Back, right frame |
-| `Assets/Resources/SimBarArt/Posters/Queen.png` | Left, front frame |
-| `Assets/Resources/SimBarArt/Posters/PopNight.png` | Left, middle frame |
-| `Assets/Resources/SimBarArt/Posters/TaylorSwift.png` | Left, rear frame |
+| Artist / design | Asset | Current use |
+| --- | --- | --- |
+| Nirvana | `Assets/Resources/SimBarArt/Posters/Nirvana.png` | Pasted papers on both walls |
+| The Beatles | `Assets/Resources/SimBarArt/Posters/TheBeatles.png` | Pasted papers on both walls |
+| BLACKPINK | `Assets/Resources/SimBarArt/Posters/Blackpink.png` | Pasted papers on both walls |
+| Queen | `Assets/Resources/SimBarArt/Posters/Queen.png` | Pasted papers on both walls |
+| POP NIGHT | `Assets/Resources/SimBarArt/Posters/PopNight.png` | Pasted papers on both walls |
+| Taylor Swift | `Assets/Resources/SimBarArt/Posters/TaylorSwift.png` | Pasted papers on both walls |
 
-PNG originals are copied into Resources without editing; the generated originals remain in the image-generation output directory. Unity imports them with a 512-pixel maximum, mipmaps, preserved non-power-of-two proportions and clamped edges. RGB textures use about 5.2 MB of GPU memory for all six posters, including mipmaps. Artwork is fitted without stretching or cropping; opaque Unlit materials keep it visible under changing stage lights. A Resources material template retains the opaque shader variant in web builds. Three rear-wall frames are reused, and three matching wooden frames are added to the left wall. No poster colliders are added.
+PNG originals are copied into Resources without editing; the generated originals remain in the image-generation output directory. Unity imports them with a 512-pixel maximum, mipmaps, preserved non-power-of-two proportions and clamped edges. RGB textures use about 5.2 MB of GPU memory for all six textures, including mipmaps. Opaque Unlit materials keep the paper artwork visible under changing stage lights; the Resources material template retains that shader variant in web builds.
+
+The current treatment is a grungy London pub flyposter collage: eight main papers on the rear wall and eight on the left wall, with varied heights, sizes, angles and overlapping layers. All six artwork textures appear on both walls. Torn mesh edges, old paper remnants, small gig flyers and aged masking tape make the arrangement look pasted over time. Artwork proportions remain intact; the irregular paper outlines slightly trim the outer print edges. There are no poster frames or poster colliders.
+
+The three legacy rear-wall frame/art assemblies were removed from the authoring Blender scene and exported venue FBX. Plants, wall sconces and the other nine venue mesh groups are preserved. See [the Blender patch and validation notes](../Blender/WALL_ART.md).
+
+Separate [floor graffiti assets and prompts](../Graffiti/README.md) provide artist-name spray lettering in gold for Queen, orange for Nirvana, mint for The Beatles, lavender for Taylor Swift and pink for BLACKPINK.
 
 ## Final generation prompts
 

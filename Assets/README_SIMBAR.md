@@ -26,7 +26,8 @@
 - 하단 서비스 패널: 대기 주문, 인내심, 음료 제공 버튼
 - 운영 패널: 손님 만족도, 공연 에너지, 실제 장면을 내려다보는 카메라 미니맵
 - 3D 환경: 벽돌 벽, 크림 타일, 목재 카운터, 76개 술병과 청록 선반, 맥주탭, 부스, 식물, 포스터, 트러스, 스피커, 드럼셋
-- 벽 포스터: 뒤벽 Nirvana·The Beatles·BLACKPINK, 왼벽 Queen·POP NIGHT·Taylor Swift. [생성 프롬프트와 자산 안내](../ArtSource/Posters/README.md)
+- 벽 콜라주: Queen·Nirvana·The Beatles·Taylor Swift·BLACKPINK·POP NIGHT 그림 6종으로 뒤벽 8장·왼벽 8장, 총 16장의 공연 종이를 비대칭으로 겹쳐 배치. 찢어진 가장자리·낡은 전단·테이프로 런던 펍의 그런지 분위기를 표현하며 기존 액자는 제거. [생성 프롬프트와 자산 안내](../ArtSource/Posters/README.md)
+- 바닥 그래피티: Queen 골드·Nirvana 오렌지·The Beatles 민트·Taylor Swift 라벤더·BLACKPINK 핑크의 스프레이 이름을 열린 바닥에 분산 배치. [그래피티 자산과 생성 프롬프트](../ArtSource/Graffiti/README.md)
 - 관객 모델: Casual·Suit·Beach·Worker·Farmer·Adventurer 6종과 의상·바지·헤어 색상 조합. 무대 밴드의 Punk·Casual2 모델과 분리하며 피부·눈·원본 텍스처는 보존
 - 3D 인물: 기존 FBX를 실제 키로 정규화하고 Singing·Guitar Playing 동작을 연결. 바 손님 4명은 스툴에서 음료를 마시고, 일반 홀 손님은 쉬는 동안 느슨하게 리듬을 탐
 - 자동 동선: 주문 손님 24명은 가구와 다른 사람을 피해 이동하고 서빙 후 원래 자리로 복귀. 바텐더·서버는 카운터 작업 구간을 왕복하고 고용한 홀 직원은 매장을 순회
@@ -117,12 +118,14 @@ Cozy는 손님 인내심 +18초와 느린 주문 유입, Challenge는 인내심 
 - 편집 가능한 환경 원본: `ArtSource/Blender/SimBarVenue.blend`
 - 편집 가능한 4인 밴드: `ArtSource/Blender/SimBarBand.blend`
 - 밴드 교환용 FBX: `ArtSource/Blender/SimBarBand.fbx` (4개 리그, 74개 메쉬, 120프레임 동작 4개)
-- 환경 FBX: `Assets/Resources/SimBarArt/SimBarVenue.fbx` (10개 mesh 그룹, 452,650 triangles)
+- 환경 FBX: `Assets/Resources/SimBarArt/SimBarVenue.fbx` (10개 mesh 그룹, 372,418 triangles)
 - 원본 Gibson에서 경량화한 기타: `Assets/Resources/SimBarArt/Gibson_Stage.fbx` (28,465 triangles)
 - 렌더 프리뷰와 모델 manifest: `ArtSource/Blender/`
 - 원래 `Assets/Model/*.fbx` 파일은 보존합니다. 고용량 Gibson 원본은 경로만 기록하고 게임에서는 경량 모델을 사용합니다.
 
 재생성 방법은 `ArtSource/Blender/README.md`에 있습니다. Unity 메뉴 `SimBar > Art > Import Blender Venue and Build Reference Scene`으로 재질·캐릭터 라이브러리·시작 씬을 다시 구성할 수 있습니다. 이 메뉴는 현재 씬에 저장하지 않은 변경이 있으면 씬 교체 전에 중단합니다.
+
+환경 원본에서 예전 액자·포스터의 80,232개 삼각형을 제거했으며 식물·벽등과 다른 9개 메시의 좌표·재질은 보존했습니다. 콜라주와 바닥 그래피티는 별도 런타임 장식이며 콜라이더를 추가하지 않습니다. 원본 패치와 재검증 방법은 [Blender 벽 장식 안내](../ArtSource/Blender/WALL_ART.md)에 있습니다.
 
 기타·베이스는 기타 목이 위쪽을 향하도록 몸 앞 허리에 배치하고, 어깨를 지나는 스트랩과 양팔 보정을 사용합니다. 왼손은 지판을 따라 이동하고 오른손은 현 위에서 스트럼합니다. 기존 FBX 연주의 하체·몸통 움직임은 유지하며 보컬과 드럼은 별도 동작을 유지합니다.
 

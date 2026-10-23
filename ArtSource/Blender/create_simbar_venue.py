@@ -413,16 +413,8 @@ def plant(x,z,scale=1):
 active_group='PlantsAndWallArt'
 print('SIMBAR_BUILD plants and posters',flush=True)
 for x,z,s in [(-9.55,-5.9,1.35),(-1.25,5.75,1.5),(-9.4,6.7,1.25),(9.73,6.65,1.0)]:plant(x,z,s)
-for x,base in [(-8.3,'PosterOrange'),(-4.8,'PosterPurple'),(-.95,'PosterTeal')]:
-    box('Framed music poster',(x,3.72,7.28),(2.05,2.45,.14),'DarkWalnut',.035)
-    box('Cream poster mat',(x,3.72,7.195),(1.89,2.29,.035),'PosterPaper',.012)
-    box('Poster color block',(x,3.81,7.17),(1.65,1.9,.026),base,.012)
-    text('Poster title','LIVE / 63',(x,4.48,7.145),.22,'PosterPaper')
-    # A stylized lightning / guitar pick graphic assembled from real mesh shapes.
-    for j in range(4):
-        o=box('Poster rhythm graphic',(x-.49+j*.33,3.82+(j%2)*.16,7.145),(.22,.86,.016),'PosterPaper',.005)
-        o.rotation_euler.y=math.radians(-25)
-    text('Poster footer','GOOD MUSIC. GOOD NIGHTS.',(x,2.9,7.145),.095,'PosterPaper')
+# Music art is supplied by the runtime pasted-paper collage. Keep the brick
+# wall clear here; baking the old three framed posters would show through it.
 # Wall sconces, lights have mesh bulbs plus scene lights for source render.
 for x in [-9.75,-6.5,-2.3]:
     box('Wall sconce bracket',(x,2.8,7.18),(.19,.5,.11),'MetalBlack',.035)
@@ -459,12 +451,16 @@ for group,objects in groups.items():
     bmesh.ops.recalc_face_normals(bm,faces=list(bm.faces))
     bm.to_mesh(joined.data);bm.free();joined.data.update()
     if group=='BarCounter': joined.data['SimBarStaffAisleOffsetZ']=0.25
+    if group=='PlantsAndWallArt': joined.data['SimBarBakedPosterAssembliesRemoved']=3
     bpy.context.scene.cursor.location=(0,0,0)
     bpy.ops.object.origin_set(type='ORIGIN_CURSOR')
     counts[joined.name]={'vertices':len(joined.data.vertices),'triangles':sum(len(p.vertices)-2 for p in joined.data.polygons)}
     joined.select_set(False)
 
 manifest['meshes']=counts
+manifest['wallArt']={'bakedFrames':0, 'legacyAssembliesOmitted':3,
+                     'sourceMesh':'SimBar_PlantsAndWallArt',
+                     'replacement':'Runtime overlapping pasted-paper music collage'}
 manifest['fbxAxis']={'forward':'-Z','up':'Y','baked':True,'workingScene':'X=Unity X, Y=Unity Z, Z=Unity Y'}
 
 scene=bpy.context.scene

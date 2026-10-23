@@ -547,8 +547,8 @@
       "nonTriangleFaces": 0
     },
     "SimBar_PlantsAndWallArt": {
-      "vertices": 46312,
-      "triangles": 91540,
+      "vertices": 5974,
+      "triangles": 11308,
       "nonTriangleFaces": 0
     }
   },
@@ -575,5 +575,14 @@
     "sourceMesh": "SimBar_BarCounter",
     "selectedVertices": 406,
     "unchangedOtherMeshes": 9
+  },
+  "wallArt": {
+    "bakedFramesRemoved": 3,
+    "sourceMesh": "SimBar_PlantsAndWallArt",
+    "removedVertices": 40338,
+    "removedTriangles": 80232,
+    "unchangedOtherMeshes": 9,
+    "plantsAndSconcesUnchanged": true,
+    "replacement": "Runtime overlapping pasted-paper music collage"
   }
 }

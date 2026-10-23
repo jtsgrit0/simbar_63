@@ -273,6 +273,7 @@ public sealed partial class SimBarExperience : MonoBehaviour
             GameObject art = Instantiate(venue, worldRoot, false);
             art.name = "Blender Venue — Reference Layout";
             SimBarMusicPosters.Build(worldRoot);
+            SimBarFloorGraffiti.Build(worldRoot);
             CreateReferencePerformers();
             CreateReferenceHouseGuests();
             CreateCrowd();
