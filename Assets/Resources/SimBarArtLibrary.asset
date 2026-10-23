@@ -13,27 +13,6 @@ MonoBehaviour:
   m_Name: SimBarArtLibrary
   m_EditorClassIdentifier: Assembly-CSharp::SimBarArtLibrary
   characters:
-  - key: Punk
-    role: guest
-    sourceModel: {fileID: 919132149155446097, guid: dd52170bd4a627642a38e4c6deccd277, type: 3}
-    sourceAnimation: {fileID: 0}
-    performanceAnimation: {fileID: 0}
-    height: 1.87
-    rotation: {x: 0, y: 0, z: 0}
-  - key: Punk
-    role: guest
-    sourceModel: {fileID: 919132149155446097, guid: dd52170bd4a627642a38e4c6deccd277, type: 3}
-    sourceAnimation: {fileID: 0}
-    performanceAnimation: {fileID: 0}
-    height: 1.82
-    rotation: {x: 0, y: 0, z: 0}
-  - key: Punk
-    role: guest
-    sourceModel: {fileID: 919132149155446097, guid: dd52170bd4a627642a38e4c6deccd277, type: 3}
-    sourceAnimation: {fileID: 0}
-    performanceAnimation: {fileID: 0}
-    height: 1.9
-    rotation: {x: 0, y: 0, z: 0}
   - key: Casual
     role: guest
     sourceModel: {fileID: 919132149155446097, guid: 79ed37e87273d234b834169b08c43e83, type: 3}
@@ -41,19 +20,40 @@ MonoBehaviour:
     performanceAnimation: {fileID: 0}
     height: 1.82
     rotation: {x: 0, y: 0, z: 0}
-  - key: Casual2
-    role: guest
-    sourceModel: {fileID: 919132149155446097, guid: 46a1c0447302c4f46aaef0a4f5991787, type: 3}
-    sourceAnimation: {fileID: 0}
-    performanceAnimation: {fileID: 0}
-    height: 1.88
-    rotation: {x: 0, y: 0, z: 0}
   - key: Suit
     role: guest
     sourceModel: {fileID: 919132149155446097, guid: 73431c85f8fefda4a98ea1990cbb7734, type: 3}
     sourceAnimation: {fileID: 0}
     performanceAnimation: {fileID: 0}
     height: 1.9
+    rotation: {x: 0, y: 0, z: 0}
+  - key: Beach
+    role: guest
+    sourceModel: {fileID: 919132149155446097, guid: 9d9924725f564684f87f8cd1ae172558, type: 3}
+    sourceAnimation: {fileID: 0}
+    performanceAnimation: {fileID: 0}
+    height: 1.84
+    rotation: {x: 0, y: 0, z: 0}
+  - key: Worker
+    role: guest
+    sourceModel: {fileID: 919132149155446097, guid: 14111d46f74544f459180b58d3352d9a, type: 3}
+    sourceAnimation: {fileID: 0}
+    performanceAnimation: {fileID: 0}
+    height: 1.86
+    rotation: {x: 0, y: 0, z: 0}
+  - key: Farmer
+    role: guest
+    sourceModel: {fileID: 919132149155446097, guid: f888293a1d10c5446b1873615330490d, type: 3}
+    sourceAnimation: {fileID: 0}
+    performanceAnimation: {fileID: 0}
+    height: 1.83
+    rotation: {x: 0, y: 0, z: 0}
+  - key: Adventurer
+    role: guest
+    sourceModel: {fileID: 919132149155446097, guid: 976977116e31cbc41991073e04ad569e, type: 3}
+    sourceAnimation: {fileID: 0}
+    performanceAnimation: {fileID: 0}
+    height: 1.88
     rotation: {x: 0, y: 0, z: 0}
   - key: Casual
     role: seated

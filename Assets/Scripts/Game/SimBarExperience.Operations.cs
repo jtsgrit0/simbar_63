@@ -62,7 +62,7 @@ public sealed partial class SimBarExperience
     private static string OpStaffName(int index) { return SimBarLocalization.Text(OpStaffNames[index], OpStaffNamesKorean[index]); }
     private static string OpUpgradeName(int index) { return SimBarLocalization.Text(OpUpgradeNames[index], OpUpgradeNamesKorean[index]); }
     private static string OpEventName(int index) { return SimBarLocalization.Text(OpEventNames[index], OpEventNamesKorean[index]); }
-    private static string OpManagementHint { get { return SimBarLocalization.Text("Paused while managing. Purchases save immediately.", "관리 중에는 시간이 멈추며, 구매 내역은 즉시 저장됩니다."); } }
+    private static string OpManagementHint { get { return SimBarLocalization.Text("Simulation pauses while this menu is open. Purchases are saved immediately.", "이 메뉴를 열면 게임이 일시 정지됩니다. 구매 내역은 즉시 저장됩니다."); } }
 
     [Serializable]
     private sealed class OperationsSaveData
@@ -112,10 +112,6 @@ public sealed partial class SimBarExperience
     private float opAutosaveTimer;
     private GameObject opOverlay;
     private Transform opBody;
-    private RectTransform opModalContent;
-    private Text opModalTitle;
-    private Button opCloseButton;
-    private readonly Button[] opTabs = new Button[4];
     private Text opWallet;
     private Text opStatus;
     private Text opFeedback;
@@ -335,7 +331,6 @@ public sealed partial class SimBarExperience
     private bool OpFailure(string message)
     {
         if (opFeedback != null) { opFeedback.text = message; opFeedback.color = new Color(1f, 0.60f, 0.48f); }
-        LayoutReadableOperationsModal();
         ShowToast(message, 3f);
         return false;
     }
@@ -346,7 +341,6 @@ public sealed partial class SimBarExperience
         SaveOperations();
         if (opMenuOpen) DrawOperationsPage();
         if (opFeedback != null) { opFeedback.text = message; opFeedback.color = new Color(0.57f, 0.94f, 0.60f); }
-        LayoutReadableOperationsModal();
         ShowToast(message, 3.5f);
     }
 
@@ -356,27 +350,23 @@ public sealed partial class SimBarExperience
         RectTransform shade = opOverlay.GetComponent<RectTransform>();
         shade.anchorMin = Vector2.zero; shade.anchorMax = Vector2.one;
         shade.offsetMin = Vector2.zero; shade.offsetMax = Vector2.zero;
-        GameObject frame = OpPanel("Operations Modal", opOverlay.transform, Vector2.one * 0.5f, Vector2.zero, new Vector2(1540f, 1000f), new Color(0.055f, 0.065f, 0.105f, 1f), true);
-        opModalContent = CreateReadableModalContent("Operations Modal", frame.transform);
-        opModalTitle = OpText("Operations Title", frame.transform, "SIMBAR  /  HOUSE MANAGEMENT", 29, new Vector2(-33f, 316f), new Vector2(938f, 46f), new Color(0.99f, 0.90f, 0.65f), TextAnchor.MiddleLeft);
-        opWallet = OpText("Operations Budget", opModalContent, string.Empty, 19, new Vector2(-55f, 276f), new Vector2(922f, 32f), Color.white, TextAnchor.MiddleLeft);
+        GameObject frame = OpPanel("Operations Modal", opOverlay.transform, Vector2.one * 0.5f, Vector2.zero, new Vector2(1080f, 720f), new Color(0.055f, 0.065f, 0.105f, 1f), true);
+        OpText("Operations Title", frame.transform, "SIMBAR  /  HOUSE MANAGEMENT", 29, new Vector2(-33f, 316f), new Vector2(938f, 46f), new Color(0.99f, 0.90f, 0.65f), TextAnchor.MiddleLeft);
+        opWallet = OpText("Operations Budget", frame.transform, string.Empty, 19, new Vector2(-55f, 276f), new Vector2(922f, 32f), Color.white, TextAnchor.MiddleLeft);
         Button close = OpButton("CLOSE  X", frame.transform, Vector2.one * 0.5f, new Vector2(449f, 315f), new Vector2(138f, 42f), 17);
-        opCloseButton = close;
         close.onClick.AddListener(CloseOperations);
         string[] names = { "STAFF", "FACILITIES", "EVENTS", "GUEST INFO" };
         for (int i = 0; i < names.Length; i++)
         {
             int page = i;
             Button tab = OpButton(names[i], frame.transform, Vector2.one * 0.5f, new Vector2(-363f + i * 242f, 225f), new Vector2(226f, 45f), 18);
-            opTabs[i] = tab;
-            tab.onClick.AddListener(() => { opPage = page; DrawOperationsPage(); ResetReadableOperationsScroll(); });
+            tab.onClick.AddListener(() => { opPage = page; DrawOperationsPage(); });
         }
-        GameObject body = CreatePanel("Operations Body", opModalContent, Vector2.one * 0.5f, new Vector2(0f, -12f), new Vector2(998f, 428f), Color.clear);
+        GameObject body = CreatePanel("Operations Body", frame.transform, Vector2.one * 0.5f, new Vector2(0f, -12f), new Vector2(998f, 428f), Color.clear);
         body.GetComponent<Image>().raycastTarget = false;
         opBody = body.transform;
-        opFeedback = OpText("Operations Feedback", opModalContent, OpManagementHint, 18, new Vector2(0f, -286f), new Vector2(1016f, 60f), new Color(0.71f, 0.78f, 0.89f), TextAnchor.MiddleCenter);
-        OpText("Operations Save Hint", opModalContent, SimBarLocalization.Text("AUTO-SAVED  /  P OR CLOSE TO RETURN", "자동 저장  /  P 키 또는 닫기로 돌아가기"), 18, new Vector2(0f, -332f), new Vector2(1010f, 48f), new Color(0.68f, 0.75f, 0.85f), TextAnchor.MiddleCenter);
-        LayoutReadableOperationsModal();
+        opFeedback = OpText("Operations Feedback", frame.transform, OpManagementHint, 17, new Vector2(0f, -286f), new Vector2(1016f, 40f), new Color(0.71f, 0.78f, 0.89f), TextAnchor.MiddleCenter);
+        OpText("Operations Save Hint", frame.transform, "AUTO-SAVED  /  P OR CLOSE TO RETURN TO THE FLOOR", 13, new Vector2(0f, -332f), new Vector2(1010f, 24f), new Color(0.49f, 0.59f, 0.72f), TextAnchor.MiddleCenter);
         opOverlay.SetActive(false);
     }
 
@@ -400,7 +390,6 @@ public sealed partial class SimBarExperience
             opFeedback.color = new Color(0.71f, 0.78f, 0.89f);
         }
         DrawOperationsPage();
-        ResetReadableOperationsScroll();
         RefreshOperationsHUD();
     }
 
@@ -431,7 +420,7 @@ public sealed partial class SimBarExperience
             child.SetActive(false);
             Destroy(child);
         }
-        if (opPage == 3) { DrawOperationsGuests(); LayoutReadableOperationsModal(); return; }
+        if (opPage == 3) { DrawOperationsGuests(); return; }
         for (int i = 0; i < 3; i++)
         {
             int index = i;
@@ -478,111 +467,6 @@ public sealed partial class SimBarExperience
             Button pay = OpButton(SimBarLocalization.Format("PAY OVERDUE WAGES  ${0}", "미지급 급여 지급  ${0}", opWageDebt), opBody, Vector2.one * 0.5f, new Vector2(0f, -231f), new Vector2(410f, 36f), 16);
             pay.onClick.AddListener(PayOperationsWages);
         }
-        LayoutReadableOperationsModal();
-    }
-
-    private static Transform ReadableActiveChild(Transform parent, string name)
-    {
-        foreach (Transform child in parent)
-            if (child.name == name && child.gameObject.activeSelf) return child;
-        return null;
-    }
-
-    private void ResetReadableOperationsScroll()
-    {
-        if (opModalContent == null || opModalContent.parent == null) return;
-        ScrollRect scroll = opModalContent.parent.GetComponent<ScrollRect>();
-        if (scroll != null) scroll.verticalNormalizedPosition = 1f;
-    }
-
-    private void LayoutReadableOperationsModal()
-    {
-        if (opModalContent == null || opBody == null || opModalTitle == null || opCloseButton == null) return;
-        for (int i = 0; i < opTabs.Length; i++) if (opTabs[i] == null) return;
-        RectTransform frame = (RectTransform)opModalTitle.transform.parent;
-        float headerWidth = Mathf.Max(160f, frame.rect.width - 24f);
-        bool narrow = headerWidth < 600f;
-        SimBarLocalization.Bind(opModalTitle, narrow ? "MANAGE" : "HOUSE MANAGEMENT", "매장 관리");
-        SimBarLocalization.Bind(opCloseButton.GetComponentInChildren<Text>(true), "CLOSE", "닫기");
-        float closeWidth = Mathf.Min(110f, headerWidth * 0.28f);
-        float titleWidth = headerWidth - closeWidth - 10f;
-        float headerHeight = Mathf.Max(ResponsiveModalTextHeight(opModalTitle, titleWidth, 44f), ResponsiveModalButtonHeight(opCloseButton, closeWidth, 44f));
-        ReadablePlace(opModalTitle.transform, -(closeWidth + 10f) * 0.5f, 10f, titleWidth, headerHeight);
-        ReadablePlace(opCloseButton.transform, (headerWidth - closeWidth) * 0.5f, 10f, closeWidth, headerHeight);
-        float top = headerHeight + 20f;
-        int columns = narrow ? 2 : 4;
-        int rows = opTabs.Length / columns;
-        float tabWidth = (headerWidth - (columns - 1) * 8f) / columns;
-        float tabHeight = 44f;
-        foreach (Button tab in opTabs) tabHeight = Mathf.Max(tabHeight, ResponsiveModalButtonHeight(tab, tabWidth, 44f));
-        for (int i = 0; i < opTabs.Length; i++)
-            ReadablePlace(opTabs[i].transform, (i % columns - (columns - 1) * 0.5f) * (tabWidth + 8f), top + i / columns * (tabHeight + 8f), tabWidth, tabHeight);
-        top += rows * (tabHeight + 8f) + 4f;
-        ResponsiveModalViewport(opModalContent, frame, top, 12f);
-
-        float width = opModalContent.rect.width - 8f;
-        top = 4f;
-        ResponsiveModalTextRow(opModalContent, "Operations Budget", ref top, width, 32f, 12f);
-
-        float bodyHeight = 0f;
-        if (opPage == 3)
-        {
-            ReadableOperationsGuestRow("Guest Overview", ref bodyHeight, width - 8f, 36f, 12f);
-            ReadableOperationsGuestRow("Guest Summary", ref bodyHeight, width - 8f, 32f, 16f);
-            ReadableOperationsGuestRow("Guest Empty", ref bodyHeight, width - 8f, 44f, 16f);
-            for (int i = 0; i < 7; i++) ReadableOperationsGuestRow("Guest Tab " + i, ref bodyHeight, width - 16f, 36f, 12f);
-        }
-        else
-        {
-            float cardWidth = width;
-            bool stacked = cardWidth < 620f;
-            float actionWidth = stacked ? cardWidth - 32f : Mathf.Min(240f, cardWidth * 0.29f);
-            float copyWidth = stacked ? cardWidth - 32f : cardWidth - actionWidth - 48f;
-            for (int i = 0; i < 3; i++)
-            {
-                Transform card = ReadableActiveChild(opBody, "Operations Item " + i);
-                if (card == null) continue;
-                Text itemTitle = card.Find("Item Title").GetComponent<Text>();
-                Text description = card.Find("Item Description").GetComponent<Text>();
-                Button action = card.GetComponentInChildren<Button>(true);
-                float titleHeight = ResponsiveModalTextHeight(itemTitle, copyWidth, 30f);
-                float descriptionHeight = ResponsiveModalTextHeight(description, copyWidth, 40f);
-                float actionHeight = ResponsiveModalButtonHeight(action, actionWidth, 44f);
-                float cardHeight = stacked ? titleHeight + descriptionHeight + actionHeight + 58f : Mathf.Max(titleHeight + descriptionHeight + 38f, actionHeight + 32f);
-                ReadablePlace(card, 0f, bodyHeight, cardWidth, cardHeight);
-                float copyX = stacked ? 0f : -cardWidth * 0.5f + 16f + copyWidth * 0.5f;
-                ReadablePlace(itemTitle.transform, copyX, 12f, copyWidth, titleHeight);
-                ReadablePlace(description.transform, copyX, titleHeight + 20f, copyWidth, descriptionHeight);
-                ReadablePlace(action.transform, stacked ? 0f : cardWidth * 0.5f - 16f - actionWidth * 0.5f,
-                    stacked ? titleHeight + descriptionHeight + 34f : (cardHeight - actionHeight) * 0.5f, actionWidth, actionHeight);
-                bodyHeight += cardHeight + 12f;
-            }
-            foreach (Transform child in opBody)
-            {
-                if (!child.gameObject.activeSelf || child.name.StartsWith("Operations Item ", StringComparison.Ordinal)) continue;
-                Button pay = child.GetComponent<Button>();
-                if (pay == null) continue;
-                float payWidth = width;
-                float payHeight = ResponsiveModalButtonHeight(pay, payWidth, 44f);
-                ReadablePlace(pay.transform, 0f, bodyHeight, payWidth, payHeight);
-                bodyHeight += payHeight + 16f;
-            }
-        }
-        ReadablePlace(opBody, 0f, top, width, bodyHeight);
-        top += bodyHeight + 14f;
-        ResponsiveModalTextRow(opModalContent, "Operations Feedback", ref top, width, 36f, 12f);
-        ResponsiveModalTextRow(opModalContent, "Operations Save Hint", ref top, width, 32f, 12f);
-        ReadableContentHeight(opModalContent, top);
-        opCloseButton.transform.SetAsLastSibling();
-    }
-
-    private void ReadableOperationsGuestRow(string name, ref float top, float width, float minimum, float gap)
-    {
-        Transform node = ReadableActiveChild(opBody, name);
-        if (node == null) return;
-        float height = ResponsiveModalTextHeight(node.GetComponent<Text>(), width, minimum);
-        ReadablePlace(node, 0f, top, width, height);
-        top += height + gap;
     }
 
     private void DrawOperationsGuests()

@@ -114,7 +114,6 @@ public sealed partial class SimBarExperience : MonoBehaviour
         InitializeJourney();
         InitializeLanguageSettings();
         InitializeVenueMotion();
-        SimBarReadability.Attach(canvas, this);
         RefreshUI();
         if (JourneyIsPlaying)
             ShowToast(SimBarLocalization.Text("LIVE HOUSE OPEN — keep the crowd glowing!", "라이브 바 오픈! 손님들과 멋진 밤을 만들어 보세요!"), 4f);
@@ -424,18 +423,18 @@ public sealed partial class SimBarExperience : MonoBehaviour
 
     private void CreateCrowd()
     {
-        Transform crowd = new GameObject("Dancing Crowd").transform;
+        Transform crowd = new GameObject("Concert Audience").transform;
         crowd.SetParent(worldRoot, false);
         Vector3[] positions =
         {
-            new Vector3(1.0f, 0f, 0.6f), new Vector3(2.4f, 0f, 0.35f), new Vector3(3.7f, 0f, 0.85f),
-            new Vector3(5.0f, 0f, 0.2f), new Vector3(6.6f, 0f, 0.7f), new Vector3(8f, 0f, 0.25f),
-            new Vector3(0.2f, 0f, -1.05f), new Vector3(1.65f, 0f, -1.25f), new Vector3(3.0f, 0f, -0.9f),
-            new Vector3(4.4f, 0f, -1.35f), new Vector3(5.8f, 0f, -1f), new Vector3(7.3f, 0f, -1.35f),
-            new Vector3(-0.3f, 0f, -2.75f), new Vector3(1.15f, 0f, -2.6f), new Vector3(2.65f, 0f, -3.1f),
-            new Vector3(4.1f, 0f, -2.75f), new Vector3(5.6f, 0f, -3.15f), new Vector3(7.25f, 0f, -2.9f),
-            new Vector3(0.1f, 0f, -4.5f), new Vector3(1.7f, 0f, -4.25f), new Vector3(3.25f, 0f, -4.7f),
-            new Vector3(4.8f, 0f, -4.35f), new Vector3(6.5f, 0f, -4.6f), new Vector3(7.8f, 0f, -4.3f)
+            ConcertHome(0), ConcertHome(1), ConcertHome(2), ConcertHome(3),
+            ConcertHome(4), ConcertHome(5), ConcertHome(6), ConcertHome(7),
+            new Vector3(.1f, 0f, .7f), new Vector3(1.5f, 0f, .5f), new Vector3(2.85f, 0f, .5f),
+            new Vector3(-.1f, 0f, -.8f), new Vector3(1.2f, 0f, -1.1f), new Vector3(2.6f, 0f, -1f),
+            new Vector3(-.2f, 0f, -2.55f), new Vector3(1.2f, 0f, -2.6f), new Vector3(2.6f, 0f, -2.75f),
+            new Vector3(0f, 0f, -4.4f), new Vector3(1.55f, 0f, -4.3f), new Vector3(3f, 0f, -4.55f),
+            new Vector3(8.55f, 0f, .65f), new Vector3(8.65f, 0f, -1f),
+            new Vector3(8.6f, 0f, -2.7f), new Vector3(8.6f, 0f, -4.7f)
         };
         Color[] outfits =
         {
@@ -447,6 +446,13 @@ public sealed partial class SimBarExperience : MonoBehaviour
             Patron patron = CreatePerson(GuestNames[i % GuestNames.Length], positions[i], outfits[i % outfits.Length], new Color(0.08f, 0.04f, 0.12f), true, crowd);
             patron.phase = i * 0.71f;
             patrons.Add(patron);
+            if (i < 8) AssignConcertSlot(patron, i);
+        }
+        for (int slot = 8; slot < 12; slot++)
+        {
+            Patron person = CreatePerson(slot == 11 ? "Crowd Surfer" : "Crowd Supporter " + (slot - 7),
+                ConcertHome(slot), outfits[slot % outfits.Length], Color.black, false, crowd, "guest");
+            AssignConcertSlot(person, slot);
         }
     }
 

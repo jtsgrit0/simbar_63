@@ -26,12 +26,13 @@ public static class SimBarArtAssetSetup
         }
         var entries = new List<SimBarArtLibrary.CharacterAsset>();
         var replacements = new Dictionary<Material, Material>();
-        Add(entries, replacements, "Punk", "guest", null, 1.87f);
-        Add(entries, replacements, "Punk", "guest", null, 1.82f);
-        Add(entries, replacements, "Punk", "guest", null, 1.9f);
+        // Standing audiences use different source models from the Punk/Casual2 band.
         Add(entries, replacements, "Casual", "guest", null, 1.82f);
-        Add(entries, replacements, "Casual2", "guest", null, 1.88f);
         Add(entries, replacements, "Suit", "guest", null, 1.9f);
+        Add(entries, replacements, "Beach", "guest", null, 1.84f);
+        Add(entries, replacements, "Worker", "guest", null, 1.86f);
+        Add(entries, replacements, "Farmer", "guest", null, 1.83f);
+        Add(entries, replacements, "Adventurer", "guest", null, 1.88f);
         Add(entries, replacements, "Casual", "seated", null, 1.82f);
         Add(entries, replacements, "Casual2", "seated", null, 1.88f);
         Add(entries, replacements, "Suit", "seated", null, 1.9f);

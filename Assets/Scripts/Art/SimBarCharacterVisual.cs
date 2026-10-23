@@ -13,6 +13,8 @@ public sealed partial class SimBarCharacterVisual : MonoBehaviour
     private GameObject model;
     private AnimationClip clip;
     private string role;
+    private string sourceModelKey;
+    public string ModelKey => sourceModelKey;
     private int variant;
     private float phase;
     private float standingHipHeight;
@@ -42,6 +44,7 @@ public sealed partial class SimBarCharacterVisual : MonoBehaviour
     private void Initialize(SimBarArtLibrary.CharacterAsset entry, string characterRole, Color outfit, int characterVariant)
     {
         role = characterRole;
+        sourceModelKey = entry.key;
         if (role == "barseated") seatHeight = 1.12f;
         variant = characterVariant;
         phase = characterVariant * 1.618f + (role == "guest" ? 0.3f : 1.1f);
@@ -93,6 +96,7 @@ public sealed partial class SimBarCharacterVisual : MonoBehaviour
             renderer.sharedMaterials = materials;
             if (renderer is SkinnedMeshRenderer skin) skin.updateWhenOffscreen = true;
         }
+        ApplyAudienceAppearance(outfit);
         foreach (var bone in model.GetComponentsInChildren<Transform>(true))
         {
             string key = BoneKey(bone.name);

@@ -39,11 +39,13 @@ public static class SimBarMotionVerification
             var gameplay = new GameplayFingerprint(host);
             var actors = CollectActors(host);
             report.Check(actors.Count >= 4, "The live movement registry contains the venue actors.");
+            CheckCrowdModels(report, host, actors);
             CheckRouteRegressions(report, host, actors);
             Call(host, "TickVenueMotion", 1f / 30f);
             CheckManualHold(report, host, actors);
             CheckTravel(report, host, actors);
             report.Check(gameplay.Matches(host), "Motion alone preserves queue identity/order, drinks, patience, economy, timers and career state.");
+            CheckCrowdOrderReservation(report, host, actors);
             CheckSeatedBarGuests(report, host, actors);
             CheckRelaxedGuests(report, Read<Transform>(host, "worldRoot"));
             CheckStageLighting(report, host);
@@ -52,7 +54,7 @@ public static class SimBarMotionVerification
             CheckFrozen(report, host, "management");
             CheckBandPresentation(report, Read<Transform>(host, "worldRoot"));
             report.Check(snapshot.PreferencesMatch(), "Movement and presentation never rewrite gameplay or interface preferences.");
-            report.measurements.Add("Simulated 40 seconds of travel plus a two-second manual-pour hold in 1/30-second motion steps, without Update, economy or journey ticks. All live transforms, motion state, presentation state and preferences restored.");
+            report.measurements.Add("Simulated 60 seconds of travel/concert actions plus focused pour/order reservation checks in 1/30-second steps, without Update or economy/journey ticks. All live transforms, motion state, presentation state and preferences restored.");
         }
         catch (Exception error) { report.failures.Add(error.GetBaseException().ToString()); }
         finally
@@ -68,12 +70,17 @@ public static class SimBarMotionVerification
         public object state, person;
         public Transform root;
         public SimBarCharacterVisual visual;
+        public Transform world;
         public float distance;
         public Vector3 previous;
         public string Kind => Convert.ToString(Read<object>(state, "kind"));
         public bool IsWorker => Kind == "BarStaff" || Kind == "FloorStaff";
         public bool IsMobile => Kind == "Guest" || IsWorker;
         public bool IsCollidable => Kind != "Band";
+        public int PitSlot => Read<int>(state, "pitSlot");
+        public bool PitActive => Read<bool>(state, "pitActive");
+        public bool IsAirborneSurfer => visual != null && visual.CrowdAction == SimBarCrowdAction.Surf
+            && world.InverseTransformPoint(root.position).y - Read<Vector3>(state, "home").y > 0.6f;
     }
 
     private static List<Actor> CollectActors(SimBarExperience host)
@@ -84,7 +91,7 @@ public static class SimBarMotionVerification
             object person = Read<object>(state, "person");
             Transform root = Read<Transform>(person, "root");
             if (root == null) continue;
-            actors.Add(new Actor { state = state, person = person, root = root, visual = root.GetComponent<SimBarCharacterVisual>(), previous = root.position });
+            actors.Add(new Actor { state = state, person = person, root = root, world = Read<Transform>(host, "worldRoot"), visual = root.GetComponent<SimBarCharacterVisual>(), previous = root.position });
         }
         return actors;
     }
@@ -140,11 +147,12 @@ public static class SimBarMotionVerification
         for (int j = i + 1; j < actors.Count; j++)
             if (actors[i].IsCollidable && actors[j].IsCollidable && actors[i].root.gameObject.activeInHierarchy && actors[j].root.gameObject.activeInHierarchy)
                 pairs.Add(new Pair(actors[i], actors[j]));
-        float maximumSpeed = 0f;
+        float maximumSpeed = 0f, maximumPitSpeed = 0f;
+        var crowd = new CrowdProbe(host, actors, report);
         int blockedSamples = 0, newOverlaps = 0, markerFailures = 0;
         string firstBlocked = "", firstOverlap = "";
         float beginning = Read<float>(host, "motionClock");
-        for (int frame = 0; frame < 1200; frame++)
+        for (int frame = 0; frame < 1800; frame++)
         {
             Call(host, "TickVenueMotion", step);
             foreach (Actor actor in actors)
@@ -154,7 +162,8 @@ public static class SimBarMotionVerification
                 actor.distance += moved;
                 if (actor.IsMobile)
                 {
-                    maximumSpeed = Mathf.Max(maximumSpeed, moved / step);
+                    if (actor.PitActive) maximumPitSpeed = Mathf.Max(maximumPitSpeed, moved / step);
+                    else maximumSpeed = Mathf.Max(maximumSpeed, moved / step);
                     if (moved > 0.00001f && !PointWalkable(host, actor, actor.root.position))
                     {
                         blockedSamples++;
@@ -168,7 +177,7 @@ public static class SimBarMotionVerification
             }
             foreach (Pair pair in pairs)
             {
-                float distance = FlatDistance(pair.a.root.position, pair.b.root.position);
+                float distance = ActorSpacing(pair.a, pair.b);
                 pair.minimum = Mathf.Min(pair.minimum, distance); pair.best = Mathf.Max(pair.best, distance);
                 if (pair.initial >= 0.4f && distance < 0.395f)
                 {
@@ -176,6 +185,7 @@ public static class SimBarMotionVerification
                     if (firstOverlap.Length == 0) firstOverlap = pair.a.root.name + " / " + pair.b.root.name + " = " + distance.ToString("F3");
                 }
             }
+            crowd.Sample();
         }
         int guestsMoved = 0, staffMoved = 0, inheritedOverlaps = 0, improvedOverlaps = 0;
         float longest = 0f;
@@ -193,23 +203,199 @@ public static class SimBarMotionVerification
             inheritedDidNotWorsen &= pair.minimum >= pair.initial - 0.015f;
             if (pair.best >= Mathf.Min(0.4f, pair.initial + 0.025f)) improvedOverlaps++;
         }
-        report.Check(Mathf.Abs(Read<float>(host, "motionClock") - beginning - 40f) < 0.02f, "Only the managed motion clock advances by the simulated 40 seconds.");
+        report.Check(Mathf.Abs(Read<float>(host, "motionClock") - beginning - 60f) < 0.02f, "Only the managed motion clock advances by the simulated 60 seconds.");
         report.Check(guestsMoved >= 3, "At least three guests travel along their routes.");
         report.Check(staffMoved >= 1, "At least one bartender/server travels to a work or order position.");
-        report.Check(maximumSpeed <= 1.2f + 0.015f, "Every moving NPC stays within 1.2 m/s; peak=" + maximumSpeed.ToString("F3") + ".");
+        report.Check(maximumSpeed <= 1.2f + 0.015f, "Ordinary routed NPCs stay within 1.2 m/s; peak=" + maximumSpeed.ToString("F3") + ".");
+        report.Check(maximumPitSpeed <= 1.35f + 0.015f, "Concert participants stay within their 1.35 m/s horizontal movement limit; peak=" + maximumPitSpeed.ToString("F3") + ".");
         report.Check(blockedSamples == 0, "Moving NPC samples stay outside static obstacles. " + firstBlocked);
         report.Check(newOverlaps == 0, "Movement does not introduce NPC separations below 0.4 m. " + firstOverlap);
         report.Check(inheritedDidNotWorsen && improvedOverlaps == inheritedOverlaps, "Initial overlaps do not worsen and improve rather than deadlock.");
         report.Check(markerFailures == 0, "Visible order markers follow their moving guest roots.");
+        crowd.Report();
         report.measurements.Add("Moving guests=" + guestsMoved + ", staff=" + staffMoved + "; longest path=" + longest.ToString("F2")
-            + " m; peak speed=" + maximumSpeed.ToString("F3") + " m/s; initial overlaps=" + inheritedOverlaps + ", improved=" + improvedOverlaps + ".");
+            + " m; peak ordinary/pit speed=" + maximumSpeed.ToString("F3") + "/" + maximumPitSpeed.ToString("F3") + " m/s; initial overlaps=" + inheritedOverlaps + ", improved=" + improvedOverlaps + ".");
     }
 
     private sealed class Pair
     {
         public Actor a, b;
         public float initial, minimum, best;
-        public Pair(Actor a, Actor b) { this.a = a; this.b = b; initial = minimum = best = FlatDistance(a.root.position, b.root.position); }
+        public Pair(Actor a, Actor b) { this.a = a; this.b = b; initial = minimum = best = ActorSpacing(a, b); }
+    }
+
+    private static void CheckCrowdModels(SimBarRuntimeVerification.Report report, SimBarExperience host, List<Actor> actors)
+    {
+        var patrons = new HashSet<object>();
+        foreach (object patron in Read<IEnumerable>(host, "patrons")) patrons.Add(patron);
+        var bandSources = new HashSet<string>(); var crowdSources = new HashSet<string>();
+        var slots = new HashSet<int>();
+        int cosmetic = 0, orderedCosmetic = 0;
+        foreach (Actor actor in actors)
+        {
+            if (actor.visual == null) continue;
+            string source = ModelSource(actor.visual);
+            if (actor.Kind == "Band") bandSources.Add(source);
+            if (actor.PitSlot < 0) continue;
+            slots.Add(actor.PitSlot); crowdSources.Add(source);
+            if (actor.PitSlot >= 8)
+            {
+                cosmetic++;
+                if (patrons.Contains(actor.person) || Read<int>(actor.person, "drinkIndex") >= 0) orderedCosmetic++;
+                foreach (object queued in QueueContents(host)) if (ReferenceEquals(queued, actor.person)) orderedCosmetic++;
+            }
+        }
+        int duplicates = 0;
+        foreach (string source in crowdSources) if (bandSources.Contains(source)) duplicates++;
+        report.Check(patrons.Count == 24 && slots.Count == 12 && cosmetic == 4 && orderedCosmetic == 0,
+            "The original 24 orderable guests remain intact; four cosmetic concert actors never enter the order pool or queue.");
+        report.Check(!crowdSources.Contains("") && crowdSources.Count >= 6 && duplicates == 0,
+            "The stage-front audience uses at least six distinct source models and does not duplicate the band models. crowd=" + crowdSources.Count + ", band overlaps=" + duplicates + ".");
+    }
+
+    private static string ModelSource(SimBarCharacterVisual visual)
+    {
+        GameObject model = Read<GameObject>(visual, "model");
+        var paths = new HashSet<string>();
+        foreach (SkinnedMeshRenderer renderer in model.GetComponentsInChildren<SkinnedMeshRenderer>(true))
+        {
+            string path = AssetDatabase.GetAssetPath(renderer.sharedMesh);
+            if (!string.IsNullOrEmpty(path)) paths.Add(path);
+        }
+        var sorted = new List<string>(paths); sorted.Sort(StringComparer.Ordinal);
+        return string.Join("|", sorted);
+    }
+
+    private sealed class CrowdProbe
+    {
+        private readonly SimBarExperience host;
+        private readonly List<Actor> actors;
+        private readonly SimBarRuntimeVerification.Report report;
+        private readonly Dictionary<Actor, float> lastAngles = new Dictionary<Actor, float>();
+        private readonly Dictionary<Actor, float> sweeps = new Dictionary<Actor, float>();
+        private readonly HashSet<SimBarCrowdAction> seen = new HashSet<SimBarCrowdAction>();
+        private int boundsFailures, floorFailures, phaseFailures, fullSurfs, validSurfs, supportedSurfs;
+        private float slamMinimum = float.PositiveInfinity, slamMaximum;
+        private float maximumHandTargetError;
+        private bool airborneFreezeChecked;
+        public CrowdProbe(SimBarExperience host, List<Actor> actors, SimBarRuntimeVerification.Report report) { this.host = host; this.actors = actors; this.report = report; }
+        public void Sample()
+        {
+            Actor leftSlam = null, rightSlam = null, surfer = null;
+            float clock = Read<float>(host, "motionClock");
+            foreach (Actor actor in actors)
+            {
+                Vector3 p = actor.world.InverseTransformPoint(actor.root.position);
+                if (actor.Kind == "Band" && (p.y < 0.5f || p.z < 2.2f)) floorFailures++;
+                if (actor.visual != null && actor.visual.Role == "guest" && actor.PitSlot != 11 && Mathf.Abs(p.y) > 0.025f) floorFailures++;
+                if (!actor.PitActive || actor.visual == null) continue;
+                if (p.x < 3.48f || p.x > 8.02f || p.z < -5.02f || p.z > 0.52f) boundsFailures++;
+                SimBarCrowdAction action = actor.visual.CrowdAction;
+                if (actor.visual.CrowdWeight > 0.1f) seen.Add(action);
+                if (Mathf.Abs(Mathf.DeltaAngle(actor.visual.CrowdPhase * 360f, Mathf.Repeat(clock * 2f, 1f) * 360f)) > 0.02f) phaseFailures++;
+                if (action == SimBarCrowdAction.Mosh)
+                {
+                    float angle = Mathf.Atan2(p.z + 1.25f, p.x - 5.75f) * Mathf.Rad2Deg;
+                    if (lastAngles.TryGetValue(actor, out float before)) sweeps[actor] += Mathf.DeltaAngle(before, angle);
+                    else sweeps[actor] = 0f;
+                    lastAngles[actor] = angle;
+                }
+                if (actor.PitSlot == 6) leftSlam = actor;
+                if (actor.PitSlot == 7) rightSlam = actor;
+                if (actor.PitSlot == 11 && actor.visual.CrowdWeight > 0.999f) surfer = actor;
+            }
+            if (leftSlam != null && rightSlam != null)
+            {
+                float distance = FlatDistance(leftSlam.root.position, rightSlam.root.position);
+                slamMinimum = Mathf.Min(slamMinimum, distance); slamMaximum = Mathf.Max(slamMaximum, distance);
+            }
+            if (surfer == null) return;
+            fullSurfs++;
+            var surfBones = Read<Dictionary<string, Transform>>(surfer.visual, "bones");
+            Transform hip = surfer.visual.CrowdHipAnchor;
+            Vector3 head = surfBones["head"].position, feet = (surfBones["footl"].position + surfBones["footr"].position) * 0.5f;
+            float height = surfer.world.InverseTransformPoint(hip.position).y;
+            bool horizontal = Mathf.Abs(Vector3.Dot((head - hip.position).normalized, surfer.world.up)) < 0.4f;
+            bool geometry = height >= 1.4f && height <= 2.3f && horizontal && Vector3.Distance(hip.position, surfer.root.position) < 0.08f;
+            if (geometry) validSurfs++;
+            int contacts = 0;
+            foreach (Actor support in actors)
+            {
+                if (support.visual == null || support.visual.CrowdAction != SimBarCrowdAction.Support || support.visual.CrowdWeight < 0.999f
+                    || !support.visual.HasCrowdSupportTarget) continue;
+                var bones = Read<Dictionary<string, Transform>>(support.visual, "bones");
+                Vector3 hands = (bones["handl"].position + bones["handr"].position) * 0.5f;
+                Vector3 shoulders = (bones["upperarml"].position + bones["upperarmr"].position) * 0.5f;
+                float error = Vector3.Distance(hands, support.visual.CrowdSupportTarget);
+                maximumHandTargetError = Mathf.Max(maximumHandTargetError, error);
+                if (error <= 0.35f && Vector3.Dot(hands - shoulders, support.world.up) > 0.05f
+                    && PointSegmentDistance(support.visual.CrowdSupportTarget, head, feet) <= 0.4f) contacts++;
+            }
+            if (geometry && contacts >= 2) supportedSurfs++;
+            if (geometry && !airborneFreezeChecked)
+            {
+                CheckFrozen(report, host, "paused"); airborneFreezeChecked = true;
+            }
+        }
+        public void Report()
+        {
+            float largestSweep = 0f; foreach (float sweep in sweeps.Values) largestSweep = Mathf.Max(largestSweep, Mathf.Abs(sweep));
+            report.Check(boundsFailures == 0 && floorFailures == 0, "Concert actors stay on the audience floor/in pit bounds, while band roots remain on the stage. bounds=" + boundsFailures + ", floor=" + floorFailures + ".");
+            report.Check(seen.Contains(SimBarCrowdAction.Mosh) && seen.Contains(SimBarCrowdAction.Slam) && seen.Contains(SimBarCrowdAction.Support)
+                && seen.Contains(SimBarCrowdAction.Surf) && largestSweep > 180f && slamMaximum - slamMinimum > 0.1f,
+                "The live audience completes a moving mosh circle, recoiling slam pair, supporters and a crowd-surfer cycle.");
+            report.Check(fullSurfs > 0 && validSurfs == fullSurfs && supportedSurfs > 0 && supportedSurfs * 2 >= fullSurfs && airborneFreezeChecked,
+                "The airborne surfer lies horizontally above the crowd with at least two raised-hand supporters and freezes when paused. valid="
+                + validSurfs + "/" + fullSurfs + ", supported=" + supportedSurfs + ", max hand-target error=" + maximumHandTargetError.ToString("F3") + " m.");
+            report.Check(phaseFailures == 0, "Concert action phases use the shared gameplay clock.");
+            report.measurements.Add("Mosh sweep=" + largestSweep.ToString("F0") + " degrees; slam separation range=" + (slamMaximum - slamMinimum).ToString("F3")
+                + " m; supported airborne samples=" + supportedSurfs + "/" + fullSurfs + ".");
+        }
+    }
+
+    private static void CheckCrowdOrderReservation(SimBarRuntimeVerification.Report report, SimBarExperience host, List<Actor> actors)
+    {
+        Actor target = actors.Find(actor => actor.PitSlot >= 0 && actor.PitSlot < 8 && actor.PitActive
+            && Read<int>(actor.person, "drinkIndex") < 0 && actor.visual != null);
+        if (target == null) { report.failures.Add("An unreserved mosh/slam participant is required for the order/pour exclusion check."); return; }
+        var snapshot = new Snapshot(host);
+        var economic = new Dictionary<string, object>();
+        foreach (string field in new[] { "cash", "fans", "gameClock", "servedTonight", "satisfaction", "performance", "requestTimer", "opWageTimer", "opAutoServeTimer" }) economic[field] = Read<object>(host, field);
+        string journey = (string)Call(host, "ExportJourneyState");
+        Array originalQueue = QueueContents(host);
+        Vector3 initialPosition = target.root.position;
+        try
+        {
+            Call(host, "AssignOrder", target.person, 0);
+            for (int frame = 0; frame < 180; frame++) Call(host, "TickVenueMotion", 1f / 30f);
+            Array ordered = QueueContents(host);
+            bool queueIntact = ordered.Length == originalQueue.Length + 1 && ReferenceEquals(ordered.GetValue(ordered.Length - 1), target.person);
+            for (int i = 0; i < originalQueue.Length && queueIntact; i++) queueIntact &= ReferenceEquals(ordered.GetValue(i), originalQueue.GetValue(i));
+            report.Check(queueIntact && !target.PitActive && target.visual.CrowdAction == SimBarCrowdAction.None
+                && Read<int>(target.state, "queueIndex") >= 0 && FlatDistance(initialPosition, target.root.position) > 0.25f,
+                "Assigning an order removes a concert participant from the pit and sends it along the normal service route without reordering existing guests.");
+
+            object queue = Read<object>(host, "orderQueue");
+            Call(queue, "Clear"); Call(queue, "Enqueue", target.person);
+            CheckManualHold(report, host, actors);
+            report.Check(!target.PitActive && target.visual.CrowdAction == SimBarCrowdAction.None
+                && Mathf.Abs(target.world.InverseTransformPoint(target.root.position).y) < 0.025f,
+                "A manual-pour target stays grounded and cannot rejoin the mosh/slam actions while reserved.");
+
+            Call(host, "ClearOrder", target.person);
+            Call(queue, "Clear"); foreach (object person in originalQueue) Call(queue, "Enqueue", person);
+            bool returned = false;
+            for (int frame = 0; frame < 360; frame++)
+            {
+                Call(host, "TickVenueMotion", 1f / 30f);
+                returned |= target.PitActive && (target.visual.CrowdAction == SimBarCrowdAction.Mosh || target.visual.CrowdAction == SimBarCrowdAction.Slam);
+            }
+            report.Check(returned, "After its order clears, a participant returns through normal navigation and rejoins its concert action.");
+            bool unchanged = journey == (string)Call(host, "ExportJourneyState");
+            foreach (var field in economic) unchanged &= Equals(field.Value, Read<object>(host, field.Key));
+            report.Check(unchanged, "Concert reservation, manual hold and return never serve drinks, pay rewards or advance economic/night timers.");
+        }
+        finally { snapshot.Restore(host); }
     }
 
     private static bool PointWalkable(SimBarExperience host, Actor actor, Vector3 position)
@@ -345,6 +531,8 @@ public static class SimBarMotionVerification
         {
             if (visual.Role != "guest") continue;
             count++;
+            visual.SetCrowdPerformance(SimBarCrowdAction.None, 0f);
+            visual.ClearCrowdSupportTarget();
             Transform pivot = Read<Transform>(visual, "pivot");
             var bones = Read<Dictionary<string, Transform>>(visual, "bones");
             Vector3 minimum = new Vector3(float.PositiveInfinity, float.PositiveInfinity, float.PositiveInfinity);
@@ -583,23 +771,36 @@ public static class SimBarMotionVerification
         private readonly List<MeshState> meshes = new List<MeshState>();
         private readonly List<LightState> lights = new List<LightState>();
         private readonly List<BeamState> beams = new List<BeamState>();
+        private readonly List<KeyValuePair<Renderer, Material[]>> markerMaterials = new List<KeyValuePair<Renderer, Material[]>>();
         private readonly Array queue;
         private readonly object journey;
         private readonly string journeyJson;
         private readonly Dictionary<string, string> preferences = new Dictionary<string, string>();
         private readonly bool hadSize;
         private readonly int textSize;
+        private readonly UnityEngine.Random.State randomState;
         private readonly IList actors, occupancy;
         private readonly object[] actorItems, occupancyItems;
         public Snapshot(SimBarExperience host)
         {
             hostFields = new ObjectState(host, false);
+            randomState = UnityEngine.Random.state;
             journey = Read<object>(host, "journey"); journeyJson = (string)Call(host, "ExportJourneyState"); queue = QueueContents(host);
             actors = Read<IList>(host, "motionActors"); actorItems = CopyList(actors);
             occupancy = Read<IList>(host, "motionOccupancy"); occupancyItems = CopyList(occupancy);
-            foreach (object actor in Read<IEnumerable>(host, "motionActors")) objects.Add(new ObjectState(actor, true));
+            foreach (object actor in Read<IEnumerable>(host, "motionActors"))
+            {
+                objects.Add(new ObjectState(actor, true));
+                object person = Read<object>(actor, "person");
+                objects.Add(new ObjectState(person, false));
+                GameObject marker = Read<GameObject>(person, "orderMarker");
+                if (marker != null)
+                {
+                    Renderer renderer = marker.GetComponent<Renderer>();
+                    markerMaterials.Add(new KeyValuePair<Renderer, Material[]>(renderer, renderer.sharedMaterials));
+                }
+            }
             objects.Add(new ObjectState(Read<object>(host, "motionNavigation"), true));
-            foreach (object person in Read<IEnumerable>(host, "patrons")) objects.Add(new ObjectState(person, false));
             Transform world = Read<Transform>(host, "worldRoot"); transforms = CapturePose(world);
             foreach (SimBarCharacterVisual visual in world.GetComponentsInChildren<SimBarCharacterVisual>(true)) objects.Add(new ObjectState(visual, false));
             foreach (SimBarGuitarPerformance guitar in world.GetComponentsInChildren<SimBarGuitarPerformance>(true))
@@ -629,6 +830,8 @@ public static class SimBarMotionVerification
             foreach (MeshState state in meshes) state.Restore();
             foreach (LightState light in lights) light.Restore();
             foreach (BeamState beam in beams) beam.Restore();
+            foreach (var marker in markerMaterials) if (marker.Key != null) marker.Key.sharedMaterials = marker.Value;
+            UnityEngine.Random.state = randomState;
             foreach (var preference in preferences) { if (preference.Value == null) PlayerPrefs.DeleteKey(preference.Key); else PlayerPrefs.SetString(preference.Key, preference.Value); }
             if (hadSize) PlayerPrefs.SetInt(SimBarReadability.TextSizeKey, textSize); else PlayerPrefs.DeleteKey(SimBarReadability.TextSizeKey);
             PlayerPrefs.Save();
@@ -647,6 +850,13 @@ public static class SimBarMotionVerification
     private static Color BeamTint(Renderer renderer) { var block = new MaterialPropertyBlock(); renderer.GetPropertyBlock(block); return block.GetColor("_BaseColor"); }
     private static bool ColorClose(Color a, Color b) => Mathf.Abs(a.r - b.r) < 0.0001f && Mathf.Abs(a.g - b.g) < 0.0001f && Mathf.Abs(a.b - b.b) < 0.0001f && Mathf.Abs(a.a - b.a) < 0.0001f;
     private static float FlatDistance(Vector3 a, Vector3 b) => Vector2.Distance(new Vector2(a.x, a.z), new Vector2(b.x, b.z));
+    private static float ActorSpacing(Actor a, Actor b) => a.IsAirborneSurfer || b.IsAirborneSurfer ? Vector3.Distance(a.root.position, b.root.position) : FlatDistance(a.root.position, b.root.position);
+    private static float PointSegmentDistance(Vector3 point, Vector3 first, Vector3 last)
+    {
+        Vector3 delta = last - first;
+        float amount = delta.sqrMagnitude > 0.000001f ? Mathf.Clamp01(Vector3.Dot(point - first, delta) / delta.sqrMagnitude) : 0f;
+        return Vector3.Distance(point, first + delta * amount);
+    }
     private static Array QueueContents(SimBarExperience host) => (Array)Call(Read<object>(host, "orderQueue"), "ToArray");
     private static T Read<T>(object target, string name) => (T)target.GetType().GetField(name, Fields).GetValue(target);
     private static T Property<T>(object target, string name) => (T)target.GetType().GetProperty(name, Fields).GetValue(target);

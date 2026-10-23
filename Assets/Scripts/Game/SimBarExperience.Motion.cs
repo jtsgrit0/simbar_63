@@ -13,9 +13,9 @@ public sealed partial class SimBarExperience
         public MotionState state;
         public Vector3 home, target;
         public readonly List<Vector3> path = new List<Vector3>(40);
-        public int pathIndex, queueIndex = -1, cycle, index;
+        public int pathIndex, queueIndex = -1, cycle, index, pitSlot = -1;
         public float wait, speed, stuck, workMin, workMax, celebration;
-        public bool moving, routeFailed;
+        public bool moving, routeFailed, pitActive;
     }
     private readonly List<MotionActor> motionActors = new List<MotionActor>(48);
     private readonly Dictionary<Patron, MotionActor> motionLookup = new Dictionary<Patron, MotionActor>();
@@ -88,14 +88,18 @@ public sealed partial class SimBarExperience
         if (motionOrdersDirty) RefreshMotionOrders();
         int walking = 0;
         foreach (MotionActor actor in motionActors) if (actor.moving) walking++;
-        VenueMovingGuests = VenueMovingStaff = 0;
+        VenueMovingGuests = VenueMovingStaff = VenueCrowdParticipants = 0;
         foreach (MotionActor actor in motionActors)
         {
             if (actor.person.root == null || !actor.person.root.gameObject.activeInHierarchy) continue;
             Vector3 previous = MotionPosition(actor);
             actor.celebration = Mathf.Max(0, actor.celebration - delta);
+            if (actor.visual != null) actor.visual.SetCrowdPerformance(SimBarCrowdAction.None, 0f);
+            actor.pitActive = false;
             bool held = IsPourInProgress && ReferenceEquals(pourPatron, actor.person);
-            if (!held)
+            bool concert = !held && TryTickConcertCrowd(actor, delta);
+            if (concert) VenueCrowdParticipants++;
+            if (!held && !concert)
             {
                 if (actor.kind == MotionKind.BarStaff && motionReferenceLayout) TickBarStaff(actor);
                 else if ((actor.kind == MotionKind.Guest || actor.kind == MotionKind.FloorStaff) && actor.queueIndex < 0
@@ -114,7 +118,7 @@ public sealed partial class SimBarExperience
             float serving = actor.kind == MotionKind.BarStaff && !actor.moving
                 ? Mathf.Max(IsPourInProgress ? .95f : orderQueue.Count > 0 ? .45f : .1f, motionServicePulse > 0 ? .9f : 0) : 0;
             float energy = Mathf.Clamp01(performance * .8f + .15f + (JourneyFeverSeconds > 0 ? .2f : 0) + (motionServicePulse > 0 ? .15f : 0));
-            if (actor.visual != null) actor.visual.ApplyPresentation(motionClock, energy, actor.speed, serving);
+            if (actor.visual != null) actor.visual.ApplyPresentation(motionClock, energy, concert ? 0f : actor.speed, serving);
             else PoseFallbackMotion(actor);
             if (actor.person.orderMarker != null && actor.person.orderMarker.activeSelf)
                 actor.person.orderMarker.transform.localPosition = new Vector3(0, 2.48f + Mathf.Abs(Mathf.Sin(motionClock * 4f + actor.index)) * .12f, 0);
@@ -141,7 +145,9 @@ public sealed partial class SimBarExperience
     private void SetMotionPath(MotionActor actor, Vector3 target, MotionState state)
     {
         actor.target = target; actor.state = state; actor.pathIndex = 0; actor.stuck = 0;
-        actor.routeFailed = !motionNavigation.FindPath(MotionPosition(actor), target, actor.path, motionOccupancy);
+        actor.routeFailed = !(actor.pitSlot >= 0
+            ? motionNavigation.FindPath(MotionPosition(actor), target, actor.path, motionOccupancy)
+            : motionNavigation.FindAislePath(MotionPosition(actor), target, actor.path, motionOccupancy));
         if (actor.routeFailed)
         { actor.path.Clear(); actor.wait = 1.5f; }
     }
@@ -153,7 +159,8 @@ public sealed partial class SimBarExperience
         { SetMotionPath(actor, actor.home, MotionState.Returning); return; }
         float angle = actor.index * 2.399f + actor.cycle * 1.7f;
         Vector3 target = actor.home + new Vector3(Mathf.Cos(angle) * 1.8f, 0, Mathf.Sin(angle) * 1.5f);
-        if (!motionNavigation.IsWalkable(target) || MotionOccupied(target, actor, .65f)) { actor.wait = 1.4f; return; }
+        if (!motionNavigation.IsWalkable(target) || actor.pitSlot < 0 && CrowdFloorReserved(target)
+            || MotionOccupied(target, actor, .65f)) { actor.wait = 1.4f; return; }
         SetMotionPath(actor, target, MotionState.Wandering);
     }
 
@@ -221,10 +228,12 @@ public sealed partial class SimBarExperience
         if (actor.kind == MotionKind.BarStaff)
         { if (next.x < actor.workMin || next.x > actor.workMax || Mathf.Abs(next.z + .565f) > .02f) return false; }
         else if (!motionNavigation.SegmentClear(current, next)) return false;
+        if (actor.pitSlot < 0 && CrowdFloorReserved(next)) return false;
         foreach (MotionActor other in motionActors)
         {
             if (other == actor || other.kind == MotionKind.Band || other.person.root == null || !other.person.root.gameObject.activeInHierarchy) continue;
             Vector3 position = MotionPosition(other);
+            if (Mathf.Abs(next.y - position.y) > 1.1f) continue;
             float nextDistance = FlatDistance(next, position);
             if (nextDistance < .46f && nextDistance < FlatDistance(current, position) + .00001f) return false;
         }

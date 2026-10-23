@@ -81,6 +81,7 @@ public sealed partial class SimBarCharacterVisual
             if (servingBlend > 0.001f) ApplyServicePose(rhythm);
         }
         else if (role == "bartender" || servingBlend > 0.001f) ApplyServicePose(rhythm);
+        if (role == "guest") ApplyCrowdPresentation(timeSeconds, energy);
         UpdateAccessories(timeSeconds, energy);
     }
 
@@ -222,6 +223,12 @@ public sealed partial class SimBarCharacterVisual
     private void SolvePresentationArm(string side, Vector3 localTarget, Vector3 localHint, float weight)
     {
         if (!bones.TryGetValue("upperarm" + side, out var upper) || !bones.TryGetValue("lowerarm" + side, out var lower) || !bones.TryGetValue("hand" + side, out var hand)) return;
+        SolvePresentationArm(upper, lower, hand, localTarget, localHint, weight);
+    }
+
+    private void SolvePresentationArm(Transform upper, Transform lower, Transform hand, Vector3 localTarget, Vector3 localHint, float weight)
+    {
+        if (upper == null || lower == null || hand == null) return;
         Quaternion upperStart = upper.rotation;
         Quaternion lowerStart = lower.rotation;
         Vector3 shoulder = upper.position;

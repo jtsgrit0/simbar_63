@@ -51,10 +51,17 @@ internal sealed class SimBarVenueNavigation
     }
 
     internal bool FindPath(Vector3 start, Vector3 goal, List<Vector3> result, List<Vector3> people)
+        => FindPathCore(start, goal, result, people, false);
+
+    internal bool FindAislePath(Vector3 start, Vector3 goal, List<Vector3> result, List<Vector3> people)
+        => FindPathCore(start, goal, result, people, true);
+
+    private bool FindPathCore(Vector3 start, Vector3 goal, List<Vector3> result, List<Vector3> people, bool avoidCrowd)
     {
         result.Clear();
         if (!IsWalkable(start) || !IsWalkable(goal)) return false;
-        int first = Closest(start), last = Closest(goal);
+        if (avoidCrowd && (SimBarExperience.CrowdFloorReserved(start) || SimBarExperience.CrowdFloorReserved(goal))) return false;
+        int first = Closest(start, avoidCrowd), last = Closest(goal, avoidCrowd);
         if (first < 0 || last < 0) return false;
         open.Clear(); reverse.Clear();
         for (int i = 0; i < points.Length; i++) { scores[i] = float.PositiveInfinity; parents[i] = -1; closed[i] = false; }
@@ -74,7 +81,7 @@ internal sealed class SimBarVenueNavigation
                 for (int n = last; n != first && n >= 0; n = parents[n]) reverse.Add(n);
                 result.Add(points[first]);
                 for (int i = reverse.Count - 1; i >= 0; i--) result.Add(points[reverse[i]]);
-                if (IsWalkable(goal) && (result.Count == 0 || SegmentClear(result[result.Count - 1], goal))) result.Add(new Vector3(goal.x, 0, goal.z));
+                if (IsWalkable(goal) && (result.Count == 0 || SegmentAllowed(result[result.Count - 1], goal, avoidCrowd))) result.Add(new Vector3(goal.x, 0, goal.z));
                 return result.Count > 0;
             }
             closed[current] = true;
@@ -85,7 +92,7 @@ internal sealed class SimBarVenueNavigation
                 int x = cx + dx, z = cz + dz;
                 if (x < 0 || x >= Columns || z < 0 || z >= Rows) continue;
                 int next = z * Columns + x;
-                if (!walkable[next] || closed[next] || !SegmentClear(points[current], points[next])) continue;
+                if (!walkable[next] || closed[next] || !SegmentAllowed(points[current], points[next], avoidCrowd)) continue;
                 float crowdCost = 0f;
                 foreach (Vector3 person in people)
                 {
@@ -101,18 +108,28 @@ internal sealed class SimBarVenueNavigation
         return false;
     }
 
-    private int Closest(Vector3 p)
+    private bool SegmentAllowed(Vector3 a, Vector3 b, bool avoidCrowd)
+    {
+        if (!SegmentClear(a, b)) return false;
+        if (!avoidCrowd) return true;
+        int steps = Mathf.Max(1, Mathf.CeilToInt(Vector3.Distance(a, b) / .12f));
+        for (int i = 0; i <= steps; i++)
+            if (SimBarExperience.CrowdFloorReserved(Vector3.Lerp(a, b, i / (float)steps))) return false;
+        return true;
+    }
+
+    private int Closest(Vector3 p, bool avoidCrowd)
     {
         int x = Mathf.Clamp(Mathf.RoundToInt((p.x - Origin.x) / Cell), 0, Columns - 1);
         int z = Mathf.Clamp(Mathf.RoundToInt((p.z - Origin.y) / Cell), 0, Rows - 1);
         int nearest = z * Columns + x;
-        if (walkable[nearest] && SegmentClear(p, points[nearest])) return nearest;
+        if (walkable[nearest] && SegmentAllowed(p, points[nearest], avoidCrowd)) return nearest;
         int found = -1; float distance = float.PositiveInfinity;
         for (int i = 0; i < points.Length; i++)
         {
             if (!walkable[i]) continue;
             float d = (p - points[i]).sqrMagnitude;
-            if (d < distance && SegmentClear(p, points[i])) { found = i; distance = d; }
+            if (d < distance && SegmentAllowed(p, points[i], avoidCrowd)) { found = i; distance = d; }
         }
         return found;
     }
