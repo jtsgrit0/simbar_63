@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 
 /// <summary>Artist name spray paint on the reference pub's open floor.</summary>
-public sealed class SimBarFloorGraffiti : MonoBehaviour
+public sealed partial class SimBarFloorGraffiti : MonoBehaviour
 {
     public const float SurfaceHeight = 0.0715f;
     public static readonly string[] ArtistKeys = { "Queen", "Nirvana", "TheBeatles", "TaylorSwift", "Blackpink" };
@@ -96,6 +96,7 @@ public sealed class SimBarFloorGraffiti : MonoBehaviour
         renderer.receiveShadows = false;
         renderer.lightProbeUsage = LightProbeUsage.Off;
         renderer.reflectionProbeUsage = ReflectionProbeUsage.Off;
+        CreateSplatter(artist, surface.transform, size, template);
     }
 
     private static Mesh CreateFloorQuad()
@@ -116,6 +117,7 @@ public sealed class SimBarFloorGraffiti : MonoBehaviour
 
     private void OnDestroy()
     {
+        ReleaseSplatter();
         foreach (Material material in ownedMaterials) Release(material);
         Release(floorQuad);
     }

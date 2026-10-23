@@ -28,6 +28,7 @@
 - 3D 환경: 벽돌 벽, 크림 타일, 목재 카운터, 76개 술병과 청록 선반, 맥주탭, 부스, 식물, 포스터, 트러스, 스피커, 드럼셋
 - 벽 콜라주: Queen·Nirvana·The Beatles·Taylor Swift·BLACKPINK·POP NIGHT 그림 6종으로 뒤벽 8장·왼벽 8장, 총 16장의 공연 종이를 비대칭으로 겹쳐 배치. 찢어진 가장자리·낡은 전단·테이프로 런던 펍의 그런지 분위기를 표현하며 기존 액자는 제거. [생성 프롬프트와 자산 안내](../ArtSource/Posters/README.md)
 - 바닥 그래피티: Queen 골드·Nirvana 오렌지·The Beatles 민트·Taylor Swift 라벤더·BLACKPINK 핑크의 스프레이 이름을 열린 바닥에 분산 배치. [그래피티 자산과 생성 프롬프트](../ArtSource/Graffiti/README.md)
+- 스프레이 튄 자국: 이름 주변에 크기·회전·밀도가 다른 페인트 방울과 잔분사 꼬리를 불규칙하게 배치. 격자 간격을 사용하지 않으며 다섯 묶음 메시로 렌더링. [텍스처와 생성 프롬프트](../ArtSource/Graffiti/Splatter.md)
 - 관객 모델: Casual·Suit·Beach·Worker·Farmer·Adventurer 6종과 의상·바지·헤어 색상 조합. 무대 밴드의 Punk·Casual2 모델과 분리하며 피부·눈·원본 텍스처는 보존
 - 3D 인물: 기존 FBX를 실제 키로 정규화하고 Singing·Guitar Playing 동작을 연결. 바 손님 4명은 스툴에서 음료를 마시고, 일반 홀 손님은 쉬는 동안 느슨하게 리듬을 탐
 - 자동 동선: 주문 손님 24명은 가구와 다른 사람을 피해 이동하고 서빙 후 원래 자리로 복귀. 바텐더·서버는 카운터 작업 구간을 왕복하고 고용한 홀 직원은 매장을 순회

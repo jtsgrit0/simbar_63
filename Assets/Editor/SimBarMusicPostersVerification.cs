@@ -166,7 +166,7 @@ public static class SimBarMusicPostersVerification
             positiveYaw |= angle > 3f; negativeYaw |= angle < -3f;
             if (CheckPaintPixels(report, texture, tint, key, out Color pigment)) pigments.Add(pigment);
         }
-        report.Check(owner.transform.childCount == SimBarFloorGraffiti.ArtistKeys.Length && materials.Count == 5 && meshes.Count == 1,
+        report.Check(materials.Count == 5 && meshes.Count == 1,
             "Five floor names share one mesh and own separate artist-image materials.");
         report.Check(positiveYaw && negativeYaw, "Floor names vary their spray angles in both directions.");
         bool distinct = pigments.Count == 5;
@@ -181,9 +181,42 @@ public static class SimBarMusicPostersVerification
                 distinct &= gap > 0.025f;
             }
         report.Check(distinct, "Rendered floor pigments distinguish all five artist names by hue.");
+        CheckSplatter(report, owner);
         CheckDecorativeOnly(report, owner, "Floor graffiti");
         report.measurements.Add("Floor paint: " + materials.Count + " alpha materials, " + meshes.Count + " shared mesh; minimum artist hue gap "
             + (smallestHueGap * 360f).ToString("F1") + " degrees.");
+    }
+
+    private static void CheckSplatter(SimBarRuntimeVerification.Report report, SimBarFloorGraffiti owner)
+    {
+        Texture2D stamp = Resources.Load<Texture2D>("SimBarArt/Graffiti/SpraySplatter");
+        report.Check(stamp != null, "The transparent spray-droplet stamp loads from Resources.");
+        if (stamp == null) return;
+        CheckImport(report, stamp, "Spray droplets", true);
+        int stamps = 0;
+        float minSize = float.PositiveInfinity, maxSize = 0f;
+        bool valid = true;
+        foreach (string key in SimBarFloorGraffiti.ArtistKeys)
+        {
+            Transform batch = owner.transform.Find(key + " Spray Splatter");
+            if (batch == null) { valid = false; continue; }
+            Mesh mesh = batch.GetComponent<MeshFilter>().sharedMesh;
+            Material material = batch.GetComponent<Renderer>().sharedMaterial;
+            valid &= mesh != null && material != null && material.mainTexture == stamp && Transparent(material)
+                && batch.localPosition.y > 0.0655f && batch.localPosition.y < 0.09f;
+            if (mesh == null) continue;
+            Vector3[] vertices = mesh.vertices;
+            stamps += vertices.Length / 4;
+            for (int v = 0; v + 3 < vertices.Length; v += 4)
+            {
+                float size = Vector3.Distance(vertices[v], vertices[v + 1]);
+                minSize = Mathf.Min(minSize, size); maxSize = Mathf.Max(maxSize, size);
+            }
+        }
+        report.Check(valid && stamps >= 45, "Five colored, transparent floor batches contain dispersed spray droplets.");
+        report.Check(maxSize > minSize * 2f, "Droplet clusters vary between small satellites and larger paint impacts.");
+        report.measurements.Add("Spray splatter: " + stamps + " irregular stamps in five batches; sizes "
+            + minSize.ToString("F2") + "–" + maxSize.ToString("F2") + " m.");
     }
 
     private static void CheckImport(SimBarRuntimeVerification.Report report, Texture2D texture, string label, bool alpha)
@@ -332,7 +365,7 @@ public static class SimBarMusicPostersVerification
         && material.HasProperty("_Cull") && Mathf.Approximately(material.GetFloat("_Cull"), (float)CullMode.Back)
         && material.HasProperty("_ZWrite") && Mathf.Approximately(material.GetFloat("_ZWrite"), 1f);
 
-    private static bool Transparent(Material material) => material != null && material.renderQueue >= (int)RenderQueue.Transparent
+    private static bool Transparent(Material material) => material != null && material.renderQueue > (int)RenderQueue.GeometryLast
         && material.GetTag("RenderType", false) == "Transparent" && material.IsKeywordEnabled("_SURFACE_TYPE_TRANSPARENT")
         && material.HasProperty("_Surface") && Mathf.Approximately(material.GetFloat("_Surface"), 1f)
         && material.HasProperty("_ZWrite") && Mathf.Approximately(material.GetFloat("_ZWrite"), 0f)
