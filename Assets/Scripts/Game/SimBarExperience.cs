@@ -463,9 +463,12 @@ public sealed partial class SimBarExperience : MonoBehaviour
     {
         Transform decor = new GameObject("Venue Decor").transform;
         decor.SetParent(worldRoot, false);
-        CreatePlant(new Vector3(-9.1f, 0f, 5.6f), decor);
-        CreatePlant(new Vector3(-1.1f, 0f, 6.3f), decor);
-        CreatePlant(new Vector3(9.15f, 0f, 5.65f), decor);
+        Material columnMaterial = MakeMaterial(new Color(0.23f, 0.25f, 0.28f), 0f);
+        columnMaterial.name = "ColumnConcrete";
+        if (columnMaterial.HasProperty("_Smoothness")) columnMaterial.SetFloat("_Smoothness", 0.22f);
+        CreateColumn(new Vector3(-9.1f, 0f, 5.6f), columnMaterial, decor);
+        CreateColumn(new Vector3(-1.1f, 0f, 6.3f), columnMaterial, decor);
+        CreateColumn(new Vector3(9.15f, 0f, 5.65f), columnMaterial, decor);
         for (int i = 0; i < 7; i++)
         {
             Material posterMat = i % 2 == 0 ? pinkGlowMat : cyanGlowMat;
@@ -473,14 +476,10 @@ public sealed partial class SimBarExperience : MonoBehaviour
         }
     }
 
-    private void CreatePlant(Vector3 position, Transform parent)
+    private void CreateColumn(Vector3 position, Material material, Transform parent)
     {
-        CreateCylinder("Planter", position + new Vector3(0f, 0.28f, 0f), new Vector3(0.35f, 0.28f, 0.35f), metalMat, parent);
-        for (int i = 0; i < 5; i++)
-        {
-            GameObject leaf = CreatePrimitive("Leaf", PrimitiveType.Capsule, position + new Vector3(0f, 0.82f, 0f), new Vector3(0.10f, 0.6f, 0.20f), MakeMaterial(new Color(0.08f, 0.42f, 0.20f), 0f), parent);
-            leaf.transform.localRotation = Quaternion.Euler(25f, i * 72f, 25f);
-        }
+        CreateBox("Gray Concrete Column", position + new Vector3(0f, 2.5f, 0f),
+            new Vector3(0.62f, 5f, 0.62f), material, parent);
     }
 
     private void CreateLights()

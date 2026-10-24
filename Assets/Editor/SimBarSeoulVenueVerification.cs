@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Unity.Collections;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -25,6 +26,8 @@ public static class SimBarSeoulVenueVerification
         catch (Exception error) { report.failures.Add("Seoul glazing: " + error.GetBaseException()); }
         try { CheckPanorama(report); }
         catch (Exception error) { report.failures.Add("Seoul panorama: " + error.GetBaseException()); }
+        try { CheckColumns(report); }
+        catch (Exception error) { report.failures.Add("Concrete columns: " + error.GetBaseException()); }
         report.measurements.Add("Read-only inspection; no assets, preferences or live gameplay state are changed.");
         return report.ToString();
     }
@@ -77,6 +80,73 @@ public static class SimBarSeoulVenueVerification
                 + "m, wall top " + wallRenderer.bounds.max.y.ToString("F3") + "m, floor/wall luminance "
                 + Luminance(floorColor).ToString("F3") + "/" + Luminance(wallColor).ToString("F3") + ".");
         }
+    }
+
+    private static void CheckColumns(SimBarRuntimeVerification.Report report)
+    {
+        MeshFilter decor = null;
+        foreach (MeshFilter filter in Object.FindObjectsByType<MeshFilter>(FindObjectsSortMode.None))
+            if (filter.name == "SimBar_PlantsAndWallArt") decor = filter;
+        report.Check(decor != null && decor.sharedMesh != null,
+            "The original venue decoration assembly remains bound after the plant replacement.");
+        if (decor == null || decor.sharedMesh == null) return;
+
+        Mesh mesh = decor.sharedMesh;
+        Material[] materials = decor.GetComponent<Renderer>().sharedMaterials;
+        int columnSlot = -1, columnSlots = 0;
+        bool noPlantSurfaces = true;
+        for (int slot = 0; slot < mesh.subMeshCount; slot++)
+        {
+            if (mesh.GetSubMesh(slot).indexCount == 0) continue;
+            Material material = slot < materials.Length ? materials[slot] : null;
+            string name = material != null ? material.name : "";
+            noPlantSurfaces &= material != null && !name.Contains("Ceramic") && !name.Contains("Foliage");
+            if (!name.Contains("ColumnConcrete")) continue;
+            columnSlot = slot;
+            columnSlots++;
+        }
+        report.Check(noPlantSurfaces, "No used decorative submesh retains ceramic pots or plant foliage materials.");
+        report.Check(columnSlots == 1, "All four concrete columns share one material slot in the original merged mesh.");
+        if (columnSlots != 1) return;
+        Material finish = materials[columnSlot];
+        Color color = MaterialColor(finish);
+        report.Check(Mathf.Abs(color.r - 0.23f) < 0.01f && Mathf.Abs(color.g - 0.25f) < 0.01f
+            && Mathf.Abs(color.b - 0.28f) < 0.01f && NeutralGray(color),
+            "The replacement columns use the intended neutral cool-gray concrete finish.");
+
+        Vector2[] centers = { new Vector2(-9.55f, -5.9f), new Vector2(-1.25f, 5.75f),
+            new Vector2(-9.4f, 6.7f), new Vector2(9.73f, 6.65f) };
+        Bounds[] bounds = new Bounds[centers.Length];
+        int[] counts = new int[centers.Length];
+        bool confined = true;
+        // Editor MeshUtility reads the imported mesh without enabling runtime Read/Write or modifying the asset.
+        using (Mesh.MeshDataArray snapshot = MeshUtility.AcquireReadOnlyMeshData(mesh))
+        using (var vertices = new NativeArray<Vector3>(mesh.vertexCount, Allocator.Temp))
+        using (var indices = new NativeArray<int>(mesh.GetSubMesh(columnSlot).indexCount, Allocator.Temp))
+        {
+            snapshot[0].GetVertices(vertices);
+            snapshot[0].GetIndices(indices, columnSlot, true);
+            foreach (int index in indices)
+            {
+                Vector3 point = decor.transform.TransformPoint(vertices[index]);
+                Vector2 horizontal = new Vector2(point.x, point.z);
+                int nearest = 0;
+                for (int i = 1; i < centers.Length; i++)
+                    if ((horizontal - centers[i]).sqrMagnitude < (horizontal - centers[nearest]).sqrMagnitude) nearest = i;
+                confined &= Mathf.Abs(point.x - centers[nearest].x) <= 0.315f
+                    && Mathf.Abs(point.z - centers[nearest].y) <= 0.315f;
+                if (counts[nearest]++ == 0) bounds[nearest] = new Bounds(point, Vector3.zero);
+                else bounds[nearest].Encapsulate(point);
+            }
+        }
+        bool geometry = confined;
+        for (int i = 0; i < centers.Length; i++)
+            geometry &= counts[i] > 0 && Mathf.Abs(bounds[i].center.x - centers[i].x) < 0.005f
+                && Mathf.Abs(bounds[i].center.z - centers[i].y) < 0.005f
+                && Mathf.Abs(bounds[i].size.x - 0.62f) < 0.01f && Mathf.Abs(bounds[i].size.z - 0.62f) < 0.01f
+                && Mathf.Abs(bounds[i].min.y - 0.0615f) < 0.005f && Mathf.Abs(bounds[i].max.y - 5f) < 0.005f;
+        report.Check(geometry, "Exactly four 0.62m square columns occupy the former plant positions from the floor to 5m high.");
+        report.measurements.Add("Columns: four concrete clusters, 0.62m square, Y 0.0615–5.000m; no used pot or foliage submeshes.");
     }
 
     private static void CheckWindows(SimBarRuntimeVerification.Report report)

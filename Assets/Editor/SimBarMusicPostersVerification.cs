@@ -58,11 +58,16 @@ public static class SimBarMusicPostersVerification
             Transform wall = walls[w];
             report.Check(wall != null, "The " + (w == 0 ? "back" : "left") + " wall has a collage group.");
             if (wall == null) continue;
-            float highestPaper = float.NegativeInfinity;
+            float highestPaper = float.NegativeInfinity, lowestPaper = float.PositiveInfinity;
             foreach (MeshFilter surface in wall.GetComponentsInChildren<MeshFilter>())
                 foreach (Vector3 vertex in surface.sharedMesh.vertices)
-                    highestPaper = Mathf.Max(highestPaper, wall.InverseTransformPoint(surface.transform.TransformPoint(vertex)).y);
-            report.Check(highestPaper <= 2.36f, wall.name + " keeps the upper window view clear, including rotated paper and tape.");
+                {
+                    float height = wall.InverseTransformPoint(surface.transform.TransformPoint(vertex)).y;
+                    highestPaper = Mathf.Max(highestPaper, height);
+                    lowestPaper = Mathf.Min(lowestPaper, height);
+                }
+            report.Check(highestPaper <= 1.63f && lowestPaper >= .21f,
+                wall.name + " keeps all rotated paper and tape on the solid charcoal wall below the window sill.");
             Vector3 expected = owner.transform.TransformDirection(w == 0 ? Vector3.back : Vector3.right);
             var areas = new List<Rect>();
             float minHeight = float.PositiveInfinity, maxHeight = float.NegativeInfinity;
@@ -104,12 +109,15 @@ public static class SimBarMusicPostersVerification
             bool overlaps = false;
             for (int a = 0; a < areas.Count; a++)
                 for (int b = a + 1; b < areas.Count; b++) overlaps |= areas[a].Overlaps(areas[b]);
-            report.Check(areas.Count >= 6 && maxHeight - minHeight > 0.8f && maxSize > minSize * 2f
+            report.Check(areas.Count >= 6 && maxHeight - minHeight > 0.45f && maxSize > minSize * 2f
                 && positiveAngle && negativeAngle, wall.name + " varies poster heights, sizes and tilt directions.");
             report.Check(overlaps, wall.name + " layers overlapping papers instead of placing a straight row.");
         }
-        report.Check(artworkCount == SimBarMusicPosters.ArtworkCount && artworkCount >= 12,
+        report.Check(artworkCount == SimBarMusicPosters.WallArtworkCount && artworkCount >= 12,
             "Both walls contain the complete layered flyposter collection.");
+        int columnCount = CheckColumns(report, owner, template, textures, materials, usedTextures);
+        report.Check(artworkCount + columnCount == SimBarMusicPosters.ArtworkCount,
+            "The solid walls and gray columns carry the complete collection of pasted music posters.");
         report.Check(materials.Count == keys.Length && usedTextures.Count == keys.Length,
             "All six artist images appear, sharing one material per image across repeat posters.");
         report.Check(tapeCount >= artworkCount && paperCount >= 6,
@@ -120,8 +128,57 @@ public static class SimBarMusicPostersVerification
                 && child.name.IndexOf("Cream Mat", StringComparison.OrdinalIgnoreCase) < 0;
         report.Check(framesAbsent, "The collage uses pasted paper without new picture frames or mats.");
         CheckDecorativeOnly(report, owner, "Wall collage");
-        report.measurements.Add("Wall collage: " + artworkCount + " artworks, " + materials.Count + " artist materials, "
-            + paperCount + " torn remnants and " + tapeCount + " tape strips across two walls.");
+        report.measurements.Add("Wall collage: " + artworkCount + " wall artworks plus " + columnCount
+            + " column artworks, " + materials.Count + " shared artist materials, "
+            + paperCount + " torn remnants and " + tapeCount + " wall tape strips.");
+    }
+
+    private static int CheckColumns(SimBarRuntimeVerification.Report report, SimBarMusicPosters owner,
+        Material template, HashSet<Texture2D> textures, HashSet<Material> materials, HashSet<Texture> usedTextures)
+    {
+        Transform columns = owner.transform.Find(SimBarMusicPosters.ColumnRootName);
+        report.Check(columns != null, "The gray support columns have pasted-paper artwork.");
+        if (columns == null) return 0;
+        int count = 0;
+        var columnTextures = new HashSet<Texture>();
+        var columnPositions = new HashSet<Vector2>();
+        foreach (Transform face in columns)
+        {
+            if (face.name.StartsWith("Paper Layers ", StringComparison.Ordinal)) continue;
+            foreach (Transform group in face)
+            {
+                Transform artwork = group.Find("Artwork");
+                if (artwork == null) continue;
+                count++;
+                MeshFilter filter = artwork.GetComponent<MeshFilter>();
+                Renderer renderer = artwork.GetComponent<Renderer>();
+                Mesh mesh = filter != null ? filter.sharedMesh : null;
+                Material material = renderer != null ? renderer.sharedMaterial : null;
+                Texture2D texture = material != null ? material.mainTexture as Texture2D : null;
+                if (material != null) materials.Add(material);
+                if (texture != null) { usedTextures.Add(texture); columnTextures.Add(texture); }
+                report.Check(mesh != null && texture != null && textures.Contains(texture) && material != template
+                    && material.shader == template.shader && Opaque(material),
+                    group.name + " reuses an opaque music-image material on a gray column.");
+                if (mesh == null || texture == null) continue;
+                Rect area = PaperRect(face, artwork, mesh);
+                Vector3 normal = artwork.TransformDirection(mesh.normals[0]).normalized;
+                report.Check(area.xMin >= -.30f && area.xMax <= .30f && area.yMin > 2.2f && area.yMax < 4f
+                    && Vector3.Dot(normal, face.TransformDirection(Vector3.back)) > .999f && CorrectWinding(mesh),
+                    group.name + " fits inside its narrow column face above furniture and faces the room.");
+                report.Check(Mathf.Abs(artwork.localScale.x / artwork.localScale.y - texture.width / (float)texture.height) < .001f
+                    && PosterUv(mesh) && HasBatchedPaperBorder(columns, artwork, mesh),
+                    group.name + " retains untwisted lettering, torn edges and a batched paper border.");
+                Vector3 position = face.localPosition;
+                // Column-front and right-face artwork share a physical pillar center.
+                if (Mathf.Abs(Mathf.DeltaAngle(face.localEulerAngles.y, 0f)) < .1f) position.z += .325f;
+                else position.x -= .325f;
+                columnPositions.Add(new Vector2(Mathf.Round(position.x * 100f) / 100f, Mathf.Round(position.z * 100f) / 100f));
+            }
+        }
+        report.Check(count == SimBarMusicPosters.ColumnArtworkCount && columnTextures.Count == 6 && columnPositions.Count == 4,
+            "All six music designs appear on the four gray replacement columns.");
+        return count;
     }
 
     private static void CheckFloor(SimBarRuntimeVerification.Report report)

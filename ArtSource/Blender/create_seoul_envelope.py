@@ -144,7 +144,17 @@ assert patch_states in ([0, 0], [VERSION, VERSION]), 'Partially applied or incom
 was_patched = patch_states == [VERSION, VERSION]
 if was_patched:
     recorded_digests = json.loads(bpy.data.objects['SimBar_Floor'].data.get(DIGEST_KEY, '{}'))
-    assert recorded_digests == before_other, 'An unrelated mesh changed after the envelope patch'
+    if recorded_digests != before_other:
+        # A later, separately guarded edit replaces only the four plants. Keep
+        # the original envelope snapshots rather than silently rebasing them.
+        column_name = 'SimBar_PlantsAndWallArt'
+        columns = bpy.data.objects[column_name].data
+        proof = json.loads(columns.get('SimBarGrayColumnsProof', '{}'))
+        assert int(columns.get('SimBarGrayColumnsVersion', 0)) == 1, 'An unrelated mesh changed after the envelope patch'
+        assert set(recorded_digests) == set(before_other), 'Envelope mesh groups changed'
+        assert all(recorded_digests[name] == before_other[name] for name in recorded_digests if name != column_name), 'Another unrelated mesh changed after the envelope patch'
+        assert recorded_digests[column_name] == proof.get('replacesGeometryDigest'), 'Column patch does not descend from the recorded plant mesh'
+        assert before_other[column_name] == proof.get('resultGeometryDigest'), 'Column mesh changed after its guarded replacement'
 else:
     for name in TARGETS:
         obj = bpy.data.objects[name]

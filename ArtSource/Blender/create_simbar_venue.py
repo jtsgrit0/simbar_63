@@ -55,6 +55,7 @@ for args in [
     ('CreamTile',(0.78,0.67,0.52),.66), ('IvoryTile',(0.91,0.82,0.65),.64),
     ('FloorGrout',(0.42,.34,.29),.8), ('WallMortar',(.39,.18,.12),.9),
     ('FloorConcrete',(.39,.42,.45),.68), ('WallCharcoal',(.075,.085,.10),.82),
+    ('ColumnConcrete',(.23,.25,.28),.78),
     ('BrickTerracotta',(.55,.18,.10),.88), ('BrickWarm',(.67,.23,.13),.86),
     ('BrickBurnt',(.43,.11,.065),.9), ('BrickPeach',(.73,.30,.17),.9),
     ('DarkWalnut',(.16,.055,.025),.35), ('WarmOak',(.43,.16,.055),.32),
@@ -394,21 +395,15 @@ for x,z,col in [(2.9,5.8,'Pink'),(8.05,5.65,'HoneyWood')]:
     rod('Guitar stand',(gx,.66,gz+.12),(gx,1.6,gz+.12),.028,'MetalBlack')
     for dx in [-.24,.24]:rod('Guitar stand foot',(gx,.85,gz+.12),(gx+dx,.65,gz-.15),.025,'MetalBlack')
 
-def plant(x,z,scale=1):
-    cyl('Ceramic plant pot',(x,.29*scale,z),.29*scale,.55*scale,'Ceramic',20,r2=.37*scale)
-    cyl('Plant soil',(x,.57*scale,z),.33*scale,.04*scale,'DarkWalnut')
-    for i in range(12):
-        angle=i*2.399
-        height=random.uniform(.8,1.65)*scale
-        end=(x+math.sin(angle)*random.uniform(.35,.7)*scale,.57*scale+height,z+math.cos(angle)*random.uniform(.35,.7)*scale)
-        rod('Plant green stem',(x,.57*scale,z),end,.019*scale,'Foliage')
-        mid=tuple((Vector((x,.57*scale,z))+Vector(end))*.5)
-        o=sphere('Long glossy plant leaf',mid,(.11*scale,height*.45,.055*scale),'FoliageLight' if i%3==0 else 'Foliage')
-        o.rotation_euler=Vector((0,0,1)).rotation_difference(Vector(pos(end))-Vector(pos((x,.57*scale,z)))).to_euler()
-
 active_group='PlantsAndWallArt'
-print('SIMBAR_BUILD plants and posters',flush=True)
-for x,z,s in [(-9.55,-5.9,1.35),(-1.25,5.75,1.5),(-9.4,6.7,1.25),(9.73,6.65,1.0)]:plant(x,z,s)
+print('SIMBAR_BUILD grey concrete columns and wall lights',flush=True)
+column_centers=[(-9.55,-5.9),(-1.25,5.75),(-9.4,6.7),(9.73,6.65)]
+for x,z in column_centers:
+    box('Grey concrete column',(x,(.0615+5.0)/2,z),(.62,5.0-.0615,.62),'ColumnConcrete',.016)
+    # Preserve the old twelve stems' three random draws even though no planter,
+    # soil or foliage geometry is authored in this venue any more.
+    for i in range(12):
+        random.uniform(.8,1.65);random.uniform(.35,.7);random.uniform(.35,.7)
 # Music art is supplied by the runtime pasted-paper collage. Keep the brick
 # wall clear here; baking the old three framed posters would show through it.
 # Wall sconces, lights have mesh bulbs plus scene lights for source render.
@@ -458,6 +453,11 @@ manifest['meshes']=counts
 manifest['wallArt']={'bakedFrames':0, 'legacyAssembliesOmitted':3,
                      'sourceMesh':'SimBar_PlantsAndWallArt',
                      'replacement':'Runtime overlapping pasted-paper music collage'}
+manifest['grayColumns']={'version':1, 'columnCount':4,
+    'sourceMesh':'SimBar_PlantsAndWallArt', 'columnUnityCentersXZ':column_centers,
+    'columnWidth':.62, 'columnBottomY':.0615, 'columnTopY':5.0,
+    'material':'ColumnConcrete', 'replaces':'All four ceramic planters, soil, stems and foliage',
+    'sconcesUnchanged':True}
 manifest['seoulEnvelope']={'version':1, 'lowerWallHeight':1.67,
     'upperWindows':'Runtime hinged casement glazing and Seoul neon streetscape',
     'wallMaterial':'WallCharcoal', 'floorMaterial':'FloorConcrete',

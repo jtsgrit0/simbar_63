@@ -25,8 +25,8 @@
 - 우측 패널: 곡 선택과 현재 재생 곡
 - 하단 서비스 패널: 대기 주문, 인내심, 음료 제공 버튼
 - 운영 패널: 손님 만족도, 공연 에너지, 실제 장면을 내려다보는 카메라 미니맵
-- 3D 환경: 아래 1/3은 짙은 회색 벽, 위쪽은 서울 네온사인 밤거리를 바라보는 여닫이 유리창. 갈색 격자 바닥은 벽보다 밝은 회색 콘크리트로 교체. 목재 카운터, 76개 술병과 청록 선반, 맥주탭, 부스, 식물, 트러스, 스피커, 드럼셋 유지. [서울 야경 자산과 제작 안내](../ArtSource/Seoul/README.md)
-- 벽 콜라주: Queen·Nirvana·The Beatles·Taylor Swift·BLACKPINK·POP NIGHT 그림 6종으로 뒤벽 8장·왼벽 8장, 총 16장의 공연 종이를 창 아래와 짙은 회색 벽에 작게 겹쳐 배치. 찢어진 가장자리·낡은 전단·테이프로 런던 펍의 그런지 분위기를 유지하며 종이 윗끝은 2.35m 아래로 제한해 창밖 풍경을 확보. [생성 프롬프트와 자산 안내](../ArtSource/Posters/README.md)
+- 3D 환경: 아래 1/3은 짙은 회색 벽, 위쪽은 서울 네온사인 밤거리를 바라보는 여닫이 유리창. 갈색 격자 바닥은 벽보다 밝은 회색 콘크리트로 교체. 화분 네 개는 같은 위치의 회색 사각 기둥으로 교체. 목재 카운터, 76개 술병과 청록 선반, 맥주탭, 부스, 트러스, 스피커, 드럼셋 유지. [서울 야경 자산과 제작 안내](../ArtSource/Seoul/README.md), [기둥 제작 안내](../ArtSource/Blender/GRAY_COLUMNS.md)
+- 벽·기둥 콜라주: Queen·Nirvana·The Beatles·Taylor Swift·BLACKPINK·POP NIGHT 그림 6종으로 짙은 회색 벽에 16장, 기둥 면에 6장의 공연 포스터를 배치. 찢어진 가장자리·낡은 전단·테이프로 런던 펍의 그런지 분위기를 유지하고 벽 종이는 유리창 아래에 붙여 야경을 확보. [생성 프롬프트와 자산 안내](../ArtSource/Posters/README.md)
 - 바닥 그래피티: Queen 골드·Nirvana 오렌지·The Beatles 민트·Taylor Swift 라벤더·BLACKPINK 핑크의 스프레이 이름과 자국을 회색 바닥 전체에 분산 배치. [그래피티 자산과 생성 프롬프트](../ArtSource/Graffiti/README.md)
 - 스프레이 튄 자국: 이름 주변에 크기·회전·밀도가 다른 페인트 방울과 잔분사 꼬리를 불규칙하게 배치. 격자 간격을 사용하지 않으며 다섯 묶음 메시로 렌더링. [텍스처와 생성 프롬프트](../ArtSource/Graffiti/Splatter.md)
 - 관객 모델: Casual·Suit·Beach·Worker·Farmer·Adventurer 6종과 의상·바지·헤어 색상 조합. 무대 밴드의 Punk·Casual2 모델과 분리하며 피부·눈·원본 텍스처는 보존

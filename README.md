@@ -12,7 +12,7 @@ UI는 첫 배포(`f34743e`)의 HUD·글자·창 배치를 사용합니다. 상�
 
 벽의 아래 1/3은 짙은 회색이고, 위쪽은 여닫이 유리창 너머로 서울 밤의 네온사인 거리가 보입니다. 바닥은 벽보다 밝은 회색 콘크리트로 이어지며 갈색 타일 격자는 제거했습니다. [서울 야경 자산과 제작 안내](ArtSource/Seoul/README.md)에 원본 정보를 보관합니다.
 
-창 아래와 짙은 회색 벽에는 런던 라이브 펍처럼 낡은 공연 종이를 작게 겹쳐 붙인 그런지 콜라주가 남아 있습니다. Queen·Nirvana·The Beatles·Taylor Swift·BLACKPINK·POP NIGHT 그림 6종을 뒤벽과 왼벽에 각각 8장씩, 총 16장 배치하고 기울기·크기·높이를 달리했습니다. 종이와 테이프의 윗끝을 2.35m 아래로 낮춰 창밖 풍경을 열어 두었습니다. [포스터 생성 프롬프트와 자산 안내](ArtSource/Posters/README.md)를 함께 보관합니다.
+화분 네 개를 없애고 같은 위치에 회색 사각 기둥을 세웠습니다. 창 아래의 짙은 회색 벽에는 공연 포스터 16장을, 기둥 면에는 6장을 붙였습니다. Queen·Nirvana·The Beatles·Taylor Swift·BLACKPINK·POP NIGHT 그림 6종을 낡은 종이와 테이프, 비정형 겹침으로 배치해 런던 펍의 그런지 콜라주 분위기를 유지합니다. 벽 콜라주는 유리창 아래에 붙어 서울 야경을 가리지 않습니다. [포스터 자산 안내](ArtSource/Posters/README.md)와 [기둥 제작 안내](ArtSource/Blender/GRAY_COLUMNS.md)를 함께 보관합니다.
 
 회색 바닥 전체에는 아티스트 이름과 스프레이 자국을 비대칭으로 흩어 배치했습니다. Queen은 골드, Nirvana는 오렌지, The Beatles는 민트, Taylor Swift는 라벤더, BLACKPINK는 핑크로 구분합니다. [그래피티 자산과 생성 프롬프트](ArtSource/Graffiti/README.md)에서 색상과 제작 정보를 확인할 수 있습니다.
 

@@ -518,6 +518,16 @@
       "roughness": 0.82,
       "metallic": 0,
       "emission": 0
+    },
+    "ColumnConcrete": {
+      "color": [
+        0.23,
+        0.25,
+        0.28
+      ],
+      "roughness": 0.78,
+      "metallic": 0,
+      "emission": 0
     }
   },
   "meshes": {
@@ -567,8 +577,9 @@
       "nonTriangleFaces": 0
     },
     "SimBar_PlantsAndWallArt": {
-      "vertices": 5974,
-      "triangles": 11308,
+      "vertices": 522,
+      "triangles": 1020,
+      "columnCount": 4,
       "nonTriangleFaces": 0
     }
   },
@@ -660,5 +671,56 @@
     "wasAlreadyPatched": false,
     "upperWindows": "Runtime hinged casement glazing and Seoul neon streetscape",
     "replaces": "Full-height brown brick walls and brown checkerboard floor"
+  },
+  "grayColumns": {
+    "version": 1,
+    "replacesGeometryDigest": "502b942b5bff2f9a9b8cffa19590ffdda9cb9d2a6e913b85f502df8a5fe30bfd",
+    "unchangedGeometryDigests": {
+      "SimBar_Floor": "15fbf19961d30198f1fe20ef32bd5912b1817b4041379981f7851aac3f09e721",
+      "SimBar_BrickWalls": "70a9e058b85bfc1ec0133fa6978a5d0eedef2e842bfb801727bfac542f7c2805",
+      "SimBar_BackBar": "38eaaebecaa1d4a8af4d48712cb457f1d20b0e290cce4819f9927820422e9bc5",
+      "SimBar_BarCounter": "bacb45f24f1e969e2f6a2fdaa5075fa93e8e4bb29dc27951134e8a5ba6acd3e2",
+      "SimBar_BoothsAndTables": "c162288573d0873782276f1f0c143a6f43e3618fad0ed919b309979267b2ad94",
+      "SimBar_Stage": "5693bcd3061d580540d6e6d52742126e75813950b2feb4cfdc77bc75a7750b41",
+      "SimBar_TrussAndNeon": "58484e534cd1feb6f51e529c886dcf18e7a5552521c690845f687641982260c0",
+      "SimBar_DrumKit": "05e42c4ce8080e923277b2e46c607519c9a19f6e32bf0246934b276c347c188f",
+      "SimBar_MicrophonesAndInstruments": "f17f23438ce98f83c39fb85e86e179d5994572e9d6509e7837b5d899892f13c0"
+    },
+    "retainedSconceFaceDigest": "628c06abcf08d39ae8720524ea73aab258c63556b48a4d96419e779e71d5ab0c",
+    "removedPlantAssemblies": 4,
+    "removedVertices": 5676,
+    "removedTriangles": 10720,
+    "columnUnityCentersXZ": [
+      [
+        -9.55,
+        -5.9
+      ],
+      [
+        -1.25,
+        5.75
+      ],
+      [
+        -9.4,
+        6.7
+      ],
+      [
+        9.73,
+        6.65
+      ]
+    ],
+    "columnWidth": 0.62,
+    "columnBottomY": 0.0615,
+    "columnTopY": 5.0,
+    "material": "ColumnConcrete",
+    "resultGeometryDigest": "b8560efa8aea0e25498298ce78befef43bef88c625f04061de03fcf5a106c407",
+    "vertices": 522,
+    "triangles": 1020,
+    "columnCount": 4,
+    "unchangedOtherMeshes": 9,
+    "dryRun": false,
+    "verifyOnly": false,
+    "wasAlreadyPatched": false,
+    "replaces": "All four ceramic planters, soil, stems and foliage",
+    "sconcesUnchanged": true
   }
 }
