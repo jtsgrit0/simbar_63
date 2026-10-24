@@ -62,42 +62,43 @@ public sealed class SimBarMusicPosters : MonoBehaviour
         Transform back = Wall(BackWallRootName, new Vector3(0f, 0f, 7.365f), 0f);
         Transform left = Wall(LeftWallRootName, new Vector3(-10.165f, 0f, 0f), -90f);
 
-        // Lower, bigger sheets stay readable. Smaller older sheets peek out between them.
-        Remnant(back, -8.05f, 4.08f, 2.0f, 2.30f, 5f, 11, oldPaper);
-        Remnant(back, -6.5f, 3.3f, 1.2f, 1.65f, -13f, 12, paper);
-        Remnant(back, -4.55f, 4.08f, 1.25f, 2.15f, 9f, 13, oldPaper);
-        Remnant(back, -2.55f, 3.36f, 2.0f, 2.28f, -8f, 14, paper);
-        Remnant(back, -0.98f, 4.03f, 1.35f, 1.66f, -15f, 15, oldPaper);
-        Ticket(back, -6.87f, 4.92f, 0.80f, 0.24f, -6f, yellowTicket, 1);
-        Ticket(back, -3.94f, 3.55f, 0.66f, 0.27f, 8f, pinkTicket, 2);
-        Ticket(back, -1.01f, 4.65f, 0.93f, 0.23f, 12f, yellowTicket, 3);
+        // Compact, irregular pasted-paper clusters sit on the charcoal knee wall
+        // and the bottom corners of the glazing, leaving the Seoul view open.
+        Remnant(back, -8.12f, 1.62f, 2.0f, 2.30f, 5f, 11, oldPaper);
+        Remnant(back, -7.08f, 1.14f, 1.2f, 1.65f, -13f, 12, paper);
+        Remnant(back, -5.48f, 1.64f, 1.25f, 2.15f, 9f, 13, oldPaper);
+        Remnant(back, -2.55f, 1.42f, 2.0f, 2.28f, -8f, 14, paper);
+        Remnant(back, -1.70f, 1.78f, 1.35f, 1.66f, -15f, 15, oldPaper);
+        Ticket(back, -7.24f, 2.12f, 0.80f, 0.24f, -6f, yellowTicket, 1);
+        Ticket(back, -5.12f, 1.19f, 0.66f, 0.27f, 8f, pinkTicket, 2);
+        Ticket(back, -1.51f, 2.04f, 0.93f, 0.23f, 12f, yellowTicket, 3);
 
-        Poster(back, "Nirvana", -8.15f, 3.55f, 2.18f, -7f, 3, 101);
-        Poster(back, "Queen", -6.75f, 4.20f, 1.46f, 8f, 1, 102);
-        Poster(back, "TheBeatles", -5.55f, 3.40f, 2.35f, 4f, 4, 103);
-        Poster(back, "TaylorSwift", -3.95f, 4.50f, 1.35f, -11f, 2, 104);
-        Poster(back, "Blackpink", -2.55f, 4.10f, 1.55f, -5f, 5, 105);
-        Poster(back, "PopNight", -0.95f, 3.35f, 1.82f, 9f, 4, 106);
-        Poster(back, "Nirvana", -7.12f, 2.79f, 0.76f, 14f, 2, 107);
-        Poster(back, "PopNight", -3.91f, 2.70f, 0.82f, -14f, 2, 108);
+        Poster(back, "Nirvana", -8.15f, 1.47f, 2.18f, -7f, 3, 101, .50f);
+        Poster(back, "Queen", -7.59f, 1.94f, 1.46f, 8f, 1, 102, .50f);
+        Poster(back, "TheBeatles", -5.65f, 1.49f, 2.35f, 4f, 4, 103, .52f);
+        Poster(back, "TaylorSwift", -5.10f, 1.94f, 1.35f, -11f, 2, 104, .52f);
+        Poster(back, "Blackpink", -2.58f, 1.81f, 1.55f, -5f, 5, 105, .56f);
+        Poster(back, "PopNight", -1.97f, 1.35f, 1.82f, 9f, 4, 106, .50f);
+        Poster(back, "Nirvana", -7.12f, .92f, .76f, 14f, 2, 107, .58f);
+        Poster(back, "PopNight", -3.01f, 1.08f, .82f, -14f, 2, 108, .60f);
 
-        Remnant(left, -3.62f, 3.92f, 2.05f, 2.45f, -7f, 21, paper);
-        Remnant(left, -2.05f, 3.40f, 1.2f, 2.18f, 14f, 22, oldPaper);
-        Remnant(left, -0.60f, 3.72f, 1.75f, 2.12f, 9f, 23, paper);
-        Remnant(left, 2.23f, 3.62f, 2.12f, 2.49f, 7f, 24, oldPaper);
-        Remnant(left, 3.88f, 4.15f, 1.75f, 2.08f, -12f, 25, paper);
-        Ticket(left, -2.02f, 3.66f, 0.91f, 0.25f, -8f, pinkTicket, 4);
-        Ticket(left, 0.55f, 3.56f, 0.71f, 0.22f, 13f, yellowTicket, 5);
-        Ticket(left, 3.17f, 2.72f, 0.73f, 0.26f, -12f, pinkTicket, 6);
+        Remnant(left, -4.73f, 1.61f, 2.05f, 2.45f, -7f, 21, paper);
+        Remnant(left, -4.00f, 1.15f, 1.2f, 2.18f, 14f, 22, oldPaper);
+        Remnant(left, -3.13f, 1.64f, 1.75f, 2.12f, 9f, 23, paper);
+        Remnant(left, -2.23f, 1.48f, 2.12f, 2.49f, 7f, 24, oldPaper);
+        Remnant(left, -1.56f, 1.76f, 1.75f, 2.08f, -12f, 25, paper);
+        Ticket(left, -4.23f, 2.13f, .91f, .25f, -8f, pinkTicket, 4);
+        Ticket(left, -2.83f, 1.15f, .71f, .22f, 13f, yellowTicket, 5);
+        Ticket(left, -1.80f, 2.05f, .73f, .26f, -12f, pinkTicket, 6);
 
-        Poster(left, "Queen", -3.65f, 3.70f, 2.25f, 10f, 4, 201);
-        Poster(left, "Nirvana", -2.05f, 4.40f, 1.26f, -8f, 1, 202);
-        Poster(left, "PopNight", -0.70f, 3.35f, 1.90f, -6f, 5, 203);
-        Poster(left, "Blackpink", 0.65f, 4.60f, 1.40f, 11f, 2, 204);
-        Poster(left, "TaylorSwift", 2.30f, 3.55f, 2.35f, -5f, 4, 205);
-        Poster(left, "TheBeatles", 3.95f, 4.20f, 1.90f, 8f, 5, 206);
-        Poster(left, "Queen", -2.05f, 2.75f, 0.72f, -12f, 2, 207);
-        Poster(left, "Blackpink", 0.80f, 2.65f, 0.88f, -10f, 2, 208);
+        Poster(left, "Queen", -4.73f, 1.65f, 2.25f, 10f, 4, 201, .50f);
+        Poster(left, "Nirvana", -4.16f, 1.98f, 1.26f, -8f, 1, 202, .48f);
+        Poster(left, "PopNight", -3.61f, 1.47f, 1.90f, -6f, 5, 203, .54f);
+        Poster(left, "Blackpink", -3.05f, 1.97f, 1.40f, 11f, 2, 204, .48f);
+        Poster(left, "TaylorSwift", -2.40f, 1.63f, 2.35f, -5f, 4, 205, .52f);
+        Poster(left, "TheBeatles", -1.77f, 1.78f, 1.90f, 8f, 5, 206, .50f);
+        Poster(left, "Queen", -4.03f, 1.07f, .72f, -12f, 2, 207, .60f);
+        Poster(left, "Blackpink", -2.04f, .98f, .88f, -10f, 2, 208, .56f);
 
         ConstrainPaperToWall(back);
         ConstrainPaperToWall(left);
@@ -114,7 +115,7 @@ public sealed class SimBarMusicPosters : MonoBehaviour
         return wall;
     }
 
-    private void Poster(Transform wall, string key, float horizontal, float height, float paperHeight, float angle, int layer, int seed)
+    private void Poster(Transform wall, string key, float horizontal, float height, float paperHeight, float angle, int layer, int seed, float scale)
     {
         if (!artistMaterials.TryGetValue(key, out Material material)) return;
         Texture2D texture = artistTextures[key];
@@ -123,6 +124,7 @@ public sealed class SimBarMusicPosters : MonoBehaviour
         group.SetParent(wall, false);
         group.localPosition = new Vector3(horizontal, height, -0.020f - layer * 0.009f);
         group.localRotation = Quaternion.Euler(0f, 0f, angle);
+        group.localScale = Vector3.one * scale;
         Mesh torn = OwnMesh(CreateTornPaper(seed));
         Surface("Wheatpaste Edge", group, torn, seed % 2 == 0 ? oldPaper : paper,
             new Vector3(0f, 0f, 0.0018f), new Vector3(width * 1.025f, paperHeight * 1.023f, 1f));
@@ -137,6 +139,7 @@ public sealed class SimBarMusicPosters : MonoBehaviour
         remnant.SetParent(wall, false);
         remnant.localPosition = new Vector3(x, y, -0.003f - (seed % 3) * 0.002f);
         remnant.localRotation = Quaternion.Euler(0f, 0f, angle);
+        remnant.localScale = Vector3.one * .50f;
         Surface("Old Paper", remnant, OwnMesh(CreateTornPaper(seed)), material, Vector3.zero, new Vector3(width, height, 1f));
         // Exposed remnants of the previous print: chunky ink bars, like half-peeled gig flyers.
         for (int i = 0; i < 3; i++)
@@ -150,6 +153,7 @@ public sealed class SimBarMusicPosters : MonoBehaviour
         ticket.SetParent(wall, false);
         ticket.localPosition = new Vector3(x, y, -0.014f);
         ticket.localRotation = Quaternion.Euler(0f, 0f, angle);
+        ticket.localScale = Vector3.one * .50f;
         Surface("Ticket", ticket, OwnMesh(CreateTornPaper(seed + 300)), material, Vector3.zero, new Vector3(width, height, 1f));
         for (int i = 0; i < 4; i++)
             Surface("Ticket Ink", ticket, quadMesh, charcoal, new Vector3(width * (-0.28f + i * 0.17f), 0f, -0.001f),
@@ -192,14 +196,14 @@ public sealed class SimBarMusicPosters : MonoBehaviour
 
     private static void ConstrainPaperToWall(Transform wall)
     {
-        // Include rotated paper corners, borders and tape beneath the 5 m brick cap.
+        // Include rotated paper corners, borders and tape below the clear glass view.
         foreach (Transform group in wall)
         {
             float top = float.NegativeInfinity;
             foreach (MeshFilter filter in group.GetComponentsInChildren<MeshFilter>())
                 foreach (Vector3 vertex in filter.sharedMesh.vertices)
                     top = Mathf.Max(top, wall.InverseTransformPoint(filter.transform.TransformPoint(vertex)).y);
-            if (top > 4.94f) group.localPosition -= Vector3.up * (top - 4.94f);
+            if (top > 2.35f) group.localPosition -= Vector3.up * (top - 2.35f);
         }
     }
 

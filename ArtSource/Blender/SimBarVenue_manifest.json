@@ -498,17 +498,37 @@
       "roughness": 0.25,
       "metallic": 0,
       "emission": 2
+    },
+    "FloorConcrete": {
+      "color": [
+        0.39,
+        0.42,
+        0.45
+      ],
+      "roughness": 0.68,
+      "metallic": 0,
+      "emission": 0
+    },
+    "WallCharcoal": {
+      "color": [
+        0.075,
+        0.085,
+        0.1
+      ],
+      "roughness": 0.82,
+      "metallic": 0,
+      "emission": 0
     }
   },
   "meshes": {
     "SimBar_Floor": {
-      "vertices": 18984,
-      "triangles": 36612,
+      "vertices": 56,
+      "triangles": 108,
       "nonTriangleFaces": 0
     },
     "SimBar_BrickWalls": {
-      "vertices": 35672,
-      "triangles": 68796,
+      "vertices": 112,
+      "triangles": 216,
       "nonTriangleFaces": 0
     },
     "SimBar_BackBar": {
@@ -584,5 +604,61 @@
     "unchangedOtherMeshes": 9,
     "plantsAndSconcesUnchanged": true,
     "replacement": "Runtime overlapping pasted-paper music collage"
+  },
+  "seoulEnvelope": {
+    "version": 1,
+    "changedMeshes": [
+      "SimBar_BrickWalls",
+      "SimBar_Floor"
+    ],
+    "unchangedOtherMeshes": 8,
+    "unchangedGeometryDigests": {
+      "SimBar_BackBar": "38eaaebecaa1d4a8af4d48712cb457f1d20b0e290cce4819f9927820422e9bc5",
+      "SimBar_BarCounter": "bacb45f24f1e969e2f6a2fdaa5075fa93e8e4bb29dc27951134e8a5ba6acd3e2",
+      "SimBar_BoothsAndTables": "c162288573d0873782276f1f0c143a6f43e3618fad0ed919b309979267b2ad94",
+      "SimBar_Stage": "5693bcd3061d580540d6e6d52742126e75813950b2feb4cfdc77bc75a7750b41",
+      "SimBar_TrussAndNeon": "58484e534cd1feb6f51e529c886dcf18e7a5552521c690845f687641982260c0",
+      "SimBar_DrumKit": "05e42c4ce8080e923277b2e46c607519c9a19f6e32bf0246934b276c347c188f",
+      "SimBar_MicrophonesAndInstruments": "f17f23438ce98f83c39fb85e86e179d5994572e9d6509e7837b5d899892f13c0",
+      "SimBar_PlantsAndWallArt": "502b942b5bff2f9a9b8cffa19590ffdda9cb9d2a6e913b85f502df8a5fe30bfd"
+    },
+    "floorUnityBounds": {
+      "x": [
+        -10.5,
+        10.5
+      ],
+      "y": [
+        -0.2800000011920929,
+        0.061500001698732376
+      ],
+      "z": [
+        -7.75,
+        7.75
+      ]
+    },
+    "wallUnityBounds": {
+      "x": [
+        -10.5,
+        10.5
+      ],
+      "y": [
+        0.0,
+        1.6699999570846558
+      ],
+      "z": [
+        -7.75,
+        7.75
+      ]
+    },
+    "lowerWallHeight": 1.67,
+    "rearInteriorZ": 7.405,
+    "leftInteriorX": -10.205,
+    "floorMaterial": "FloorConcrete",
+    "wallMaterial": "WallCharcoal",
+    "dryRun": false,
+    "verifyOnly": false,
+    "wasAlreadyPatched": false,
+    "upperWindows": "Runtime hinged casement glazing and Seoul neon streetscape",
+    "replaces": "Full-height brown brick walls and brown checkerboard floor"
   }
 }

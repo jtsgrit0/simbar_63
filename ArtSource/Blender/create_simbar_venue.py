@@ -54,6 +54,7 @@ def material(name, color, roughness=0.55, metallic=0, emission=0):
 for args in [
     ('CreamTile',(0.78,0.67,0.52),.66), ('IvoryTile',(0.91,0.82,0.65),.64),
     ('FloorGrout',(0.42,.34,.29),.8), ('WallMortar',(.39,.18,.12),.9),
+    ('FloorConcrete',(.39,.42,.45),.68), ('WallCharcoal',(.075,.085,.10),.82),
     ('BrickTerracotta',(.55,.18,.10),.88), ('BrickWarm',(.67,.23,.13),.86),
     ('BrickBurnt',(.43,.11,.065),.9), ('BrickPeach',(.73,.30,.17),.9),
     ('DarkWalnut',(.16,.055,.025),.35), ('WarmOak',(.43,.16,.055),.32),
@@ -177,31 +178,26 @@ def cocktail(x,y,z):
 
 active_group='Floor'
 print('SIMBAR_BUILD floor',flush=True)
-box('Foundation',(0,-.14,0),(21,.28,15.5),'DarkWalnut',.07)
-box('Grout surface',(0,.005,0),(20.9,.04,15.4),'FloorGrout',0)
-for ix in range(21):
-    for iz in range(16):
-        x=-10+ix;z=-7.25+iz*.96
-        box('Cream stone tile',(x,.034,z),(.984,.055,.946),'IvoryTile' if (ix+iz)%3 else 'CreamTile',.009)
-box('Front brass floor edge',(0,.05,-7.72),(20.9,.07,.055),'Brass',.012)
+# One continuous gray concrete slab: no tile grid or brown foundation trim.
+# Preserve the original walkable top (0.0615 m) and the room footprint.
+box('Continuous gray concrete floor',(0,-.10925,0),(21,.3415,15.5),'FloorConcrete',.009)
 
 active_group='BrickWalls'
-print('SIMBAR_BUILD brick walls',flush=True)
-box('Back wall backing',(0,2.5,7.6),(21,5,.18),'WallMortar',.015)
-box('Left wall backing',(-10.4,2.5,.05),(.18,5,15.25),'WallMortar',.015)
+print('SIMBAR_BUILD charcoal window knee walls',flush=True)
+# Keep the joined mesh's historical name for stable prefab/material references.
+# Upper casement glazing and the Seoul streetscape are authored at runtime.
+box('Back charcoal knee wall',(0,.835,7.55),(21,1.67,.29),'WallCharcoal',.016)
+box('Left charcoal knee wall',(-10.35,.835,0),(.29,1.67,15.5),'WallCharcoal',.016)
+# Retain the old brick loops' random draws so bottles, plants and all remaining
+# venue groups reproduce exactly when generated from the original seed.
 brickmats=['BrickTerracotta','BrickWarm','BrickBurnt','BrickPeach']
 for row in range(15):
-    h=.18+row*.326
     for col in range(25):
         x=-10.1+col*.85+(row%2)*.425
-        if x<10.32:box('Back wall terracotta brick',(x,h,7.47),(.814,.294,.13),random.choice(brickmats),.016)
+        if x<10.32:random.choice(brickmats)
     for col in range(18):
         z=-7.35+col*.85+(row%2)*.425
-        if z<7.4:box('Left wall terracotta brick',(-10.27,h,z),(.13,.294,.814),random.choice(brickmats),.016)
-box('Back wall crown',(0,5.03,7.58),(21.1,.15,.3),'DarkWalnut',.025)
-box('Left wall crown',(-10.39,5.03,0),(.3,.15,15.5),'DarkWalnut',.025)
-box('Back wall skirting',(0,.16,7.37),(21,.25,.18),'DarkWalnut',.02)
-box('Left wall skirting',(-10.18,.16,0),(.18,.25,15.5),'DarkWalnut',.02)
+        if z<7.4:random.choice(brickmats)
 
 active_group='BackBar'
 print('SIMBAR_BUILD illuminated bottle shelves',flush=True)
@@ -452,6 +448,7 @@ for group,objects in groups.items():
     bm.to_mesh(joined.data);bm.free();joined.data.update()
     if group=='BarCounter': joined.data['SimBarStaffAisleOffsetZ']=0.25
     if group=='PlantsAndWallArt': joined.data['SimBarBakedPosterAssembliesRemoved']=3
+    if group in ('Floor','BrickWalls'): joined.data['SimBarSeoulEnvelopeVersion']=1
     bpy.context.scene.cursor.location=(0,0,0)
     bpy.ops.object.origin_set(type='ORIGIN_CURSOR')
     counts[joined.name]={'vertices':len(joined.data.vertices),'triangles':sum(len(p.vertices)-2 for p in joined.data.polygons)}
@@ -461,6 +458,12 @@ manifest['meshes']=counts
 manifest['wallArt']={'bakedFrames':0, 'legacyAssembliesOmitted':3,
                      'sourceMesh':'SimBar_PlantsAndWallArt',
                      'replacement':'Runtime overlapping pasted-paper music collage'}
+manifest['seoulEnvelope']={'version':1, 'lowerWallHeight':1.67,
+    'upperWindows':'Runtime hinged casement glazing and Seoul neon streetscape',
+    'wallMaterial':'WallCharcoal', 'floorMaterial':'FloorConcrete',
+    'floorTopY':.0615, 'floorUnityBounds':{'x':[-10.5,10.5],'y':[-.28,.0615],'z':[-7.75,7.75]},
+    'rearInteriorZ':7.405, 'leftInteriorX':-10.205,
+    'replaces':'Full-height brown brick walls and brown checkerboard floor'}
 manifest['fbxAxis']={'forward':'-Z','up':'Y','baked':True,'workingScene':'X=Unity X, Y=Unity Z, Z=Unity Y'}
 
 scene=bpy.context.scene

@@ -25,9 +25,9 @@
 - 우측 패널: 곡 선택과 현재 재생 곡
 - 하단 서비스 패널: 대기 주문, 인내심, 음료 제공 버튼
 - 운영 패널: 손님 만족도, 공연 에너지, 실제 장면을 내려다보는 카메라 미니맵
-- 3D 환경: 벽돌 벽, 크림 타일, 목재 카운터, 76개 술병과 청록 선반, 맥주탭, 부스, 식물, 포스터, 트러스, 스피커, 드럼셋
-- 벽 콜라주: Queen·Nirvana·The Beatles·Taylor Swift·BLACKPINK·POP NIGHT 그림 6종으로 뒤벽 8장·왼벽 8장, 총 16장의 공연 종이를 비대칭으로 겹쳐 배치. 찢어진 가장자리·낡은 전단·테이프로 런던 펍의 그런지 분위기를 표현하며 기존 액자는 제거. [생성 프롬프트와 자산 안내](../ArtSource/Posters/README.md)
-- 바닥 그래피티: Queen 골드·Nirvana 오렌지·The Beatles 민트·Taylor Swift 라벤더·BLACKPINK 핑크의 스프레이 이름을 열린 바닥에 분산 배치. [그래피티 자산과 생성 프롬프트](../ArtSource/Graffiti/README.md)
+- 3D 환경: 아래 1/3은 짙은 회색 벽, 위쪽은 서울 네온사인 밤거리를 바라보는 여닫이 유리창. 갈색 격자 바닥은 벽보다 밝은 회색 콘크리트로 교체. 목재 카운터, 76개 술병과 청록 선반, 맥주탭, 부스, 식물, 트러스, 스피커, 드럼셋 유지. [서울 야경 자산과 제작 안내](../ArtSource/Seoul/README.md)
+- 벽 콜라주: Queen·Nirvana·The Beatles·Taylor Swift·BLACKPINK·POP NIGHT 그림 6종으로 뒤벽 8장·왼벽 8장, 총 16장의 공연 종이를 창 아래와 짙은 회색 벽에 작게 겹쳐 배치. 찢어진 가장자리·낡은 전단·테이프로 런던 펍의 그런지 분위기를 유지하며 종이 윗끝은 2.35m 아래로 제한해 창밖 풍경을 확보. [생성 프롬프트와 자산 안내](../ArtSource/Posters/README.md)
+- 바닥 그래피티: Queen 골드·Nirvana 오렌지·The Beatles 민트·Taylor Swift 라벤더·BLACKPINK 핑크의 스프레이 이름과 자국을 회색 바닥 전체에 분산 배치. [그래피티 자산과 생성 프롬프트](../ArtSource/Graffiti/README.md)
 - 스프레이 튄 자국: 이름 주변에 크기·회전·밀도가 다른 페인트 방울과 잔분사 꼬리를 불규칙하게 배치. 격자 간격을 사용하지 않으며 다섯 묶음 메시로 렌더링. [텍스처와 생성 프롬프트](../ArtSource/Graffiti/Splatter.md)
 - 관객 모델: Casual·Suit·Beach·Worker·Farmer·Adventurer 6종과 의상·바지·헤어 색상 조합. 무대 밴드의 Punk·Casual2 모델과 분리하며 피부·눈·원본 텍스처는 보존
 - 3D 인물: 기존 FBX를 실제 키로 정규화하고 Singing·Guitar Playing 동작을 연결. 바 손님 4명은 스툴에서 음료를 마시고, 일반 홀 손님은 쉬는 동안 느슨하게 리듬을 탐
@@ -119,14 +119,14 @@ Cozy는 손님 인내심 +18초와 느린 주문 유입, Challenge는 인내심 
 - 편집 가능한 환경 원본: `ArtSource/Blender/SimBarVenue.blend`
 - 편집 가능한 4인 밴드: `ArtSource/Blender/SimBarBand.blend`
 - 밴드 교환용 FBX: `ArtSource/Blender/SimBarBand.fbx` (4개 리그, 74개 메쉬, 120프레임 동작 4개)
-- 환경 FBX: `Assets/Resources/SimBarArt/SimBarVenue.fbx` (10개 mesh 그룹, 372,418 triangles)
+- 환경 FBX: `Assets/Resources/SimBarArt/SimBarVenue.fbx` (10개 mesh 그룹, 267,334 triangles)
 - 원본 Gibson에서 경량화한 기타: `Assets/Resources/SimBarArt/Gibson_Stage.fbx` (28,465 triangles)
 - 렌더 프리뷰와 모델 manifest: `ArtSource/Blender/`
 - 원래 `Assets/Model/*.fbx` 파일은 보존합니다. 고용량 Gibson 원본은 경로만 기록하고 게임에서는 경량 모델을 사용합니다.
 
 재생성 방법은 `ArtSource/Blender/README.md`에 있습니다. Unity 메뉴 `SimBar > Art > Import Blender Venue and Build Reference Scene`으로 재질·캐릭터 라이브러리·시작 씬을 다시 구성할 수 있습니다. 이 메뉴는 현재 씬에 저장하지 않은 변경이 있으면 씬 교체 전에 중단합니다.
 
-환경 원본에서 예전 액자·포스터의 80,232개 삼각형을 제거했으며 식물·벽등과 다른 9개 메시의 좌표·재질은 보존했습니다. 콜라주와 바닥 그래피티는 별도 런타임 장식이며 콜라이더를 추가하지 않습니다. 원본 패치와 재검증 방법은 [Blender 벽 장식 안내](../ArtSource/Blender/WALL_ART.md)에 있습니다.
+환경 원본에서 예전 액자·포스터의 80,232개 삼각형을 제거했습니다. 이어 기존 바닥과 벽 메시만 회색 콘크리트와 1.67m 높이의 짙은 회색 하부 벽으로 교체했으며, 다른 8개 메시의 형상·재질 슬롯·변환 해시와 기존 바닥 높이 0.0615m를 보존했습니다. 창문·콜라주·바닥 그래피티는 별도 런타임 장식이며 콜라이더를 추가하지 않습니다. 원본 패치와 재검증 방법은 [Blender 벽 장식 안내](../ArtSource/Blender/WALL_ART.md)와 [서울 창호 환경 안내](../ArtSource/Blender/SEOUL_ENVELOPE.md)에 있습니다.
 
 기타·베이스는 기타 목이 위쪽을 향하도록 몸 앞 허리에 배치하고, 어깨를 지나는 스트랩과 양팔 보정을 사용합니다. 왼손은 지판을 따라 이동하고 오른손은 현 위에서 스트럼합니다. 기존 FBX 연주의 하체·몸통 움직임은 유지하며 보컬과 드럼은 별도 동작을 유지합니다.
 

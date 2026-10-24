@@ -62,7 +62,7 @@ public static class SimBarMusicPostersVerification
             foreach (MeshFilter surface in wall.GetComponentsInChildren<MeshFilter>())
                 foreach (Vector3 vertex in surface.sharedMesh.vertices)
                     highestPaper = Mathf.Max(highestPaper, wall.InverseTransformPoint(surface.transform.TransformPoint(vertex)).y);
-            report.Check(highestPaper <= 4.95f, wall.name + " stays below the brick wall cap, including rotated paper and tape.");
+            report.Check(highestPaper <= 2.36f, wall.name + " keeps the upper window view clear, including rotated paper and tape.");
             Vector3 expected = owner.transform.TransformDirection(w == 0 ? Vector3.back : Vector3.right);
             var areas = new List<Rect>();
             float minHeight = float.PositiveInfinity, maxHeight = float.NegativeInfinity;
@@ -134,6 +134,7 @@ public static class SimBarMusicPostersVerification
         var materials = new HashSet<Material>();
         var meshes = new HashSet<Mesh>();
         var pigments = new List<Color>();
+        int titleCount = 0;
         bool positiveYaw = false, negativeYaw = false;
         foreach (string key in SimBarFloorGraffiti.ArtistKeys)
         {
@@ -153,21 +154,21 @@ public static class SimBarMusicPostersVerification
                 key + " uses an alpha-blended material clone with its own transparent image.");
             if (mesh == null || material == null) continue;
             Color tint = material.HasProperty("_BaseColor") ? material.GetColor("_BaseColor") : material.color;
-            report.Check(tint.a > 0.5f && tint.a < 1f, key + " retains partial paint opacity so the stone floor reads through.");
+            report.Check(tint.a > 0.5f && tint.a < 1f, key + " retains partial paint opacity so the grey floor reads through.");
             report.Check(paint.localPosition.y > 0.0655f && paint.localPosition.y < 0.09f
                 && Vector3.Dot(paint.TransformDirection(mesh.normals[0]).normalized, Vector3.up) > 0.999f
                 && CorrectWinding(mesh), key + " sits just above the floor with an upward visible face.");
-            report.Check(Mathf.Abs(paint.localScale.x / paint.localScale.z - texture.width / (float)texture.height) < 0.001f
-                && FloorUv(mesh), key + " preserves the source lettering proportions and readable UV orientation.");
-            Vector3 center = paint.localPosition;
-            report.Check(center.x > -1f && center.x < 9.3f && center.z > -7f && center.z < 1.7f,
-                key + " occupies open floor in front of the stage and beside the bar.");
+            bool titleQuads = FloorTitleQuads(mesh, paint, owner.transform,
+                texture.width / (float)texture.height, out int count);
+            titleCount += count;
+            report.Check(titleQuads && count == 2,
+                key + " batches two upward floor tags with correct lettering proportions and unmirrored UVs.");
             float angle = Mathf.DeltaAngle(0f, paint.localEulerAngles.y);
             positiveYaw |= angle > 3f; negativeYaw |= angle < -3f;
             if (CheckPaintPixels(report, texture, tint, key, out Color pigment)) pigments.Add(pigment);
         }
-        report.Check(materials.Count == 5 && meshes.Count == 1,
-            "Five floor names share one mesh and own separate artist-image materials.");
+        report.Check(materials.Count == 5 && meshes.Count == 5 && titleCount == SimBarFloorGraffiti.TitleCount,
+            "Ten floor names are combined into five artist meshes and five alpha materials.");
         report.Check(positiveYaw && negativeYaw, "Floor names vary their spray angles in both directions.");
         bool distinct = pigments.Count == 5;
         float smallestHueGap = 1f;
@@ -183,7 +184,8 @@ public static class SimBarMusicPostersVerification
         report.Check(distinct, "Rendered floor pigments distinguish all five artist names by hue.");
         CheckSplatter(report, owner);
         CheckDecorativeOnly(report, owner, "Floor graffiti");
-        report.measurements.Add("Floor paint: " + materials.Count + " alpha materials, " + meshes.Count + " shared mesh; minimum artist hue gap "
+        report.measurements.Add("Floor paint: " + titleCount + " tags in " + meshes.Count + " artist meshes and "
+            + materials.Count + " alpha materials; minimum artist hue gap "
             + (smallestHueGap * 360f).ToString("F1") + " degrees.");
     }
 
@@ -195,6 +197,8 @@ public static class SimBarMusicPostersVerification
         CheckImport(report, stamp, "Spray droplets", true);
         int stamps = 0;
         float minSize = float.PositiveInfinity, maxSize = 0f;
+        Vector2 minimum = new Vector2(float.PositiveInfinity, float.PositiveInfinity);
+        Vector2 maximum = new Vector2(float.NegativeInfinity, float.NegativeInfinity);
         bool valid = true;
         foreach (string key in SimBarFloorGraffiti.ArtistKeys)
         {
@@ -209,14 +213,22 @@ public static class SimBarMusicPostersVerification
             stamps += vertices.Length / 4;
             for (int v = 0; v + 3 < vertices.Length; v += 4)
             {
-                float size = Vector3.Distance(vertices[v], vertices[v + 1]);
+                float size = Vector3.Distance(batch.TransformPoint(vertices[v]), batch.TransformPoint(vertices[v + 1]));
                 minSize = Mathf.Min(minSize, size); maxSize = Mathf.Max(maxSize, size);
+                for (int corner = 0; corner < 4; corner++)
+                {
+                    Vector3 point = owner.transform.InverseTransformPoint(batch.TransformPoint(vertices[v + corner]));
+                    minimum = Vector2.Min(minimum, new Vector2(point.x, point.z));
+                    maximum = Vector2.Max(maximum, new Vector2(point.x, point.z));
+                }
             }
         }
         report.Check(valid && stamps >= 45, "Five colored, transparent floor batches contain dispersed spray droplets.");
         report.Check(maxSize > minSize * 2f, "Droplet clusters vary between small satellites and larger paint impacts.");
         report.measurements.Add("Spray splatter: " + stamps + " irregular stamps in five batches; sizes "
-            + minSize.ToString("F2") + "–" + maxSize.ToString("F2") + " m.");
+            + minSize.ToString("F2") + "–" + maxSize.ToString("F2") + " m; floor coverage X "
+            + minimum.x.ToString("F2") + "–" + maximum.x.ToString("F2") + ", Z "
+            + minimum.y.ToString("F2") + "–" + maximum.y.ToString("F2") + " m.");
     }
 
     private static void CheckImport(SimBarRuntimeVerification.Report report, Texture2D texture, string label, bool alpha)
@@ -347,12 +359,29 @@ public static class SimBarMusicPostersVerification
         return true;
     }
 
-    private static bool FloorUv(Mesh mesh)
+    private static bool FloorTitleQuads(Mesh mesh, Transform paint, Transform owner, float textureAspect, out int count)
     {
         Vector3[] vertices = mesh.vertices; Vector2[] uv = mesh.uv;
-        if (uv.Length != vertices.Length) return false;
-        for (int i = 0; i < vertices.Length; i++)
-            if (Vector2.Distance(uv[i], new Vector2(vertices[i].x + 0.5f, vertices[i].z + 0.5f)) > 0.001f) return false;
+        count = vertices.Length / 4;
+        if (vertices.Length == 0 || vertices.Length % 4 != 0 || uv.Length != vertices.Length
+            || mesh.triangles.Length != count * 6) return false;
+        for (int first = 0; first < vertices.Length; first += 4)
+        {
+            Vector3[] points = new Vector3[4];
+            for (int corner = 0; corner < 4; corner++)
+            {
+                Vector2 expected = new Vector2((corner & 1) == 0 ? 0f : 1f, (corner & 2) == 0 ? 0f : 1f);
+                if (Vector2.Distance(uv[first + corner], expected) > 0.001f) return false;
+                points[corner] = owner.InverseTransformPoint(paint.TransformPoint(vertices[first + corner]));
+                Vector3 point = points[corner];
+                if (point.x < -10.12f || point.x > 10.2f || point.z < -7.5f || point.z > 7.25f
+                    || point.y <= 0.0655f || point.y >= 0.09f) return false;
+            }
+            Vector3 across = points[1] - points[0], upImage = points[2] - points[0];
+            if (upImage.magnitude <= 0f || Mathf.Abs(across.magnitude / upImage.magnitude - textureAspect) > 0.002f
+                || Mathf.Abs(Vector3.Dot(across.normalized, upImage.normalized)) > 0.001f
+                || Vector3.Dot(Vector3.Cross(upImage, across).normalized, Vector3.up) < 0.999f) return false;
+        }
         return true;
     }
 

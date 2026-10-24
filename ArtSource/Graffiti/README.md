@@ -2,6 +2,8 @@
 
 [Spray splatter accents](Splatter.md) add irregular artist-colored paint droplets around the lettering.
 
+The current gray-floor venue uses ten title marks in five artist batches. Larger foreground names are joined by smaller marks in the rear, central and side aisles. Paint also extends through open areas between titles, rather than being confined to the original five foreground patches.
+
 Five original artist-name spray-paint textures generated using the built-in `image_gen` tool on 2026-10-24. Original handwritten lettering, paint specks, overspray and worn gaps are stored on a genuinely transparent background. The source images are copied unmodified; the default generated originals are preserved.
 
 ## Saved assets and pigments
