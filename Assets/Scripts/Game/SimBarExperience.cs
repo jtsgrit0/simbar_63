@@ -168,14 +168,12 @@ public sealed partial class SimBarExperience : MonoBehaviour
     public static void FrameReferenceCamera(Camera camera)
     {
         camera.orthographic = true;
-        camera.orthographicSize = 8.4f;
         camera.nearClipPlane = 0.05f;
         camera.farClipPlane = 100f;
         camera.clearFlags = CameraClearFlags.SolidColor;
         camera.backgroundColor = new Color(0.035f, 0.026f, 0.055f);
         camera.rect = new Rect(0f, 0f, 1f, 1f);
-        camera.transform.position = new Vector3(13f, 21f, -25f);
-        camera.transform.LookAt(new Vector3(0f, 1.45f, 0.15f));
+        SimBarVenueFraming.Apply(camera);
     }
 
     private void CreateMaterials()
