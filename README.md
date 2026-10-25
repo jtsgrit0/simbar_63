@@ -6,11 +6,13 @@ Unity 6000.6.3f1로 만든 라이브 음악 펍 운영 게임입니다.
 
 로비와 게임 화면의 설정 메뉴에서 **한국어 / English**를 선택할 수 있습니다. 선택한 언어와 게임 진행 상황은 브라우저에 저장됩니다.
 
-UI는 첫 배포(`f34743e`)의 HUD·글자·창 배치를 사용합니다. 상단의 현금·팬·시각, 오른쪽 재생 목록, 하단 주문·서빙과 주변 관리 패널을 유지하며 한국어·영문으로 전환할 수 있습니다.
+영업 중 UI는 첫 배포(`f34743e`)의 HUD·글자·창 배치를 사용합니다. 상단의 현금·팬·시각, 오른쪽 재생 목록, 하단 주문·서빙과 주변 관리 패널을 유지하며 한국어·영문으로 전환할 수 있습니다.
 
-매장은 기존 아이소메트릭 각도와 직교 투영 비율을 유지하면서 화면을 채우는 가까운 구도로 표시합니다. 바·중앙 관객·무대를 크게 보여 주며, 외곽 바닥과 지붕 일부는 화면 밖으로 잘립니다. 창 크기 변경과 전체 화면 전환 시에도 화면 비율에 맞춰 같은 구도를 채우고, 미니맵은 매장 전체를 보여 줍니다.
+시작 타이틀에서는 여성 사장, FF 사장, 펫사운즈 사장 세 명 중 하나를 선택합니다. 선택한 사장은 매장 저장과 별도의 `SimBar.Owner` 설정에 보관합니다. 새 타이틀만 화면 크기에 맞춰 같은 비율로 축소하며, [사장 일러스트 제작 기록](ArtSource/Owners/README.md)에 그림의 출처와 생성 프롬프트를 보관합니다.
 
 관객은 밴드와 다른 6종 모델에 의상·바지·헤어 색상 조합을 사용합니다. 무대 앞에서는 6명이 서클핏 모싱을 하고 2명이 짝을 지어 슬램 동작을 합니다. 별도의 서핑 팀은 받치는 3명과 서퍼 1명으로, 24초 주기로 들어 올리고 운반한 뒤 내려놓습니다.
+
+슬램 두 사람은 몸 간격 0.84m에서 서로 접촉하고 뒤로 물러납니다. 연속 이동 경로의 몸 충돌을 검사해 상대를 통과하지 않으며, 모슁은 원호를 따라 움직입니다. 주문을 받으러 가는 공연 관객도 다른 사람의 몸과 슬램 구역을 피해 이동합니다.
 
 벽의 아래 1/3은 짙은 회색이고, 위쪽은 여닫이 유리창 너머로 서울 밤의 네온사인 거리가 보입니다. 바닥은 벽보다 밝은 회색 콘크리트로 이어지며 갈색 타일 격자는 제거했습니다. [서울 야경 자산과 제작 안내](ArtSource/Seoul/README.md)에 원본 정보를 보관합니다.
 
@@ -35,14 +37,14 @@ UI는 첫 배포(`f34743e`)의 HUD·글자·창 배치를 사용합니다. 상�
 
 Unity Hub에서 이 폴더를 Unity **6000.6.3f1**로 열고 `Assets/Scenes/SimBar_Reference.unity`를 실행합니다. 게임 구성과 검증 방법은 [Assets/README_SIMBAR.md](Assets/README_SIMBAR.md)에 있습니다.
 
-Play 모드에서 `SimBar > Validation > Check Running Original UI`로 원본 UI 배치를, `Check Running Motion`으로 60초 동선·밴드·관객 연출을 검증할 수 있습니다.
+Play 모드에서 `SimBar > Validation > Check Running Original UI`로 원본 UI 배치를, `Check Running Motion`으로 60초 동선·밴드·관객 연출을, `Check Running Owner Title`로 사장 선택·저장·한영 전환을 검증할 수 있습니다.
 
 ## 웹 배포
 
-GitHub Pages는 `main` 브랜치의 `docs/` 폴더를 게시합니다. Unity WebGL 빌드를 `Builds/SimBarPlayerWebGL`에 만든 후 다음 명령으로 게시용 파일을 갱신합니다.
+GitHub Pages는 `main` 브랜치의 `docs/` 폴더를 게시합니다. Unity WebGL 빌드를 `Builds/Pages/SimBarPlayerWebGL`에 만든 후 다음 명령으로 게시용 파일을 갱신합니다.
 
 ```powershell
-python Tools/prepare_github_pages.py
+python Tools/prepare_github_pages.py --source Builds/Pages/SimBarPlayerWebGL
 ```
 
 이 스크립트는 Brotli 압축을 해제해 일반 정적 호스팅에서도 실행되는 파일을 만듭니다. Windows에서는 Unity에 포함된 Brotli 실행 파일을 사용하며, 다른 환경에서는 Python `brotli` 패키지 또는 `--brotli` 옵션으로 지정한 실행 파일을 사용할 수 있습니다.

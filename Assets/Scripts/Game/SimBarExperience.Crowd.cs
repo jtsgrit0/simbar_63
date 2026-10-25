@@ -3,8 +3,14 @@ using UnityEngine;
 public sealed partial class SimBarExperience
 {
     private static readonly Vector3 ConcertPitCenter = new Vector3(5.75f, 0f, -1.25f);
+    private const float ConcertMoshRadius = 1.58f;
+    private const float SlamBodyRadius = .42f;
+    private const float SlamRestHalfDistance = .68f;
     private readonly MotionActor[] concertActors = new MotionActor[12];
+    private bool slamPairPrepared;
+    private float slamVelocity = -.9f, slamImpact, slamRecoil, slamRest;
     public int VenueCrowdParticipants { get; private set; }
+    public int VenueSlamContacts { get; private set; }
     public float CrowdSurfWeight => ConcertSurfAmount(motionClock);
 
     internal static bool CrowdFloorReserved(Vector3 point)
@@ -19,7 +25,7 @@ public sealed partial class SimBarExperience
         if (slot < 6)
         {
             float angle = slot * Mathf.PI / 3f;
-            return ConcertPitCenter + new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)) * 1.4f;
+            return ConcertPitCenter + new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)) * ConcertMoshRadius;
         }
         if (slot < 8) return ConcertPitCenter + Vector3.right * (slot == 6 ? -.68f : .68f);
         Vector3 center = new Vector3(6f, 0f, -4.25f);
@@ -41,6 +47,59 @@ public sealed partial class SimBarExperience
             * (1f - Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(16f, 18f, cycle)));
     }
 
+    private bool ConcertActorAvailable(MotionActor actor)
+    {
+        return actor != null && actor.person.root != null && actor.person.root.gameObject.activeInHierarchy
+            && actor.queueIndex < 0 && actor.person.drinkIndex < 0
+            && !(IsPourInProgress && ReferenceEquals(pourPatron, actor.person))
+            && (actor.state != MotionState.Returning || FlatDistance(MotionPosition(actor), actor.home) <= .18f);
+    }
+
+    // These two kinematic bodies advance together. A swept body contact stops the inward
+    // velocity and applies an equal outward impulse; the animation never drives their roots.
+    private void TickConcertSlam(float delta)
+    {
+        slamPairPrepared = false;
+        slamImpact *= Mathf.Exp(-12f * delta);
+        slamRecoil = Mathf.MoveTowards(slamRecoil, slamVelocity > 0f ? 1f : 0f, delta * 6f);
+        slamRest = Mathf.Max(0f, slamRest - delta);
+        MotionActor left = concertActors[6], right = concertActors[7];
+        if (!ConcertActorAvailable(left) || !ConcertActorAvailable(right))
+        { slamVelocity = -.9f; slamImpact = slamRecoil = slamRest = 0f; return; }
+        Vector3 a = MotionPosition(left), b = MotionPosition(right);
+        // Returning guests first recover their own side; no snapping through their partner.
+        if (a.x >= ConcertPitCenter.x || b.x <= ConcertPitCenter.x
+            || Mathf.Abs(a.z - ConcertPitCenter.z) > .06f || Mathf.Abs(b.z - ConcertPitCenter.z) > .06f) return;
+        slamPairPrepared = true;
+        if (Quaternion.Angle(left.person.root.rotation, worldRoot.rotation * Quaternion.Euler(0, 90f, 0)) > 12f
+            || Quaternion.Angle(right.person.root.rotation, worldRoot.rotation * Quaternion.Euler(0, 270f, 0)) > 12f) return;
+        if (slamRest > 0f) return;
+        if (Mathf.Abs(slamVelocity) < .01f) slamVelocity = -.9f;
+        float movement = slamVelocity * delta;
+        Vector3 nextA = a - Vector3.right * movement, nextB = b + Vector3.right * movement;
+        nextA.z = Mathf.MoveTowards(a.z, ConcertPitCenter.z, delta * .6f);
+        nextB.z = Mathf.MoveTowards(b.z, ConcertPitCenter.z, delta * .6f);
+        bool contact = slamVelocity < 0f && nextB.x - nextA.x <= SlamBodyRadius * 2f;
+        if (contact)
+        {
+            float allowed = Mathf.Max(0f, b.x - a.x - SlamBodyRadius * 2f) * .5f;
+            nextA.x = a.x + allowed; nextB.x = b.x - allowed;
+        }
+        bool rested = false;
+        if (slamVelocity > 0f)
+        {
+            nextA.x = Mathf.Max(nextA.x, ConcertPitCenter.x - SlamRestHalfDistance);
+            nextB.x = Mathf.Min(nextB.x, ConcertPitCenter.x + SlamRestHalfDistance);
+            rested = nextA.x <= ConcertPitCenter.x - SlamRestHalfDistance + .0001f
+                && nextB.x >= ConcertPitCenter.x + SlamRestHalfDistance - .0001f;
+        }
+        if (!MotionStepAllowed(left, a, nextA) || !MotionStepAllowed(right, b, nextB)) return;
+        left.person.root.position = worldRoot.TransformPoint(nextA);
+        right.person.root.position = worldRoot.TransformPoint(nextB);
+        if (contact) { slamVelocity = .9f; slamImpact = 1f; VenueSlamContacts++; }
+        else if (rested) { slamVelocity = 0f; slamRest = .28f; }
+    }
+
     private bool TryTickConcertCrowd(MotionActor actor, float delta)
     {
         actor.pitActive = false;
@@ -54,8 +113,16 @@ public sealed partial class SimBarExperience
         SimBarCrowdAction action;
         if (slot < 6)
         {
-            float angle = slot * Mathf.PI / 3f + motionClock * .65f;
-            target = ConcertPitCenter + new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)) * 1.4f;
+            Vector3 radial = position - ConcertPitCenter; radial.y = 0f;
+            float radius = radial.magnitude;
+            float angle = Mathf.Atan2(radial.z, radial.x);
+            float desired = slot * Mathf.PI / 3f + motionClock * .65f;
+            // Resume along the rim after yielding/ordering instead of cutting a long
+            // chord through the slam pair to catch a target several beats ahead.
+            if (radius >= ConcertMoshRadius - .08f)
+                angle += Mathf.Min(Mathf.Repeat(desired - angle, Mathf.PI * 2f), 1.28f * delta / Mathf.Max(.5f, radius));
+            radius = Mathf.MoveTowards(radius, ConcertMoshRadius, .7f * delta);
+            target = ConcertPitCenter + new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)) * radius;
             Vector3 tangent = new Vector3(-Mathf.Sin(angle), 0f, Mathf.Cos(angle));
             facing = Quaternion.LookRotation(tangent).eulerAngles.y;
             action = SimBarCrowdAction.Mosh;
@@ -63,8 +130,7 @@ public sealed partial class SimBarExperience
         else if (slot < 8)
         {
             float side = slot == 6 ? -1f : 1f;
-            float recoil = .52f - .16f * Mathf.Sin(motionClock * Mathf.PI * 2f);
-            target = ConcertPitCenter + new Vector3(side * recoil, 0f, Mathf.Sin(motionClock * 2f) * .07f);
+            target = slamPairPrepared ? position : ConcertPitCenter + Vector3.right * (side * SlamRestHalfDistance);
             facing = side < 0f ? 90f : 270f;
             action = SimBarCrowdAction.Slam;
         }
@@ -96,7 +162,14 @@ public sealed partial class SimBarExperience
             worldRoot.rotation * Quaternion.Euler(0f, facing, 0f), 220f * delta);
         actor.state = MotionState.Idle; actor.path.Clear(); actor.pathIndex = 0; actor.routeFailed = false;
         actor.pitActive = true;
-        if (actor.visual != null) actor.visual.SetCrowdPerformance(action, weight);
+        if (actor.visual != null)
+        {
+            actor.visual.SetCrowdPerformance(action, weight);
+            if (action == SimBarCrowdAction.Slam)
+                actor.visual.SetCrowdSlamContact(slamPairPrepared ? slamImpact : 0f,
+                    slamPairPrepared ? slamRecoil : 0f,
+                    worldRoot.TransformPoint(ConcertPitCenter + Vector3.up * 1.2f));
+        }
         return true;
     }
 }

@@ -130,31 +130,35 @@ public sealed partial class SimBarExperience
     private void BuildJourneyLobby()
     {
         Transform panel;
-        juiLobby = JourneyOverlay("Journey Lobby", new Vector2(1080f, 720f), out panel);
-        OpText("Journey Lobby Title", panel, "SIMBAR", 57, new Vector2(0f, 281f), new Vector2(960f, 78f), JuiGold, TextAnchor.MiddleCenter);
-        OpText("Journey Lobby Subtitle", panel, "YOUR BAR. YOUR CROWD. ONE GREAT NIGHT.", 23, new Vector2(0f, 224f), new Vector2(980f, 40f), Color.white, TextAnchor.MiddleCenter);
-        juiLobbyProgress = OpText("Journey Lobby Progress", panel, string.Empty, 20, new Vector2(0f, 173f), new Vector2(980f, 35f), JuiMuted, TextAnchor.MiddleCenter);
-        Button cozy = OpButton(string.Empty, panel, Vector2.one * 0.5f, new Vector2(-238f, 47f), new Vector2(452f, 160f), 20);
+        juiLobby = JourneyOverlay("Journey Lobby", new Vector2(1480f, 900f), out panel);
+        BuildOwnerTitleBackdrop(panel);
+        OpText("Journey Lobby Eyebrow", panel, SimBarLocalization.Text("SEOUL AFTER DARK  /  LIVE HOUSE STORIES", "서울의 밤  /  라이브하우스 스토리"), 17, new Vector2(0f, 417f), new Vector2(1340f, 26f), new Color(0.39f, 0.91f, 0.94f), TextAnchor.MiddleCenter);
+        Text title = OpText("Journey Lobby Title", panel, "SIMBAR", 72, new Vector2(0f, 370f), new Vector2(1340f, 88f), Color.white, TextAnchor.MiddleCenter);
+        title.fontStyle = FontStyle.Bold;
+        OpText("Journey Lobby Subtitle", panel, SimBarLocalization.Text("CHOOSE YOUR OWNER. TAKE THE NIGHT.", "사장을 선택하고, 오늘의 밤을 시작하세요."), 25, new Vector2(0f, 312f), new Vector2(1320f, 42f), JuiGold, TextAnchor.MiddleCenter);
+        BuildOwnerSelection(panel);
+        Button cozy = OpButton(string.Empty, panel, Vector2.one * 0.5f, new Vector2(-227f, -268f), new Vector2(440f, 76f), 20);
         cozy.name = "Journey Cozy Mode Button";
         juiCozyCard = cozy.GetComponent<Image>();
-        OpText("Journey Cozy Title", cozy.transform, "COZY NIGHT", 29, new Vector2(0f, 42f), new Vector2(414f, 42f), JuiGold, TextAnchor.MiddleCenter);
-        OpText("Journey Cozy Description", cozy.transform, "3 min / 12 orders / 4 perfects / x5 combo\nLonger guest patience. A gentler pace.", 18, new Vector2(0f, -17f), new Vector2(412f, 66f), Color.white, TextAnchor.MiddleCenter);
+        OpText("Journey Cozy Title", cozy.transform, "COZY NIGHT", 23, new Vector2(0f, 16f), new Vector2(414f, 32f), JuiGold, TextAnchor.MiddleCenter);
+        OpText("Journey Cozy Description", cozy.transform, SimBarLocalization.Text("3 MIN  /  RELAXED ORDERS", "3분  /  여유로운 주문과 대기 시간"), 16, new Vector2(0f, -17f), new Vector2(412f, 27f), Color.white, TextAnchor.MiddleCenter);
         cozy.onClick.AddListener(() => SelectJourneyMode(false));
-        Button challenge = OpButton(string.Empty, panel, Vector2.one * 0.5f, new Vector2(238f, 47f), new Vector2(452f, 160f), 20);
+        Button challenge = OpButton(string.Empty, panel, Vector2.one * 0.5f, new Vector2(227f, -268f), new Vector2(440f, 76f), 20);
         challenge.name = "Journey Challenge Mode Button";
         juiChallengeCard = challenge.GetComponent<Image>();
-        OpText("Journey Challenge Title", challenge.transform, "CHALLENGE NIGHT", 29, new Vector2(0f, 42f), new Vector2(414f, 42f), JuiGold, TextAnchor.MiddleCenter);
-        OpText("Journey Challenge Description", challenge.transform, "3 min / 20 orders / 7 perfects / x8 combo\nFaster orders. Less time per guest.", 18, new Vector2(0f, -17f), new Vector2(412f, 66f), Color.white, TextAnchor.MiddleCenter);
+        OpText("Journey Challenge Title", challenge.transform, "CHALLENGE NIGHT", 23, new Vector2(0f, 16f), new Vector2(414f, 32f), JuiGold, TextAnchor.MiddleCenter);
+        OpText("Journey Challenge Description", challenge.transform, SimBarLocalization.Text("3 MIN  /  FASTER ORDERS, HIGHER GOALS", "3분  /  빠른 주문과 더 높은 목표"), 16, new Vector2(0f, -17f), new Vector2(412f, 27f), Color.white, TextAnchor.MiddleCenter);
         challenge.onClick.AddListener(() => SelectJourneyMode(true));
-        juiLobbyMode = OpText("Journey Selected Mode", panel, "COZY NIGHT SELECTED", 18, new Vector2(0f, -64f), new Vector2(960f, 34f), JuiGreen, TextAnchor.MiddleCenter);
-        juiContinue = OpButton("CONTINUE SAVED NIGHT", panel, Vector2.one * 0.5f, new Vector2(0f, -127f), new Vector2(620f, 55f), 23);
+        juiLobbyMode = OpText("Journey Selected Mode", panel, "COZY NIGHT SELECTED", 17, new Vector2(0f, -326f), new Vector2(1320f, 28f), JuiGreen, TextAnchor.MiddleCenter);
+        juiContinue = OpButton("CONTINUE SAVED NIGHT", panel, Vector2.one * 0.5f, new Vector2(-283f, -369f), new Vector2(546f, 56f), 22);
         juiContinue.name = "Journey Continue Button";
         juiContinue.onClick.AddListener(ContinueJourney);
-        juiBegin = OpButton("OPEN TONIGHT", panel, Vector2.one * 0.5f, new Vector2(0f, -197f), new Vector2(620f, 59f), 24);
+        juiBegin = OpButton("OPEN TONIGHT", panel, Vector2.one * 0.5f, new Vector2(283f, -369f), new Vector2(546f, 56f), 23);
         juiBegin.name = "Journey Begin Button";
+        juiBegin.GetComponent<Image>().color = new Color(0.22f, 0.44f, 0.38f);
         juiBegin.onClick.AddListener(() => JourneyStartNight(juiChallenge));
-        OpText("Journey Lobby Carryover", panel, "Your venue, hired staff and upgrades stay with you.", 18, new Vector2(0f, -266f), new Vector2(990f, 32f), JuiMuted, TextAnchor.MiddleCenter);
-        OpText("Journey Lobby Controls", panel, "1 / 2 / 3 CHOOSE DRINK     SPACE / STOP POUR     P PAUSE", 16, new Vector2(0f, -316f), new Vector2(980f, 30f), new Color(0.54f, 0.64f, 0.78f), TextAnchor.MiddleCenter);
+        juiLobbyProgress = OpText("Journey Lobby Progress", panel, string.Empty, 17, new Vector2(0f, -422f), new Vector2(1360f, 29f), JuiMuted, TextAnchor.MiddleCenter);
+        SimBarOwnerTitleLayout.Attach(panel.GetComponent<RectTransform>());
         SelectJourneyMode(false);
     }
 
@@ -302,13 +306,15 @@ public sealed partial class SimBarExperience
         }
         if (JourneyIsLobby)
         {
+            RefreshOwnerSelection();
             juiLobbyProgress.text = SimBarLocalization.Format("DAY {0}    /    RANK {1}    /    {2} XP    /    BEST {3}", "{0}일 차    /    등급 {1}    /    경험치 {2}    /    최고 점수 {3}", JourneyDay, JourneyRankLabel, JourneyXP.ToString("N0"), JourneyBestScore.ToString("N0"));
             juiContinue.interactable = JourneyHasSave;
             juiContinue.gameObject.SetActive(JourneyHasSave);
             juiBegin.gameObject.SetActive(!JourneyHasActiveNight);
             juiCozyCard.GetComponent<Button>().interactable = !JourneyHasActiveNight;
             juiChallengeCard.GetComponent<Button>().interactable = !JourneyHasActiveNight;
-            juiBegin.GetComponent<RectTransform>().anchoredPosition = new Vector2(0f, JourneyHasSave ? -197f : -145f);
+            juiBegin.GetComponent<RectTransform>().anchoredPosition = new Vector2(JourneyHasSave ? 283f : 0f, -369f);
+            juiContinue.GetComponent<RectTransform>().anchoredPosition = new Vector2(JourneyHasActiveNight ? 0f : -283f, -369f);
             Text continueLabel = juiContinue.GetComponentInChildren<Text>();
             if (continueLabel != null) continueLabel.text = JourneyHasActiveNight
                 ? SimBarLocalization.Text("CONTINUE SAVED NIGHT  /  ", "저장한 영업 이어하기  /  ") + OpTime(JourneySecondsLeft)

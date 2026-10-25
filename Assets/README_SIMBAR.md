@@ -8,7 +8,7 @@
 - 한국어 글꼴은 `Resources/Fonts/NotoSansKR-Regular.otf`에 포함되어 있습니다. 라이선스는 같은 폴더의 `OFL.txt`입니다.
 - 설정을 여는 동안 영업 시간은 멈추며, 닫기 또는 `P`로 이전 상태로 돌아갑니다. `P`의 기존 일시정지 기능도 사용할 수 있습니다.
 - Play 모드에서 `SimBar > Validation > Check Running Localization`으로 언어 전환·저장·글꼴·일시정지 복원을 검증합니다.
-- UI는 첫 배포 `f34743e`의 HUD·모달 위치, 크기, 글꼴 크기와 1920×1080 기준 캔버스 스케일을 사용합니다. 카메라는 전체 화면을 사용하며, 한영 설정과 기존 게임 기능을 유지합니다.
+- 영업 중 UI는 첫 배포 `f34743e`의 HUD·모달 위치, 크기, 글꼴 크기와 1920×1080 기준 캔버스 스케일을 사용합니다. 카메라는 전체 화면을 사용하며, 한영 설정과 기존 게임 기능을 유지합니다.
 
 ## 프로젝트 개요
 
@@ -22,11 +22,11 @@
 `Scripts/Game/RuntimeBootstrap.cs`가 씬 진입 시 `SimBarExperience`를 시작합니다. Blender 환경 FBX와 프로젝트의 리깅 캐릭터로 바, 부스, 4인 밴드와 홀 관객을 구성합니다. 에디터에서도 모델을 볼 수 있고 Play 진입 시 게임용 장면과 HUD를 생성합니다.
 
 - 상단 HUD: 현금, 팬, 공연 시각
+- 시작 타이틀: 여성 사장·FF 사장·펫사운즈 사장의 세 카드 중 하나 선택. `SimBar.Owner`로 독립 저장하며 밤 시작·이어하기·한영 설정 흐름에 연결. 타이틀 패널만 균등 축소해 가로·세로 화면에 맞춤. [일러스트 제작 기록](../ArtSource/Owners/README.md)
 - 우측 패널: 곡 선택과 현재 재생 곡
 - 하단 서비스 패널: 대기 주문, 인내심, 음료 제공 버튼
 - 운영 패널: 손님 만족도, 공연 에너지, 실제 장면을 내려다보는 카메라 미니맵
 - 3D 환경: 아래 1/3은 짙은 회색 벽, 위쪽은 서울 네온사인 밤거리를 바라보는 여닫이 유리창. 갈색 격자 바닥은 벽보다 밝은 회색 콘크리트로 교체. 화분 네 개는 같은 위치의 회색 사각 기둥으로 교체. 목재 카운터, 76개 술병과 청록 선반, 맥주탭, 부스, 트러스, 스피커, 드럼셋 유지. [서울 야경 자산과 제작 안내](../ArtSource/Seoul/README.md), [기둥 제작 안내](../ArtSource/Blender/GRAY_COLUMNS.md)
-- 매장 카메라: 원래 아이소메트릭 회전과 직교 비율을 유지한 채 바·중앙 관객·무대를 약 1.53배 확대. 16:9 기준 직교 크기 5.5, 초점 (0.35, 1.3, 0.35). `SimBarVenueFraming`이 메인 카메라의 화면 크기 변경 시에만 구도를 갱신하며 와이드 화면은 전면 바닥·지붕 일부를 잘라 채움. HUD 배치와 별도의 전체 매장 미니맵은 유지.
 - 벽·기둥 콜라주: Queen·Nirvana·The Beatles·Taylor Swift·BLACKPINK·POP NIGHT 그림 6종으로 짙은 회색 벽에 16장, 기둥 면에 6장의 공연 포스터를 배치. 찢어진 가장자리·낡은 전단·테이프로 런던 펍의 그런지 분위기를 유지하고 벽 종이는 유리창 아래에 붙여 야경을 확보. [생성 프롬프트와 자산 안내](../ArtSource/Posters/README.md)
 - 바닥 그래피티: Queen 골드·Nirvana 오렌지·The Beatles 민트·Taylor Swift 라벤더·BLACKPINK 핑크의 스프레이 이름과 자국을 회색 바닥 전체에 분산 배치. [그래피티 자산과 생성 프롬프트](../ArtSource/Graffiti/README.md)
 - 스프레이 튄 자국: 이름 주변에 크기·회전·밀도가 다른 페인트 방울과 잔분사 꼬리를 불규칙하게 배치. 격자 간격을 사용하지 않으며 다섯 묶음 메시로 렌더링. [텍스처와 생성 프롬프트](../ArtSource/Graffiti/Splatter.md)
@@ -34,6 +34,7 @@
 - 3D 인물: 기존 FBX를 실제 키로 정규화하고 Singing·Guitar Playing 동작을 연결. 바 손님 4명은 스툴에서 음료를 마시고, 일반 홀 손님은 쉬는 동안 느슨하게 리듬을 탐
 - 자동 동선: 주문 손님 24명은 가구와 다른 사람을 피해 이동하고 서빙 후 원래 자리로 복귀. 바텐더·서버는 카운터 작업 구간을 왕복하고 고용한 홀 직원은 매장을 순회
 - 무대 앞 피트: 주문 손님 중 6명은 원형 동선으로 모싱하고 2명은 슬램 동작을 주고받음. 이 8명도 주문이 생기면 피트에서 나와 바 서비스를 받은 뒤 복귀
+- 슬램 충돌: 두 몸의 0.84m 접촉 간격, 접근·접촉·반동·휴식 동작과 자세 제한으로 몸통·머리·손 관통 방지. 연속 이동의 충돌 검사와 사람별 몸 반경을 반영한 경로 탐색으로 공연 관객의 주문 우회를 지원
 - 크라우드 서핑: 추가 연출 인물 4명 중 3명이 서퍼 1명을 받치고, 24초 주기로 들어 올리기·운반·내려놓기를 반복. 주문·매출·보상에는 참여하지 않음
 - 공연 동작: 보컬의 마이크·손짓, 기타·베이스의 스트럼·운지, 드러머의 교대 타격을 역할에 맞게 표현. 공연 에너지에 따라 동작 강도 변화
 - 조명: 따뜻한 실내광, 그림자, 음악 리듬에 맞춰 점멸하는 청록·분홍 무대 스포트라이트, 반투명 광선과 블룸
@@ -133,15 +134,15 @@ Cozy는 손님 인내심 +18초와 느린 주문 유입, Challenge는 인내심 
 
 ## WebGL 실행
 
-최신 플레이어 버전은 `Builds/SimBarPlayerWebGL`입니다. 이전 `Builds/SimBarOperationsWebGL`과 `Builds/SimBarReferenceWebGL`도 보존합니다. 압축 파일 헤더를 지원하는 미리보기 서버를 실행하고 브라우저에서 `http://127.0.0.1:8765/`를 엽니다.
+최신 플레이어 버전은 `Builds/Pages/SimBarPlayerWebGL`입니다. 이전 로컬 빌드도 보존합니다. 미리보기 서버를 실행하고 브라우저에서 `http://127.0.0.1:8765/`를 엽니다.
 
 ```powershell
-& 'E:/Blender/5.2/python/bin/python.exe' 'Tools/serve_simbar.py'
+& 'E:/Blender/5.2/python/bin/python.exe' 'Tools/serve_simbar.py' --directory Builds/Pages/SimBarPlayerWebGL
 ```
 
 게임 화면 캡처는 `Assets/Screenshots/SimBar_Reference.png`, Blender 밴드 렌더는 `ArtSource/Blender/SimBarBand_preview.png`에 있습니다.
 
-플레이어 흐름 캡처는 `Assets/Screenshots/SimBar_Journey_Lobby.png`, `SimBar_Journey_Guide.png`, `SimBar_Journey_Pour.png`, `SimBar_Journey_Fever.png`, `SimBar_Journey_Results.png`입니다.
+새 시작 타이틀 캡처는 `Assets/Screenshots/SimBar_Owner_Selection.png`와 `SimBar_Owner_Selection_Mobile.png`입니다. 이전 플레이어 흐름 캡처는 `Assets/Screenshots/SimBar_Journey_Lobby.png`, `SimBar_Journey_Guide.png`, `SimBar_Journey_Pour.png`, `SimBar_Journey_Fever.png`, `SimBar_Journey_Results.png`입니다.
 
 ## 검증
 
@@ -150,6 +151,8 @@ Reference 씬을 Play한 상태에서 `SimBar > Validation > Check Running Opera
 `SimBar > Validation > Check Running Player Journey`는 로비/도움말·타이밍 버튼·직원과 서빙 경쟁·콤보/FEVER·영업 종료·별/XP·저장 복원·재도전·정산 중복 방지·포커스 자동 일시정지를 검사한 뒤 원래 상태로 복원합니다. 테스트 중에는 운영 메뉴와 타이밍 게임을 먼저 닫아 주세요.
 
 `SimBar > Validation > Check Running Original UI`는 `f34743e`의 실제 HUD·모달 배치와 글자 크기, 캔버스 스케일, 전체 카메라 화면, 한영 설정과 상태 복원을 확인합니다.
+
+`SimBar > Validation > Check Running Owner Title`는 세 초상화와 선택 버튼, 화면 안 배치, 사장 설정의 저장·복원, 한영 전환, 시작·이어하기 버튼과 기존 영업 저장값 보존을 검사합니다.
 
 `SimBar > Validation > Check Running Motion`은 60초간 동선을 시뮬레이션하며 이동 속도·장애물·인물 간격·주문 마커·수동 따르기 대상 고정·일시정지와 밴드·악기 동작을 검사합니다. 관객 모델 다양성, 모싱·슬램과 서핑의 들어 올리기·운반·내려놓기도 확인합니다. 주문·경제·영업 시간은 진행하지 않고 검사 전 상태로 복원합니다. 운영 메뉴·설정·타이밍 게임을 먼저 닫아 주세요.
 

@@ -41,6 +41,7 @@ public static class SimBarMotionVerification
             report.Check(actors.Count >= 4, "The live movement registry contains the venue actors.");
             CheckCrowdModels(report, host, actors);
             CheckRouteRegressions(report, host, actors);
+            CheckSlamCollisionGuard(report, host, actors);
             Call(host, "TickVenueMotion", 1f / 30f);
             CheckManualHold(report, host, actors);
             CheckTravel(report, host, actors);
@@ -212,6 +213,14 @@ public static class SimBarMotionVerification
         report.Check(newOverlaps == 0, "Movement does not introduce NPC separations below 0.4 m. " + firstOverlap);
         report.Check(inheritedDidNotWorsen && improvedOverlaps == inheritedOverlaps, "Initial overlaps do not worsen and improve rather than deadlock.");
         report.Check(markerFailures == 0, "Visible order markers follow their moving guest roots.");
+        float concertOrderRemaining = 0f;
+        foreach (Actor actor in actors)
+            if (actor.PitSlot >= 0 && actor.PitSlot < 8 && Read<int>(actor.state, "queueIndex") >= 0)
+                concertOrderRemaining = Mathf.Max(concertOrderRemaining,
+                    FlatDistance(actor.world.InverseTransformPoint(actor.root.position), Read<Vector3>(actor.state, "target")));
+        report.Check(concertOrderRemaining <= .2f,
+            "Ordering concert guests route around the solid slam bodies and reach the service queue, instead of blocking the performance. remaining="
+            + concertOrderRemaining.ToString("F3") + " m.");
         crowd.Report();
         report.measurements.Add("Moving guests=" + guestsMoved + ", staff=" + staffMoved + "; longest path=" + longest.ToString("F2")
             + " m; peak ordinary/pit speed=" + maximumSpeed.ToString("F3") + "/" + maximumPitSpeed.ToString("F3") + " m/s; initial overlaps=" + inheritedOverlaps + ", improved=" + improvedOverlaps + ".");
@@ -222,6 +231,41 @@ public static class SimBarMotionVerification
         public Actor a, b;
         public float initial, minimum, best;
         public Pair(Actor a, Actor b) { this.a = a; this.b = b; initial = minimum = best = ActorSpacing(a, b); }
+    }
+
+    private static void CheckSlamCollisionGuard(SimBarRuntimeVerification.Report report, SimBarExperience host, List<Actor> actors)
+    {
+        Actor left = actors.Find(actor => actor.PitSlot == 6), right = actors.Find(actor => actor.PitSlot == 7);
+        if (left == null || right == null) { report.failures.Add("Two slam participants are required for collision checks."); return; }
+        var leftRoot = new TransformState(left.root); var rightRoot = new TransformState(right.root);
+        try
+        {
+            Vector3 a = new Vector3(5.25f, 0f, -1.25f), b = new Vector3(6.25f, 0f, -1.25f);
+            left.root.position = left.world.TransformPoint(a); right.root.position = right.world.TransformPoint(b);
+            bool rejectsPenetration = !(bool)Call(host, "MotionStepAllowed", left.state, a, a + Vector3.right * .3f);
+            bool rejectsTunneling = !(bool)Call(host, "MotionStepAllowed", left.state, a, b + Vector3.right * 1f);
+            report.Check(rejectsPenetration && rejectsTunneling,
+                "Slam body collision rejects entering the partner's 0.84 m clearance and a swept step through to the far side.");
+            Vector3 overlapping = b - Vector3.right * .7f;
+            left.root.position = left.world.TransformPoint(overlapping);
+            report.Check(!(bool)Call(host, "MotionStepAllowed", left.state, overlapping, overlapping + Vector3.right * .02f)
+                && (bool)Call(host, "MotionStepAllowed", left.state, overlapping, overlapping - Vector3.right * .02f),
+                "An inherited body overlap can retreat smoothly, while a step that deepens the overlap is blocked.");
+            var bodies = new List<Vector4> {
+                new Vector4(5.07f, 0f, -1.25f, .76f), new Vector4(5.33f, 0f, -1.25f, .76f),
+                new Vector4(6.17f, 0f, -1.25f, .76f), new Vector4(6.43f, 0f, -1.25f, .76f) };
+            var path = new List<Vector3>(); var occupancy = new List<Vector3>();
+            Vector3 previous = new Vector3(6.54f, 0f, .118f), goal = new Vector3(-1.5f, 0f, -1.75f);
+            bool safeRoute = (bool)Call(Read<object>(host, "motionNavigation"), "FindCrowdPath", previous, goal, path, occupancy, bodies);
+            foreach (Vector3 waypoint in path)
+            {
+                foreach (Vector4 body in bodies) safeRoute &= PointSegmentDistance(new Vector3(body.x, body.y, body.z), previous, waypoint) >= .758f;
+                previous = waypoint;
+            }
+            report.Check(safeRoute && FlatDistance(previous, goal) < .001f,
+                "A mosh participant's order route avoids both complete slam body trajectories, including every path edge.");
+        }
+        finally { leftRoot.Restore(); rightRoot.Restore(); }
     }
 
     private static void CheckCrowdModels(SimBarRuntimeVerification.Report report, SimBarExperience host, List<Actor> actors)
@@ -276,9 +320,13 @@ public static class SimBarMotionVerification
         private readonly HashSet<SimBarCrowdAction> seen = new HashSet<SimBarCrowdAction>();
         private int boundsFailures, floorFailures, phaseFailures, fullSurfs, validSurfs, supportedSurfs;
         private float slamMinimum = float.PositiveInfinity, slamMaximum;
+        private float slamBodyGap = float.PositiveInfinity, previousSlamDistance;
+        private int slamCrossings, slamBodyOverlaps, slamHandCrossings, slamImpactSamples, slamRecoilSamples;
+        private int startingContacts;
         private float maximumHandTargetError;
         private bool airborneFreezeChecked;
-        public CrowdProbe(SimBarExperience host, List<Actor> actors, SimBarRuntimeVerification.Report report) { this.host = host; this.actors = actors; this.report = report; }
+        public CrowdProbe(SimBarExperience host, List<Actor> actors, SimBarRuntimeVerification.Report report)
+        { this.host = host; this.actors = actors; this.report = report; startingContacts = host.VenueSlamContacts; }
         public void Sample()
         {
             Actor leftSlam = null, rightSlam = null, surfer = null;
@@ -308,6 +356,26 @@ public static class SimBarMotionVerification
             {
                 float distance = FlatDistance(leftSlam.root.position, rightSlam.root.position);
                 slamMinimum = Mathf.Min(slamMinimum, distance); slamMaximum = Mathf.Max(slamMaximum, distance);
+                Vector3 direction = leftSlam.world.right;
+                float leftOrigin = Vector3.Dot(leftSlam.root.position, direction), rightOrigin = Vector3.Dot(rightSlam.root.position, direction);
+                if (leftOrigin >= rightOrigin) slamCrossings++;
+                float leftExtent = SlamBodyExtent(leftSlam, direction, true), rightExtent = SlamBodyExtent(rightSlam, direction, false);
+                float bodyGap = rightExtent - leftExtent;
+                slamBodyGap = Mathf.Min(slamBodyGap, bodyGap);
+                if (bodyGap < -.015f) slamBodyOverlaps++;
+                float plane = (leftOrigin + rightOrigin) * .5f;
+                foreach (Actor actor in new[] { leftSlam, rightSlam })
+                {
+                    var bones = Read<Dictionary<string, Transform>>(actor.visual, "bones");
+                    foreach (string key in new[] { "handl", "handr" })
+                    {
+                        float hand = Vector3.Dot(bones[key].position, direction);
+                        if (ReferenceEquals(actor, leftSlam) ? hand > plane + .025f : hand < plane - .025f) slamHandCrossings++;
+                    }
+                }
+                if (leftSlam.visual.CrowdSlamImpact >= .9f && rightSlam.visual.CrowdSlamImpact >= .9f && distance <= .855f) slamImpactSamples++;
+                if (leftSlam.visual.CrowdSlamRecoil > .5f && distance > previousSlamDistance + .001f) slamRecoilSamples++;
+                previousSlamDistance = distance;
             }
             if (surfer == null) return;
             fullSurfs++;
@@ -337,6 +405,19 @@ public static class SimBarMotionVerification
                 CheckFrozen(report, host, "paused"); airborneFreezeChecked = true;
             }
         }
+        private static float SlamBodyExtent(Actor actor, Vector3 direction, bool maximum)
+        {
+            var bones = Read<Dictionary<string, Transform>>(actor.visual, "bones");
+            float extent = maximum ? float.NegativeInfinity : float.PositiveInfinity;
+            foreach (string key in new[] { "hips", "torso", "chest", "head" })
+            {
+                if (!bones.TryGetValue(key, out Transform bone)) continue;
+                float radius = key == "head" ? .15f : .19f;
+                float edge = Vector3.Dot(bone.position, direction) + (maximum ? radius : -radius);
+                extent = maximum ? Mathf.Max(extent, edge) : Mathf.Min(extent, edge);
+            }
+            return extent;
+        }
         public void Report()
         {
             float largestSweep = 0f; foreach (float sweep in sweeps.Values) largestSweep = Mathf.Max(largestSweep, Mathf.Abs(sweep));
@@ -348,6 +429,13 @@ public static class SimBarMotionVerification
                 "The airborne surfer lies horizontally above the crowd with at least two raised-hand supporters and freezes when paused. valid="
                 + validSurfs + "/" + fullSurfs + ", supported=" + supportedSurfs + ", max hand-target error=" + maximumHandTargetError.ToString("F3") + " m.");
             report.Check(phaseFailures == 0, "Concert action phases use the shared gameplay clock.");
+            report.Check(slamMinimum >= .839f && slamCrossings == 0 && slamBodyOverlaps == 0 && slamHandCrossings == 0,
+                "Slam roots retain their sides and full body clearance; posed torso/head capsules and bracing hands never pass through the partner. root min="
+                + slamMinimum.ToString("F3") + " m, body gap=" + slamBodyGap.ToString("F3") + " m; crossings/body/hand failures="
+                + slamCrossings + "/" + slamBodyOverlaps + "/" + slamHandCrossings + ".");
+            report.Check(host.VenueSlamContacts - startingContacts >= 3 && slamImpactSamples >= 3 && slamRecoilSamples >= 3,
+                "Actual body contacts trigger synchronized impact poses and an outward recoil impulse. contacts="
+                + (host.VenueSlamContacts - startingContacts) + ", impact/recoil samples=" + slamImpactSamples + "/" + slamRecoilSamples + ".");
             report.measurements.Add("Mosh sweep=" + largestSweep.ToString("F0") + " degrees; slam separation range=" + (slamMaximum - slamMinimum).ToString("F3")
                 + " m; supported airborne samples=" + supportedSurfs + "/" + fullSurfs + ".");
         }

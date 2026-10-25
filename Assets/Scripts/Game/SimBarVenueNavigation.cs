@@ -24,6 +24,8 @@ internal sealed class SimBarVenueNavigation
     private readonly float[] scores = new float[Columns * Rows];
     private readonly int[] parents = new int[Columns * Rows];
     private readonly List<int> open = new List<int>(Columns * Rows), reverse = new List<int>(Columns * Rows);
+    private List<Vector4> solidCrowdBodies;
+    private Vector3 solidCrowdGoal;
 
     internal SimBarVenueNavigation()
     {
@@ -55,6 +57,14 @@ internal sealed class SimBarVenueNavigation
 
     internal bool FindAislePath(Vector3 start, Vector3 goal, List<Vector3> result, List<Vector3> people)
         => FindPathCore(start, goal, result, people, true);
+
+    internal bool FindCrowdPath(Vector3 start, Vector3 goal, List<Vector3> result, List<Vector3> people,
+        List<Vector4> bodies)
+    {
+        solidCrowdBodies = bodies; solidCrowdGoal = goal;
+        try { return FindPathCore(start, goal, result, people, false); }
+        finally { solidCrowdBodies = null; solidCrowdGoal = Vector3.zero; }
+    }
 
     private bool FindPathCore(Vector3 start, Vector3 goal, List<Vector3> result, List<Vector3> people, bool avoidCrowd)
     {
@@ -111,6 +121,21 @@ internal sealed class SimBarVenueNavigation
     private bool SegmentAllowed(Vector3 a, Vector3 b, bool avoidCrowd)
     {
         if (!SegmentClear(a, b)) return false;
+        if (solidCrowdBodies != null)
+        {
+            Vector3 travel = b - a; travel.y = 0f;
+            foreach (Vector4 body in solidCrowdBodies)
+            {
+                float minimum = Mathf.Max(0f, body.w - .001f);
+                Vector3 fromGoal = new Vector3(body.x - solidCrowdGoal.x, 0f, body.z - solidCrowdGoal.z);
+                // An occupied queue destination is temporary: approach its safe edge
+                // and let the swept movement guard wait for the preceding body to clear.
+                if (fromGoal.sqrMagnitude < minimum * minimum) continue;
+                Vector3 offset = new Vector3(body.x - a.x, 0f, body.z - a.z);
+                float amount = travel.sqrMagnitude > .0000001f ? Mathf.Clamp01(Vector3.Dot(offset, travel) / travel.sqrMagnitude) : 0f;
+                if ((offset - travel * amount).sqrMagnitude < minimum * minimum) return false;
+            }
+        }
         if (!avoidCrowd) return true;
         int steps = Mathf.Max(1, Mathf.CeilToInt(Vector3.Distance(a, b) / .12f));
         for (int i = 0; i <= steps; i++)

@@ -11,7 +11,7 @@ public sealed partial class SimBarExperience
         public SimBarCharacterVisual visual;
         public MotionKind kind;
         public MotionState state;
-        public Vector3 home, target;
+        public Vector3 home, target, frameStartPosition;
         public readonly List<Vector3> path = new List<Vector3>(40);
         public int pathIndex, queueIndex = -1, cycle, index, pitSlot = -1;
         public float wait, speed, stuck, workMin, workMax, celebration;
@@ -20,6 +20,7 @@ public sealed partial class SimBarExperience
     private readonly List<MotionActor> motionActors = new List<MotionActor>(48);
     private readonly Dictionary<Patron, MotionActor> motionLookup = new Dictionary<Patron, MotionActor>();
     private readonly List<Vector3> motionOccupancy = new List<Vector3>(48);
+    private readonly List<Vector4> motionSolidBodies = new List<Vector4>(48);
     private SimBarVenueNavigation motionNavigation;
     private bool motionReady, motionOrdersDirty, motionReferenceLayout;
     private float motionClock, motionServicePulse;
@@ -83,16 +84,20 @@ public sealed partial class SimBarExperience
         motionClock += delta; motionServicePulse = Mathf.Max(0, motionServicePulse - delta);
         motionOccupancy.Clear();
         foreach (MotionActor actor in motionActors)
-            if (actor.person.root != null && actor.person.root.gameObject.activeInHierarchy && actor.kind != MotionKind.Band)
-                motionOccupancy.Add(MotionPosition(actor));
+            if (actor.person.root != null && actor.person.root.gameObject.activeInHierarchy)
+            {
+                actor.frameStartPosition = MotionPosition(actor);
+                if (actor.kind != MotionKind.Band) motionOccupancy.Add(actor.frameStartPosition);
+            }
         if (motionOrdersDirty) RefreshMotionOrders();
+        TickConcertSlam(delta);
         int walking = 0;
         foreach (MotionActor actor in motionActors) if (actor.moving) walking++;
         VenueMovingGuests = VenueMovingStaff = VenueCrowdParticipants = 0;
         foreach (MotionActor actor in motionActors)
         {
             if (actor.person.root == null || !actor.person.root.gameObject.activeInHierarchy) continue;
-            Vector3 previous = MotionPosition(actor);
+            Vector3 previous = actor.frameStartPosition;
             actor.celebration = Mathf.Max(0, actor.celebration - delta);
             if (actor.visual != null) actor.visual.SetCrowdPerformance(SimBarCrowdAction.None, 0f);
             actor.pitActive = false;
@@ -145,7 +150,30 @@ public sealed partial class SimBarExperience
     private void SetMotionPath(MotionActor actor, Vector3 target, MotionState state)
     {
         actor.target = target; actor.state = state; actor.pathIndex = 0; actor.stuck = 0;
-        actor.routeFailed = !(actor.pitSlot >= 0
+        if (actor.pitSlot >= 0 && actor.pitSlot < 8)
+        {
+            motionSolidBodies.Clear();
+            Vector3 origin = MotionPosition(actor);
+            foreach (MotionActor other in motionActors)
+            {
+                if (other == actor || other.kind == MotionKind.Band || other.person.root == null || !other.person.root.gameObject.activeInHierarchy) continue;
+                Vector3 body = MotionPosition(other);
+                if (Mathf.Abs(body.y - origin.y) > 1.1f) continue;
+                float clearance = MotionBodyRadius(actor) + MotionBodyRadius(other);
+                motionSolidBodies.Add(new Vector4(body.x, body.y, body.z, clearance));
+                if ((other.pitSlot == 6 || other.pitSlot == 7) && ConcertActorAvailable(other))
+                {
+                    float side = other.pitSlot == 6 ? -1f : 1f;
+                    Vector3 rest = ConcertPitCenter + Vector3.right * (side * SlamRestHalfDistance);
+                    Vector3 contact = ConcertPitCenter + Vector3.right * (side * SlamBodyRadius);
+                    motionSolidBodies.Add(new Vector4(rest.x, rest.y, rest.z, clearance));
+                    motionSolidBodies.Add(new Vector4(contact.x, contact.y, contact.z, clearance));
+                }
+            }
+            actor.routeFailed = !motionNavigation.FindCrowdPath(origin, target, actor.path, motionOccupancy, motionSolidBodies);
+            motionSolidBodies.Clear();
+        }
+        else actor.routeFailed = !(actor.pitSlot >= 0
             ? motionNavigation.FindPath(MotionPosition(actor), target, actor.path, motionOccupancy)
             : motionNavigation.FindAislePath(MotionPosition(actor), target, actor.path, motionOccupancy));
         if (actor.routeFailed)
@@ -234,10 +262,31 @@ public sealed partial class SimBarExperience
             if (other == actor || other.kind == MotionKind.Band || other.person.root == null || !other.person.root.gameObject.activeInHierarchy) continue;
             Vector3 position = MotionPosition(other);
             if (Mathf.Abs(next.y - position.y) > 1.1f) continue;
-            float nextDistance = FlatDistance(next, position);
-            if (nextDistance < .46f && nextDistance < FlatDistance(current, position) + .00001f) return false;
+            float clearance = MotionBodyRadius(actor) + MotionBodyRadius(other);
+            float currentDistance = FlatDistance(current, position), nextDistance = FlatDistance(next, position);
+            if (currentDistance < clearance - .0001f)
+            {
+                // Inherited overlaps may retreat, but can never deepen or cross the other body.
+                Vector3 away = current - position, step = next - current; away.y = step.y = 0f;
+                if (nextDistance < currentDistance - .00001f || Vector3.Dot(away, step) < -.000001f) return false;
+            }
+            else
+            {
+                Vector3 travel = next - current, toBody = position - current; travel.y = toBody.y = 0f;
+                float amount = travel.sqrMagnitude > .0000001f ? Mathf.Clamp01(Vector3.Dot(toBody, travel) / travel.sqrMagnitude) : 0f;
+                if ((toBody - travel * amount).sqrMagnitude < (clearance - .0001f) * (clearance - .0001f)) return false;
+            }
         }
         return true;
+    }
+
+    private float MotionBodyRadius(MotionActor actor)
+    {
+        // Ordering, pouring and returning guests use the ordinary aisle footprint.
+        // The wider contact bodies apply only when they can take part in the pit.
+        if (!ConcertActorAvailable(actor)) return .23f;
+        return actor.pitSlot == 6 || actor.pitSlot == 7 ? SlamBodyRadius
+            : actor.pitSlot >= 0 && actor.pitSlot < 6 ? .34f : .23f;
     }
 
     private bool MotionOccupied(Vector3 point, MotionActor self, float distance)

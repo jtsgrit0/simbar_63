@@ -16,6 +16,8 @@ public sealed partial class SimBarCharacterVisual
     public float CrowdWeight { get; private set; }
     /// <summary>Normalized, shared 120 BPM beat from the host gameplay clock.</summary>
     public float CrowdPhase { get; private set; }
+    public float CrowdSlamImpact { get; private set; }
+    public float CrowdSlamRecoil { get; private set; }
     public bool HasCrowdSupportTarget => hasCrowdSupportTarget;
     /// <summary>World-space midpoint requested for the two supporting wrists.</summary>
     public Vector3 CrowdSupportTarget => crowdSupportTarget;
@@ -42,6 +44,8 @@ public sealed partial class SimBarCharacterVisual
     private CrowdArm crowdRightArm;
     private bool hasCrowdSupportTarget;
     private Vector3 crowdSupportTarget;
+    private Vector3 crowdSlamContactPoint;
+    private bool hasCrowdSlamContact;
 
     /// <summary>
     /// Set before ApplyPresentation. Weight is immediate: gameplay owns transitions.
@@ -55,6 +59,18 @@ public sealed partial class SimBarCharacterVisual
         CrowdAction = action;
         CrowdWeight = action == SimBarCrowdAction.None || !FinitePresentation(weight) ? 0f : Mathf.Clamp01(weight);
         if (action != SimBarCrowdAction.Support) hasCrowdSupportTarget = false;
+        if (action != SimBarCrowdAction.Slam)
+        { hasCrowdSlamContact = false; CrowdSlamImpact = CrowdSlamRecoil = 0f; }
+    }
+
+    /// <summary>The host's physical contact, not the beat, triggers the bracing/recoil pose.</summary>
+    public void SetCrowdSlamContact(float impact, float recoil, Vector3 worldContactPoint)
+    {
+        CrowdSlamImpact = FinitePresentation(impact) ? Mathf.Clamp01(impact) : 0f;
+        CrowdSlamRecoil = FinitePresentation(recoil) ? Mathf.Clamp01(recoil) : 0f;
+        hasCrowdSlamContact = FinitePresentation(worldContactPoint.x)
+            && FinitePresentation(worldContactPoint.y) && FinitePresentation(worldContactPoint.z);
+        if (hasCrowdSlamContact) crowdSlamContactPoint = worldContactPoint;
     }
 
     /// <summary>Optional world contact; wrists aim 12 cm either side, within the rig's reach.</summary>
@@ -73,9 +89,40 @@ public sealed partial class SimBarCharacterVisual
         CacheCrowdBones();
         float beat = timeSeconds * Mathf.PI * 4f;
         if (CrowdAction == SimBarCrowdAction.Mosh) ApplyMoshPresentation(beat, energy, false);
-        else if (CrowdAction == SimBarCrowdAction.Slam) ApplyMoshPresentation(beat * .5f, energy, true);
+        else if (CrowdAction == SimBarCrowdAction.Slam) ApplySlamPresentation(beat, energy);
         else if (CrowdAction == SimBarCrowdAction.Support) ApplyCrowdSupportPresentation(beat, energy);
         else if (CrowdAction == SimBarCrowdAction.Surf) ApplyCrowdSurfPresentation(beat, energy);
+    }
+
+    private void ApplySlamPresentation(float beat, float energy)
+    {
+        float weight = CrowdWeight, impact = CrowdSlamImpact, recoil = CrowdSlamRecoil * (1f - impact);
+        float strength = Mathf.Lerp(.75f, 1f, energy);
+        // The old deep forward hinge let the skeleton pass through its partner even
+        // when the feet were separated. Keep the body inside its 42 cm contact radius.
+        BlendCrowdPivot(new Vector3(0f, -.045f - impact * .035f, -.055f * recoil),
+            new Vector3((6f - recoil * 11f - impact * 2f) * strength, 0f, Mathf.Sin(beat * .5f) * 1.4f), weight);
+        AimPresentation("upperlegl", "lowerlegl", new Vector3(-.24f, -1f, .18f + impact * .18f), weight);
+        AimPresentation("upperlegr", "lowerlegr", new Vector3(.24f, -1f, .18f + impact * .18f), weight);
+        AimPresentation("lowerlegl", "footl", new Vector3(.025f, -1f, -.24f - impact * .16f), weight);
+        AimPresentation("lowerlegr", "footr", new Vector3(-.025f, -1f, -.24f - impact * .16f), weight);
+        RotatePresentationBone("torso", (2f - recoil * 4f) * weight * strength, 0f, 0f);
+        RotatePresentationBone("head", (-2f + impact * 7f - recoil * 5f) * weight, 0f, 0f);
+
+        float shoulder = PresentationBonePosition("upperarml", new Vector3(-.18f, 1.4f, 0f)).y;
+        float reach = .32f + impact * .04f;
+        if (hasCrowdSlamContact)
+        {
+            // Hands brace on our side of the shared contact plane, including during recoil.
+            Vector3 contact = pivot.InverseTransformPoint(crowdSlamContactPoint);
+            reach = Mathf.Min(reach, Mathf.Max(.12f, contact.z - .075f));
+        }
+        SolveCrowdArm(crowdLeftArm, new Vector3(-.19f, shoulder - .16f + impact * .08f, reach),
+            new Vector3(-.43f, shoulder - .28f, .03f), weight);
+        SolveCrowdArm(crowdRightArm, new Vector3(.19f, shoulder - .12f + impact * .08f, reach),
+            new Vector3(.43f, shoulder - .24f, .03f), weight);
+        PoseCrowdPalm(crowdLeftArm, false, pivot.up, -pivot.forward, weight);
+        PoseCrowdPalm(crowdRightArm, true, pivot.up, -pivot.forward, weight);
     }
 
     private void ApplyMoshPresentation(float beat, float energy, bool slam)
