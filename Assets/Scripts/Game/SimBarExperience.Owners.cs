@@ -58,7 +58,7 @@ public sealed partial class SimBarExperience
     private void BuildOwnerTitleBackdrop(Transform panel)
     {
         panel.GetComponent<Image>().color = new Color(0.025f, 0.032f, 0.052f, 1f);
-        Texture2D night = Resources.Load<Texture2D>("SimBarArt/Seoul/SeoulNeonNight");
+        Texture2D night = SimBarWebTextures.Load("SimBarArt/Seoul/SeoulNeonNight");
         if (night != null)
         {
             GameObject backdrop = new GameObject("Owner Title Seoul Night", typeof(RectTransform), typeof(RawImage));
@@ -93,7 +93,7 @@ public sealed partial class SimBarExperience
             GameObject portraitObject = new GameObject("Journey Owner Portrait " + i, typeof(RectTransform), typeof(RawImage));
             portraitObject.transform.SetParent(card.transform, false);
             RawImage portrait = portraitObject.GetComponent<RawImage>();
-            Texture2D texture = Resources.Load<Texture2D>("SimBarArt/Owners/" + OwnerPortraits[i]);
+            Texture2D texture = SimBarWebTextures.Load("SimBarArt/Owners/" + OwnerPortraits[i]);
             portrait.texture = texture;
             portrait.raycastTarget = false;
             SetRect(portrait.rectTransform, Vector2.one * 0.5f, new Vector2(0f, 38f), new Vector2(400f, 350f));

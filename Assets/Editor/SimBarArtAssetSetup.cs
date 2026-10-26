@@ -45,6 +45,8 @@ public static class SimBarArtAssetSetup
         library.originalGuitarAssetPath = "Assets/Model/gibson.fbx";
         library.stageGuitar = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Resources/SimBarArt/Gibson_Stage.fbx")
             ?? AssetDatabase.LoadAssetAtPath<GameObject>("Assets/SimBarGenerated/Models/Gibson_Stage.fbx");
+        library.legacyWalkingModel = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Model/Walking.fbx");
+        library.legacyWalkingClip = FindClip("Assets/Model/Walking.fbx");
         if (library.stageGuitar != null) CollectMaterials(library.stageGuitar, replacements);
         library.characters = entries.ToArray();
         library.materials = replacements.Select(pair => new SimBarArtLibrary.MaterialReplacement { original = pair.Key, universal = pair.Value }).ToArray();

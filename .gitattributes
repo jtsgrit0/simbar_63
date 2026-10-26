@@ -30,3 +30,5 @@
 *.ttf binary
 *.wasm binary
 *.data binary
+*.unityweb binary
+*.bytes binary

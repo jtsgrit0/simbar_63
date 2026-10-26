@@ -189,3 +189,5 @@ MonoBehaviour:
     universal: {fileID: 2100000, guid: bf459842b92c3d041bf1a3270fc86ad5, type: 2}
   originalGuitarAssetPath: Assets/Model/gibson.fbx
   stageGuitar: {fileID: 919132149155446097, guid: 711a3c684e898b74e998bf48a6ed020b, type: 3}
+  legacyWalkingModel: {fileID: 919132149155446097, guid: 5b20ad618c9a3de48ad5c2f202a7777d, type: 3}
+  legacyWalkingClip: {fileID: -203655887218126122, guid: 5b20ad618c9a3de48ad5c2f202a7777d, type: 3}

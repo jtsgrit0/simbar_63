@@ -1,6 +1,6 @@
 # Seoul neon night exterior
 
-Saved asset: `Assets/Resources/SimBarArt/Seoul/SeoulNeonNight.png`.
+Saved asset: `Assets/Art/StartupTextures/Seoul/SeoulNeonNight.png`.
 
 Original stylized Seoul nightlife panorama created with the built-in `image_gen` tool on 2026-10-24. This is an imagined Korean street, not a photograph of a specific location. The generated original is retained; the selected PNG is copied into the project without pixel editing. Unity imports it with a 2048-pixel limit, preserved aspect ratio, mipmaps and clamped edges. One shared texture serves both exterior planes.
 

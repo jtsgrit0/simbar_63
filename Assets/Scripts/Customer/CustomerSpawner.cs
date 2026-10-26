@@ -274,6 +274,10 @@ public class CustomerSpawner : MonoBehaviour
 
             private static AnimationClip TryLoadWalkingClip()
             {
+                var library = Resources.Load<SimBarArtLibrary>("SimBarArtLibrary");
+                if (library != null && library.legacyWalkingClip != null)
+                    return library.legacyWalkingClip;
+
                 foreach (string candidate in new[]
                 {
                     "Animations/Walking",
@@ -323,6 +327,14 @@ public class CustomerSpawner : MonoBehaviour
 
     private static GameObject LoadWalkingCustomerPrefab()
     {
+        var library = Resources.Load<SimBarArtLibrary>("SimBarArtLibrary");
+        if (library != null)
+        {
+            if (library.legacyWalkingModel != null) return library.legacyWalkingModel;
+            var guest = library.Find("guest", 0);
+            if (guest != null && guest.sourceModel != null) return guest.sourceModel;
+        }
+
         string[] candidates =
         {
             "Characters/Walking",

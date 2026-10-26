@@ -8,6 +8,9 @@
     <title>SimBar</title>
     <link rel="icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="TemplateData/style.css?v=aefa58239a8fcc60">
+    <link rel="preload" as="script" href="Build/1e449b517fe62544dd80c5d8fa5a4e6c.loader.js?v=c68c79496894eba3">
+    <link rel="preload" as="script" href="Build/dbfcf343c74c272fb7c2b69865b9a33e.framework.js?v=e89b59ac33442555">
+    <link rel="preload" as="fetch" type="application/wasm" crossorigin="anonymous" href="Build/2c80113a04944b8989d83579a43e07c3.wasm?v=698932db775cf382">
   </head>
   <body>
     <main id="game-shell" data-player-state="loading">
@@ -43,11 +46,11 @@
       (() => {
         "use strict";
         const build = {
-  "loaderUrl": "Build/SimBarPlayerWebGL.loader.js?v=c68c79496894eba3",
+  "loaderUrl": "Build/1e449b517fe62544dd80c5d8fa5a4e6c.loader.js?v=c68c79496894eba3",
   "config": {
-    "dataUrl": "Build/SimBarPlayerWebGL.data?v=fa6e37dbdc38b3b8",
-    "frameworkUrl": "Build/SimBarPlayerWebGL.framework.js?v=4f0c4d5005249911",
-    "codeUrl": "Build/SimBarPlayerWebGL.wasm?v=f948f6807f8489e0",
+    "dataUrl": "Build/726dce8790ca735f1b5bcf2278083aa3.data?v=f497f47779c2a5f3",
+    "frameworkUrl": "Build/dbfcf343c74c272fb7c2b69865b9a33e.framework.js?v=e89b59ac33442555",
+    "codeUrl": "Build/2c80113a04944b8989d83579a43e07c3.wasm?v=698932db775cf382",
     "streamingAssetsUrl": "StreamingAssets",
     "arguments": [],
     "companyName": "DefaultCompany",
@@ -130,10 +133,25 @@
         canvas.addEventListener("pointerdown", focusGame);
         fullscreenButton.hidden = !(shell.requestFullscreen || shell.webkitRequestFullscreen);
 
+        // Release builds use Unity's content hashes as filenames. Only those
+        // exact URLs can safely skip revalidation across future deployments.
+        const immutableBuildUrls = new Set([
+          build.loaderUrl, build.config.dataUrl, build.config.frameworkUrl, build.config.codeUrl
+        ].filter((value) => {
+          const url = new URL(value, document.baseURI);
+          return /\/[0-9a-f]{32}\.(data|wasm|framework\.js)(\.unityweb)?$/.test(url.pathname)
+            && /^[0-9a-f]{16}$/.test(url.searchParams.get("v") || "");
+        }).map((value) => new URL(value, document.baseURI).href));
         const config = {
           ...build.config,
           matchWebGLToCanvasSize: true,
           fullscreenElementID: "game-shell",
+          cacheControl(value) {
+            const url = new URL(value, document.baseURI);
+            if (immutableBuildUrls.has(url.href)) return "immutable";
+            return /\.(data|bundle)(\.(unityweb|br|gz))?$/.test(url.pathname)
+              ? "must-revalidate" : "no-store";
+          },
           showBanner(message, type) {
             if (type === "error") fail(message);
             else notice(message);

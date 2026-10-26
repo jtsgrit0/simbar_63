@@ -20,8 +20,11 @@ MonoBehaviour:
     rid: 1636356536881905670
   m_ActivePlatformGuid: 
   m_AdditionalPlatformBuildSettings: []
-  m_OverrideGlobalSceneList: 0
-  m_Scenes: []
+  m_OverrideGlobalSceneList: 1
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Scenes/SimBar_Reference.unity
+    guid: 62549cbff8047424d8b8ffccfd4135f8
   m_HasScriptingDefines: 0
   m_ScriptingDefines: []
   m_PlayerSettingsYaml:
@@ -42,8 +45,8 @@ MonoBehaviour:
     - line: '|   defaultCursor: {instanceID: 0}'
     - line: '|   cursorHotspot: {x: 0, y: 0}'
     - line: '|   m_SplashScreenBackgroundColor: {r: 0.13725491, g: 0.12156863, b: 0.1254902, a: 1}'
-    - line: '|   m_ShowUnitySplashScreen: 1'
-    - line: '|   m_ShowUnitySplashLogo: 1'
+    - line: '|   m_ShowUnitySplashScreen: 0'
+    - line: '|   m_ShowUnitySplashLogo: 0'
     - line: '|   m_SplashScreenOverlayOpacity: 1'
     - line: '|   m_SplashScreenAnimation: 1'
     - line: '|   m_SplashScreenLogoStyle: 1'
@@ -772,7 +775,7 @@ MonoBehaviour:
     - line: '|   spritePackerPolicy: '
     - line: '|   webGLMemorySize: 32'
     - line: '|   webGLExceptionSupport: 1'
-    - line: '|   webGLNameFilesAsHashes: 0'
+    - line: '|   webGLNameFilesAsHashes: 1'
     - line: '|   webGLShowDiagnostics: 0'
     - line: '|   webGLDataCaching: 1'
     - line: '|   webGLDebugSymbols: 0'
@@ -781,7 +784,7 @@ MonoBehaviour:
     - line: '|   webGLTemplate: APPLICATION:Default'
     - line: '|   webGLAnalyzeBuildSize: 0'
     - line: '|   webGLUseEmbeddedResources: 0'
-    - line: '|   webGLCompressionFormat: 0'
+    - line: '|   webGLCompressionFormat: 2'
     - line: '|   webGLWasmArithmeticExceptions: 0'
     - line: '|   webGLLinkerTarget: 1'
     - line: '|   webGLThreadsSupport: 0'
@@ -810,7 +813,8 @@ MonoBehaviour:
     - line: '|     WebGL: 1'
     - line: '|   il2cppLTOMode: {}'
     - line: '|   il2cppStacktraceInformation: {}'
-    - line: '|   managedStrippingLevel: {}'
+    - line: '|   managedStrippingLevel:'
+    - line: '|     WebGL: 2'
     - line: '|   incrementalIl2cppBuild: {}'
     - line: '|   suppressCommonWarnings: 1'
     - line: '|   allowUnsafeCode: 0'

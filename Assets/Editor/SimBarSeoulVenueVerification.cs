@@ -218,7 +218,7 @@ public static class SimBarSeoulVenueVerification
 
     private static void CheckPanorama(SimBarRuntimeVerification.Report report)
     {
-        Texture2D texture = Resources.Load<Texture2D>(SimBarSeoulWindows.PanoramaResource);
+        Texture2D texture = SimBarWebTextures.Load(SimBarSeoulWindows.PanoramaResource);
         report.Check(texture != null, "The Seoul neon night image loads from Resources.");
         if (texture == null) return;
         string path = AssetDatabase.GetAssetPath(texture);

@@ -31,6 +31,9 @@ public sealed class SimBarArtLibrary : ScriptableObject
     public string originalGuitarAssetPath = "Assets/Model/gibson.fbx";
     [Tooltip("Optional optimized stage guitar. The original high-poly asset is never cloned as a fallback.")]
     public GameObject stageGuitar;
+    [Tooltip("Original walking model used by the legacy customer prototype instead of duplicated Resources FBXs.")]
+    public GameObject legacyWalkingModel;
+    public AnimationClip legacyWalkingClip;
 
     public CharacterAsset Find(string role, int variant)
     {

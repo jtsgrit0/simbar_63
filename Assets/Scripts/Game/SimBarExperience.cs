@@ -121,8 +121,8 @@ public sealed partial class SimBarExperience : MonoBehaviour
 
     private void SuppressLegacyPresentation()
     {
-        // The scene contains a useful authored prototype. Hide it while retaining
-        // it in the scene file, then place the final runtime venue in front.
+        // Retain authored prototypes for editing, then hide them in Play Mode.
+        // The EditorOnly preview hierarchy is stripped from player builds.
         GameObject prototype = GameObject.Find("SimBar_CozyRoom");
         if (prototype != null)
             prototype.SetActive(false);

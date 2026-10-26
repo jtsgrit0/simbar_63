@@ -113,6 +113,7 @@ public static class SimBarReferenceSceneSetup
         SimBarExperience.FrameReferenceCamera(camera);
         new GameObject("SimBarExperience").AddComponent<SimBarExperience>();
         var preview = new GameObject("SimBar_EditorPreview");
+        preview.tag = "EditorOnly";
         var environment = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
         environment.transform.SetParent(preview.transform, false);
         PreviewPerson(preview.transform, "singer", new Vector3(5.5f, 0.62f, 2.7f), 180f, 0);

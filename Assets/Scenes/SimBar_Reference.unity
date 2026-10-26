@@ -28395,7 +28395,7 @@ GameObject:
   - component: {fileID: 876225230}
   m_Layer: 0
   m_Name: SimBar_EditorPreview
-  m_TagString: Untagged
+  m_TagString: EditorOnly
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

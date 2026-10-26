@@ -3,12 +3,12 @@
 These portraits are project-bound raster assets for the three-owner title screen.
 The game renders names, selection highlights and buttons as native Unity UI.
 All illustrations use the built-in `image_gen` tool; the selected files are
-copied unchanged into `Assets/Resources/SimBarArt/Owners/` and their generated
+copied unchanged into `Assets/Art/StartupTextures/Owners/` and their generated
 originals are retained at the default output location.
 
 ## Original woman owner
 
-- Runtime asset: `Assets/Resources/SimBarArt/Owners/OwnerFemale.png`.
+- Runtime asset: `Assets/Art/StartupTextures/Owners/OwnerFemale.png`.
 - Source size: 1122 × 1402 pixels; the title crops the image without stretching.
 - Original: `C:/Users/Jtsgr/.codex/generated_images/01a15d64-7e98-7de3-b801-d7f23d06a304/exec-f5055d55-99dd-44d9-804e-45c675c7ac9e.png`.
 - An original fictional adult character; no real person's likeness is used.
@@ -19,7 +19,7 @@ Final prompt:
 
 ## FF owner
 
-- Runtime asset: `Assets/Resources/SimBarArt/Owners/OwnerFF.png`.
+- Runtime asset: `Assets/Art/StartupTextures/Owners/OwnerFF.png`.
 - Source size: 1122 × 1402 pixels.
 - Original: `C:/Users/Jtsgr/.codex/generated_images/01a15d64-7e98-7de3-b801-d7f23d06a304/exec-dce6c997-ef14-4ae2-a587-dccff3fcda05.png`.
 - Face reference: the user's attached `스크린샷 2026-10-25 124427.png`, explicitly selected by the user for the FF owner. The source photo is retained locally and is not copied into the repository.
@@ -32,7 +32,7 @@ Final prompt:
 
 ## Pet Sounds owner
 
-- Runtime asset: `Assets/Resources/SimBarArt/Owners/OwnerPetSounds.png`.
+- Runtime asset: `Assets/Art/StartupTextures/Owners/OwnerPetSounds.png`.
 - Source size: 1122 × 1402 pixels.
 - Original: `C:/Users/Jtsgr/.codex/generated_images/01a15d64-7e98-7de3-b801-d7f23d06a304/exec-cd6bfc00-cda6-498b-a1ef-e260909ff5da.png`.
 - Face reference: [Jazz Avenue, 부기우기 대표 황순재 interview](https://www.youtube.com/watch?v=8r510wNulKA), January 5, 2022. The title and description identify the sole interview subject as 황순재.

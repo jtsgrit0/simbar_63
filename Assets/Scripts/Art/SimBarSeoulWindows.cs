@@ -47,7 +47,7 @@ public sealed class SimBarSeoulWindows : MonoBehaviour
         aperture = new Material(apertureTemplate) { name = "SimBar Window Aperture Stencil", renderQueue = (int)RenderQueue.Geometry + 1 };
         ownedMaterials.Add(aperture);
 
-        Texture2D panorama = Resources.Load<Texture2D>(PanoramaResource);
+        Texture2D panorama = SimBarWebTextures.Load(PanoramaResource);
         if (panorama != null)
         {
             city = OwnMaterial(cityTemplate, "SimBar Seoul Neon Night Exterior", new Color(0.83f, 0.83f, 0.86f, 1f), false);

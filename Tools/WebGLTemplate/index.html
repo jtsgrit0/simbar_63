@@ -8,6 +8,7 @@
     <title>SimBar</title>
     <link rel="icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="__SIMBAR_STYLESHEET__">
+    __SIMBAR_ASSET_HINTS__
   </head>
   <body>
     <main id="game-shell" data-player-state="loading">
@@ -118,10 +119,25 @@
         canvas.addEventListener("pointerdown", focusGame);
         fullscreenButton.hidden = !(shell.requestFullscreen || shell.webkitRequestFullscreen);
 
+        // Release builds use Unity's content hashes as filenames. Only those
+        // exact URLs can safely skip revalidation across future deployments.
+        const immutableBuildUrls = new Set([
+          build.loaderUrl, build.config.dataUrl, build.config.frameworkUrl, build.config.codeUrl
+        ].filter((value) => {
+          const url = new URL(value, document.baseURI);
+          return /\/[0-9a-f]{32}\.(data|wasm|framework\.js)(\.unityweb)?$/.test(url.pathname)
+            && /^[0-9a-f]{16}$/.test(url.searchParams.get("v") || "");
+        }).map((value) => new URL(value, document.baseURI).href));
         const config = {
           ...build.config,
           matchWebGLToCanvasSize: true,
           fullscreenElementID: "game-shell",
+          cacheControl(value) {
+            const url = new URL(value, document.baseURI);
+            if (immutableBuildUrls.has(url.href)) return "immutable";
+            return /\.(data|bundle)(\.(unityweb|br|gz))?$/.test(url.pathname)
+              ? "must-revalidate" : "no-store";
+          },
           showBanner(message, type) {
             if (type === "error") fail(message);
             else notice(message);
