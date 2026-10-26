@@ -26,8 +26,8 @@ public sealed partial class SimBarExperience
 
     private static string OwnerName(int index)
     {
-        if (index == 1) return SimBarLocalization.Text("FF OWNER", "FF 사장");
-        if (index == 2) return SimBarLocalization.Text("PET SOUNDS OWNER", "펫사운즈 사장");
+        if (index == 1) return SimBarLocalization.Text("HONGDAE FF OWNER", "홍대ff 사장");
+        if (index == 2) return SimBarLocalization.Text("ITAEWON PET SOUNDS OWNER", "이태원 펫사운즈 사장");
         return SimBarLocalization.Text("THE OWNER", "여사장");
     }
 
@@ -61,6 +61,24 @@ public sealed partial class SimBarExperience
         Texture2D night = SimBarWebTextures.Load("SimBarArt/Seoul/SeoulNeonNight");
         if (night != null)
         {
+            // Fill the whole title screen, including the area outside its card.
+            // Share the already loaded city texture with the in-card backdrop.
+            GameObject street = new GameObject("Owner Title Fullscreen Seoul Night", typeof(RectTransform), typeof(RawImage), typeof(AspectRatioFitter));
+            street.transform.SetParent(panel.parent, false);
+            street.transform.SetAsFirstSibling();
+            RawImage streetImage = street.GetComponent<RawImage>();
+            streetImage.texture = night;
+            streetImage.color = new Color(0.72f, 0.72f, 0.78f, 1f);
+            streetImage.raycastTarget = false;
+            RectTransform streetRect = streetImage.rectTransform;
+            streetRect.anchorMin = Vector2.zero;
+            streetRect.anchorMax = Vector2.one;
+            streetRect.offsetMin = Vector2.zero;
+            streetRect.offsetMax = Vector2.zero;
+            AspectRatioFitter streetFit = street.GetComponent<AspectRatioFitter>();
+            streetFit.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
+            streetFit.aspectRatio = night.width / (float)night.height;
+
             GameObject backdrop = new GameObject("Owner Title Seoul Night", typeof(RectTransform), typeof(RawImage));
             backdrop.transform.SetParent(panel, false);
             RawImage image = backdrop.GetComponent<RawImage>();
@@ -107,6 +125,9 @@ public sealed partial class SimBarExperience
             ownerBadges[i] = OpText("Journey Owner Badge Label " + i, badge.transform, string.Empty, 15, Vector2.zero, new Vector2(98f, 28f), OwnerAccents[i], TextAnchor.MiddleCenter);
             ownerNames[i] = OpText("Journey Owner Name " + i, card.transform, string.Empty, 30, new Vector2(0f, -158f), new Vector2(394f, 44f), Color.white, TextAnchor.MiddleCenter);
             ownerNames[i].fontStyle = FontStyle.Bold;
+            ownerNames[i].resizeTextForBestFit = true;
+            ownerNames[i].resizeTextMinSize = 20;
+            ownerNames[i].resizeTextMaxSize = 30;
             ownerDescriptions[i] = OpText("Journey Owner Description " + i, card.transform, string.Empty, 16, new Vector2(0f, -202f), new Vector2(396f, 31f), JuiMuted, TextAnchor.MiddleCenter);
         }
         ownerSelectionLabel = OpText("Journey Selected Owner", panel, string.Empty, 19, new Vector2(0f, -211f), new Vector2(1340f, 28f), JuiGold, TextAnchor.MiddleCenter);

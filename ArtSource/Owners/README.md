@@ -46,4 +46,6 @@ Final prompt:
 
 ## Production notes
 
+The two male portraits were refined again on October 26, 2026, keeping their facial contours and expressions while simplifying the shading and strengthening the GTA-style ink outlines. The exact edit prompts and selected outputs are in [GTA-20261026.md](GTA-20261026.md).
+
 All three selected illustrations were generated with the built-in image generation tool. The two male portraits use photo references; the fictional woman uses no reference. The current male portraits use the stronger GTA loading-screen cartoon treatment requested on October 25, 2026. Reference photos are not distributed in the game. The illustrated selection changes player identity only.

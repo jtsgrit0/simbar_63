@@ -74,6 +74,8 @@ public sealed partial class SimBarExperience : MonoBehaviour
     private Image performanceFill;
     private GameObject pausePanel;
     private AudioSource musicSource;
+    private readonly AudioClip[] generatedMusicClips = new AudioClip[Playlist.Length];
+    private bool musicWaitingForInput;
 
     private Material floorMat;
     private Material wallMat;
@@ -200,8 +202,37 @@ public sealed partial class SimBarExperience : MonoBehaviour
         musicSource.loop = true;
         musicSource.spatialBlend = 0f;
         musicSource.volume = 0.14f;
-        musicSource.clip = CreateProceduralTrack(playlistIndex);
+#if UNITY_WEBGL && !UNITY_EDITOR
+        // Browsers need a user gesture for audio, so keep synthesis off the startup path.
+        musicWaitingForInput = true;
+#else
+        PlaySelectedMusic();
+#endif
+    }
+
+    private void PlaySelectedMusic()
+    {
+        if (musicSource == null || musicWaitingForInput) return;
+        AudioClip clip = generatedMusicClips[playlistIndex];
+        if (clip == null)
+        {
+            clip = CreateProceduralTrack(playlistIndex);
+            generatedMusicClips[playlistIndex] = clip;
+        }
+        musicSource.Stop();
+        musicSource.clip = clip;
         musicSource.Play();
+    }
+
+    private void StartMusicOnInput()
+    {
+        if (!musicWaitingForInput) return;
+        bool pointerPressed = Pointer.current != null && Pointer.current.press.wasPressedThisFrame;
+        bool keyPressed = Keyboard.current != null && Keyboard.current.anyKey.wasPressedThisFrame;
+        bool touchPressed = Touchscreen.current != null && Touchscreen.current.primaryTouch.press.wasPressedThisFrame;
+        if (!pointerPressed && !keyPressed && !touchPressed) return;
+        musicWaitingForInput = false;
+        PlaySelectedMusic();
     }
 
     private AudioClip CreateProceduralTrack(int trackIndex)
@@ -740,6 +771,7 @@ public sealed partial class SimBarExperience : MonoBehaviour
 
     private void Update()
     {
+        StartMusicOnInput();
         if (Keyboard.current != null)
         {
             if (Keyboard.current.digit1Key.wasPressedThisFrame) RequestPlayerPour(0);
@@ -923,12 +955,7 @@ public sealed partial class SimBarExperience : MonoBehaviour
     {
         playlistIndex = index;
         performance = Mathf.Min(1f, performance + 0.08f);
-        if (musicSource != null)
-        {
-            musicSource.Stop();
-            musicSource.clip = CreateProceduralTrack(index);
-            musicSource.Play();
-        }
+        PlaySelectedMusic();
         for (int i = 0; i < playlistRows.Count; i++)
             playlistRows[i].color = i == index ? new Color(0.06f, 0.36f, 0.30f, 0.96f) : new Color(0.10f, 0.12f, 0.19f, 0.88f);
         ShowToast(SimBarLocalization.Text("NOW PLAYING: ", "재생 중: ") + Playlist[index].Substring(3).ToUpperInvariant(), 2.4f);

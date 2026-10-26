@@ -7,8 +7,25 @@
     <meta name="description" content="SimBar — 한국어와 English로 즐기는 브라우저 바 운영 게임.">
     <title>SimBar</title>
     <link rel="icon" href="TemplateData/favicon.ico">
-    <link rel="stylesheet" href="__SIMBAR_STYLESHEET__">
     __SIMBAR_ASSET_HINTS__
+    <script>
+      // Start the large transfers before a stylesheet can block body scripts.
+      window.simbarBootstrap = (() => {
+        const build = __SIMBAR_BUILD_CONFIG__;
+        __SIMBAR_ASSET_CACHE__
+        let assetStorage;
+        try { assetStorage = window.caches; } catch (_) { /* Storage may be disabled. */ }
+        const nativeAssetCache = createSimbarAssetFetch(window.fetch.bind(window), assetStorage,
+          document.baseURI, [build.config.dataUrl, build.config.codeUrl]);
+        if (nativeAssetCache.enabled) {
+          window.fetch = nativeAssetCache.fetch;
+          nativeAssetCache.prime(build.config.dataUrl);
+          nativeAssetCache.prime(build.config.codeUrl, { credentials: "same-origin" });
+        }
+        return { build, nativeAssetCache };
+      })();
+    </script>
+    <link rel="stylesheet" href="__SIMBAR_STYLESHEET__">
   </head>
   <body>
     <main id="game-shell" data-player-state="loading">
@@ -43,17 +60,7 @@
     <script>
       (() => {
         "use strict";
-        const build = __SIMBAR_BUILD_CONFIG__;
-        __SIMBAR_ASSET_CACHE__
-        let assetStorage;
-        try { assetStorage = window.caches; } catch (_) { /* Storage may be disabled. */ }
-        const nativeAssetCache = createSimbarAssetFetch(window.fetch.bind(window), assetStorage,
-          document.baseURI, [build.config.dataUrl, build.config.codeUrl]);
-        if (nativeAssetCache.enabled) {
-          window.fetch = nativeAssetCache.fetch;
-          nativeAssetCache.prime(build.config.dataUrl);
-          nativeAssetCache.prime(build.config.codeUrl, { credentials: "same-origin" });
-        }
+        const { build, nativeAssetCache } = window.simbarBootstrap;
         const shell = document.getElementById("game-shell");
         const canvas = document.getElementById("unity-canvas");
         const loadingPanel = document.getElementById("loading-panel");

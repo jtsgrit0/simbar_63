@@ -7,49 +7,17 @@
     <meta name="description" content="SimBar — 한국어와 English로 즐기는 브라우저 바 운영 게임.">
     <title>SimBar</title>
     <link rel="icon" href="TemplateData/favicon.ico">
-    <link rel="stylesheet" href="TemplateData/style.css?v=aefa58239a8fcc60">
     <link rel="preload" as="script" href="Build/5e82fa2127550411bf63889c835d0369.loader.js?v=512c957d406cb049">
     <link rel="preload" as="script" href="Build/dbfcf343c74c272fb7c2b69865b9a33e.framework.js?v=e89b59ac33442555">
-  </head>
-  <body>
-    <main id="game-shell" data-player-state="loading">
-      <header class="game-toolbar">
-        <h1>SimBar</h1>
-        <p id="toolbar-status" role="status" aria-live="polite"></p>
-        <button id="fullscreen-button" type="button" aria-pressed="false" aria-label="전체 화면 / Full screen" title="전체 화면 / Full screen" disabled>
-          <span aria-hidden="true">⛶</span> <span id="fullscreen-label">전체 화면 / Full screen</span>
-        </button>
-      </header>
-      <div id="game-stage">
-        <canvas id="unity-canvas" width="1280" height="720" tabindex="0"
-                aria-label="SimBar 게임 화면 / SimBar game"></canvas>
-        <div id="loading-panel" role="status" aria-live="polite">
-          <div class="loading-card">
-            <p class="loading-title">SimBar</p>
-            <p>게임을 불러오는 중입니다. / Loading game…</p>
-            <progress id="loading-progress" max="100" value="0" aria-label="게임 로딩 / Game loading"></progress>
-            <p id="loading-percent">0%</p>
-          </div>
-        </div>
-        <section id="error-panel" aria-labelledby="error-title" role="alert" hidden>
-          <div class="error-card">
-            <h2 id="error-title">게임을 불러오지 못했습니다. / Unable to load the game.</h2>
-            <p id="error-message"></p>
-            <button id="reload-button" type="button">다시 시도 / Try again</button>
-          </div>
-        </section>
-      </div>
-      <noscript>게임을 실행하려면 JavaScript를 켜 주세요. / Enable JavaScript to play.</noscript>
-    </main>
     <script>
-      (() => {
-        "use strict";
+      // Start the large transfers before a stylesheet can block body scripts.
+      window.simbarBootstrap = (() => {
         const build = {
   "loaderUrl": "Build/5e82fa2127550411bf63889c835d0369.loader.js?v=512c957d406cb049",
   "config": {
-    "dataUrl": "Build/7ac28be27756a99a70a8430bafc10979.data?v=9f679d8600015fb1",
+    "dataUrl": "Build/fc4fe070338d9bb6c0f114d25baa1cf4.data?v=3163925be69a3624",
     "frameworkUrl": "Build/dbfcf343c74c272fb7c2b69865b9a33e.framework.js?v=e89b59ac33442555",
-    "codeUrl": "Build/da977d7c5d3f379e72c36e64f238f7ac.wasm?v=d21a4b8a5397a591",
+    "codeUrl": "Build/effb8071774bda3aec82fb159baa8fa6.wasm?v=40e695d9351a8a27",
     "streamingAssetsUrl": "StreamingAssets",
     "arguments": [],
     "companyName": "DefaultCompany",
@@ -182,6 +150,45 @@ function createSimbarAssetFetch(nativeFetch, cacheStorage, baseURI, assetUrls) {
           nativeAssetCache.prime(build.config.dataUrl);
           nativeAssetCache.prime(build.config.codeUrl, { credentials: "same-origin" });
         }
+        return { build, nativeAssetCache };
+      })();
+    </script>
+    <link rel="stylesheet" href="TemplateData/style.css?v=aefa58239a8fcc60">
+  </head>
+  <body>
+    <main id="game-shell" data-player-state="loading">
+      <header class="game-toolbar">
+        <h1>SimBar</h1>
+        <p id="toolbar-status" role="status" aria-live="polite"></p>
+        <button id="fullscreen-button" type="button" aria-pressed="false" aria-label="전체 화면 / Full screen" title="전체 화면 / Full screen" disabled>
+          <span aria-hidden="true">⛶</span> <span id="fullscreen-label">전체 화면 / Full screen</span>
+        </button>
+      </header>
+      <div id="game-stage">
+        <canvas id="unity-canvas" width="1280" height="720" tabindex="0"
+                aria-label="SimBar 게임 화면 / SimBar game"></canvas>
+        <div id="loading-panel" role="status" aria-live="polite">
+          <div class="loading-card">
+            <p class="loading-title">SimBar</p>
+            <p>게임을 불러오는 중입니다. / Loading game…</p>
+            <progress id="loading-progress" max="100" value="0" aria-label="게임 로딩 / Game loading"></progress>
+            <p id="loading-percent">0%</p>
+          </div>
+        </div>
+        <section id="error-panel" aria-labelledby="error-title" role="alert" hidden>
+          <div class="error-card">
+            <h2 id="error-title">게임을 불러오지 못했습니다. / Unable to load the game.</h2>
+            <p id="error-message"></p>
+            <button id="reload-button" type="button">다시 시도 / Try again</button>
+          </div>
+        </section>
+      </div>
+      <noscript>게임을 실행하려면 JavaScript를 켜 주세요. / Enable JavaScript to play.</noscript>
+    </main>
+    <script>
+      (() => {
+        "use strict";
+        const { build, nativeAssetCache } = window.simbarBootstrap;
         const shell = document.getElementById("game-shell");
         const canvas = document.getElementById("unity-canvas");
         const loadingPanel = document.getElementById("loading-panel");

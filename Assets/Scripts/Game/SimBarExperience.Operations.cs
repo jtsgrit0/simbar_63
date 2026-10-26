@@ -593,10 +593,7 @@ public sealed partial class SimBarExperience
             opAutoServeTimer = OpFinite(state.autoServeTimer, 12f, 0.1f, 12f);
             opPromoterTimer = OpFinite(state.promoterTimer, 0f, 0f, 20f);
             ImportJourneyState(state.journeyJson);
-            if (musicSource != null)
-            {
-                musicSource.Stop(); musicSource.clip = CreateProceduralTrack(playlistIndex); musicSource.Play();
-            }
+            PlaySelectedMusic();
             for (int i = 0; i < playlistRows.Count; i++)
                 playlistRows[i].color = i == playlistIndex ? new Color(0.06f, 0.36f, 0.30f, 0.96f) : new Color(0.10f, 0.12f, 0.19f, 0.88f);
         }

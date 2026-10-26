@@ -95,5 +95,15 @@ public sealed partial class SimBarExperience
     private void OnDestroy()
     {
         SimBarLocalization.Changed -= RefreshLanguageUI;
+        if (musicSource != null)
+        {
+            musicSource.Stop();
+            musicSource.clip = null;
+        }
+        for (int i = 0; i < generatedMusicClips.Length; i++)
+        {
+            if (generatedMusicClips[i] != null) Destroy(generatedMusicClips[i]);
+            generatedMusicClips[i] = null;
+        }
     }
 }
