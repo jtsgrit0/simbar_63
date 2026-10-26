@@ -23,6 +23,7 @@ public sealed class SimBarMiniMap : MonoBehaviour
         owner.target = new RenderTexture(256, 224, 16, RenderTextureFormat.ARGB32) { name = "SIMBAR actual venue overview" };
         owner.target.Create();
         var camera = cameraObject.AddComponent<Camera>();
+        camera.cullingMask &= ~SimBarNightBackdrop.LayerMask;
         camera.orthographic = true;
         camera.orthographicSize = 9.4f;
         camera.nearClipPlane = 0.1f;

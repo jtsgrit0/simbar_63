@@ -27,6 +27,7 @@ public static class SimBarWebTextures
         new Definition("SimBarArt/Owners/OwnerFF", "Assets/Art/StartupTextures/Owners/OwnerFF.png", "SimBarWebTextures/OwnerFF", false),
         new Definition("SimBarArt/Owners/OwnerPetSounds", "Assets/Art/StartupTextures/Owners/OwnerPetSounds.png", "SimBarWebTextures/OwnerPetSounds", false),
         new Definition("SimBarArt/Seoul/SeoulNeonNight", "Assets/Art/StartupTextures/Seoul/SeoulNeonNight.png", "SimBarWebTextures/SeoulNeonNight", true),
+        new Definition("SimBarArt/Seoul/SeoulNightDistricts", "Assets/Art/StartupTextures/Seoul/SeoulNightDistricts.png", "SimBarWebTextures/SeoulNightDistricts", false),
         new Definition("SimBarArt/Posters/Queen", "Assets/Art/StartupTextures/Posters/Queen.png", "SimBarWebTextures/Posters_Queen", true),
         new Definition("SimBarArt/Posters/Nirvana", "Assets/Art/StartupTextures/Posters/Nirvana.png", "SimBarWebTextures/Posters_Nirvana", true),
         new Definition("SimBarArt/Posters/TheBeatles", "Assets/Art/StartupTextures/Posters/TheBeatles.png", "SimBarWebTextures/Posters_TheBeatles", true),

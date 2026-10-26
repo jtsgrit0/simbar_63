@@ -297,6 +297,7 @@ public sealed partial class SimBarExperience : MonoBehaviour
     private void BuildEnvironment()
     {
         worldRoot = new GameObject("SimBarLiveVenue").transform;
+        SimBarNightBackdrop.Build(worldRoot, Camera.main);
 
         GameObject venue = Resources.Load<GameObject>("SimBarArt/SimBarVenueReady")
             ?? Resources.Load<GameObject>("SimBarArt/SimBarVenue");
