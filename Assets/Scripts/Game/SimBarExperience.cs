@@ -123,6 +123,7 @@ public sealed partial class SimBarExperience : MonoBehaviour
 
     private void SuppressLegacyPresentation()
     {
+#if !UNITY_WEBGL || UNITY_EDITOR
         // Retain authored prototypes for editing, then hide them in Play Mode.
         // The EditorOnly preview hierarchy is stripped from player builds.
         GameObject prototype = GameObject.Find("SimBar_CozyRoom");
@@ -147,6 +148,7 @@ public sealed partial class SimBarExperience : MonoBehaviour
         // canvas so it cannot sit behind the purpose-built HUD.
         foreach (Canvas oldCanvas in FindObjectsByType<Canvas>(FindObjectsInactive.Include))
             Destroy(oldCanvas.gameObject);
+#endif
     }
 
     private void ConfigureCamera()
@@ -761,12 +763,14 @@ public sealed partial class SimBarExperience : MonoBehaviour
         AssignOrder(patrons[1], 0);
         AssignOrder(patrons[4], 1);
         AssignOrder(patrons[8], 2);
+#if !UNITY_WEBGL || UNITY_EDITOR
         if (GameManager.Instance != null)
         {
             GameManager.Instance.money = cash;
             GameManager.Instance.reputation = fans;
             GameManager.Instance.isOpen = true;
         }
+#endif
     }
 
     private void Update()
@@ -1006,11 +1010,13 @@ public sealed partial class SimBarExperience : MonoBehaviour
         SetMeter(satisfactionFill, satisfaction);
         SetMeter(performanceFill, performance);
 
+#if !UNITY_WEBGL || UNITY_EDITOR
         if (GameManager.Instance != null)
         {
             GameManager.Instance.money = cash;
             GameManager.Instance.reputation = fans;
         }
+#endif
         RefreshOperationsHUD();
         RefreshJourneyHUD();
     }

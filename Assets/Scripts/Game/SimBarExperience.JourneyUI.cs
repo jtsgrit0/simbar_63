@@ -271,6 +271,14 @@ public sealed partial class SimBarExperience
     {
         if (!juiBuilt) return;
         bool visible = !JourneyValidationMode;
+        // The opaque Seoul title covers the venue. Avoid drawing/animating the
+        // hidden 3D scene (and compiling its shaders) on the first title frame.
+        if (worldRoot != null)
+        {
+            bool showVenue = !visible || !JourneyIsLobby || !ownerTitleHasFullscreenBackdrop;
+            if (worldRoot.gameObject.activeSelf != showVenue)
+                worldRoot.gameObject.SetActive(showVenue);
+        }
         juiHud.SetActive(visible && JourneyIsPlaying);
         JourneySetOverlay(juiLobby, visible && JourneyIsLobby);
         JourneySetOverlay(juiGuide, visible && JourneyIsGuide);

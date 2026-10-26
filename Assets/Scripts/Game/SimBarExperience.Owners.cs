@@ -19,6 +19,7 @@ public sealed partial class SimBarExperience
     private readonly Text[] ownerDescriptions = new Text[3];
     private readonly Text[] ownerBadges = new Text[3];
     private Text ownerSelectionLabel;
+    private bool ownerTitleHasFullscreenBackdrop;
 
     public int SelectedOwnerIndex { get { return selectedOwner; } }
     public string SelectedOwnerId { get { return OwnerIds[Mathf.Clamp(selectedOwner, 0, 2)]; } }
@@ -61,6 +62,7 @@ public sealed partial class SimBarExperience
         Texture2D night = SimBarWebTextures.Load("SimBarArt/Seoul/SeoulNeonNight");
         if (night != null)
         {
+            ownerTitleHasFullscreenBackdrop = true;
             // Fill the whole title screen, including the area outside its card.
             // Share the already loaded city texture with the in-card backdrop.
             GameObject street = new GameObject("Owner Title Fullscreen Seoul Night", typeof(RectTransform), typeof(RawImage), typeof(AspectRatioFitter));
