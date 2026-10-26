@@ -292,7 +292,7 @@ public sealed partial class SimBarCharacterVisual : MonoBehaviour
 
     private Transform Primitive(string name, PrimitiveType type, Vector3 scale, Color color)
     {
-        var go = GameObject.CreatePrimitive(type);
+        var go = SimBarVisualPrimitive.Create(type);
         go.name = name;
         go.transform.SetParent(pivot, false);
         go.transform.localScale = scale;

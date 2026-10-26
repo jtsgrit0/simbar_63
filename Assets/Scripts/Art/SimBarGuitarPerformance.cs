@@ -387,7 +387,7 @@ public sealed class SimBarGuitarPerformance : MonoBehaviour
 
     private void Buckle(string name, Vector3 position)
     {
-        var button = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+        var button = SimBarVisualPrimitive.Create(PrimitiveType.Cylinder);
         button.name = name;
         button.transform.SetParent(Guitar, false);
         button.transform.localPosition = position;

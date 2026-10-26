@@ -76,7 +76,7 @@ public sealed partial class SimBarFloorGraffiti : MonoBehaviour
 
     private void FitTitles(int artist)
     {
-        Texture2D texture = Resources.Load<Texture2D>("SimBarArt/Graffiti/" + ArtistKeys[artist]);
+        Texture2D texture = SimBarWebTextures.Load("SimBarArt/Graffiti/" + ArtistKeys[artist]);
         if (texture == null) return;
         float aspect = texture.width / (float)Mathf.Max(1, texture.height);
         for (int index = 0; index < paintMarks[artist].Count; index++)
@@ -93,7 +93,7 @@ public sealed partial class SimBarFloorGraffiti : MonoBehaviour
     private void Paint(int artist, Material template)
     {
         string key = ArtistKeys[artist];
-        Texture2D texture = Resources.Load<Texture2D>("SimBarArt/Graffiti/" + key);
+        Texture2D texture = SimBarWebTextures.Load("SimBarArt/Graffiti/" + key);
         if (texture == null)
         {
             Debug.LogWarning("SimBar floor graffiti texture is missing: " + key);

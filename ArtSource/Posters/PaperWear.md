@@ -1,6 +1,6 @@
 # Worn gig-paper texture
 
-Saved asset: `Assets/Resources/SimBarArt/Posters/PaperWear.png`. Generated with the built-in `image_gen` tool on 2026-10-24; copied unmodified, with the original generation output retained. Imported at a 512-pixel maximum with mipmaps and used on torn-paper remnants and wheatpaste borders in the wall collage.
+Saved asset: `Assets/Art/StartupTextures/Posters/PaperWear.png`. Generated with the built-in `image_gen` tool on 2026-10-24; copied unmodified, with the original generation output retained. Imported at a 512-pixel maximum with mipmaps and used on torn-paper remnants and wheatpaste borders in the wall collage.
 
 Final generation prompt:
 

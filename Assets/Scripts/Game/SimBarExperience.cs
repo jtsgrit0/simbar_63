@@ -1058,7 +1058,7 @@ public sealed partial class SimBarExperience : MonoBehaviour
 
     private GameObject CreatePrimitive(string name, PrimitiveType type, Vector3 localPosition, Vector3 localScale, Material material, Transform parent)
     {
-        GameObject primitive = GameObject.CreatePrimitive(type);
+        GameObject primitive = SimBarVisualPrimitive.Create(type);
         primitive.name = name;
         primitive.transform.SetParent(parent, false);
         primitive.transform.localPosition = localPosition;

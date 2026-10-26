@@ -26,7 +26,20 @@ public static class SimBarWebTextures
         new Definition("SimBarArt/Owners/OwnerFemale", "Assets/Art/StartupTextures/Owners/OwnerFemale.png", "SimBarWebTextures/OwnerFemale", false),
         new Definition("SimBarArt/Owners/OwnerFF", "Assets/Art/StartupTextures/Owners/OwnerFF.png", "SimBarWebTextures/OwnerFF", false),
         new Definition("SimBarArt/Owners/OwnerPetSounds", "Assets/Art/StartupTextures/Owners/OwnerPetSounds.png", "SimBarWebTextures/OwnerPetSounds", false),
-        new Definition("SimBarArt/Seoul/SeoulNeonNight", "Assets/Art/StartupTextures/Seoul/SeoulNeonNight.png", "SimBarWebTextures/SeoulNeonNight", true)
+        new Definition("SimBarArt/Seoul/SeoulNeonNight", "Assets/Art/StartupTextures/Seoul/SeoulNeonNight.png", "SimBarWebTextures/SeoulNeonNight", true),
+        new Definition("SimBarArt/Posters/Queen", "Assets/Art/StartupTextures/Posters/Queen.png", "SimBarWebTextures/Posters_Queen", true),
+        new Definition("SimBarArt/Posters/Nirvana", "Assets/Art/StartupTextures/Posters/Nirvana.png", "SimBarWebTextures/Posters_Nirvana", true),
+        new Definition("SimBarArt/Posters/TheBeatles", "Assets/Art/StartupTextures/Posters/TheBeatles.png", "SimBarWebTextures/Posters_TheBeatles", true),
+        new Definition("SimBarArt/Posters/TaylorSwift", "Assets/Art/StartupTextures/Posters/TaylorSwift.png", "SimBarWebTextures/Posters_TaylorSwift", true),
+        new Definition("SimBarArt/Posters/Blackpink", "Assets/Art/StartupTextures/Posters/Blackpink.png", "SimBarWebTextures/Posters_Blackpink", true),
+        new Definition("SimBarArt/Posters/PopNight", "Assets/Art/StartupTextures/Posters/PopNight.png", "SimBarWebTextures/Posters_PopNight", true),
+        new Definition("SimBarArt/Posters/PaperWear", "Assets/Art/StartupTextures/Posters/PaperWear.png", "SimBarWebTextures/Posters_PaperWear", true),
+        new Definition("SimBarArt/Graffiti/Queen", "Assets/Art/StartupTextures/Graffiti/Queen.png", "SimBarWebTextures/Graffiti_Queen", true),
+        new Definition("SimBarArt/Graffiti/Nirvana", "Assets/Art/StartupTextures/Graffiti/Nirvana.png", "SimBarWebTextures/Graffiti_Nirvana", true),
+        new Definition("SimBarArt/Graffiti/TheBeatles", "Assets/Art/StartupTextures/Graffiti/TheBeatles.png", "SimBarWebTextures/Graffiti_TheBeatles", true),
+        new Definition("SimBarArt/Graffiti/TaylorSwift", "Assets/Art/StartupTextures/Graffiti/TaylorSwift.png", "SimBarWebTextures/Graffiti_TaylorSwift", true),
+        new Definition("SimBarArt/Graffiti/Blackpink", "Assets/Art/StartupTextures/Graffiti/Blackpink.png", "SimBarWebTextures/Graffiti_Blackpink", true),
+        new Definition("SimBarArt/Graffiti/SpraySplatter", "Assets/Art/StartupTextures/Graffiti/SpraySplatter.png", "SimBarWebTextures/Graffiti_SpraySplatter", true)
     };
     private static readonly Dictionary<string, Texture2D> decoded = new Dictionary<string, Texture2D>();
 

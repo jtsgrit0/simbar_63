@@ -44,6 +44,16 @@
       (() => {
         "use strict";
         const build = __SIMBAR_BUILD_CONFIG__;
+        __SIMBAR_ASSET_CACHE__
+        let assetStorage;
+        try { assetStorage = window.caches; } catch (_) { /* Storage may be disabled. */ }
+        const nativeAssetCache = createSimbarAssetFetch(window.fetch.bind(window), assetStorage,
+          document.baseURI, [build.config.dataUrl, build.config.codeUrl]);
+        if (nativeAssetCache.enabled) {
+          window.fetch = nativeAssetCache.fetch;
+          nativeAssetCache.prime(build.config.dataUrl);
+          nativeAssetCache.prime(build.config.codeUrl, { credentials: "same-origin" });
+        }
         const shell = document.getElementById("game-shell");
         const canvas = document.getElementById("unity-canvas");
         const loadingPanel = document.getElementById("loading-panel");
@@ -134,6 +144,8 @@
           fullscreenElementID: "game-shell",
           cacheControl(value) {
             const url = new URL(value, document.baseURI);
+            if (nativeAssetCache.enabled && immutableBuildUrls.has(url.href)
+                && /\.(data|wasm)$/.test(url.pathname)) return "no-store";
             if (immutableBuildUrls.has(url.href)) return "immutable";
             return /\.(data|bundle)(\.(unityweb|br|gz))?$/.test(url.pathname)
               ? "must-revalidate" : "no-store";
@@ -145,6 +157,7 @@
         };
         const loader = document.createElement("script");
         loader.src = build.loaderUrl;
+        let displayedPercent = -1;
         // Resolves with the Unity instance after startup; rejects if the player cannot load.
         window.simbarPlayerReady = new Promise((resolve, reject) => {
           loader.onerror = () => reject(new Error("실행 파일을 내려받지 못했습니다. / Could not download the game loader."));
@@ -155,8 +168,11 @@
             }
             Promise.resolve().then(() => createUnityInstance(canvas, config, (value) => {
               const percent = Math.min(100, Math.max(0, Math.round(value * 100)));
-              progress.value = percent;
-              progressText.textContent = percent + "%";
+              if (percent !== displayedPercent) {
+                displayedPercent = percent;
+                progress.value = percent;
+                progressText.textContent = percent + "%";
+              }
             })).then((instance) => {
               if (shell.dataset.playerState !== "error") {
                 shell.dataset.playerState = "ready";

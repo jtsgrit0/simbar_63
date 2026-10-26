@@ -40,7 +40,7 @@ public static class SimBarMusicPostersVerification
         var textures = new HashSet<Texture2D>();
         foreach (string key in keys)
         {
-            Texture2D texture = Resources.Load<Texture2D>("SimBarArt/Posters/" + key);
+            Texture2D texture = SimBarWebTextures.Load("SimBarArt/Posters/" + key);
             report.Check(texture != null, key + " wall artwork loads from Resources.");
             if (texture == null) continue;
             textures.Add(texture);
@@ -195,7 +195,7 @@ public static class SimBarMusicPostersVerification
         bool positiveYaw = false, negativeYaw = false;
         foreach (string key in SimBarFloorGraffiti.ArtistKeys)
         {
-            Texture2D texture = Resources.Load<Texture2D>("SimBarArt/Graffiti/" + key);
+            Texture2D texture = SimBarWebTextures.Load("SimBarArt/Graffiti/" + key);
             Transform paint = owner.transform.Find(key);
             report.Check(texture != null && paint != null, key + " floor name and Resource texture are present.");
             if (texture == null || paint == null) continue;
@@ -248,7 +248,7 @@ public static class SimBarMusicPostersVerification
 
     private static void CheckSplatter(SimBarRuntimeVerification.Report report, SimBarFloorGraffiti owner)
     {
-        Texture2D stamp = Resources.Load<Texture2D>("SimBarArt/Graffiti/SpraySplatter");
+        Texture2D stamp = SimBarWebTextures.Load("SimBarArt/Graffiti/SpraySplatter");
         report.Check(stamp != null, "The transparent spray-droplet stamp loads from Resources.");
         if (stamp == null) return;
         CheckImport(report, stamp, "Spray droplets", true);

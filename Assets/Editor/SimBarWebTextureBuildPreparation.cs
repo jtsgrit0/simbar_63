@@ -11,7 +11,7 @@ using UnityEngine;
 public sealed class SimBarWebTextureBuildPreparation : IPreprocessBuildWithReport
 {
     private const int JpegQuality = 94;
-    private const string ExporterVersion = "1";
+    private const string ExporterVersion = "2";
     private const string CacheDirectory = "Library/SimBarWebTextures";
 
     public int callbackOrder => -1000;
@@ -43,6 +43,7 @@ public sealed class SimBarWebTextureBuildPreparation : IPreprocessBuildWithRepor
         byte[] encoded = null;
         int width = 0, height = 0;
         double meanError = 0d;
+        bool preserveAlpha = false;
         try
         {
             if (!wasReadable)
@@ -55,11 +56,12 @@ public sealed class SimBarWebTextureBuildPreparation : IPreprocessBuildWithRepor
             width = source.width;
             height = source.height;
             Color32[] originalPixels = source.GetPixels32();
+            preserveAlpha = originalPixels.Any(pixel => pixel.a != 255);
             // Copy raw imported pixels on the CPU: no render-texture gamma conversion or resizing.
-            copy = new Texture2D(width, height, TextureFormat.RGB24, false, false);
+            copy = new Texture2D(width, height, preserveAlpha ? TextureFormat.RGBA32 : TextureFormat.RGB24, false, false);
             copy.SetPixels32(originalPixels);
             copy.Apply(false, false);
-            encoded = ImageConversion.EncodeToJPG(copy, JpegQuality);
+            encoded = preserveAlpha ? ImageConversion.EncodeToPNG(copy) : ImageConversion.EncodeToJPG(copy, JpegQuality);
             if (encoded == null || encoded.Length == 0)
                 throw new BuildFailedException("Could not encode startup image: " + definition.sourcePath);
 
@@ -73,6 +75,8 @@ public sealed class SimBarWebTextureBuildPreparation : IPreprocessBuildWithRepor
                 absoluteError += Math.Abs(originalPixels[i].r - compressedPixels[i].r);
                 absoluteError += Math.Abs(originalPixels[i].g - compressedPixels[i].g);
                 absoluteError += Math.Abs(originalPixels[i].b - compressedPixels[i].b);
+                if (originalPixels[i].a != compressedPixels[i].a)
+                    throw new BuildFailedException("Compact startup image changed transparency: " + definition.sourcePath);
             }
             meanError = absoluteError / (originalPixels.Length * 3d * 255d);
             if (meanError > 0.025d)
@@ -98,7 +102,8 @@ public sealed class SimBarWebTextureBuildPreparation : IPreprocessBuildWithRepor
         }
         File.WriteAllText(cache, inputVersion + ":" + FileHash(target));
         Debug.Log("[SimBar Web Art] " + definition.resourceKey + ": " + width + "x" + height
-            + ", " + encoded.Length.ToString("N0") + " JPEG bytes, mean RGB error " + (meanError * 100d).ToString("F3") + "%.");
+            + ", " + encoded.Length.ToString("N0") + (preserveAlpha ? " PNG" : " JPEG")
+            + " bytes, mean RGB error " + (meanError * 100d).ToString("F3") + "%.");
     }
 
     private static string FileHash(string path)

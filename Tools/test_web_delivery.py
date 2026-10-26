@@ -80,8 +80,9 @@ class PackagingTests(unittest.TestCase):
         pages.package_player(self.source, self.output)
         self.assert_packaged_assets(assets, "")
         index = (self.output / "index.html").read_text(encoding="utf-8")
-        self.assertIn('as="fetch" type="application/wasm" crossorigin="anonymous"', index)
-        self.assertIn('href="' + self.config()["config"]["codeUrl"] + '"', index)
+        self.assertNotIn('as="fetch"', index)
+        self.assertIn('nativeAssetCache.prime(build.config.codeUrl', index)
+        self.assertNotIn("__SIMBAR_ASSET_CACHE__", index)
         self.assertNotIn("__SIMBAR_ASSET_HINTS__", index)
 
     def test_legacy_gzip_is_unpacked(self):
@@ -141,12 +142,13 @@ const assert = require('node:assert/strict');
 const build = {
   loaderUrl: 'Build/Game.loader.js?v=0123456789abcdef',
   config: {
-    dataUrl: 'Build/0123456789abcdef0123456789abcdef.data.unityweb?v=0123456789abcdef',
-    frameworkUrl: 'Build/0123456789abcdef0123456789abcdef.framework.js.unityweb?v=0123456789abcdef',
-    codeUrl: 'Build/0123456789abcdef0123456789abcdef.wasm.unityweb?v=0123456789abcdef'
+    dataUrl: 'Build/0123456789abcdef0123456789abcdef.data?v=0123456789abcdef',
+    frameworkUrl: 'Build/0123456789abcdef0123456789abcdef.framework.js?v=0123456789abcdef',
+    codeUrl: 'Build/0123456789abcdef0123456789abcdef.wasm?v=0123456789abcdef'
   }
 };
 const document = {baseURI: 'https://example.com/simbar/'};
+const nativeAssetCache = {enabled: false};
 """ + template[start:end] + """
 for (const [url, expected] of [
   [build.config.dataUrl, 'immutable'],
@@ -160,6 +162,10 @@ for (const [url, expected] of [
   ['https://elsewhere.com/simbar/' + build.config.codeUrl, 'no-store'],
   ['StreamingAssets/music.bundle', 'must-revalidate']
 ]) assert.equal(config.cacheControl(url), expected, url);
+nativeAssetCache.enabled = true;
+assert.equal(config.cacheControl(build.config.dataUrl), 'no-store');
+assert.equal(config.cacheControl(build.config.codeUrl), 'no-store');
+assert.equal(config.cacheControl(build.config.frameworkUrl), 'immutable');
 """
         result = subprocess.run([node, "-e", script], capture_output=True, text=True)
         self.assertEqual(result.returncode, 0, result.stderr)

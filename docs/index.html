@@ -8,9 +8,8 @@
     <title>SimBar</title>
     <link rel="icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="TemplateData/style.css?v=aefa58239a8fcc60">
-    <link rel="preload" as="script" href="Build/1e449b517fe62544dd80c5d8fa5a4e6c.loader.js?v=c68c79496894eba3">
+    <link rel="preload" as="script" href="Build/5e82fa2127550411bf63889c835d0369.loader.js?v=512c957d406cb049">
     <link rel="preload" as="script" href="Build/dbfcf343c74c272fb7c2b69865b9a33e.framework.js?v=e89b59ac33442555">
-    <link rel="preload" as="fetch" type="application/wasm" crossorigin="anonymous" href="Build/2c80113a04944b8989d83579a43e07c3.wasm?v=698932db775cf382">
   </head>
   <body>
     <main id="game-shell" data-player-state="loading">
@@ -46,11 +45,11 @@
       (() => {
         "use strict";
         const build = {
-  "loaderUrl": "Build/1e449b517fe62544dd80c5d8fa5a4e6c.loader.js?v=c68c79496894eba3",
+  "loaderUrl": "Build/5e82fa2127550411bf63889c835d0369.loader.js?v=512c957d406cb049",
   "config": {
-    "dataUrl": "Build/726dce8790ca735f1b5bcf2278083aa3.data?v=f497f47779c2a5f3",
+    "dataUrl": "Build/7ac28be27756a99a70a8430bafc10979.data?v=9f679d8600015fb1",
     "frameworkUrl": "Build/dbfcf343c74c272fb7c2b69865b9a33e.framework.js?v=e89b59ac33442555",
-    "codeUrl": "Build/2c80113a04944b8989d83579a43e07c3.wasm?v=698932db775cf382",
+    "codeUrl": "Build/da977d7c5d3f379e72c36e64f238f7ac.wasm?v=d21a4b8a5397a591",
     "streamingAssetsUrl": "StreamingAssets",
     "arguments": [],
     "companyName": "DefaultCompany",
@@ -58,6 +57,131 @@
     "productVersion": "0.1.0"
   }
 };
+        // The immutable URLs below refer to one exact build. Cache decoded HTTP
+// responses so both Unity's data reader and streaming Wasm compiler can reuse
+// them without downloading or decompressing the same build again.
+function createSimbarAssetFetch(nativeFetch, cacheStorage, baseURI, assetUrls) {
+  let base;
+  try { base = new URL(baseURI); } catch (_) { base = null; }
+  const allowed = new Set();
+  function buildAssetUrl(value) {
+    if (!base || !/^https?:$/.test(base.protocol)) return null;
+    try {
+      const url = new URL(value?.url || value, base);
+      if (url.origin === base.origin && !url.hash
+          && /\/[0-9a-f]{32}\.(data|wasm)$/.test(url.pathname)
+          && [...url.searchParams].length === 1
+          && /^[0-9a-f]{16}$/.test(url.searchParams.get("v") || "")) return url.href;
+    } catch (_) { /* Invalid or unrelated URLs use the original fetch. */ }
+    return null;
+  }
+  for (const value of assetUrls) {
+    const url = buildAssetUrl(value);
+    if (url) allowed.add(url);
+  }
+  const enabled = allowed.size > 0 && !!cacheStorage && typeof cacheStorage.open === "function";
+  const primed = new Map();
+  let cachePromise;
+
+  function pruneOldBuilds(cache) {
+    if (typeof cache.keys !== "function" || typeof cache.delete !== "function") return;
+    // Cleanup is best effort and never awaited by a request. Restrict it to
+    // versioned player assets in this cache, leaving metadata untouched.
+    Promise.resolve().then(() => cache.keys()).then(keys => Promise.all(keys.map(key => {
+      const url = buildAssetUrl(key);
+      return url && !allowed.has(url) ? cache.delete(key) : undefined;
+    }))).catch(() => {});
+  }
+
+  function candidate(input, init) {
+    if (!enabled) return null;
+    try {
+      const request = typeof input === "string" || input instanceof URL ? null : input;
+      const method = String(init?.method || request?.method || "GET").toUpperCase();
+      const mode = init?.cache || request?.cache || "default";
+      const signal = init?.signal || request?.signal;
+      if (method !== "GET" || mode === "no-store" || signal?.aborted) return null;
+      const headers = new Headers(init?.headers || request?.headers);
+      if (headers.has("range")) return null;
+      const url = new URL(request?.url || input, base);
+      if (!allowed.has(url.href)) return null;
+      return {
+        url: url.href,
+        reload: mode === "reload" || mode === "no-cache",
+        signature: JSON.stringify([
+          init?.credentials || request?.credentials || "same-origin",
+          init?.mode || request?.mode || "cors",
+          init?.redirect || request?.redirect || "follow",
+          [...headers.entries()].sort()
+        ])
+      };
+    } catch (_) { return null; }
+  }
+
+  function openCache() {
+    if (!cachePromise) {
+      const name = "SimBarAssets_v1:" + base.origin + new URL(".", base).pathname;
+      cachePromise = Promise.resolve().then(() => cacheStorage.open(name)).then(cache => {
+        pruneOldBuilds(cache);
+        return cache;
+      }).catch(() => null);
+    }
+    return cachePromise;
+  }
+
+  async function load(input, init, asset) {
+    const cache = await openCache();
+    if (cache && !asset.reload) {
+      try {
+        const response = await cache.match(asset.url);
+        if (response && response.status === 200) return response;
+      } catch (_) { /* Storage restrictions must not prevent the game loading. */ }
+    }
+    const response = await nativeFetch(input, init);
+    if (cache && response.status === 200) {
+      try {
+        // Do not wait for disk writes on the startup path. The other stream
+        // branch remains available immediately to the Wasm compiler or Unity.
+        Promise.resolve(cache.put(asset.url, response.clone())).catch(() => {});
+      } catch (_) { /* Quota or unsupported response: keep the network result. */ }
+    }
+    return response;
+  }
+
+  function fetchAsset(input, init) {
+    const asset = candidate(input, init);
+    if (!asset) return nativeFetch(input, init);
+    const pending = primed.get(asset.url);
+    if (!asset.reload && pending && pending.signature === asset.signature) {
+      primed.delete(asset.url);
+      return pending.response.then(response => response || load(input, init, asset));
+    }
+    return load(input, init, asset);
+  }
+
+  function prime(input, init) {
+    const asset = candidate(input, init);
+    if (!asset || asset.reload || primed.has(asset.url)) return;
+    // Only one reader receives this response. A failed speculative request is
+    // retried by the real reader instead of becoming an unhandled rejection.
+    primed.set(asset.url, {
+      signature: asset.signature,
+      response: load(input, init, asset).then(response => response.status === 200 ? response : null).catch(() => null)
+    });
+  }
+
+  return { fetch: fetchAsset, prime, enabled };
+}
+
+        let assetStorage;
+        try { assetStorage = window.caches; } catch (_) { /* Storage may be disabled. */ }
+        const nativeAssetCache = createSimbarAssetFetch(window.fetch.bind(window), assetStorage,
+          document.baseURI, [build.config.dataUrl, build.config.codeUrl]);
+        if (nativeAssetCache.enabled) {
+          window.fetch = nativeAssetCache.fetch;
+          nativeAssetCache.prime(build.config.dataUrl);
+          nativeAssetCache.prime(build.config.codeUrl, { credentials: "same-origin" });
+        }
         const shell = document.getElementById("game-shell");
         const canvas = document.getElementById("unity-canvas");
         const loadingPanel = document.getElementById("loading-panel");
@@ -148,6 +272,8 @@
           fullscreenElementID: "game-shell",
           cacheControl(value) {
             const url = new URL(value, document.baseURI);
+            if (nativeAssetCache.enabled && immutableBuildUrls.has(url.href)
+                && /\.(data|wasm)$/.test(url.pathname)) return "no-store";
             if (immutableBuildUrls.has(url.href)) return "immutable";
             return /\.(data|bundle)(\.(unityweb|br|gz))?$/.test(url.pathname)
               ? "must-revalidate" : "no-store";
@@ -159,6 +285,7 @@
         };
         const loader = document.createElement("script");
         loader.src = build.loaderUrl;
+        let displayedPercent = -1;
         // Resolves with the Unity instance after startup; rejects if the player cannot load.
         window.simbarPlayerReady = new Promise((resolve, reject) => {
           loader.onerror = () => reject(new Error("실행 파일을 내려받지 못했습니다. / Could not download the game loader."));
@@ -169,8 +296,11 @@
             }
             Promise.resolve().then(() => createUnityInstance(canvas, config, (value) => {
               const percent = Math.min(100, Math.max(0, Math.round(value * 100)));
-              progress.value = percent;
-              progressText.textContent = percent + "%";
+              if (percent !== displayedPercent) {
+                displayedPercent = percent;
+                progress.value = percent;
+                progressText.textContent = percent + "%";
+              }
             })).then((instance) => {
               if (shell.dataset.playerState !== "error") {
                 shell.dataset.playerState = "ready";

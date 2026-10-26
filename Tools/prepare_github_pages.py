@@ -129,9 +129,6 @@ def write_web_host(source, output, assets=None):
     hints = ['<link rel="preload" as="script" href="' + html.escape(build["loaderUrl"], quote=True) + '">']
     if config["frameworkUrl"].partition("?")[0].endswith(".js"):
         hints.append('<link rel="preload" as="script" href="' + html.escape(config["frameworkUrl"], quote=True) + '">')
-    if config["codeUrl"].partition("?")[0].endswith(".wasm"):
-        hints.append('<link rel="preload" as="fetch" type="application/wasm" crossorigin="anonymous" href="'
-                     + html.escape(config["codeUrl"], quote=True) + '">')
     # Keep Unity's internal product metadata so saved preferences remain available.
     encoded = json.dumps(build, ensure_ascii=False, indent=2).replace("<", "\\u003c")
     stylesheet = output / "TemplateData/style.css"
@@ -140,6 +137,7 @@ def write_web_host(source, output, assets=None):
     index = (TEMPLATE / "index.html").read_text(encoding="utf-8")
     index = index.replace("__SIMBAR_BUILD_CONFIG__", encoded)
     index = index.replace("__SIMBAR_ASSET_HINTS__", "\n    ".join(hints))
+    index = index.replace("__SIMBAR_ASSET_CACHE__", (TEMPLATE / "asset-cache.js").read_text(encoding="utf-8"))
     index = index.replace("__SIMBAR_STYLESHEET__", "TemplateData/style.css?v=" + file_version(stylesheet))
     (output / "index.html").write_text(index, encoding="utf-8", newline="\n")
     (output / ".nojekyll").touch()

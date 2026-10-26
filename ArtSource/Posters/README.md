@@ -8,12 +8,12 @@ Six original illustrated music posters generated with the built-in `image_gen` t
 
 | Artist / design | Asset | Current use |
 | --- | --- | --- |
-| Nirvana | `Assets/Resources/SimBarArt/Posters/Nirvana.png` | Pasted papers on both walls |
-| The Beatles | `Assets/Resources/SimBarArt/Posters/TheBeatles.png` | Pasted papers on both walls |
-| BLACKPINK | `Assets/Resources/SimBarArt/Posters/Blackpink.png` | Pasted papers on both walls |
-| Queen | `Assets/Resources/SimBarArt/Posters/Queen.png` | Pasted papers on both walls |
-| POP NIGHT | `Assets/Resources/SimBarArt/Posters/PopNight.png` | Pasted papers on both walls |
-| Taylor Swift | `Assets/Resources/SimBarArt/Posters/TaylorSwift.png` | Pasted papers on both walls |
+| Nirvana | `Assets/Art/StartupTextures/Posters/Nirvana.png` | Pasted papers on both walls |
+| The Beatles | `Assets/Art/StartupTextures/Posters/TheBeatles.png` | Pasted papers on both walls |
+| BLACKPINK | `Assets/Art/StartupTextures/Posters/Blackpink.png` | Pasted papers on both walls |
+| Queen | `Assets/Art/StartupTextures/Posters/Queen.png` | Pasted papers on both walls |
+| POP NIGHT | `Assets/Art/StartupTextures/Posters/PopNight.png` | Pasted papers on both walls |
+| Taylor Swift | `Assets/Art/StartupTextures/Posters/TaylorSwift.png` | Pasted papers on both walls |
 
 PNG originals are copied into Resources without editing; the generated originals remain in the image-generation output directory. Unity imports them with a 512-pixel maximum, mipmaps, preserved non-power-of-two proportions and clamped edges. RGB textures use about 5.2 MB of GPU memory for all six textures, including mipmaps. Opaque Unlit materials keep the paper artwork visible under changing stage lights; the Resources material template retains that shader variant in web builds.
 

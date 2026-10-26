@@ -49,9 +49,9 @@ python Tools/prepare_github_pages.py --source Builds/Pages/SimBarPlayerWebGL
 
 릴리스 프로필은 Unity 파일 압축과 `Decompression Fallback`을 끕니다. GitHub Pages의 HTTP gzip 압축은 브라우저가 처리하고, WebAssembly는 내려받는 동안 컴파일합니다. JavaScript Brotli 압축 해제로 빠른 회선·재접속의 시작이 늦어지는 것을 방지합니다. 다른 호스팅에서도 `.wasm`은 `application/wasm`으로 제공하고 HTTP 압축을 켜 주세요. 패키징 스크립트는 이전 `.unityweb` 빌드도 그대로 보존하며, `.br`/`.gz` 빌드는 압축을 해제해 배포합니다.
 
-사장 초상화와 서울 야경 원본은 `Assets/Art/StartupTextures/`에 보관합니다. 빌드 전에 같은 해상도의 JPEG 데이터를 `Assets/Resources/SimBarWebTextures/*.bytes`로 자동 생성하고, 실행 중 한 번만 디코딩해 공유합니다. 인코더는 해상도와 색상 오차를 검증합니다. 중복 프로토타입 모델은 `Assets/Legacy/`에 보관하고, 실제 캐릭터와 보행 호환 참조는 원본 모델을 재사용합니다. 릴리스 프로필은 필요한 저장 데이터의 필드를 보존하면서 사용하지 않는 관리 코드를 제거합니다.
+시작에 사용하는 그림 원본은 `Assets/Art/StartupTextures/`에 보관합니다. 빌드 전에 같은 해상도의 JPEG(불투명 이미지) 또는 PNG(투명 이미지) 데이터를 `Assets/Resources/SimBarWebTextures/*.bytes`로 자동 생성하고, 실행 중 한 번만 디코딩해 공유합니다. 인코더는 해상도·색상 오차·투명도를 검증합니다. 중복 프로토타입 모델은 `Assets/Legacy/`에 보관하고, 실제 캐릭터와 보행 호환 참조는 원본 모델을 재사용합니다. 원본 FBX 파일을 유지하면서 메시 압축을 적용하고, 릴리스 프로필은 필요한 저장 데이터의 필드를 보존하면서 사용하지 않는 관리 코드를 제거합니다. 웹 플레이어는 사용하지 않는 프로토타입 UI·게임 관리자를 생성하지 않습니다.
 
-반응형 웹 템플릿은 `Tools/WebGLTemplate/`에 보관합니다. 웹 페이지의 HTML·CSS만 바꿀 때는 `python Tools/prepare_github_pages.py --host-only`로 게시 파일을 갱신할 수 있습니다. 릴리스 빌드는 파일 내용의 해시를 파일명에 사용해 새 빌드와 이전 캐시가 섞이지 않도록 하며, 같은 버전의 데이터와 WebAssembly는 Unity의 영구 캐시에서 재사용합니다.
+반응형 웹 템플릿은 `Tools/WebGLTemplate/`에 보관합니다. 웹 페이지의 HTML·CSS만 바꿀 때는 `python Tools/prepare_github_pages.py --host-only`로 게시 파일을 갱신할 수 있습니다. 릴리스 빌드는 파일 내용의 해시를 파일명에 사용해 새 빌드와 이전 캐시가 섞이지 않도록 하며, 같은 버전의 데이터와 WebAssembly 응답은 브라우저의 Cache Storage에서 재사용합니다. 캐시를 읽어도 WebAssembly 스트리밍 컴파일을 유지하며, 캐시 쓰기 완료를 기다리지 않고 게임을 시작합니다.
 
 `docs/` 변경 사항을 커밋하여 `main`에 푸시하면 GitHub Pages가 갱신됩니다. Unity 캐시, 로컬 빌드, 임시 복구 파일은 Git에 포함하지 않습니다.
 

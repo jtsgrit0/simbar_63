@@ -44,7 +44,7 @@ public sealed class SimBarMusicPosters : MonoBehaviour
         tape = OwnMaterial(template, "SimBar Aged Masking Tape", new Color(0.56f, 0.49f, 0.31f, 1f));
         pinkTicket = OwnMaterial(template, "SimBar Faded Pink Ticket", new Color(0.56f, 0.23f, 0.27f, 1f));
         yellowTicket = OwnMaterial(template, "SimBar Faded Yellow Ticket", new Color(0.67f, 0.53f, 0.17f, 1f));
-        Texture2D wear = Resources.Load<Texture2D>("SimBarArt/Posters/PaperWear");
+        Texture2D wear = SimBarWebTextures.Load("SimBarArt/Posters/PaperWear");
         if (wear != null)
         {
             paper.mainTexture = wear;
@@ -53,7 +53,7 @@ public sealed class SimBarMusicPosters : MonoBehaviour
 
         foreach (string key in new[] { "Queen", "Nirvana", "TheBeatles", "PopNight", "TaylorSwift", "Blackpink" })
         {
-            Texture2D texture = Resources.Load<Texture2D>("SimBarArt/Posters/" + key);
+            Texture2D texture = SimBarWebTextures.Load("SimBarArt/Posters/" + key);
             if (texture == null) { Debug.LogWarning("SimBar poster texture is missing: " + key); continue; }
             Material material = OwnMaterial(template, "SimBar Poster " + key, new Color(0.89f, 0.86f, 0.80f, 1f));
             if (material.HasProperty("_BaseMap")) material.SetTexture("_BaseMap", texture);

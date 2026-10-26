@@ -9,7 +9,7 @@ public sealed partial class SimBarFloorGraffiti
 
     private void CreateSplatter(int artist, Material template)
     {
-        Texture2D stamp = Resources.Load<Texture2D>("SimBarArt/Graffiti/SpraySplatter");
+        Texture2D stamp = SimBarWebTextures.Load("SimBarArt/Graffiti/SpraySplatter");
         if (stamp == null) return;
 
         // A private seed keeps the venue stable without consuming gameplay's random sequence.

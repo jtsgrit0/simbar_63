@@ -10,11 +10,11 @@ Five original artist-name spray-paint textures generated using the built-in `ima
 
 | Artist | Saved PNG | Floor pigment |
 | --- | --- | --- |
-| Queen | `Assets/Resources/SimBarArt/Graffiti/Queen.png` | Gold |
-| Nirvana | `Assets/Resources/SimBarArt/Graffiti/Nirvana.png` | Orange, tinted from the generated mustard pigment |
-| The Beatles | `Assets/Resources/SimBarArt/Graffiti/TheBeatles.png` | Mint turquoise |
-| Taylor Swift | `Assets/Resources/SimBarArt/Graffiti/TaylorSwift.png` | Lavender / rose |
-| Blackpink | `Assets/Resources/SimBarArt/Graffiti/Blackpink.png` | Hot pink |
+| Queen | `Assets/Art/StartupTextures/Graffiti/Queen.png` | Gold |
+| Nirvana | `Assets/Art/StartupTextures/Graffiti/Nirvana.png` | Orange, tinted from the generated mustard pigment |
+| The Beatles | `Assets/Art/StartupTextures/Graffiti/TheBeatles.png` | Mint turquoise |
+| Taylor Swift | `Assets/Art/StartupTextures/Graffiti/TaylorSwift.png` | Lavender / rose |
+| Blackpink | `Assets/Art/StartupTextures/Graffiti/Blackpink.png` | Hot pink |
 
 Unity imports each image at a 512-pixel maximum with NPOT proportions preserved, input alpha, transparent-edge filtering, clamped edges and mipmaps. No image pixels are edited. An explicit transparent URP Unlit Resources material retains the shader variant in the web build. Floor planes sit about 1 cm above the tile surface, fit the source proportions, use no colliders, and are staggered across open floor areas. The texture alpha reveals tiles through the overspray; the material uses 0.88 opacity and a warm orange tint for Nirvana to distinguish it from Queen.
 

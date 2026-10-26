@@ -5,6 +5,7 @@ public static class RuntimeBootstrap
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void Bootstrap()
     {
+#if !UNITY_WEBGL || UNITY_EDITOR
         if (GameManager.Instance == null)
         {
             var gameManagerGO = new GameObject("GameManager");
@@ -16,6 +17,7 @@ public static class RuntimeBootstrap
             var audioGO = new GameObject("AudioManager");
             audioGO.AddComponent<AudioManager>();
         }
+#endif
 
         // SimBarExperience owns the playable presentation.  The older builders are
         // kept in the project as reusable prototypes, but must not create a second

@@ -2,7 +2,7 @@
 
 The Seoul-window venue extends these accents around ten title marks and twenty additional irregular floor regions, including rear, side and staff aisles. Live validation measured 261 stamps spanning X -9.76..10.04m and Z -7.35..7.16m, while keeping the same five renderer batches.
 
-Saved asset: `Assets/Resources/SimBarArt/Graffiti/SpraySplatter.png`.
+Saved asset: `Assets/Art/StartupTextures/Graffiti/SpraySplatter.png`.
 
 Generated and refined with the built-in `image_gen` tool on 2026-10-24. The final transparent PNG was copied into the project without pixel editing; both default generation outputs remain preserved. Unity imports the stamp at 512px with input alpha, transparent-edge filtering, mipmaps and clamped wrapping. A shared white-pigment stamp is tinted to the five artist colors.
 
