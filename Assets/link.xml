@@ -4,5 +4,8 @@
   <assembly fullname="Assembly-CSharp">
     <type fullname="SimBarExperience/JourneyData" preserve="all"/>
     <type fullname="SimBarExperience/OperationsSaveData" preserve="all"/>
+    <type fullname="SimBarBooking/Plan" preserve="all"/>
+    <type fullname="SimBarBooking/Career" preserve="all"/>
+    <type fullname="SimBarBooking/Metrics" preserve="all"/>
   </assembly>
 </linker>

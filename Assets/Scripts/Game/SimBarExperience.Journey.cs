@@ -8,7 +8,7 @@ using UnityEngine;
 public sealed partial class SimBarExperience
 {
     private const float JourneyNightDuration = 180f;
-    private enum JourneyPhase { Lobby, Guide, Playing, Results }
+    private enum JourneyPhase { Lobby, Guide, Playing, Results, Planning }
 
     [Serializable]
     private sealed class JourneyData
@@ -46,6 +46,12 @@ public sealed partial class SimBarExperience
         public int resultBonus;
         public float resultProfit;
         public bool resultNewRecord;
+        public SimBarBooking.Plan booking;
+        public SimBarBooking.Career bookingCareer = SimBarBooking.NewCareer();
+        public float dayOpeningCash;
+        public bool hasDayOpeningCash;
+        public float resultTicketIncome;
+        public int resultAttendance;
     }
 
     private JourneyData journey = new JourneyData();
@@ -71,7 +77,7 @@ public sealed partial class SimBarExperience
     private bool JourneyIsLobby { get { return journeyPhase == JourneyPhase.Lobby; } }
     private bool JourneyIsGuide { get { return journeyPhase == JourneyPhase.Guide; } }
     private bool JourneyIsResults { get { return journeyPhase == JourneyPhase.Results; } }
-    private bool JourneyHasSave { get { return journey.inProgress || journey.settledSession > 0; } }
+    private bool JourneyHasSave { get { return JourneyHasActivePlan || journey.inProgress || journey.settledSession > 0; } }
     private bool JourneyHasActiveNight { get { return journey.inProgress; } }
     private int JourneyGuideStep { get { return journey.guideStep; } }
     private int JourneyDay { get { return journey.day; } }
@@ -265,11 +271,11 @@ public sealed partial class SimBarExperience
     private void JourneyStartNight(bool challenge)
     {
         if (journeyValidationMode) return;
-        if (journey.inProgress) { ContinueJourney(); return; }
+        if (journey.inProgress || JourneyHasActivePlan) { ContinueJourney(); return; }
         if (journey.settlementPending) SettleJourneyNight();
         if (journey.settledSession > 0 && journey.session == journey.settledSession)
             journey.day = Mathf.Min(9999, journey.day + 1);
-        StartFreshJourneyNight(challenge);
+        BeginDayPlanning(challenge);
     }
 
     private void StartFreshJourneyNight(bool challenge)
@@ -288,14 +294,15 @@ public sealed partial class SimBarExperience
         journey.score = journey.combo = journey.bestCombo = journey.manualPerfects = 0;
         journey.orders = journey.mistakes = journey.successfulEvents = journey.manualStreak = 0;
         journey.feverSeconds = journey.feverCharge = journey.drinkIncome = 0f;
-        journey.openingCash = JourneyClamp(cash, StartingCash, 0f, 1000000000f);
+        journey.openingCash = JourneyClamp(BookingHasNight && journey.hasDayOpeningCash ? journey.dayOpeningCash : cash, StartingCash, 0f, 1000000000f);
         journey.resultStars = journey.resultServed = journey.resultXP = journey.resultBonus = 0;
-        journey.resultProfit = 0f;
+        journey.resultProfit = journey.resultTicketIncome = 0f;
+        journey.resultAttendance = 0;
         journey.resultNewRecord = false;
         journey.guideStep = 0;
         journey.guidePending = !journey.tutorialComplete;
         journeyAutosaveTimer = 0f;
-        gameClock = 21.5f;
+        gameClock = 18f;
         satisfaction = Mathf.Max(satisfaction, challenge ? 0.85f : 0.94f);
         performance = Mathf.Max(performance, 0.92f);
         ResetJourneyOrders();
@@ -312,6 +319,7 @@ public sealed partial class SimBarExperience
     {
         if (journeyValidationMode) return;
         if (journey.settlementPending) SettleJourneyNight();
+        if (JourneyHasActivePlan) { BeginDayPlanning(journey.challenge); return; }
         if (!journey.inProgress)
         {
             if (journey.settledSession > 0)
@@ -357,13 +365,13 @@ public sealed partial class SimBarExperience
     {
         if (journeyValidationMode || journey.inProgress || !JourneyIsResults) return;
         journey.day = Mathf.Min(9999, journey.day + 1);
-        StartFreshJourneyNight(journey.challenge);
+        BeginDayPlanning(journey.challenge);
     }
 
     private void JourneyRetryNight()
     {
         if (journeyValidationMode || journey.inProgress || !JourneyIsResults) return;
-        StartFreshJourneyNight(journey.challenge);
+        BeginDayPlanning(journey.challenge);
     }
 
     private void JourneyReturnToLobby()
@@ -388,7 +396,7 @@ public sealed partial class SimBarExperience
         {
             for (int i = 0; i < Mathf.Min(3, patrons.Count); i++) AssignOrder(patrons[i], i % DrinkNames.Length);
         }
-        requestTimer = 3f * JourneyOrderIntervalMultiplier;
+        requestTimer = 3f * JourneyOrderIntervalMultiplier * BookingOrderIntervalMultiplier;
         // servedTonight is deliberately lifetime-compatible for active events.
     }
 
@@ -397,6 +405,7 @@ public sealed partial class SimBarExperience
         if (journeyValidationMode || !journey.inProgress || journeyClosing) return;
         CancelPourGame(false);
         journey.secondsLeft = 0f;
+        gameClock = 24f;
         journey.settlementPending = true;
         journey.inProgress = false;
         journeyPhase = JourneyPhase.Results;
@@ -434,6 +443,7 @@ public sealed partial class SimBarExperience
                 journey.xp = Mathf.Min(100000000, journey.xp + earnedXP);
                 journey.completedNights = Mathf.Min(100000000, journey.completedNights + 1);
                 cash = JourneyClamp(cash + bonus, cash, 0f, 1000000000f);
+                CompleteBookingNight(stars);
                 journey.resultProfit = JourneyClamp(cash - journey.openingCash, 0f, -1000000000f, 1000000000f);
                 journey.settledSession = journey.session;
             }
@@ -510,6 +520,14 @@ public sealed partial class SimBarExperience
             journey.inProgress = false;
             journey.settlementPending = false;
         }
+        if (journey.bookingCareer == null) journey.bookingCareer = SimBarBooking.NewCareer();
+        SimBarBooking.Sanitize(journey.booking, journey.bookingCareer);
+        journey.dayOpeningCash = JourneyClamp(journey.dayOpeningCash, cash, 0f, 1000000000f);
+        journey.resultTicketIncome = JourneyClamp(journey.resultTicketIncome, 0f, 0f, 1000000f);
+        journey.resultAttendance = Mathf.Clamp(journey.resultAttendance, 0, 120);
+        if (journey.booking != null && journey.booking.day != journey.day) journey.booking = null;
+        // Older night saves have no booking plan and continue without fabricated fees or receipts.
+        if (journey.inProgress && JourneyHasActivePlan) SimBarBooking.Lock(journey.booking);
         if (journey.tutorialComplete) journey.guidePending = false;
     }
 

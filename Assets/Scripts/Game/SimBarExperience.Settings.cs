@@ -82,6 +82,7 @@ public sealed partial class SimBarExperience
         Font choiceFont = Resources.Load<Font>("Fonts/NotoSansKR-Regular");
         if (settingsKorean != null && choiceFont != null) settingsKorean.GetComponentInChildren<Text>(true).font = choiceFont;
         RefreshServiceMenuLabels();
+        RefreshBookingUI();
         if (settingsKorean != null) settingsKorean.GetComponent<Image>().color = SimBarLocalization.IsKorean ? new Color(0.12f, 0.48f, 0.34f) : new Color(0.16f, 0.20f, 0.27f);
         if (settingsEnglish != null) settingsEnglish.GetComponent<Image>().color = !SimBarLocalization.IsKorean ? new Color(0.12f, 0.48f, 0.34f) : new Color(0.16f, 0.20f, 0.27f);
         RefreshOperationsLanguage();
@@ -95,6 +96,7 @@ public sealed partial class SimBarExperience
     {
         SimBarLocalization.Changed -= RefreshLanguageUI;
         if (serviceMenuRoot != null) Destroy(serviceMenuRoot);
+        DestroyBookingUI();
         if (musicSource != null)
         {
             musicSource.Stop();

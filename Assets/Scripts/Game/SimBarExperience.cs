@@ -807,19 +807,17 @@ public sealed partial class SimBarExperience : MonoBehaviour
         TickPourGame(delta);
         TickOperations(delta);
         beat += delta * (2.2f + performance * 1.5f);
-        gameClock += delta * 0.011f;
-        if (gameClock >= 24f)
-            gameClock = 18f;
+        gameClock = 18f + 6f * (1f - JourneySecondsLeft / JourneyDuration);
         requestTimer -= delta;
         if (requestTimer <= 0f)
         {
             TryCreateOrder();
-            requestTimer = UnityEngine.Random.Range(4.5f, 7.5f) * OperationsOrderIntervalMultiplier * JourneyOrderIntervalMultiplier;
+            requestTimer = UnityEngine.Random.Range(4.5f, 7.5f) * OperationsOrderIntervalMultiplier * JourneyOrderIntervalMultiplier * BookingOrderIntervalMultiplier;
         }
 
         AnimateVenue(delta);
         UpdatePatience(delta);
-        performance = Mathf.Clamp01(performance - delta * 0.0015f);
+        performance = Mathf.Clamp01(performance - delta * (0.0015f - BookingEnergyBonus * 0.006f));
         if (toastTimer > 0f)
             toastTimer -= delta;
         else if (toastText != null)
@@ -1002,7 +1000,7 @@ public sealed partial class SimBarExperience : MonoBehaviour
         fanText.text = fans.ToString("N0");
         int hour = Mathf.FloorToInt(gameClock);
         int minute = Mathf.FloorToInt((gameClock - hour) * 60f);
-        timeText.text = hour.ToString("00") + ":" + minute.ToString("00");
+        timeText.text = (hour % 24).ToString("00") + ":" + minute.ToString("00");
         if (playlistNowText != null)
             playlistNowText.text = SimBarLocalization.Text("NOW PLAYING: ", "재생 중: ") + Playlist[playlistIndex].Substring(3).ToUpperInvariant();
 

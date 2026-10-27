@@ -97,6 +97,7 @@ public sealed partial class SimBarExperience
         BuildJourneyResults();
         ConfigureJourneyPauseMenu();
         juiBuilt = true;
+        BuildBookingUI();
         RefreshJourneyHUD();
     }
 
@@ -216,10 +217,10 @@ public sealed partial class SimBarExperience
         juiResultXP = JourneyResultStat(panel, "XP EARNED", 315f);
         juiResultRecord = OpText("Journey New Record", panel, string.Empty, 24, new Vector2(0f, -131f), new Vector2(980f, 40f), JuiGreen, TextAnchor.MiddleCenter);
         juiResultProgress = OpText("Journey Result Progress", panel, string.Empty, 18, new Vector2(0f, -174f), new Vector2(980f, 34f), JuiMuted, TextAnchor.MiddleCenter);
-        Button retry = OpButton("RETRY THIS NIGHT", panel, Vector2.one * 0.5f, new Vector2(-322f, -257f), new Vector2(304f, 60f), 20);
+        Button retry = OpButton(SimBarLocalization.Text("PLAN THIS DAY AGAIN", "이날 다시 기획"), panel, Vector2.one * 0.5f, new Vector2(-322f, -257f), new Vector2(304f, 60f), 20);
         retry.name = "Journey Retry Night Button";
         retry.onClick.AddListener(JourneyRetryNight);
-        Button next = OpButton("NEXT NIGHT", panel, Vector2.one * 0.5f, new Vector2(0f, -257f), new Vector2(304f, 60f), 23);
+        Button next = OpButton(SimBarLocalization.Text("PLAN NEXT DAY", "다음 날 낮 기획"), panel, Vector2.one * 0.5f, new Vector2(0f, -257f), new Vector2(304f, 60f), 23);
         next.name = "Journey Next Night Button";
         next.onClick.AddListener(JourneyNextNight);
         Button lobby = OpButton("BACK TO LOBBY", panel, Vector2.one * 0.5f, new Vector2(322f, -257f), new Vector2(304f, 60f), 20);
@@ -274,12 +275,13 @@ public sealed partial class SimBarExperience
     private void RefreshJourneyHUD()
     {
         if (!juiBuilt) return;
+        RefreshBookingUI();
         bool visible = !JourneyValidationMode;
         // The opaque Seoul title covers the venue. Avoid drawing/animating the
         // hidden 3D scene (and compiling its shaders) on the first title frame.
         if (worldRoot != null)
         {
-            bool showVenue = !visible || !JourneyIsLobby || !ownerTitleHasFullscreenBackdrop;
+            bool showVenue = !visible || (!JourneyIsPlanning && (!JourneyIsLobby || !ownerTitleHasFullscreenBackdrop));
             if (worldRoot.gameObject.activeSelf != showVenue)
                 worldRoot.gameObject.SetActive(showVenue);
         }
@@ -322,16 +324,19 @@ public sealed partial class SimBarExperience
             juiLobbyProgress.text = SimBarLocalization.Format("DAY {0}    /    RANK {1}    /    {2} XP    /    BEST {3}", "{0}일 차    /    등급 {1}    /    경험치 {2}    /    최고 점수 {3}", JourneyDay, JourneyRankLabel, JourneyXP.ToString("N0"), JourneyBestScore.ToString("N0"));
             juiContinue.interactable = JourneyHasSave;
             juiContinue.gameObject.SetActive(JourneyHasSave);
-            juiBegin.gameObject.SetActive(!JourneyHasActiveNight);
-            juiCozyCard.GetComponent<Button>().interactable = !JourneyHasActiveNight;
-            juiChallengeCard.GetComponent<Button>().interactable = !JourneyHasActiveNight;
+            juiBegin.gameObject.SetActive(!(JourneyHasActiveNight || JourneyHasActivePlan));
+            juiCozyCard.GetComponent<Button>().interactable = !(JourneyHasActiveNight || JourneyHasActivePlan);
+            juiChallengeCard.GetComponent<Button>().interactable = !(JourneyHasActiveNight || JourneyHasActivePlan);
             juiBegin.GetComponent<RectTransform>().anchoredPosition = new Vector2(JourneyHasSave ? 283f : 0f, -369f);
-            juiContinue.GetComponent<RectTransform>().anchoredPosition = new Vector2(JourneyHasActiveNight ? 0f : -283f, -369f);
+            juiContinue.GetComponent<RectTransform>().anchoredPosition = new Vector2((JourneyHasActiveNight || JourneyHasActivePlan) ? 0f : -283f, -369f);
+            juiBegin.GetComponentInChildren<Text>().text = SimBarLocalization.Text("PLAN THE DAY / BOOK BANDS", "낮 공연 기획·섭외 시작");
             Text continueLabel = juiContinue.GetComponentInChildren<Text>();
-            if (continueLabel != null) continueLabel.text = JourneyHasActiveNight
+            if (continueLabel != null) continueLabel.text = JourneyHasActivePlan
+                ? SimBarLocalization.Text("CONTINUE DAY PLANNING", "낮 기획·섭외 이어하기")
+                : JourneyHasActiveNight
                 ? SimBarLocalization.Text("CONTINUE SAVED NIGHT  /  ", "저장한 영업 이어하기  /  ") + OpTime(JourneySecondsLeft)
                 : SimBarLocalization.Text("REVIEW LAST NIGHT", "지난 영업 결과 보기");
-            if (JourneyHasActiveNight)
+            if (JourneyHasActiveNight || JourneyHasActivePlan)
             {
                 SelectJourneyMode(JourneyChallenge);
                 juiLobbyMode.text = SimBarLocalization.Format("SAVED {0} NIGHT  /  CONTINUE WHERE YOU LEFT OFF", "저장된 {0} 모드  /  중단한 지점부터 이어서 시작", JourneyModeLabel);
@@ -358,7 +363,7 @@ public sealed partial class SimBarExperience
             juiResultServices.text = JourneyResultServed.ToString("N0");
             juiResultXP.text = "+" + JourneyResultXP.ToString("N0");
             juiResultRecord.text = JourneyResultNewRecord ? SimBarLocalization.Text("NEW HIGH SCORE!", "최고 점수 경신!") : SimBarLocalization.Text("BEST SCORE  ", "최고 점수  ") + JourneyBestScore.ToString("N0");
-            juiResultProgress.text = SimBarLocalization.Format("NIGHT BONUS {0}    /    RANK {1}    /    TOTAL XP {2}", "영업 보너스 {0}    /    등급 {1}    /    총 경험치 {2}", SimBarMoney.Format(JourneyResultBonus, true), JourneyRankLabel, JourneyXP.ToString("N0"));
+            juiResultProgress.text = SimBarLocalization.Format("BONUS {0} / TICKETS {1} / {2} GUESTS / {3} XP", "보너스 {0} / 티켓 {1} / 관객 {2}명 / 경험치 {3}", SimBarMoney.Format(JourneyResultBonus, true), SimBarMoney.Format(journey.resultTicketIncome), journey.resultAttendance, JourneyXP.ToString("N0"));
         }
     }
 

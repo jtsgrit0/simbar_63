@@ -57,6 +57,8 @@ public static partial class SimBarRuntimeVerification
             }
             report.Check(reachable, "The title's start button is pointer-accessible.");
             begin.onClick.Invoke();
+            report.Check(Property<bool>(host, "JourneyIsPlanning") && Read<bool>(host, "paused"), "The first day opens the planning desk.");
+            Call(host, "BookingLaunchNight");
             report.Check(Property<bool>(host, "JourneyIsGuide") && Read<bool>(host, "paused"), "The first night starts with an onboarding guide.");
             Call(host, "TickJourney", 10f);
             report.Check(Property<float>(host, "JourneySecondsLeft") == 180f, "Reading the guide never consumes play time.");
@@ -140,14 +142,18 @@ public static partial class SimBarRuntimeVerification
             Call(host, "FinishJourneyNight"); Call(host, "SettleJourneyNight"); host.SaveOperations(); Call(host, "LoadOperations"); Call(host, "ContinueJourney");
             report.Check(Read<float>(host, "cash") == money && Property<int>(host, "JourneyXP") == xp, "Closing, reloading and reviewing results never duplicate awards.");
             int day = Property<int>(host, "JourneyDay"); Call(host, "JourneyNextNight");
+            report.Check(Property<bool>(host, "JourneyIsPlanning"), "Next day opens daytime planning.");
+            Call(host, "BookingLaunchNight");
             report.Check(Property<int>(host, "JourneyDay") == day + 1 && Property<float>(host, "JourneySecondsLeft") == 180f
                 && Read<float>(host, "cash") == money && Read<int[]>(host, "opStaff")[0] == 1 && Read<int[]>(host, "opUpgrades")[0] == 1,
                 "The next night resets its goals while preserving cash, employees and upgrades.");
             report.Check(Property<bool>(host, "JourneyIsPlaying"), "Returning players do not repeat the completed onboarding guide.");
             Call(host, "TickJourney", 180f); day = Property<int>(host, "JourneyDay"); money = Read<float>(host, "cash");
             Call(host, "JourneyRetryNight");
+            report.Check(Property<bool>(host, "JourneyIsPlanning"), "Retry returns to planning the same day.");
+            Call(host, "BookingLaunchNight");
             report.Check(Property<int>(host, "JourneyDay") == day && Read<float>(host, "cash") == money && Property<bool>(host, "JourneyIsPlaying"), "Retry reopens the same day without erasing the venue or paying an extra reward.");
-            Call(host, "TickJourney", 180f); Call(host, "JourneyReturnToLobby"); Call(host, "JourneyStartNight", true);
+            Call(host, "TickJourney", 180f); Call(host, "JourneyReturnToLobby"); Call(host, "JourneyStartNight", true); Call(host, "BookingLaunchNight");
             report.Check(Property<bool>(host, "JourneyChallenge") && Property<float>(host, "ActivePourPerfectWidth") < 0.10f
                 && Property<float>(host, "JourneyPatienceBonus") < 0f, "Challenge mode actually tightens pour timing and guest patience.");
 
