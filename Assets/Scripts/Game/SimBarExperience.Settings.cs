@@ -7,7 +7,7 @@ public sealed partial class SimBarExperience
     private bool settingsWasPaused;
     private Button settingsKorean;
     private Button settingsEnglish;
-    private readonly Text[] drinkButtonLabels = new Text[3];
+    private readonly Text[] drinkButtonLabels = new Text[DrinkPrices.Length];
 
     private void InitializeLanguageSettings()
     {
@@ -81,8 +81,7 @@ public sealed partial class SimBarExperience
         // The Korean choice must stay readable even when the interface is English.
         Font choiceFont = Resources.Load<Font>("Fonts/NotoSansKR-Regular");
         if (settingsKorean != null && choiceFont != null) settingsKorean.GetComponentInChildren<Text>(true).font = choiceFont;
-        for (int i = 0; i < drinkButtonLabels.Length; i++)
-            if (drinkButtonLabels[i] != null) drinkButtonLabels[i].text = (i + 1) + "  " + DrinkNames[i] + "  $" + DrinkPrices[i];
+        RefreshServiceMenuLabels();
         if (settingsKorean != null) settingsKorean.GetComponent<Image>().color = SimBarLocalization.IsKorean ? new Color(0.12f, 0.48f, 0.34f) : new Color(0.16f, 0.20f, 0.27f);
         if (settingsEnglish != null) settingsEnglish.GetComponent<Image>().color = !SimBarLocalization.IsKorean ? new Color(0.12f, 0.48f, 0.34f) : new Color(0.16f, 0.20f, 0.27f);
         RefreshOperationsLanguage();
@@ -95,6 +94,7 @@ public sealed partial class SimBarExperience
     private void OnDestroy()
     {
         SimBarLocalization.Changed -= RefreshLanguageUI;
+        if (serviceMenuRoot != null) Destroy(serviceMenuRoot);
         if (musicSource != null)
         {
             musicSource.Stop();

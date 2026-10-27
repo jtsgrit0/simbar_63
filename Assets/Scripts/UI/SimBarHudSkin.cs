@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -87,13 +86,14 @@ public sealed class SimBarHudSkin : MonoBehaviour
             ButtonColors(gear);
         }
 
-        Stat("CASH", "Cash", "현금", new Vector2(-493f, -47f), new Vector2(208f, 80f),
+        Stat("CASH", "Cash", "현금", new Vector2(-509f, -47f), new Vector2(240f, 80f),
             Icon("cash", new Rect(3f, 20f, 37f, 37f)), Green);
         Stat("FANS", "Fans", "팬", new Vector2(-284f, -47f), new Vector2(200f, 80f),
             Icon("fans", new Rect(3f, 14f, 43f, 40f)), new Color(1f, 0.80f, 0.26f));
         Stat("TIME", "Time", "시간", new Vector2(-97f, -47f), new Vector2(174f, 80f),
             Icon("time", new Rect(3f, 9f, 36f, 44f)), Color.white);
         sourceCash = Component<Text>("CASH Value");
+        FitMoney(sourceCash, 18, 28);
         sourceTime = Component<Text>("TIME Value");
 
         Transform toast = Node("Toast");
@@ -187,22 +187,26 @@ public sealed class SimBarHudSkin : MonoBehaviour
         PlaceText("Current Order", null, 24, new Vector2(0f, -34f), new Vector2(796f, 30f), Color.white);
         PlaceText("Queue", null, 13, new Vector2(0f, -57f), new Vector2(790f, 22f), new Color(0.61f, 0.75f, 0.83f));
         Button[] drinks = panel.GetComponentsInChildren<Button>(true);
+        const float rowWidth = 790f;
+        const float buttonGap = 16f;
+        float buttonWidth = (rowWidth - buttonGap * Mathf.Max(0, drinks.Length - 1)) / Mathf.Max(1, drinks.Length);
         for (int i = 0; i < drinks.Length; i++)
         {
             Button drink = drinks[i];
-            Rect(drink.GetComponent<RectTransform>(), new Vector2(0.5f, 0f), new Vector2(-269f + 269f * i, 36f), new Vector2(253f, 43f));
+            float x = -rowWidth * 0.5f + buttonWidth * 0.5f + (buttonWidth + buttonGap) * i;
+            Rect(drink.GetComponent<RectTransform>(), new Vector2(0.5f, 0f), new Vector2(x, 36f), new Vector2(buttonWidth, 43f));
             Image image = drink.GetComponent<Image>();
             Panel(image, new Color(image.color.r * 0.52f, image.color.g * 0.52f, image.color.b * 0.52f, 1f), new Color(0.56f, 0.57f, 0.60f), 1.2f);
             Text text = drink.GetComponentInChildren<Text>(true);
             TextStyle(text, 17, TextAnchor.MiddleCenter, Color.white);
-            if (text != null) Rect(text.rectTransform, Vector2.one * 0.5f, Vector2.zero, new Vector2(245f, 39f));
+            if (text != null) Rect(text.rectTransform, Vector2.one * 0.5f, Vector2.zero, new Vector2(buttonWidth - 8f, 39f));
             ButtonColors(drink);
         }
         Text help = Component<Text>("Service Help");
         TextStyle(help, 11, TextAnchor.MiddleCenter, new Color(0.66f, 0.70f, 0.77f));
         if (help != null)
         {
-            SimBarLocalization.Bind(help, "1 / 2 / 3 POUR     E SERVE ORDER     P PAUSE", "1 / 2 / 3 음료 따르기     E 주문 서빙     P 일시 정지");
+            SimBarLocalization.Bind(help, "1–5 SELECT     M MENU     E PREPARE ORDER     P PAUSE", "1–5 메뉴 선택     M 메뉴     E 주문 준비     P 일시 정지");
             Rect(help.rectTransform, new Vector2(0.5f, 0f), new Vector2(0f, 7f), new Vector2(790f, 18f));
         }
     }
@@ -254,8 +258,10 @@ public sealed class SimBarHudSkin : MonoBehaviour
         AddIcon("Daily Cash Icon", day.transform, Icon("cash", new Rect(3f, 20f, 37f, 37f)), new Vector2(-99f, -5f), new Vector2(43f, 43f));
         dailyCash = NewText("Daily Cash", day.transform, string.Empty, 33, new Vector2(20f, -4f), new Vector2(194f, 47f), Green);
         dailyCash.fontStyle = FontStyle.Bold;
+        FitMoney(dailyCash, 20, 33);
         dailyProfit = NewText("Daily Profit", day.transform, string.Empty, 17, new Vector2(0f, -53f), new Vector2(250f, 29f), Color.white);
         dailyProfit.supportRichText = true;
+        FitMoney(dailyProfit, 12, 17);
     }
 
     private void StyleMood()
@@ -328,18 +334,13 @@ public sealed class SimBarHudSkin : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (sourceCash != null && dailyCash != null)
+        if (sourceCash != null && dailyCash != null) dailyCash.text = sourceCash.text;
+        if (dailyProfit != null && experience != null)
         {
-            dailyCash.text = sourceCash.text;
-            float money;
-            if (dailyProfit != null && float.TryParse(sourceCash.text.Replace("$", string.Empty).Replace(",", string.Empty), NumberStyles.Float, CultureInfo.InvariantCulture, out money))
-            {
-                float profit = experience != null ? experience.JourneyProfitForHUD : money - 10000f;
-                string tint = profit < 0f ? "FF997F" : "78E05D";
-                string sign = profit < 0f ? "-$" : "$";
-                dailyProfit.text = SimBarLocalization.Text("DAILY PROFIT: ", "오늘의 수익: ") + "<color=#" + tint + ">" + sign
-                    + Mathf.Abs(profit).ToString("N0", CultureInfo.InvariantCulture) + "</color>";
-            }
+            float profit = experience.JourneyProfitForHUD;
+            string tint = profit < 0f ? "FF997F" : "78E05D";
+            dailyProfit.text = SimBarLocalization.Text("DAILY PROFIT: ", "오늘의 수익: ") + "<color=#" + tint + ">"
+                + SimBarMoney.Format(profit, true) + "</color>";
         }
         if (dailyTime != null && sourceTime != null) dailyTime.text = sourceTime.text;
         if (satisfactionPercent != null && satisfaction != null)
@@ -380,6 +381,16 @@ public sealed class SimBarHudSkin : MonoBehaviour
         text.horizontalOverflow = HorizontalWrapMode.Overflow;
         text.verticalOverflow = VerticalWrapMode.Overflow;
         text.raycastTarget = false;
+    }
+
+    private static void FitMoney(Text text, int minSize, int maxSize)
+    {
+        if (text == null) return;
+        text.resizeTextForBestFit = true;
+        text.resizeTextMinSize = minSize;
+        text.resizeTextMaxSize = maxSize;
+        text.horizontalOverflow = HorizontalWrapMode.Wrap;
+        text.verticalOverflow = VerticalWrapMode.Truncate;
     }
 
     private Text NewText(string name, Transform parent, string content, int size, Vector2 position, Vector2 bounds, Color color, string koreanContent = null)

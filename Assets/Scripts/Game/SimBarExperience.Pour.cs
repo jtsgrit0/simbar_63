@@ -239,7 +239,9 @@ public sealed partial class SimBarExperience
         foreach (var text in pourPanel.GetComponentsInChildren<Text>(true)) text.font = SimBarLocalization.Font;
         if (pourRunning && pourPatron != null)
         {
-            pourTitle.text = SimBarLocalization.Format("POUR {0}", "{0} 따르기", DrinkNames[pourDrinkIndex]);
+            pourTitle.text = IsFood(pourDrinkIndex)
+                ? SimBarLocalization.Format("PLATE {0}", "{0} 플레이팅", DrinkNames[pourDrinkIndex])
+                : SimBarLocalization.Format("POUR {0}", "{0} 따르기", DrinkNames[pourDrinkIndex]);
             pourSubtitle.text = SimBarLocalization.Format("{0} is waiting. Green is good. Gold is perfect.",
                 "{0} 님이 기다려요. 초록은 성공, 금색은 완벽!", pourPatron.name.ToUpperInvariant());
             pourHint.text = SimBarLocalization.Text("SPACE / STOP / tap the bar   •   hit the golden beat",
@@ -249,14 +251,16 @@ public sealed partial class SimBarExperience
         }
         else if (pourFeedbackRemaining > 0f)
         {
-            pourTitle.text = LastPourQuality >= 0.9f ? SimBarLocalization.Text("PERFECT POUR!", "완벽하게 따랐어요!")
-                : LastPourQuality >= 0.5f ? SimBarLocalization.Text("GOOD POUR!", "잘 따랐어요!")
-                : SimBarLocalization.Text("A LITTLE SPILL", "조금 흘렸어요");
+            pourTitle.text = LastPourQuality >= 0.9f ? SimBarLocalization.Text("PERFECT SERVICE!", "완벽하게 서빙했어요!")
+                : LastPourQuality >= 0.5f ? SimBarLocalization.Text("GOOD SERVICE!", "잘 서빙했어요!")
+                : IsFood(pourDrinkIndex) ? SimBarLocalization.Text("A LITTLE UNTIDY", "플레이팅이 조금 흐트러졌어요") : SimBarLocalization.Text("A LITTLE SPILL", "조금 흘렸어요");
             pourSubtitle.text = LastPourQuality >= 0.9f ? SimBarLocalization.Text("Right on the golden beat. Beautiful!", "금색 구간에 정확히 맞췄어요. 멋져요!")
                 : LastPourQuality >= 0.5f ? SimBarLocalization.Text("Nicely served. Try the gold zone for a perfect tip.", "잘 서빙했어요. 금색 구간을 맞추면 팁이 더 늘어요.")
-                : pourTimedOut ? SimBarLocalization.Text("The glass overflowed. Still served — try a quicker stop next time.", "잔이 넘쳤지만 서빙은 완료했어요. 다음엔 더 빨리 멈춰 보세요.")
+                : pourTimedOut ? (IsFood(pourDrinkIndex)
+                    ? SimBarLocalization.Text("Plating ran late. Still served — try a quicker stop next time.", "준비가 늦었지만 서빙은 완료했어요. 다음엔 더 빨리 멈춰 보세요.")
+                    : SimBarLocalization.Text("The glass overflowed. Still served — try a quicker stop next time.", "잔이 넘쳤지만 서빙은 완료했어요. 다음엔 더 빨리 멈춰 보세요."))
                 : SimBarLocalization.Text("Still served. Stop inside the green zone next time.", "서빙은 완료했어요. 다음엔 초록 구간에서 멈춰 보세요.");
-            pourHint.text = SimBarLocalization.Text("Choose the next drink when ready.", "준비되면 다음 음료를 선택하세요.");
+            pourHint.text = SimBarLocalization.Text("Choose the next item when ready.", "준비되면 다음 메뉴를 선택하세요.");
             pourClockText.text = string.Empty;
             pourStopLabel.text = SimBarLocalization.Text("SERVED", "서빙 완료");
         }
@@ -264,7 +268,7 @@ public sealed partial class SimBarExperience
         {
             pourTitle.text = SimBarLocalization.Text("HIT THE GOLDEN BEAT", "금색 구간을 맞추세요");
             pourSubtitle.text = SimBarLocalization.Text("Green is good. Gold is perfect.", "초록은 성공, 금색은 완벽!");
-            pourHint.text = SimBarLocalization.Text("SPACE / STOP / tap the bar   •   3 seconds to pour",
+            pourHint.text = SimBarLocalization.Text("SPACE / STOP / tap the bar   •   3 seconds to serve",
                 "스페이스 / 멈춤 / 막대 클릭   •   제한 시간 3초");
             pourStopLabel.text = SimBarLocalization.Text("STOP", "멈춤");
             pourClockText.text = SimBarLocalization.Format("{0:0.0}s", "{0:0.0}초", PourTimeLimit);

@@ -48,15 +48,15 @@ public sealed partial class SimBarExperience
     private static readonly int[] OpEventFanRewards = { 12, 25, 40 };
     private static readonly string[] OpEventDescriptions =
     {
-        "60 sec: +10% drink revenue, +8 sec guest patience.\nServe 6 orders for $300 + 12 fans. Cooldown: 90 sec.",
-        "90 sec: +40% tips and band energy recovery.\nServe 9 orders for $650 + 25 fans. Cooldown: 150 sec.",
-        "120 sec: +15% revenue, +20% tips, faster orders.\n+2 fans / 10 sec. Serve 12 orders: $1,050 + 40 fans."
+        "60 sec: +10% drink revenue, +8 sec guest patience.\nServe 6 orders for " + SimBarMoney.Format(OpEventRewards[0]) + " + 12 fans. Cooldown: 90 sec.",
+        "90 sec: +40% tips and band energy recovery.\nServe 9 orders for " + SimBarMoney.Format(OpEventRewards[1]) + " + 25 fans. Cooldown: 150 sec.",
+        "120 sec: +15% revenue, +20% tips, faster orders.\n+2 fans / 10 sec. Serve 12 orders: " + SimBarMoney.Format(OpEventRewards[2]) + " + 40 fans."
     };
     private static readonly string[] OpEventDescriptionsKorean =
     {
-        "60초: 음료 매출 +10%, 손님 대기 시간 +8초.\n주문 6건 서빙 시 $300와 팬 12명 획득. 재개최 대기: 90초.",
-        "90초: 팁 +40%, 밴드 에너지 회복.\n주문 9건 서빙 시 $650와 팬 25명 획득. 재개최 대기: 150초.",
-        "120초: 매출 +15%, 팁 +20%, 주문 빈도 증가.\n10초마다 팬 +2명. 주문 12건 서빙 시 $1,050와 팬 40명 획득."
+        "60초: 음료 매출 +10%, 손님 대기 시간 +8초.\n주문 6건 서빙 시 " + SimBarMoney.Format(OpEventRewards[0]) + "와 팬 12명 획득. 재개최 대기: 90초.",
+        "90초: 팁 +40%, 밴드 에너지 회복.\n주문 9건 서빙 시 " + SimBarMoney.Format(OpEventRewards[1]) + "와 팬 25명 획득. 재개최 대기: 150초.",
+        "120초: 매출 +15%, 팁 +20%, 주문 빈도 증가.\n10초마다 팬 +2명. 주문 12건 서빙 시 " + SimBarMoney.Format(OpEventRewards[2]) + "와 팬 40명 획득."
     };
 
     private static string OpStaffName(int index) { return SimBarLocalization.Text(OpStaffNames[index], OpStaffNamesKorean[index]); }
@@ -239,12 +239,12 @@ public sealed partial class SimBarExperience
             cash -= payment;
             opWageDebt = 0;
             opWageTimer = 60f;
-            ShowToast(SimBarLocalization.Format("STAFF PAYROLL PAID  -${0}", "직원 급여 지급  -${0}", payment), 2.8f);
+            ShowToast(SimBarLocalization.Format("STAFF PAYROLL PAID  {0}", "직원 급여 지급  {0}", SimBarMoney.Format(-payment, true)), 2.8f);
         }
         else
         {
             opWageTimer = 10f;
-            ShowToast(SimBarLocalization.Format("WAGES DUE: ${0} — hired staff are off duty until paid.", "미지급 급여: ${0} — 급여를 지급할 때까지 고용한 직원이 근무를 중단합니다.", opWageDebt), 4f);
+            ShowToast(SimBarLocalization.Format("WAGES DUE: {0} — hired staff are off duty until paid.", "미지급 급여: {0} — 급여를 지급할 때까지 고용한 직원이 근무를 중단합니다.", SimBarMoney.Format(opWageDebt)), 4f);
         }
         UpdateOperationsWorldVisuals();
         SaveOperations();
@@ -260,7 +260,7 @@ public sealed partial class SimBarExperience
         opStaff[index] = 1;
         if (index == 0) opAutoServeTimer = 12f;
         UpdateOperationsWorldVisuals();
-        FinishOperationsAction(SimBarLocalization.Format("{0} hired. Payroll: ${1} per 60 seconds.", "{0} 고용 완료. 60초마다 급여 ${1}를 지급합니다.", OpStaffName(index), OpPayroll));
+        FinishOperationsAction(SimBarLocalization.Format("{0} hired. Payroll: {1} per 60 seconds.", "{0} 고용 완료. 60초마다 급여 {1}를 지급합니다.", OpStaffName(index), SimBarMoney.Format(OpPayroll)));
         return true;
     }
 
@@ -312,7 +312,7 @@ public sealed partial class SimBarExperience
         // starts at the normal duration rather than including unplayed minutes.
         opCooldowns[index] = Mathf.Min(opCooldowns[index], OpEventCooldowns[index]);
         JourneyRecordEvent(success);
-        ShowToast(SimBarLocalization.Format("{0}  +${1}  +{2} FANS", "{0}  +${1}  팬 +{2}명", success ? SimBarLocalization.Text("EVENT SUCCESS!", "이벤트 성공!") : SimBarLocalization.Text("EVENT ENDED — target missed.", "이벤트 종료 — 목표 미달"), reward, newFans), 5f);
+        ShowToast(SimBarLocalization.Format("{0}  {1}  +{2} FANS", "{0}  {1}  팬 +{2}명", success ? SimBarLocalization.Text("EVENT SUCCESS!", "이벤트 성공!") : SimBarLocalization.Text("EVENT ENDED — target missed.", "이벤트 종료 — 목표 미달"), SimBarMoney.Format(reward, true), newFans), 5f);
         SaveOperations();
     }
 
@@ -325,7 +325,7 @@ public sealed partial class SimBarExperience
         opWageDebt = 0;
         opWageTimer = 60f;
         UpdateOperationsWorldVisuals();
-        FinishOperationsAction(SimBarLocalization.Format("Wages paid: ${0}. All hired staff are back on duty.", "급여 ${0} 지급 완료. 고용한 직원 모두가 근무를 재개합니다.", payment));
+        FinishOperationsAction(SimBarLocalization.Format("Wages paid: {0}. All hired staff are back on duty.", "급여 {0} 지급 완료. 고용한 직원 모두가 근무를 재개합니다.", SimBarMoney.Format(payment)));
     }
 
     private bool OpFailure(string message)
@@ -353,6 +353,10 @@ public sealed partial class SimBarExperience
         GameObject frame = OpPanel("Operations Modal", opOverlay.transform, Vector2.one * 0.5f, Vector2.zero, new Vector2(1080f, 720f), new Color(0.055f, 0.065f, 0.105f, 1f), true);
         OpText("Operations Title", frame.transform, "SIMBAR  /  HOUSE MANAGEMENT", 29, new Vector2(-33f, 316f), new Vector2(938f, 46f), new Color(0.99f, 0.90f, 0.65f), TextAnchor.MiddleLeft);
         opWallet = OpText("Operations Budget", frame.transform, string.Empty, 19, new Vector2(-55f, 276f), new Vector2(922f, 32f), Color.white, TextAnchor.MiddleLeft);
+        opWallet.resizeTextForBestFit = true;
+        opWallet.resizeTextMinSize = 13;
+        opWallet.resizeTextMaxSize = 19;
+        opWallet.verticalOverflow = VerticalWrapMode.Truncate;
         Button close = OpButton("CLOSE  X", frame.transform, Vector2.one * 0.5f, new Vector2(449f, 315f), new Vector2(138f, 42f), 17);
         close.onClick.AddListener(CloseOperations);
         string[] names = { "STAFF", "FACILITIES", "EVENTS", "GUEST INFO" };
@@ -431,22 +435,22 @@ public sealed partial class SimBarExperience
             bool enabled = true;
             if (opPage == 0)
             {
-                title = SimBarLocalization.Format("{0}  /  ${1} WAGE EVERY 60 SEC", "{0}  /  60초마다 급여 ${1}", OpStaffName(i), OpWages[i]);
+                title = SimBarLocalization.Format("{0}  /  {1} WAGE EVERY 60 SEC", "{0}  /  60초마다 급여 {1}", OpStaffName(i), SimBarMoney.Format(OpWages[i]));
                 description = SimBarLocalization.Text(OpStaffDescriptions[i], OpStaffDescriptionsKorean[i]);
-                action = opStaff[i] > 0 ? (opWageDebt > 0 ? SimBarLocalization.Text("OFF DUTY / WAGES DUE", "근무 중단 / 급여 미지급") : SimBarLocalization.Text("HIRED / ON DUTY", "고용 완료 / 근무 중")) : SimBarLocalization.Format("HIRE  ${0}", "고용  ${0}", OpHireCosts[i]);
+                action = opStaff[i] > 0 ? (opWageDebt > 0 ? SimBarLocalization.Text("OFF DUTY / WAGES DUE", "근무 중단 / 급여 미지급") : SimBarLocalization.Text("HIRED / ON DUTY", "고용 완료 / 근무 중")) : SimBarLocalization.Format("HIRE  {0}", "고용  {0}", SimBarMoney.Format(OpHireCosts[i]));
                 enabled = opStaff[i] == 0;
             }
             else if (opPage == 1)
             {
                 title = SimBarLocalization.Format("{0}  /  LEVEL {1} OF 3", "{0}  /  레벨 {1} / 3", OpUpgradeName(i), opUpgrades[i]);
                 description = SimBarLocalization.Text(OpUpgradeDescriptions[i], OpUpgradeDescriptionsKorean[i]);
-                action = opUpgrades[i] >= 3 ? SimBarLocalization.Text("MAX LEVEL", "최고 레벨") : SimBarLocalization.Format("UPGRADE  ${0}", "업그레이드  ${0}", OpUpgradeCosts[i, opUpgrades[i]]);
+                action = opUpgrades[i] >= 3 ? SimBarLocalization.Text("MAX LEVEL", "최고 레벨") : SimBarLocalization.Format("UPGRADE  {0}", "업그레이드  {0}", SimBarMoney.Format(OpUpgradeCosts[i, opUpgrades[i]]));
                 enabled = opUpgrades[i] < 3;
             }
             else
             {
                 title = OpEventName(i); description = SimBarLocalization.Text(OpEventDescriptions[i], OpEventDescriptionsKorean[i]);
-                action = SimBarLocalization.Format("BOOK  ${0}", "개최  ${0}", OpEventCosts[i]);
+                action = SimBarLocalization.Format("BOOK  {0}", "개최  {0}", SimBarMoney.Format(OpEventCosts[i]));
                 if (opActiveEvent == i) { action = SimBarLocalization.Format("LIVE  {0}", "진행 중  {0}", OpTime(opEventRemaining)); enabled = false; }
                 else if (opActiveEvent >= 0) { action = SimBarLocalization.Text("AN EVENT IS RUNNING", "다른 이벤트 진행 중"); enabled = false; }
                 else if (opCooldowns[i] > 0f) { action = SimBarLocalization.Format("COOLDOWN  {0}", "재개최 대기  {0}", OpTime(opCooldowns[i])); enabled = false; }
@@ -464,7 +468,7 @@ public sealed partial class SimBarExperience
         }
         if (opPage == 0 && opWageDebt > 0)
         {
-            Button pay = OpButton(SimBarLocalization.Format("PAY OVERDUE WAGES  ${0}", "미지급 급여 지급  ${0}", opWageDebt), opBody, Vector2.one * 0.5f, new Vector2(0f, -231f), new Vector2(410f, 36f), 16);
+            Button pay = OpButton(SimBarLocalization.Format("PAY OVERDUE WAGES  {0}", "미지급 급여 지급  {0}", SimBarMoney.Format(opWageDebt)), opBody, Vector2.one * 0.5f, new Vector2(0f, -231f), new Vector2(410f, 36f), 16);
             pay.onClick.AddListener(PayOperationsWages);
         }
     }
@@ -491,7 +495,7 @@ public sealed partial class SimBarExperience
     private void RefreshOperationsHUD()
     {
         if (!opInitialized) return;
-        string staffState = opWageDebt > 0 ? SimBarLocalization.Format("WAGES DUE ${0}", "미지급 급여 ${0}", opWageDebt) : SimBarLocalization.Format("STAFF {0}", "직원 {0}명", 2 + OpHireCount);
+        string staffState = opWageDebt > 0 ? SimBarLocalization.Format("WAGES DUE {0}", "미지급 급여 {0}", SimBarMoney.Format(opWageDebt)) : SimBarLocalization.Format("STAFF {0}", "직원 {0}명", 2 + OpHireCount);
         if (opStatus != null)
         {
             opStatus.text = opActiveEvent >= 0
@@ -500,7 +504,7 @@ public sealed partial class SimBarExperience
             opStatus.color = opWageDebt > 0 ? new Color(1f, 0.65f, 0.48f) : opActiveEvent >= 0 ? new Color(0.96f, 0.82f, 0.36f) : new Color(0.80f, 0.91f, 0.78f);
         }
         if (opWallet != null)
-            opWallet.text = SimBarLocalization.Format("CASH ${0}   /   {1}   /   PAUSED WHILE MANAGING", "현금 ${0}   /   {1}   /   관리 중 일시 정지", cash.ToString("N0"), opWageDebt > 0 ? SimBarLocalization.Format("OVERDUE WAGES ${0}", "미지급 급여 ${0}", opWageDebt) : SimBarLocalization.Format("PAYROLL ${0} IN {1}", "{1} 후 급여 ${0}", OpPayroll, OpTime(opWageTimer)));
+            opWallet.text = SimBarLocalization.Format("CASH {0}   /   {1}   /   PAUSED WHILE MANAGING", "현금 {0}   /   {1}   /   관리 중 일시 정지", SimBarMoney.Format(cash), opWageDebt > 0 ? SimBarLocalization.Format("OVERDUE WAGES {0}", "미지급 급여 {0}", SimBarMoney.Format(opWageDebt)) : SimBarLocalization.Format("PAYROLL {0} IN {1}", "{1} 후 급여 {0}", SimBarMoney.Format(OpPayroll), OpTime(opWageTimer)));
         if (opMapCaption != null) opMapCaption.text = opWageDebt > 0 ? SimBarLocalization.Text("HIRED STAFF OFF DUTY / WAGES DUE", "고용 직원 근무 중단 / 급여 미지급") : SimBarLocalization.Format("{0} STAFF  /  HOUSE OPEN", "직원 {0}명  /  영업 중", 2 + OpHireCount);
         if (opStaffCaption != null) opStaffCaption.text = SimBarLocalization.Format("Staff Management  {0}", "직원 관리  {0}명", 2 + OpHireCount);
     }

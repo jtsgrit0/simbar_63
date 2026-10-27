@@ -52,37 +52,37 @@ public sealed partial class SimBarExperience
     private static readonly string[] JuiGuideTitles =
     {
         "READ THE ORDER",
-        "TIME YOUR POUR",
+        "TIME YOUR SERVICE",
         "MAKE IT A GREAT NIGHT"
     };
     private static readonly string[] JuiGuideBodies =
     {
-        "The first guest's order appears in BAR SERVICE.\nChoose the matching drink with 1, 2 or 3, or click its button.\nServe the oldest order before the guest loses patience.",
-        "Choosing a drink starts the timing bar.\nPress SPACE or click STOP when the marker reaches the target.\nAccurate pours earn tips and build your combo.\nBuild a clean streak to ignite FEVER for bonus tips.",
+        "The first guest's order appears in BAR SERVICE.\nPress M or click MENU to choose an item, or use keys 1–5.\nPress E or PREPARE ORDER to match the oldest order.",
+        "Choosing a menu item starts the timing bar.\nPour cocktails or plate food on the beat: press SPACE or STOP at the target.\nAccurate service earns tips and builds your combo.\nBuild a clean streak to ignite FEVER for bonus tips.",
         "Complete tonight's three goals before last call.\nHire staff, upgrade your venue and book events for useful bonuses.\nManagement menus pause the timers. Earn stars and XP, then open the next night."
     };
     private static readonly string[] JuiGuideExamples =
     {
-        "MINA WANTS AMBER ALE\n\n[ 1  AMBER ALE ]     2  NEON FIZZ     3  WHISKEY SOUR",
-        "CHOOSE A DRINK     >     WATCH THE MARKER     >     SPACE / STOP\n\nA good pour keeps the crowd happy. A perfect pour keeps the combo alive.",
+        "CHECK THE ORDER     >     MENU / 1–5     >     CHOOSE AN ITEM\n\nUse E / PREPARE ORDER to prepare the oldest guest's requested item.",
+        "CHOOSE AN ITEM     >     WATCH THE MARKER     >     SPACE / STOP\n\nGood service keeps the crowd happy. Perfect service keeps the combo alive.",
         "SERVE YOUR GUESTS     +     HIT YOUR GOALS     +     GROW YOUR VENUE\n\nYour cash, hired staff and facility upgrades carry into the next night."
     };
     private static readonly string[] JuiGuideTitlesKorean =
     {
         "주문 확인하기",
-        "타이밍에 맞춰 따르기",
+        "타이밍에 맞춰 서빙하기",
         "멋진 밤 만들기"
     };
     private static readonly string[] JuiGuideBodiesKorean =
     {
-        "첫 손님의 주문이 바 서비스에 표시됩니다.\n1, 2, 3 키 또는 음료 버튼으로 주문에 맞는 음료를 고르세요.\n손님이 지치기 전에 가장 오래된 주문부터 제공하세요.",
-        "음료를 고르면 타이밍 바가 시작됩니다.\n표시가 목표 구간에 도달하면 SPACE 키나 멈춤 버튼을 누르세요.\n정확하게 따르면 팁과 콤보를 얻습니다.\n실수 없이 연속으로 성공하면 피버가 발동해 팁이 늘어납니다.",
+        "첫 손님의 주문이 바 서비스에 표시됩니다.\nM 키나 메뉴 버튼을 눌러 메뉴를 고르거나 1–5 키를 누르세요.\nE 키나 주문 메뉴 준비 버튼으로 가장 오래된 주문을 준비하세요.",
+        "메뉴를 고르면 타이밍 바가 시작됩니다.\n음료 따르기와 푸드 플레이팅 모두 목표 구간에서 SPACE 키나 멈춤 버튼을 누르세요.\n정확하게 서빙하면 팁과 콤보를 얻습니다.\n실수 없이 연속으로 성공하면 피버가 발동해 팁이 늘어납니다.",
         "영업이 끝나기 전에 오늘의 목표 세 가지를 달성하세요.\n직원 고용, 매장 업그레이드, 이벤트 예약으로 보너스를 얻을 수 있습니다.\n관리 메뉴에서는 시간이 멈춥니다. 별과 경험치를 모아 다음 날에도 영업하세요."
     };
     private static readonly string[] JuiGuideExamplesKorean =
     {
-        "미나의 주문: 앰버 에일\n\n[ 1  앰버 에일 ]     2  네온 피즈     3  위스키 사워",
-        "음료 선택     >     표시 확인     >     SPACE / 멈춤\n\n잘 따르면 손님이 만족하고, 완벽하게 따르면 콤보가 이어집니다.",
+        "주문 확인     >     메뉴 / 1–5     >     메뉴 선택\n\nE 키나 주문 메뉴 준비 버튼으로 가장 오래된 손님의 주문을 준비하세요.",
+        "메뉴 선택     >     표시 확인     >     SPACE / 멈춤\n\n잘 서빙하면 손님이 만족하고, 완벽하게 서빙하면 콤보가 이어집니다.",
         "손님 응대     +     목표 달성     +     매장 성장\n\n보유 현금, 고용한 직원, 시설 업그레이드는 다음 날에도 유지됩니다."
     };
 
@@ -208,6 +208,10 @@ public sealed partial class SimBarExperience
             juiResultGoals[i] = OpText("Journey Result Goal Label " + i, goal.transform, string.Empty, 20, Vector2.zero, new Vector2(898f, 34f), Color.white, TextAnchor.MiddleLeft);
         }
         juiResultProfit = JourneyResultStat(panel, "NIGHT PROFIT", -315f);
+        juiResultProfit.resizeTextForBestFit = true;
+        juiResultProfit.resizeTextMinSize = 20;
+        juiResultProfit.resizeTextMaxSize = 34;
+        juiResultProfit.verticalOverflow = VerticalWrapMode.Truncate;
         juiResultServices = JourneyResultStat(panel, "GUESTS SERVED", 0f);
         juiResultXP = JourneyResultStat(panel, "XP EARNED", 315f);
         juiResultRecord = OpText("Journey New Record", panel, string.Empty, 24, new Vector2(0f, -131f), new Vector2(980f, 40f), JuiGreen, TextAnchor.MiddleCenter);
@@ -350,11 +354,11 @@ public sealed partial class SimBarExperience
         {
             juiResultsTitle.text = SimBarLocalization.Format("DAY {0}  /  LAST CALL", "{0}일 차  /  영업 마감", JourneyDay);
             juiResultsRank.text = SimBarLocalization.Format("{0} POINTS    /    BEST COMBO x{1}    /    {2} PERFECT POURS", "{0}점    /    최고 콤보 x{1}    /    퍼펙트 {2}회", JourneyScore.ToString("N0"), JourneyBestCombo, JourneyPerfects);
-            juiResultProfit.text = JourneyResultProfit.ToString("+$#,##0;-$#,##0;$0");
+            juiResultProfit.text = SimBarMoney.Format(JourneyResultProfit, true);
             juiResultServices.text = JourneyResultServed.ToString("N0");
             juiResultXP.text = "+" + JourneyResultXP.ToString("N0");
             juiResultRecord.text = JourneyResultNewRecord ? SimBarLocalization.Text("NEW HIGH SCORE!", "최고 점수 경신!") : SimBarLocalization.Text("BEST SCORE  ", "최고 점수  ") + JourneyBestScore.ToString("N0");
-            juiResultProgress.text = SimBarLocalization.Format("NIGHT BONUS +${0}    /    RANK {1}    /    TOTAL XP {2}", "영업 보너스 +${0}    /    등급 {1}    /    총 경험치 {2}", JourneyResultBonus.ToString("N0"), JourneyRankLabel, JourneyXP.ToString("N0"));
+            juiResultProgress.text = SimBarLocalization.Format("NIGHT BONUS {0}    /    RANK {1}    /    TOTAL XP {2}", "영업 보너스 {0}    /    등급 {1}    /    총 경험치 {2}", SimBarMoney.Format(JourneyResultBonus, true), JourneyRankLabel, JourneyXP.ToString("N0"));
         }
     }
 

@@ -14,15 +14,18 @@ using UnityEngine.UI;
 public sealed partial class SimBarExperience : MonoBehaviour
 {
     private const float StartingCash = 12340f;
-    private static readonly string[] EnglishDrinkNames = { "AMBER ALE", "NEON FIZZ", "WHISKEY SOUR" };
-    private static readonly string[] KoreanDrinkNames = { "앰버 에일", "네온 피즈", "위스키 사워" };
+    private static readonly string[] EnglishDrinkNames = { "FAUST", "ADIOS MOTHERFUCKER", "PEPPERONI HALF PIZZA", "CHILI CHEESE FRIES", "CHILI CHEESE CHIPS" };
+    private static readonly string[] KoreanDrinkNames = { "파우스트", "아디오스 마더퍼커", "페퍼로니 피자 하프", "칠리 치즈 프라이", "칠리 치즈 칩스" };
     private static string[] DrinkNames => SimBarLocalization.IsKorean ? KoreanDrinkNames : EnglishDrinkNames;
-    private static readonly int[] DrinkPrices = { 28, 34, 42 };
+    // Keep saved wallet units intact; SimBarMoney displays each unit as ₩1,000.
+    private static readonly int[] DrinkPrices = { 14, 12, 9, 14, 14 };
     private static readonly Color[] DrinkColors =
     {
         new Color(1f, 0.60f, 0.14f),
         new Color(0.10f, 0.92f, 0.86f),
-        new Color(0.95f, 0.33f, 0.48f)
+        new Color(0.95f, 0.33f, 0.48f),
+        new Color(1f, 0.78f, 0.25f),
+        new Color(0.55f, 0.86f, 0.35f)
     };
     private static readonly string[] Playlist =
     {
@@ -86,7 +89,7 @@ public sealed partial class SimBarExperience : MonoBehaviour
     private Material cyanGlowMat;
     private Material pinkGlowMat;
     private Material amberGlowMat;
-    private readonly Material[] orderMarkerMaterials = new Material[3];
+    private readonly Material[] orderMarkerMaterials = new Material[DrinkPrices.Length];
 
     private float cash = StartingCash;
     private int fans = 256;
@@ -635,6 +638,7 @@ public sealed partial class SimBarExperience : MonoBehaviour
         CreatePausePanel();
         SimBarHudSkin.Apply(canvas);
         SimBarMiniMap.Attach(canvas, worldRoot);
+        BuildServiceMenu();
     }
 
     private void EnsureEventSystem()
@@ -708,14 +712,15 @@ public sealed partial class SimBarExperience : MonoBehaviour
         queueText = CreateText("Queue", panel.transform, "", 13, TextAnchor.MiddleCenter, new Color(0.65f, 0.78f, 0.94f));
         SetRect(queueText.rectTransform, new Vector2(0.5f, 1f), new Vector2(0f, -82f), new Vector2(670f, 22f));
 
-        for (int i = 0; i < DrinkNames.Length; i++)
-        {
-            int index = i;
-            Button drink = CreateButton((i + 1) + "  " + EnglishDrinkNames[i] + "  $" + DrinkPrices[i], panel.transform, new Vector2(0.5f, 0f), new Vector2(-230f + 230f * i, 37f), new Vector2(212f, 48f), DrinkColors[i] * 0.62f + new Color(0.08f, 0.08f, 0.10f), 14);
-            drinkButtonLabels[i] = drink.GetComponentInChildren<Text>();
-            drink.onClick.AddListener(() => RequestPlayerPour(index));
-        }
-        Text help = CreateText("Service Help", panel.transform, "1 / 2 / 3 choose  •  SPACE / STOP pour  •  E choose requested drink  •  P pause", 12, TextAnchor.MiddleCenter, new Color(0.70f, 0.76f, 0.88f));
+        Button menu = CreateButton("MENU  /  5 ITEMS", panel.transform, new Vector2(0.5f, 0f), new Vector2(-170f, 37f), new Vector2(320f, 48f), new Color(0.42f, 0.20f, 0.32f), 18);
+        menu.name = "Service Menu Open Button";
+        SimBarLocalization.Bind(menu.GetComponentInChildren<Text>(), "MENU  /  5 ITEMS", "메뉴  /  5종");
+        menu.onClick.AddListener(OpenServiceMenu);
+        Button requested = CreateButton("PREPARE ORDER  /  E", panel.transform, new Vector2(0.5f, 0f), new Vector2(170f, 37f), new Vector2(320f, 48f), new Color(0.10f, 0.38f, 0.32f), 18);
+        requested.name = "Service Requested Item Button";
+        SimBarLocalization.Bind(requested.GetComponentInChildren<Text>(), "PREPARE ORDER  /  E", "주문 메뉴 준비  /  E");
+        requested.onClick.AddListener(PrepareRequestedService);
+        Text help = CreateText("Service Help", panel.transform, "1–5 SELECT  /  M MENU  /  E ORDER  /  P PAUSE", 12, TextAnchor.MiddleCenter, new Color(0.70f, 0.76f, 0.88f));
         SetRect(help.rectTransform, new Vector2(0.5f, 0f), new Vector2(0f, 8f), new Vector2(680f, 20f));
     }
 
@@ -779,10 +784,13 @@ public sealed partial class SimBarExperience : MonoBehaviour
         StartMusicOnInput();
         if (Keyboard.current != null)
         {
-            if (Keyboard.current.digit1Key.wasPressedThisFrame) RequestPlayerPour(0);
-            if (Keyboard.current.digit2Key.wasPressedThisFrame) RequestPlayerPour(1);
-            if (Keyboard.current.digit3Key.wasPressedThisFrame) RequestPlayerPour(2);
-            if (Keyboard.current.eKey.wasPressedThisFrame && orderQueue.Count > 0) RequestPlayerPour(orderQueue.Peek().drinkIndex);
+            if (Keyboard.current.digit1Key.wasPressedThisFrame) SelectServiceItem(0);
+            if (Keyboard.current.digit2Key.wasPressedThisFrame) SelectServiceItem(1);
+            if (Keyboard.current.digit3Key.wasPressedThisFrame) SelectServiceItem(2);
+            if (Keyboard.current.digit4Key.wasPressedThisFrame) SelectServiceItem(3);
+            if (Keyboard.current.digit5Key.wasPressedThisFrame) SelectServiceItem(4);
+            if (Keyboard.current.mKey.wasPressedThisFrame) { if (serviceMenuOpen) CloseServiceMenu(); else OpenServiceMenu(); }
+            if (Keyboard.current.eKey.wasPressedThisFrame) PrepareRequestedService();
             if (Keyboard.current.pKey.wasPressedThisFrame) TogglePause();
         }
 
@@ -865,7 +873,7 @@ public sealed partial class SimBarExperience : MonoBehaviour
             performance = Mathf.Max(0.35f, performance - 0.04f);
             fans = Mathf.Max(0, fans - 3);
             JourneyRecordMistake();
-            ShowToast(SimBarLocalization.Format("{0} left thirsty — fans noticed.", "{0} 손님이 음료를 받지 못하고 떠났어요. 팬이 줄었습니다.", front.name.ToUpperInvariant()), 3.5f);
+            ShowToast(SimBarLocalization.Format("{0} left without their order — fans noticed.", "{0} 손님이 주문을 받지 못하고 떠났어요. 팬이 줄었습니다.", front.name.ToUpperInvariant()), 3.5f);
         }
     }
 
@@ -879,7 +887,7 @@ public sealed partial class SimBarExperience : MonoBehaviour
             if (candidate.drinkIndex >= 0)
                 continue;
             AssignOrder(candidate, UnityEngine.Random.Range(0, DrinkNames.Length));
-            ShowToast(SimBarLocalization.Format("{0} raised a hand at the bar.", "{0} 손님이 음료를 주문했어요.", candidate.name.ToUpperInvariant()), 2.6f);
+            ShowToast(SimBarLocalization.Format("{0} raised a hand at the bar.", "{0} 손님이 메뉴를 주문했어요.", candidate.name.ToUpperInvariant()), 2.6f);
             return;
         }
     }
@@ -930,7 +938,7 @@ public sealed partial class SimBarExperience : MonoBehaviour
         {
             satisfaction = Mathf.Max(0.30f, satisfaction - 0.025f);
             JourneyRecordMistake();
-            ShowToast(SimBarLocalization.Format("That is not {0}'S ORDER.", "{0} 손님의 주문과 다른 음료예요.", patron.name.ToUpperInvariant()), 2.3f);
+            ShowToast(SimBarLocalization.Format("That is not {0}'S ORDER.", "{0} 손님의 주문과 다른 메뉴예요.", patron.name.ToUpperInvariant()), 2.3f);
             return;
         }
 
@@ -947,10 +955,10 @@ public sealed partial class SimBarExperience : MonoBehaviour
         MotionServed(patron, automatic, quality);
         TryCreateOrder();
         string verdict = automatic ? SimBarLocalization.Text("BARBACK SERVED", "바 보조가 서빙했어요")
-            : quality >= 0.9f ? SimBarLocalization.Text("PERFECT POUR!", "완벽하게 따랐어요!")
-            : quality >= 0.5f ? SimBarLocalization.Text("GOOD POUR!", "잘 따랐어요!")
-            : SimBarLocalization.Text("SPILLED — NO TIP", "음료를 흘렸어요 — 팁 없음");
-        ShowToast(verdict + "  +$" + (sale + tip), 2.8f);
+            : quality >= 0.9f ? SimBarLocalization.Text("PERFECT SERVICE!", "완벽하게 서빙했어요!")
+            : quality >= 0.5f ? SimBarLocalization.Text("GOOD SERVICE!", "잘 서빙했어요!")
+            : SimBarLocalization.Text("SERVICE MISSED — NO TIP", "서빙 타이밍을 놓쳤어요 — 팁 없음");
+        ShowToast(verdict + "  +" + SimBarMoney.Format(sale + tip), 2.8f);
         JourneyRecordServe(automatic, quality, sale + tip);
         RefreshUI();
         SaveOperations();
@@ -969,6 +977,7 @@ public sealed partial class SimBarExperience : MonoBehaviour
 
     private void TogglePause()
     {
+        if (serviceMenuOpen) { CloseServiceMenu(); return; }
         if (settingsOverlay != null && settingsOverlay.activeSelf)
         {
             CloseLanguageSettings();
@@ -989,7 +998,7 @@ public sealed partial class SimBarExperience : MonoBehaviour
     {
         if (cashText == null)
             return;
-        cashText.text = "$" + cash.ToString("N0");
+        cashText.text = SimBarMoney.Format(cash);
         fanText.text = fans.ToString("N0");
         int hour = Mathf.FloorToInt(gameClock);
         int minute = Mathf.FloorToInt((gameClock - hour) * 60f);
@@ -1006,7 +1015,7 @@ public sealed partial class SimBarExperience : MonoBehaviour
         {
             Patron patron = orderQueue.Peek();
             orderText.text = SimBarLocalization.Format("{0} WANTS {1}", "{0} 주문: {1}", patron.name.ToUpperInvariant(), DrinkNames[patron.drinkIndex]);
-            queueText.text = SimBarLocalization.Format("QUEUE {0}  •  PATIENCE {1}s  •  TONIGHT'S POURS {2}", "대기 {0}명  •  남은 대기 시간 {1}초  •  오늘 서빙 {2}잔", orderQueue.Count, Mathf.CeilToInt(Mathf.Max(0f, patron.patience)), servedTonight);
+            queueText.text = SimBarLocalization.Format("QUEUE {0}  •  PATIENCE {1}s  •  TONIGHT'S ORDERS {2}", "대기 {0}명  •  남은 대기 시간 {1}초  •  오늘 서빙 {2}건", orderQueue.Count, Mathf.CeilToInt(Mathf.Max(0f, patron.patience)), servedTonight);
         }
         SetMeter(satisfactionFill, satisfaction);
         SetMeter(performanceFill, performance);
