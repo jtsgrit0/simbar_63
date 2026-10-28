@@ -37,7 +37,8 @@ public sealed partial class SimBarExperience
         CancelPourGame(false);
         if (serviceMenuOpen) CloseServiceMenu();
         if (opMenuOpen) CloseOperations();
-        if (!JourneyHasActivePlan)
+        bool freshPlan=!JourneyHasActivePlan;
+        if (freshPlan)
         {
             journey.booking = SimBarBooking.NewPlan(journey.day, selectedOwner == 2 ? 1 : 0);
             journey.dayOpeningCash = cash;
@@ -47,6 +48,7 @@ public sealed partial class SimBarExperience
         SimBarBooking.Sanitize(DayPlan, BookingCareer);
         journey.challenge = challenge;
         journeyPhase = JourneyPhase.Planning;
+        if(freshPlan) { bookingShowingPosters=true; bookingShowingArchive=false; }
         paused = true;
         gameClock = SimBarBooking.Hour(DayPlan);
         bookingFeedback = "";
@@ -79,6 +81,10 @@ public sealed partial class SimBarExperience
         if (result.success) cash = JourneyClamp(cash + result.cashDelta, cash, 0f, 1000000000f);
         switch (result.code)
         {
+            case "scouted": bookingFeedback=SimBarLocalization.Text("Lineup discovered. Select an artist card to continue booking.","출연진 발굴 완료. 팀 카드를 눌러 섭외 상세로 이동하세요."); break;
+            case "not_discovered": bookingFeedback=SimBarLocalization.Text("Research the band's poster first.","먼저 포스터를 조사해 이 팀을 발굴해 주세요."); break;
+            case "already_scouted":
+            case "already_discovered": bookingFeedback=SimBarLocalization.Text("This lineup is already in your scouting network.","이미 발굴한 출연진입니다. 섭외 탭에서 제안할 수 있어요."); break;
             case "listened": bookingFeedback = SimBarLocalization.Text("Demo reviewed. This band's acceptance chance improved.", "데모 검토 완료. 이 팀의 제안 수락 확률이 올랐어요."); break;
             case "accepted": bookingFeedback = SimBarLocalization.Text("Booking confirmed! The artist fee has been paid.", "섭외 확정! 출연료를 지급했습니다."); break;
             case "rejected": bookingFeedback = SimBarLocalization.Text("The band declined today. Try another newcomer.", "오늘의 제안은 거절됐어요. 다른 신인에게 제안해 보세요."); break;

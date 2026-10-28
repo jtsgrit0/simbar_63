@@ -14,16 +14,17 @@ public sealed partial class SimBarExperience
     private Button bookingBack, bookingLanguage, bookingPlanTab, bookingArchiveTab, bookingVenueButton;
     private Button bookingListenButton, bookingOfferButton, bookingPromotionButton, bookingLaunchButton, bookingBrowseButton;
     private readonly Button[] bookingVenueButtons = new Button[4];
-    private readonly Button[] bookingBandButtons = new Button[12];
-    private readonly Text[] bookingBandNames = new Text[12];
-    private readonly Text[] bookingBandGenres = new Text[12];
-    private readonly Text[] bookingBandStates = new Text[12];
+    private readonly Button[] bookingBandButtons = new Button[SimBarBooking.BandCount];
+    private readonly Text[] bookingBandNames = new Text[SimBarBooking.BandCount];
+    private readonly Text[] bookingBandGenres = new Text[SimBarBooking.BandCount];
+    private readonly Text[] bookingBandStates = new Text[SimBarBooking.BandCount];
     private readonly Button[] bookingPackageButtons = new Button[2];
     private readonly Button[] bookingTicketButtons = new Button[3];
     private Text bookingTitle, bookingSubtitle, bookingClockLabel, bookingVenueLabel, bookingVenueStats;
     private Text bookingSelectedName, bookingSelectedGenre, bookingSelectedMetrics, bookingActionHint;
     private Text bookingLineupTitle, bookingLineupBody, bookingForecastLabel, bookingFeedbackLabel, bookingWalletLabel;
     private Text bookingLiveText, bookingArchiveTitle, bookingArchiveNote;
+    private Text bookingArtistKind;
     private readonly List<RectTransform> bookingArchiveRows = new List<RectTransform>();
     private readonly List<Text> bookingArchiveArtistLabels = new List<Text>();
     private readonly List<Text> bookingArchiveEvidenceLabels = new List<Text>();
@@ -63,9 +64,9 @@ public sealed partial class SimBarExperience
         bookingBack.onClick.AddListener(BookingBackToLobby);
         bookingLanguage = BookingButton("Planning language", bookingHeader, "한국어", "ENGLISH", 12, BookingCard, BookingInk);
         bookingLanguage.onClick.AddListener(() => SimBarLocalization.SetLanguage(!SimBarLocalization.IsKorean));
-        bookingPlanTab = BookingButton("Fictional booking tab", bookingHeader, "BOOK NEWCOMERS", "신인 섭외", 15, BookingGreen, Color.white);
+        bookingPlanTab = BookingButton("Artist booking tab", bookingHeader, "BOOKING", "라인업·섭외", 14, BookingGreen, Color.white);
         bookingPlanTab.onClick.AddListener(() => BookingShowArchive(false));
-        bookingArchiveTab = BookingButton("Verified venue history tab", bookingHeader, "VENUE ARCHIVE", "공연 기록", 15, BookingLine, BookingInk);
+        bookingArchiveTab = BookingButton("Verified venue history tab", bookingHeader, "ARCHIVE", "공연 기록", 14, BookingLine, BookingInk);
         bookingArchiveTab.onClick.AddListener(() => BookingShowArchive(true));
         bookingClockLabel = BookingText("Planning time and remaining blocks", bookingHeader, "", "", 15, BookingGreen, true);
         bookingVenueButton = BookingButton("Choose one of four venues", bookingHeader, "", "", 16, BookingCard, BookingInk);
@@ -88,6 +89,7 @@ public sealed partial class SimBarExperience
         BuildBookingRoster();
         BuildBookingDetail();
         BuildBookingBusiness();
+        BuildPosterScoutingUI();
         bookingArchive = BookingPanel("Read only real venue archive", bookingContent, BookingCard);
         bookingArchiveTitle = BookingText("Archive title", bookingArchive, "", "", 22, BookingInk, true);
         bookingArchiveNote = BookingText("Archive scope and verification date", bookingArchive, "", "", 13, BookingMuted);
@@ -95,7 +97,7 @@ public sealed partial class SimBarExperience
         bookingFeedbackLabel = BookingText("Planning action feedback", bookingFooter, "", "", 14, BookingGreen);
         bookingWalletLabel = BookingText("Game wallet", bookingFooter, "", "", 13, BookingMuted);
         bookingLaunchButton = BookingButton("Launch three minute night", bookingFooter, "", "", 19, BookingGreen, Color.white);
-        bookingLaunchButton.onClick.AddListener(BookingLaunchNight);
+        bookingLaunchButton.onClick.AddListener(BookingPrimaryAction);
 
         // The venue menu is a last sibling so its four choices overlay the scroll area.
         bookingVenueMenu = BookingPanel("Venue dropdown", bookingRoot, BookingCard);
@@ -131,8 +133,8 @@ public sealed partial class SimBarExperience
     private void BuildBookingRoster()
     {
         bookingRoster = BookingPanel("Fictional newcomer list", bookingContent, BookingCard);
-        BookingText("Roster heading", bookingRoster, "12 FICTIONAL NEWCOMERS", "가상 신인 12팀 · 모든 장르", 18, BookingInk, true);
-        BookingText("Roster scope", bookingRoster, "Original artists created for this game", "게임을 위해 만든 아티스트입니다", 12, BookingMuted);
+        BookingText("Roster heading", bookingRoster, "ARTISTS / ALL GENRES", "발굴 아티스트 · 모든 장르", 18, BookingInk, true);
+        BookingText("Roster scope", bookingRoster, "Poster artists + 12 fictional newcomers", "실존 포스터 출연진 + 가상 신인 12팀", 12, BookingMuted);
         for (int i = 0; i < bookingBandButtons.Length; i++)
         {
             int selected = i;
@@ -157,7 +159,7 @@ public sealed partial class SimBarExperience
     private void BuildBookingDetail()
     {
         bookingDetail = BookingPanel("Selected fictional artist", bookingContent, BookingCard);
-        BookingText("Fictional artist badge", bookingDetail, "FICTIONAL ARTIST  /  GAME VALUES", "가상 아티스트  /  모든 수치는 게임 설정", 12, BookingGreen, true);
+        bookingArtistKind=BookingText("Artist identity and simulation scope", bookingDetail, "", "", 11, BookingGreen, true);
         bookingSelectedName = BookingText("Selected artist name", bookingDetail, "", "", 26, BookingInk, true);
         bookingSelectedGenre = BookingText("Selected artist genre", bookingDetail, "", "", 16, BookingMuted);
         bookingSelectedMetrics = BookingText("Fictional offer metrics", bookingDetail, "", "", 16, BookingInk);
@@ -175,7 +177,7 @@ public sealed partial class SimBarExperience
         bookingActionHint = BookingText("Actions consume time", bookingDetail,
             "Each listen / offer uses 2 hours. Rejected offers also use time.\nFees are paid only after acceptance. Listening improves the chance.",
             "듣기·제안마다 2시간 소요. 거절되어도 시간은 흘러요.\n수락할 때만 출연료를 지불해요. 데모를 들으면 확률이 올라요.", 12, BookingMuted);
-        bookingBrowseButton = BookingButton("Browse all twelve newcomers", bookingDetail, "BROWSE ALL 12 ARTISTS  ↓", "가상 신인 12팀 둘러보기  ↓", 14, BookingLine, BookingInk);
+        bookingBrowseButton = BookingButton("Browse all artists", bookingDetail, "BROWSE ALL ARTISTS  v", "전체 아티스트 둘러보기  v", 14, BookingLine, BookingInk);
         bookingBrowseButton.onClick.AddListener(() =>
         {
             float travel = Mathf.Max(1f, bookingContent.rect.height - bookingScroll.viewport.rect.height);
@@ -238,6 +240,7 @@ public sealed partial class SimBarExperience
         bool listened = (plan.listenedMask & bit) != 0;
         bool attempted = (plan.attemptedMask & bit) != 0;
         bool selectedBooked = (plan.bookedMask & bit) != 0;
+        bool discovered=SimBarBooking.IsDiscovered(BookingCareer,bookingSelectedBand);
         int relationship = BookingCareer != null && BookingCareer.relationships != null && BookingCareer.relationships.Length > bookingSelectedBand ? BookingCareer.relationships[bookingSelectedBand] : 0;
         int growth = BookingCareer != null && BookingCareer.growth != null && BookingCareer.growth.Length > bookingSelectedBand ? BookingCareer.growth[bookingSelectedBand] : 0;
         bookingTitle.text = SimBarLocalization.Format("DAY {0}  /  THE BOOKING DESK", "{0}일 차  /  낮의 기획실", plan.day);
@@ -252,16 +255,19 @@ public sealed partial class SimBarExperience
             BookingButtonColor(bookingVenueButtons[i], i == venueIndex ? BookingPaleGreen : BookingCard, BookingInk);
         }
         bookingSelectedName.text = korean ? band.name : band.nameEnglish;
+        bookingArtistKind.text=band.isReal?SimBarLocalization.Text("REAL POSTER ARTIST / BOOKING IS A GAME SIMULATION", "포스터 출신 실존 밴드 / 섭외 조건은 게임 설정"):
+            SimBarLocalization.Text("FICTIONAL NEWCOMER / GAME VALUES", "가상 신인 / 모든 수치는 게임 설정");
         bookingSelectedGenre.text = korean ? band.genreKorean : band.genre;
         bookingSelectedMetrics.text = SimBarLocalization.Format(
             "Offer fee     {0}\nAcceptance     {1}%\nRelationship     {2}/100    ·    Growth     {3}/100",
             "제안 출연료     {0}\n수락 확률     {1}%\n관계     {2}/100    ·    성장     {3}/100",
             SimBarMoney.Format(SimBarBooking.Fee(bookingSelectedBand, bookingPackage)),
             SimBarBooking.Chance(plan, BookingCareer, bookingSelectedBand, bookingPackage), relationship, growth);
-        bookingListenButton.interactable = canAct && !listened && !attempted;
-        bookingListenButton.GetComponentInChildren<Text>().text = listened ? SimBarLocalization.Text("DEMO HEARD ✓", "데모 감상 완료") : SimBarLocalization.Text("LISTEN · 2H · FREE", "데모 듣기 · 2시간 · 무료");
-        bookingOfferButton.interactable = canAct && !attempted && booked < SimBarBooking.BookingLimit && cash >= SimBarBooking.Fee(bookingSelectedBand, bookingPackage);
-        bookingOfferButton.GetComponentInChildren<Text>().text = selectedBooked ? SimBarLocalization.Text("BOOKED", "섭외 완료") : attempted ? SimBarLocalization.Text("OFFER CLOSED", "오늘 제안 완료") : SimBarLocalization.Text("OFFER · 2 HOURS", "섭외 제안 · 2시간");
+        bookingListenButton.interactable = discovered && canAct && !listened && !attempted;
+        bookingListenButton.GetComponentInChildren<Text>().text = listened ? SimBarLocalization.Text("DEMO REVIEWED", "데모 검토 완료") : SimBarLocalization.Text("DEMO · 2H · FREE", "데모 검토 · 2시간 · 무료");
+        bookingOfferButton.interactable = discovered && canAct && !attempted && booked < SimBarBooking.BookingLimit && cash >= SimBarBooking.Fee(bookingSelectedBand, bookingPackage);
+        bookingOfferButton.GetComponentInChildren<Text>().text = !discovered?SimBarLocalization.Text("SCOUT POSTER FIRST", "포스터 발굴 필요"):
+            selectedBooked ? SimBarLocalization.Text("BOOKED", "섭외 완료") : attempted ? SimBarLocalization.Text("OFFER CLOSED", "오늘 제안 완료") : SimBarLocalization.Text("OFFER · 2 HOURS", "섭외 제안 · 2시간");
         for (int i = 0; i < bookingPackageButtons.Length; i++)
             BookingButtonColor(bookingPackageButtons[i], bookingPackage == i ? BookingGreen : BookingLine, bookingPackage == i ? Color.white : BookingInk);
         for (int i = 0; i < bookingBandButtons.Length; i++)
@@ -271,7 +277,9 @@ public sealed partial class SimBarExperience
             bookingBandGenres[i].text = (korean ? item.genreKorean : item.genre) + "  ·  " + SimBarMoney.Format(item.baseFee);
             bookingBandStates[i].text = (plan.bookedMask & (1 << i)) != 0 ? SimBarLocalization.Text("BOOKED", "섭외 완료")
                 : (plan.attemptedMask & (1 << i)) != 0 ? SimBarLocalization.Text("CLOSED", "제안 완료")
-                : (plan.listenedMask & (1 << i)) != 0 ? SimBarLocalization.Text("HEARD", "감상 완료") : SimBarLocalization.Text("FICTIONAL", "가상 신인");
+                : (plan.listenedMask & (1 << i)) != 0 ? SimBarLocalization.Text("REVIEWED", "검토 완료")
+                : !SimBarBooking.IsDiscovered(BookingCareer,i)?SimBarLocalization.Text("LOCKED", "미발굴")
+                : item.isReal?SimBarLocalization.Text("POSTER", "포스터 출신"):SimBarLocalization.Text("FICTIONAL", "가상 신인");
             BookingButtonColor(bookingBandButtons[i], bookingSelectedBand == i ? BookingPaleGreen : BookingCard, BookingInk);
         }
         bookingLineupTitle.text = SimBarLocalization.Format("TONIGHT'S LINEUP  {0} / 3", "오늘의 라인업  {0} / 3팀", booked);
@@ -296,17 +304,27 @@ public sealed partial class SimBarExperience
             "게임 예상  ·  관객 {0}/{1}명  ·  홍보 {2}회\n티켓 수입 최대 {3} · 최종 수입은 영업 성과에 따라 결정\n매장 수치·출연료·확률은 실제 자료가 아닌 게임 설정입니다.",
             forecast.attendance, forecast.venueCapacity, plan.promotions, SimBarMoney.Format(forecast.ticketIncome));
         bookingFeedbackLabel.text = string.IsNullOrEmpty(bookingFeedback)
-            ? SimBarLocalization.Text("Listen, make an offer, or promote. Each action spends one block.", "데모 감상, 섭외 제안, 공연 홍보마다 한 블록이 흘러갑니다.") : bookingFeedback;
+            ? bookingShowingPosters?SimBarLocalization.Text("Inspect the poster, research its lineup, then open an artist's booking details.","포스터를 살펴보고 조사한 뒤, 발굴한 팀의 섭외 상세로 이동하세요."):
+                SimBarLocalization.Text("Review a demo, make an offer, or promote. Each action spends one block.", "데모 검토, 섭외 제안, 공연 홍보마다 한 블록이 흘러갑니다.") : bookingFeedback;
         bookingWalletLabel.text = SimBarLocalization.Text("GAME WALLET  ", "게임 보유금  ") + SimBarMoney.Format(cash);
         bookingLaunchButton.interactable = !plan.locked && !plan.completed;
         bookingLaunchButton.GetComponentInChildren<Text>().text = booked > 0 ? SimBarLocalization.Text("OPEN THE NIGHT  ·  3 MIN", "오늘의 밤 열기  ·  3분") : SimBarLocalization.Text("OPEN COMMUNITY MIC  ·  3 MIN", "커뮤니티 오픈마이크 열기  ·  3분");
-        BookingButtonColor(bookingPlanTab, bookingShowingArchive ? BookingLine : BookingGreen, bookingShowingArchive ? BookingInk : Color.white);
+        if(bookingShowingPosters && SimBarPosterCatalog.Entries.Length>0)
+        {
+            bool knownPoster=SimBarBooking.IsPosterDiscovered(BookingCareer,scoutingPosterIndex);
+            bookingLaunchButton.interactable=knownPoster || SimBarBooking.CanAct(plan);
+            bookingLaunchButton.GetComponentInChildren<Text>().text=knownPoster?SimBarLocalization.Text("BOOK A DISCOVERED ARTIST >","발굴한 팀 섭외하기 >"):
+                SimBarLocalization.Text("RESEARCH THIS POSTER / 2H","이 포스터 조사하기 / 2시간");
+        }
+        BookingButtonColor(bookingPlanTab, bookingShowingArchive || bookingShowingPosters ? BookingLine : BookingGreen, bookingShowingArchive || bookingShowingPosters ? BookingInk : Color.white);
         BookingButtonColor(bookingArchiveTab, bookingShowingArchive ? BookingGreen : BookingLine, bookingShowingArchive ? Color.white : BookingInk);
         if (bookingArchiveVenue != venueIndex) RebuildBookingArchive(venueIndex);
+        RefreshPosterScoutingUI();
     }
 
     private void BookingShowArchive(bool show)
     {
+        bookingShowingPosters=false;
         bookingShowingArchive = show;
         bookingVenueMenuOpen = false;
         bookingVenueMenu.gameObject.SetActive(false);
@@ -323,7 +341,7 @@ public sealed partial class SimBarExperience
         bookingArchiveRows.Clear(); bookingArchiveArtistLabels.Clear(); bookingArchiveEvidenceLabels.Clear(); bookingArchiveSources.Clear();
         var venue = SimBarBooking.Venues4[venueIndex];
         bookingArchiveTitle.text = (SimBarLocalization.IsKorean ? venue.name : venue.nameEnglish) + SimBarLocalization.Text("  /  VERIFIED RECORDS", "  /  확인된 공연 기록");
-        bookingArchiveNote.text = SimBarLocalization.Text("Selected verified records · Open source\nReal artists are archive-only and cannot be booked. Checked: ", "확인된 일부 기록 · 출처 열기\n실존 아티스트는 기록 열람 전용입니다. 확인일: ") + SimBarVenueArchive.VerifiedAt;
+        bookingArchiveNote.text = SimBarLocalization.Text("Selected dated records. Booking simulation: Poster Scout tab. Checked: ", "확인된 일부 과거 기록 · 게임 섭외는 포스터 발굴 탭에서 · 확인일: ") + SimBarVenueArchive.VerifiedAt;
         foreach (var entry in SimBarVenueArchive.Entries)
         {
             if (entry.venueId != venue.id) continue;
@@ -356,8 +374,10 @@ public sealed partial class SimBarExperience
         BookingPlace(bookingBack.GetComponent<RectTransform>(), size.x - margin - 116f, 15f, 116f, 34f);
         BookingPlace(bookingLanguage.GetComponent<RectTransform>(), size.x - margin - 116f, 53f, 116f, 28f);
         BookingPlace(bookingSubtitle.rectTransform, margin, wide ? 61f : 88f, width, wide ? 28f : 38f);
-        BookingPlace(bookingPlanTab.GetComponent<RectTransform>(), margin, wide ? 101f : 132f, wide ? 160f : (width - 8f) * 0.5f, 40f);
-        BookingPlace(bookingArchiveTab.GetComponent<RectTransform>(), margin + (wide ? 168f : (width + 8f) * 0.5f), wide ? 101f : 132f, wide ? 148f : (width - 8f) * 0.5f, 40f);
+        float tabWidth=wide?100f:(width-16f)/3f;
+        BookingPlace(bookingPosterTab.GetComponent<RectTransform>(),margin,wide?101f:132f,tabWidth,40f);
+        BookingPlace(bookingPlanTab.GetComponent<RectTransform>(),margin+tabWidth+8f,wide?101f:132f,tabWidth,40f);
+        BookingPlace(bookingArchiveTab.GetComponent<RectTransform>(),margin+2f*(tabWidth+8f),wide?101f:132f,tabWidth,40f);
         BookingPlace(bookingClockLabel.rectTransform, wide ? margin + 332f : margin, wide ? 91f : 187f, wide ? width - 674f : width * 0.49f, wide ? 53f : 34f);
         bookingClockLabel.fontSize = wide ? 14 : 12;
         BookingPlace(bookingVenueButton.GetComponent<RectTransform>(), wide ? size.x - margin - 320f : margin + width * 0.51f, wide ? 93f : 180f, wide ? 320f : width * 0.49f, 36f);
@@ -371,8 +391,9 @@ public sealed partial class SimBarExperience
             bookingTitle.fontSize = 20;
             BookingPlace(bookingBack.GetComponent<RectTransform>(), size.x - margin - 116f, 7f, 116f, 28f);
             BookingPlace(bookingLanguage.GetComponent<RectTransform>(), size.x - margin - 116f, 39f, 116f, 25f);
-            BookingPlace(bookingPlanTab.GetComponent<RectTransform>(), margin, 62f, (width - 8f) * 0.5f, 32f);
-            BookingPlace(bookingArchiveTab.GetComponent<RectTransform>(), margin + (width + 8f) * 0.5f, 62f, (width - 8f) * 0.5f, 32f);
+            BookingPlace(bookingPosterTab.GetComponent<RectTransform>(),margin,62f,tabWidth,32f);
+            BookingPlace(bookingPlanTab.GetComponent<RectTransform>(),margin+tabWidth+8f,62f,tabWidth,32f);
+            BookingPlace(bookingArchiveTab.GetComponent<RectTransform>(),margin+2f*(tabWidth+8f),62f,tabWidth,32f);
             BookingPlace(bookingClockLabel.rectTransform, margin, 101f, width * 0.49f, 31f);
             BookingPlace(bookingVenueButton.GetComponent<RectTransform>(), margin + width * 0.51f, 100f, width * 0.49f, 34f);
             BookingPlace(bookingVenueStats.rectTransform, margin, 137f, width, 18f);
@@ -410,14 +431,15 @@ public sealed partial class SimBarExperience
         const float detailHeight = 398f;
         const float businessHeight = 364f;
         float rightX = wide ? rosterWidth + gap : 0f;
+        float rosterHeight=89f+SimBarBooking.BandCount*66f;
         bookingRosterY = wide ? 0f : detailHeight + businessHeight + gap * 2f;
         BookingPlace(bookingDetail, rightX, 0f, detailWidth, detailHeight);
         BookingPlace(bookingBusiness, rightX, detailHeight + gap, detailWidth, businessHeight);
-        BookingPlace(bookingRoster, 0f, bookingRosterY, rosterWidth, 880f);
+        BookingPlace(bookingRoster, 0f, bookingRosterY, rosterWidth, rosterHeight);
         var rosterHeadings = bookingRoster.GetComponentsInChildren<Text>(true);
         BookingPlace(rosterHeadings[0].rectTransform, 16f, 14f, rosterWidth - 32f, 28f);
         BookingPlace(rosterHeadings[1].rectTransform, 16f, 43f, rosterWidth - 32f, 23f);
-        for (int i = 0; i < 12; i++)
+        for (int i = 0; i < SimBarBooking.BandCount; i++)
         {
             BookingPlace(bookingBandButtons[i].GetComponent<RectTransform>(), 8f, 73f + i * 66f, rosterWidth - 16f, 62f);
             BookingPlace(bookingBandNames[i].rectTransform, 11f, 7f, rosterWidth - 38f, 25f);
@@ -443,7 +465,7 @@ public sealed partial class SimBarExperience
             BookingPlace(bookingDetail, rightX, 0f, detailWidth, detailHeight + 38f);
             BookingPlace(bookingBusiness, rightX, detailHeight + 38f + gap, detailWidth, businessHeight);
             bookingRosterY += 38f;
-            BookingPlace(bookingRoster, 0f, bookingRosterY, rosterWidth, 880f);
+            BookingPlace(bookingRoster, 0f, bookingRosterY, rosterWidth, rosterHeight);
         }
         bookingSelectedName.fontSize = detailWidth < 390f ? 23 : 26;
         bookingSelectedMetrics.fontSize = detailWidth < 360f ? 14 : 16;
@@ -459,9 +481,9 @@ public sealed partial class SimBarExperience
         BookingPlace(bookingForecastLabel.rectTransform, 16f, 280f, inner, 76f);
         bookingForecastLabel.fontSize = detailWidth < 390f ? 12 : 13;
 
-        bookingRoster.gameObject.SetActive(!bookingShowingArchive);
-        bookingDetail.gameObject.SetActive(!bookingShowingArchive);
-        bookingBusiness.gameObject.SetActive(!bookingShowingArchive);
+        bookingRoster.gameObject.SetActive(!bookingShowingArchive && !bookingShowingPosters);
+        bookingDetail.gameObject.SetActive(!bookingShowingArchive && !bookingShowingPosters);
+        bookingBusiness.gameObject.SetActive(!bookingShowingArchive && !bookingShowingPosters);
         bookingArchive.gameObject.SetActive(bookingShowingArchive);
         float archiveRowHeight = wide ? 116f : 156f;
         float archiveHeight = 140f + bookingArchiveRows.Count * (archiveRowHeight + 10f);
@@ -477,12 +499,15 @@ public sealed partial class SimBarExperience
             BookingPlace(bookingArchiveEvidenceLabels[i].rectTransform, 12f, wide ? 48f : 56f, textWidth, 53f);
             BookingPlace(bookingArchiveSources[i].GetComponent<RectTransform>(), wide ? width - 164f : 12f, wide ? 35f : 113f, 128f, 34f);
         }
-        float contentHeight = bookingShowingArchive ? archiveHeight : wide ? 880f : bookingRosterY + 880f;
+        float posterHeight=LayoutPosterScoutingUI(width,wide);
+        if(scoutingBoard!=null) scoutingBoard.gameObject.SetActive(bookingShowingPosters);
+        float contentHeight = bookingShowingPosters?posterHeight:bookingShowingArchive ? archiveHeight : wide ? rosterHeight : bookingRosterY + rosterHeight;
         BookingPlace(bookingContent, 0f, 0f, width, Mathf.Max(contentHeight, bodyHeight));
     }
 
     private void DestroyBookingUI()
     {
+        DestroyPosterScouting();
         if (bookingCanvas != null) Destroy(bookingCanvas.gameObject);
         if (bookingLiveText != null) Destroy(bookingLiveText.gameObject);
         bookingCanvas = null;
@@ -560,7 +585,7 @@ public sealed partial class SimBarExperience
     private static int BookingBitCount(int mask)
     {
         int count = 0;
-        for (int i = 0; i < 12; i++) if ((mask & (1 << i)) != 0) count++;
+        for (int i = 0; i < SimBarBooking.BandCount; i++) if ((mask & (1 << i)) != 0) count++;
         return count;
     }
 

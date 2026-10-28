@@ -2,16 +2,28 @@ using System;
 
 /// <summary>
 /// Deterministic daytime booking rules. Credits are game currency (1 credit = KRW 1,000).
-/// All artist identities are fictional newcomers. Venue capacities, genre preferences,
-/// artist draw, fees and probabilities are GAME PARAMETERS, never real-world venue data.
+/// The first twelve artists are original fictional newcomers. Appended real artist names
+/// come from visually checked poster records; their fees, draw, relationships and acceptance
+/// probabilities remain GAME PARAMETERS and are not real-world booking conditions.
 /// The caller applies Result.cashDelta to its wallet and saves the receipt atomically.
 /// </summary>
 public static class SimBarBooking
 {
     public const int ActionLimit = 4;
     public const int BookingLimit = 3;
+    public const int LegacyBandCount = 12;
     public const float PromotionCost = 60f;
-    private const int BandMask = (1 << 12) - 1;
+    private const int LegacyBandMask = (1 << LegacyBandCount) - 1;
+    private static int BandMask { get { return (1 << BandCount) - 1; } }
+    private static int PosterMask
+    {
+        get
+        {
+            int count = SimBarPosterCatalog.Entries == null ? 0 : SimBarPosterCatalog.Entries.Length;
+            if (count >= 31) throw new InvalidOperationException("Poster scouting supports at most 30 stable poster indices.");
+            return (1 << count) - 1;
+        }
+    }
 
     public sealed class Venue
     {
@@ -28,24 +40,28 @@ public static class SimBarBooking
 
     public sealed class Band
     {
-        public readonly string id, name, nameEnglish, genre, genreKorean;
+        public readonly string id, name, nameEnglish, genre, genreKorean, sourceUrl;
+        public readonly bool isReal;
         public readonly int baseFee, draw;
         internal readonly int genreIndex;
 
-        internal Band(string id, string name, string english, int genreIndex, int fee, int draw)
+        internal Band(string id, string name, string english, int genreIndex, int fee, int draw, bool isReal = false, string sourceUrl = "")
         {
             this.id = id; this.name = name; nameEnglish = english; this.genreIndex = genreIndex;
-            genre = GenreNames[genreIndex]; genreKorean = GenreNamesKorean[genreIndex]; baseFee = fee; this.draw = draw;
+            bool knownGenre = genreIndex >= 0 && genreIndex < GenreNames.Length;
+            genre = knownGenre ? GenreNames[genreIndex] : "Unverified genre";
+            genreKorean = knownGenre ? GenreNamesKorean[genreIndex] : "장르 미확인";
+            baseFee = fee; this.draw = draw; this.isReal = isReal; this.sourceUrl = sourceUrl ?? "";
         }
     }
 
     private static readonly string[] GenreNames =
     {
-        "Rock", "Jazz", "Punk", "Hip-hop", "Electronic", "Folk", "Metal", "Shoegaze", "R&B", "Post-rock", "Experimental", "Latin"
+        "Rock", "Jazz", "Punk", "Hip-hop", "Electronic", "Folk", "Metal", "Shoegaze", "R&B", "Post-rock", "Experimental", "Latin", "Blues"
     };
     private static readonly string[] GenreNamesKorean =
     {
-        "록", "재즈", "펑크", "힙합", "일렉트로닉", "포크", "메탈", "슈게이즈", "알앤비", "포스트록", "실험음악", "라틴"
+        "록", "재즈", "펑크", "힙합", "일렉트로닉", "포크", "메탈", "슈게이즈", "알앤비", "포스트록", "실험음악", "라틴", "블루스"
     };
 
     // These four capacities and preferences describe this game, not the actual venues.
@@ -58,7 +74,7 @@ public static class SimBarBooking
     };
 
     // Original fictional newcomers; no real artists, biographies or audience statistics.
-    public static readonly Band[] Bands12 =
+    private static readonly Band[] LegacyBands =
     {
         new Band("amp-sprout-17", "앰프새싹 17", "Amp Sprout 17", 0, 100, 14),
         new Band("lamp-rabbit-quartet", "램프토끼 사중주", "Lamp Rabbit Quartet", 1, 120, 15),
@@ -74,6 +90,33 @@ public static class SimBarBooking
         new Band("lime-lantern-04", "라임등불 04", "Lime Lantern 04", 11, 100, 14)
     };
 
+    // Compatibility name retained for callers. Keep every existing index append-only;
+    // indices 0..11 are the legacy fictional artists from older saved games.
+    public static readonly Band[] Bands12 = BuildBands();
+    public static int BandCount { get { return Bands12.Length; } }
+
+    private static Band[] BuildBands()
+    {
+        var artists = SimBarPosterCatalog.Artists;
+        int extra = artists == null ? 0 : artists.Length;
+        if (LegacyBandCount + extra >= 31)
+            throw new InvalidOperationException("Booking supports at most 30 stable artist indices; preserve the first twelve.");
+        var result = new Band[LegacyBandCount + extra];
+        Array.Copy(LegacyBands, result, LegacyBandCount);
+        for (int i = 0; i < extra; i++)
+        {
+            var artist = artists[i];
+            if (artist == null || string.IsNullOrWhiteSpace(artist.id) || string.IsNullOrWhiteSpace(artist.name))
+                throw new InvalidOperationException("Poster artist definitions need a stable id and a verified display name.");
+            for (int previous = 0; previous < LegacyBandCount + i; previous++)
+                if (result[previous].id == artist.id) throw new InvalidOperationException("Duplicate booking artist id: " + artist.id);
+            result[LegacyBandCount + i] = new Band(artist.id, artist.name,
+                string.IsNullOrWhiteSpace(artist.nameEnglish) ? artist.name : artist.nameEnglish,
+                artist.genreIndex, Clamp(artist.gameFee, 20, 500), Clamp(artist.gameDraw, 1, 50), true, artist.sourceUrl);
+        }
+        return result;
+    }
+
     [Serializable]
     public sealed class Plan
     {
@@ -83,13 +126,14 @@ public static class SimBarBooking
         public int listenedMask;
         public int attemptedMask;
         public int bookedMask;
+        public int scoutedPosterMask;
         public int promotions;
         public int ticketTier = 1;
         public bool locked;
         public bool completed;
         public int attempts;
         // Capture career growth when an offer is accepted so the evening stays stable.
-        public int[] bookedGrowth = new int[12];
+        public int[] bookedGrowth = new int[BandCount];
         public bool hasLockedMetrics;
         public Metrics lockedMetrics;
     }
@@ -97,8 +141,9 @@ public static class SimBarBooking
     [Serializable]
     public sealed class Career
     {
-        public int[] relationships = new int[12];
-        public int[] growth = new int[12];
+        public int discoveredMask = LegacyBandMask;
+        public int[] relationships = new int[BandCount];
+        public int[] growth = new int[BandCount];
     }
 
     [Serializable]
@@ -138,6 +183,8 @@ public static class SimBarBooking
         {
             career.relationships = RepairArray(career.relationships);
             career.growth = RepairArray(career.growth);
+            // Old JSON has no discovery field; the original roster stays available.
+            career.discoveredMask = (career.discoveredMask & BandMask) | LegacyBandMask;
         }
         if (plan == null) return;
         plan.day = Math.Max(1, plan.day);
@@ -148,11 +195,24 @@ public static class SimBarBooking
         plan.attemptedMask = plan.bookedMask | FirstBits(attempted & ~plan.bookedMask, ActionLimit - Count(plan.bookedMask));
         plan.attempts = Count(plan.attemptedMask);
         plan.listenedMask = FirstBits(plan.listenedMask & BandMask, ActionLimit - plan.attempts);
-        plan.promotions = Clamp(plan.promotions, 0, ActionLimit - plan.attempts - Count(plan.listenedMask));
-        int spent = plan.attempts + Count(plan.listenedMask) + plan.promotions;
+        plan.scoutedPosterMask = FirstBits(plan.scoutedPosterMask & PosterMask,
+            ActionLimit - plan.attempts - Count(plan.listenedMask));
+        plan.promotions = Clamp(plan.promotions, 0, ActionLimit - plan.attempts - Count(plan.listenedMask) - Count(plan.scoutedPosterMask));
+        int spent = plan.attempts + Count(plan.listenedMask) + plan.promotions + Count(plan.scoutedPosterMask);
         plan.blocks = Clamp(Math.Max(plan.blocks, spent), 0, ActionLimit);
         plan.bookedGrowth = RepairArray(plan.bookedGrowth);
-        for (int i = 0; i < 12; i++) if ((plan.bookedMask & (1 << i)) == 0) plan.bookedGrowth[i] = 0;
+        for (int i = 0; i < BandCount; i++) if ((plan.bookedMask & (1 << i)) == 0) plan.bookedGrowth[i] = 0;
+        if (career != null)
+        {
+            career.discoveredMask |= plan.bookedMask | plan.attemptedMask | plan.listenedMask;
+            int posterCount = SimBarPosterCatalog.Entries == null ? 0 : SimBarPosterCatalog.Entries.Length;
+            for (int i = 0; i < posterCount; i++)
+            {
+                int artists;
+                if ((plan.scoutedPosterMask & (1 << i)) != 0 && TryPosterArtists(i, out artists))
+                    career.discoveredMask |= artists;
+            }
+        }
         if (plan.completed) plan.locked = true;
         if (plan.locked)
         {
@@ -170,7 +230,7 @@ public static class SimBarBooking
 
     public static int Chance(Plan plan, Career career, int band, int package)
     {
-        if (!ValidPlan(plan) || !ValidBand(band) || !ValidPackage(package)) return 0;
+        if (!ValidPlan(plan) || !ValidBand(band) || !ValidPackage(package) || !IsDiscovered(career, band)) return 0;
         int chance = 58 + VenueFit(plan.venue, band) + (package == 1 ? 15 : 0);
         if ((plan.listenedMask & (1 << band)) != 0) chance += 20;
         chance += CareerValue(career == null ? null : career.relationships, band) / 12;
@@ -183,11 +243,41 @@ public static class SimBarBooking
         return ValidBand(band) && ValidPackage(package) ? Bands12[band].baseFee * (package == 1 ? 1.35f : 1f) : 0f;
     }
 
+    public static bool IsDiscovered(Career career, int band)
+    {
+        return ValidBand(band) && (band < LegacyBandCount || (career != null && (career.discoveredMask & (1 << band)) != 0));
+    }
+
+    public static bool IsPosterDiscovered(Career career, int posterIndex)
+    {
+        int artists;
+        return TryPosterArtists(posterIndex, out artists) && career != null
+            && (career.discoveredMask & artists) == artists;
+    }
+
+    /// <summary>Reviewing a poster costs one two-hour block and permanently unlocks its real artist names.</summary>
+    public static Result Scout(Plan plan, Career career, int posterIndex)
+    {
+        string error = ActionError(plan);
+        if (error != null) return Fail(error);
+        if (career == null) return Fail("invalid_career");
+        int artists;
+        if (!TryPosterArtists(posterIndex, out artists)) return Fail("invalid_poster");
+        int posterBit = 1 << posterIndex;
+        if ((plan.scoutedPosterMask & posterBit) != 0) return Fail("already_scouted");
+        if ((career.discoveredMask & artists) == artists) return Fail("already_discovered");
+        plan.scoutedPosterMask |= posterBit;
+        plan.blocks++;
+        career.discoveredMask = (career.discoveredMask | artists | LegacyBandMask) & BandMask;
+        return Ok("scouted");
+    }
+
     public static Result Listen(Plan plan, Career career, int band)
     {
         string error = ActionError(plan);
         if (error != null) return Fail(error, band);
         if (!ValidBand(band)) return Fail("invalid_band", band);
+        if (!IsDiscovered(career, band)) return Fail("not_discovered", band);
         int bit = 1 << band;
         if ((plan.listenedMask & bit) != 0) return Fail("already_listened", band);
         plan.listenedMask |= bit;
@@ -200,6 +290,7 @@ public static class SimBarBooking
         string error = ActionError(plan);
         if (error != null) return Fail(error, band);
         if (!ValidBand(band)) return Fail("invalid_band", band);
+        if (!IsDiscovered(career, band)) return Fail("not_discovered", band);
         if (!ValidPackage(package)) return Fail("invalid_package", band);
         if (!Finite(availableCash)) return Fail("invalid_cash", band);
         int bit = 1 << band;
@@ -214,7 +305,7 @@ public static class SimBarBooking
         plan.blocks++;
         if (!accepted) return Fail("rejected", band);
         plan.bookedMask |= bit;
-        if (plan.bookedGrowth == null || plan.bookedGrowth.Length != 12) plan.bookedGrowth = RepairArray(plan.bookedGrowth);
+        if (plan.bookedGrowth == null || plan.bookedGrowth.Length != BandCount) plan.bookedGrowth = RepairArray(plan.bookedGrowth);
         plan.bookedGrowth[band] = CareerValue(career == null ? null : career.growth, band);
         Result result = Ok("accepted", band);
         result.cashDelta = -fee;
@@ -269,7 +360,7 @@ public static class SimBarBooking
         stars = Clamp(stars, 0, 3);
         career.relationships = RepairArray(career.relationships);
         career.growth = RepairArray(career.growth);
-        for (int i = 0; i < 12; i++)
+        for (int i = 0; i < BandCount; i++)
         {
             if ((plan.bookedMask & (1 << i)) == 0) continue;
             career.relationships[i] = Clamp(career.relationships[i] + 4 + stars, 0, 100);
@@ -289,7 +380,7 @@ public static class SimBarBooking
         int capacity = Venues4[plan.venue].capacity;
         int draw = count == 0 ? 12 : 10;
         int fit = 0;
-        for (int i = 0; i < 12; i++)
+        for (int i = 0; i < BandCount; i++)
         {
             if ((plan.bookedMask & (1 << i)) == 0) continue;
             int affinity = VenueFit(plan.venue, i);
@@ -345,8 +436,9 @@ public static class SimBarBooking
             && plan.blocks >= 0 && plan.blocks <= ActionLimit && plan.promotions >= 0 && plan.promotions <= ActionLimit
             && plan.ticketTier >= 0 && plan.ticketTier <= 2 && (plan.listenedMask & ~BandMask) == 0
             && (plan.attemptedMask & ~BandMask) == 0 && (plan.bookedMask & ~BandMask) == 0
+            && (plan.scoutedPosterMask & ~PosterMask) == 0
             && (plan.bookedMask & ~plan.attemptedMask) == 0 && Count(plan.bookedMask) <= BookingLimit
-            && Count(plan.listenedMask) + Count(plan.attemptedMask) + plan.promotions <= plan.blocks;
+            && Count(plan.listenedMask) + Count(plan.attemptedMask) + Count(plan.scoutedPosterMask) + plan.promotions <= plan.blocks;
     }
 
     private static bool ValidBand(int band) { return band >= 0 && band < Bands12.Length; }
@@ -357,10 +449,10 @@ public static class SimBarBooking
     private static int CareerValue(int[] values, int band) { return values != null && band >= 0 && band < values.Length ? Clamp(values[band], 0, 100) : 0; }
     private static int[] RepairArray(int[] values)
     {
-        if (values == null || values.Length != 12)
+        if (values == null || values.Length != BandCount)
         {
-            int[] repaired = new int[12];
-            if (values != null) Array.Copy(values, repaired, Math.Min(values.Length, 12));
+            int[] repaired = new int[BandCount];
+            if (values != null) Array.Copy(values, repaired, Math.Min(values.Length, BandCount));
             values = repaired;
         }
         for (int i = 0; i < values.Length; i++) values[i] = Clamp(values[i], 0, 100);
@@ -369,14 +461,29 @@ public static class SimBarBooking
     private static int FirstBits(int mask, int limit)
     {
         int result = 0;
-        for (int i = 0; i < 12 && limit > 0; i++) if ((mask & (1 << i)) != 0) { result |= 1 << i; limit--; }
+        for (int i = 0; i < 30 && limit > 0; i++) if ((mask & (1 << i)) != 0) { result |= 1 << i; limit--; }
         return result;
     }
     private static int Count(int mask)
     {
         int count = 0;
-        for (uint bits = (uint)(mask & BandMask); bits != 0; bits &= bits - 1) count++;
+        for (uint bits = (uint)mask; bits != 0; bits &= bits - 1) count++;
         return count;
+    }
+
+    private static bool TryPosterArtists(int posterIndex, out int mask)
+    {
+        mask = 0;
+        var posters = SimBarPosterCatalog.Entries;
+        if (posters == null || posterIndex < 0 || posterIndex >= posters.Length || posterIndex >= 30) return false;
+        var poster = posters[posterIndex];
+        if (poster == null || poster.artistIndices == null || poster.artistIndices.Length == 0) return false;
+        foreach (int band in poster.artistIndices)
+        {
+            if (!ValidBand(band) || band < LegacyBandCount || !Bands12[band].isReal) { mask = 0; return false; }
+            mask |= 1 << band;
+        }
+        return mask != 0;
     }
     private static int Roll(int day, int venue, int band, int package, int attempt)
     {
