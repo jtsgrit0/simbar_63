@@ -790,6 +790,7 @@ public sealed partial class SimBarExperience : MonoBehaviour
             if (Keyboard.current.digit4Key.wasPressedThisFrame) SelectServiceItem(3);
             if (Keyboard.current.digit5Key.wasPressedThisFrame) SelectServiceItem(4);
             if (Keyboard.current.mKey.wasPressedThisFrame) { if (serviceMenuOpen) CloseServiceMenu(); else OpenServiceMenu(); }
+            if (Keyboard.current.hKey.wasPressedThisFrame) ToggleFloorMissionDrawer();
             if (Keyboard.current.eKey.wasPressedThisFrame) PrepareRequestedService();
             if (Keyboard.current.pKey.wasPressedThisFrame) TogglePause();
         }
@@ -801,6 +802,15 @@ public sealed partial class SimBarExperience : MonoBehaviour
         }
 
         float delta = Time.unscaledDeltaTime;
+        if (JourneyIsFloorClosing)
+        {
+            TickVenueMotion(delta);
+            TickFloorMissions(delta);
+            if (toastTimer > 0f) toastTimer -= delta;
+            else if (toastText != null) toastText.transform.parent.gameObject.SetActive(false);
+            RefreshUI();
+            return;
+        }
         TickJourney(delta);
         if (paused || !JourneyIsPlaying)
             return;
@@ -816,6 +826,7 @@ public sealed partial class SimBarExperience : MonoBehaviour
         }
 
         AnimateVenue(delta);
+        TickFloorMissions(delta);
         UpdatePatience(delta);
         performance = Mathf.Clamp01(performance - delta * (0.0015f - BookingEnergyBonus * 0.006f));
         if (toastTimer > 0f)

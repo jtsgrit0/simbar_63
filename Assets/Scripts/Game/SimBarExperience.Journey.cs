@@ -8,7 +8,7 @@ using UnityEngine;
 public sealed partial class SimBarExperience
 {
     private const float JourneyNightDuration = 180f;
-    private enum JourneyPhase { Lobby, Guide, Playing, Results, Planning }
+    private enum JourneyPhase { Lobby, Guide, Playing, Results, Planning, FloorClosing }
 
     [Serializable]
     private sealed class JourneyData
@@ -52,6 +52,10 @@ public sealed partial class SimBarExperience
         public bool hasDayOpeningCash;
         public float resultTicketIncome;
         public int resultAttendance;
+        public SimBarFloorMissions.State floorMissions = SimBarFloorMissions.NewState();
+        public bool floorClosing;
+        public float resultFloorBonus;
+        public int resultFloorTasks;
     }
 
     private JourneyData journey = new JourneyData();
@@ -106,6 +110,7 @@ public sealed partial class SimBarExperience
         {
             if (JourneyIsGuide) return SimBarLocalization.Text("YOUR FIRST SOUND CHECK", "첫 영업 준비");
             if (JourneyIsResults) return SimBarLocalization.Text("NIGHT COMPLETE", "오늘의 영업 완료");
+            if (JourneyIsFloorClosing) return SimBarLocalization.Text("AFTER-SHOW FLOOR MISSIONS", "공연 후 홀 정리");
             return JourneyIsPlaying ? SimBarLocalization.Format("DAY {0} / {1}", "{0}일 차 / {1}", journey.day, JourneyModeLabel) : SimBarLocalization.Text("WELCOME TO SIMBAR", "심바에 오신 것을 환영합니다");
         }
     }
@@ -190,8 +195,9 @@ public sealed partial class SimBarExperience
 
     private void OnApplicationFocus(bool hasFocus)
     {
-        if (hasFocus || !journeyInitialized || journeyValidationMode || !JourneyIsPlaying || paused) return;
+        if (hasFocus || !journeyInitialized || journeyValidationMode || (!JourneyIsPlaying && !JourneyIsFloorClosing) || paused) return;
         // A real-time shift should not expire while the player uses another tab.
+        CloseFloorMissionDrawer();
         paused = true;
         if (pausePanel != null) pausePanel.SetActive(true);
         TickPourGame(0f);
@@ -260,7 +266,8 @@ public sealed partial class SimBarExperience
     private bool TryHandleJourneyPause()
     {
         if (journeyValidationMode) return false;
-        if (JourneyIsPlaying) return false;
+        if (floorMissionDrawerOpen) { CloseFloorMissionDrawer(); return true; }
+        if (JourneyIsPlaying || JourneyIsFloorClosing) return false;
         if (JourneyIsGuide) JourneyReturnToLobby();
         paused = true;
         if (pausePanel != null) pausePanel.SetActive(false);
@@ -283,6 +290,7 @@ public sealed partial class SimBarExperience
         if (journeyValidationMode || journey.inProgress) return;
         CancelPourGame(false);
         if (opMenuOpen) CloseOperations();
+        ResetFloorForNewNight();
         journey.session = journey.session >= 1000000000 ? 1 : journey.session + 1;
         // At rollover the monotonically unique receipt is reset alongside the
         // session, never leaving an old settled id equal to a fresh new night.
@@ -333,6 +341,11 @@ public sealed partial class SimBarExperience
             return;
         }
         if (opMenuOpen) CloseOperations();
+        if (journey.floorClosing)
+        {
+            if (!TryBeginFloorClosing()) FinishJourneyNight();
+            return;
+        }
         if (journey.secondsLeft <= 0f) { FinishJourneyNight(); return; }
         // The queue is a transient scene object. Reconnect safely supplies fresh
         // orders without erasing night counters, earnings, XP or event progress.
@@ -379,6 +392,7 @@ public sealed partial class SimBarExperience
         if (journeyValidationMode) return;
         CancelPourGame(false);
         if (opMenuOpen) CloseOperations();
+        CloseFloorMissionDrawer();
         journeyPhase = JourneyPhase.Lobby;
         paused = true;
         if (pausePanel != null) pausePanel.SetActive(false);
@@ -403,7 +417,10 @@ public sealed partial class SimBarExperience
     private void FinishJourneyNight()
     {
         if (journeyValidationMode || !journey.inProgress || journeyClosing) return;
+        if (TryBeginFloorClosing()) return;
         CancelPourGame(false);
+        CloseFloorMissionDrawer();
+        journey.floorClosing = false;
         journey.secondsLeft = 0f;
         gameClock = 24f;
         journey.settlementPending = true;
@@ -444,11 +461,13 @@ public sealed partial class SimBarExperience
                 journey.completedNights = Mathf.Min(100000000, journey.completedNights + 1);
                 cash = JourneyClamp(cash + bonus, cash, 0f, 1000000000f);
                 CompleteBookingNight(stars);
+                CompleteFloorNight();
                 journey.resultProfit = JourneyClamp(cash - journey.openingCash, 0f, -1000000000f, 1000000000f);
                 journey.settledSession = journey.session;
             }
             journey.settlementPending = false;
             journey.inProgress = false;
+            journey.floorClosing = false;
             journey.guidePending = false;
             journey.feverSeconds = 0f;
             journey.combo = 0;
@@ -467,6 +486,7 @@ public sealed partial class SimBarExperience
 
     private void ImportJourneyState(string json)
     {
+        PrepareFloorStateImport();
         journey = new JourneyData();
         if (!string.IsNullOrWhiteSpace(json) && json.Length <= 16000)
         {
@@ -510,6 +530,10 @@ public sealed partial class SimBarExperience
         journey.resultXP = Mathf.Clamp(journey.resultXP, 0, 10000);
         journey.resultBonus = Mathf.Clamp(journey.resultBonus, 0, 100000);
         journey.resultProfit = JourneyClamp(journey.resultProfit, 0f, -1000000000f, 1000000000f);
+        if (journey.floorMissions == null) journey.floorMissions = SimBarFloorMissions.NewState();
+        SimBarFloorMissions.Sanitize(journey.floorMissions);
+        journey.resultFloorBonus = JourneyClamp(journey.resultFloorBonus, 0f, 0f, SimBarFloorMissions.CleanupReward);
+        journey.resultFloorTasks = Mathf.Clamp(journey.resultFloorTasks, 0, 2);
         if (journey.session == 0)
         {
             journey.inProgress = false;
@@ -519,6 +543,23 @@ public sealed partial class SimBarExperience
         {
             journey.inProgress = false;
             journey.settlementPending = false;
+        }
+        // Recover an unfinished floor shift before accepting a pending receipt.
+        // Older saves have an empty floor state and retain their original settlement.
+        if (journey.session > 0 && journey.settledSession != journey.session
+            && journey.settlementPending
+            && (SimBarFloorMissions.Remaining(journey.floorMissions) > 0 || journey.floorMissions.guestActive))
+        {
+            journey.inProgress = true;
+            journey.floorClosing = true;
+            journey.settlementPending = false;
+        }
+        if (!journey.inProgress || journey.settledSession == journey.session) journey.floorClosing = false;
+        if (journey.floorClosing)
+        {
+            journey.secondsLeft = 0f;
+            journey.settlementPending = false;
+            journey.guidePending = false;
         }
         if (journey.bookingCareer == null) journey.bookingCareer = SimBarBooking.NewCareer();
         SimBarBooking.Sanitize(journey.booking, journey.bookingCareer);

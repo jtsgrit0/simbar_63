@@ -7,5 +7,6 @@
     <type fullname="SimBarBooking/Plan" preserve="all"/>
     <type fullname="SimBarBooking/Career" preserve="all"/>
     <type fullname="SimBarBooking/Metrics" preserve="all"/>
+    <type fullname="SimBarFloorMissions/State" preserve="all"/>
   </assembly>
 </linker>

@@ -60,6 +60,7 @@ public sealed partial class SimBarExperience
     private void OpenLanguageSettings()
     {
         if (settingsOverlay == null || settingsOverlay.activeSelf) return;
+        if (floorMissionDrawerOpen) CloseFloorMissionDrawer();
         settingsWasPaused = paused;
         paused = true;
         settingsOverlay.SetActive(true);
@@ -83,6 +84,7 @@ public sealed partial class SimBarExperience
         if (settingsKorean != null && choiceFont != null) settingsKorean.GetComponentInChildren<Text>(true).font = choiceFont;
         RefreshServiceMenuLabels();
         RefreshBookingUI();
+        RefreshFloorMissionUI();
         if (settingsKorean != null) settingsKorean.GetComponent<Image>().color = SimBarLocalization.IsKorean ? new Color(0.12f, 0.48f, 0.34f) : new Color(0.16f, 0.20f, 0.27f);
         if (settingsEnglish != null) settingsEnglish.GetComponent<Image>().color = !SimBarLocalization.IsKorean ? new Color(0.12f, 0.48f, 0.34f) : new Color(0.16f, 0.20f, 0.27f);
         RefreshOperationsLanguage();
@@ -97,6 +99,7 @@ public sealed partial class SimBarExperience
         SimBarLocalization.Changed -= RefreshLanguageUI;
         if (serviceMenuRoot != null) Destroy(serviceMenuRoot);
         DestroyBookingUI();
+        DestroyFloorMissionUI();
         if (musicSource != null)
         {
             musicSource.Stop();

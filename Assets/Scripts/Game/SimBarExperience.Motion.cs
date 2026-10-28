@@ -79,7 +79,7 @@ public sealed partial class SimBarExperience
 
     private void TickVenueMotion(float delta)
     {
-        if (!motionReady || paused || !JourneyIsPlaying || opMenuOpen || delta <= 0 || float.IsNaN(delta) || float.IsInfinity(delta)) return;
+        if (!motionReady || paused || (!JourneyIsPlaying && !JourneyIsFloorClosing) || opMenuOpen || delta <= 0 || float.IsNaN(delta) || float.IsInfinity(delta)) return;
         delta = Mathf.Min(delta, .1f);
         motionClock += delta; motionServicePulse = Mathf.Max(0, motionServicePulse - delta);
         motionOccupancy.Clear();
@@ -90,19 +90,21 @@ public sealed partial class SimBarExperience
                 if (actor.kind != MotionKind.Band) motionOccupancy.Add(actor.frameStartPosition);
             }
         if (motionOrdersDirty) RefreshMotionOrders();
-        TickConcertSlam(delta);
+        if (!JourneyIsFloorClosing) TickConcertSlam(delta);
         int walking = 0;
         foreach (MotionActor actor in motionActors) if (actor.moving) walking++;
         VenueMovingGuests = VenueMovingStaff = VenueCrowdParticipants = 0;
         foreach (MotionActor actor in motionActors)
         {
             if (actor.person.root == null || !actor.person.root.gameObject.activeInHierarchy) continue;
+            if (IsFloorMissionActor(actor.person.root) || JourneyIsFloorClosing && actor.kind == MotionKind.Band)
+            { actor.speed = 0f; actor.moving = false; continue; }
             Vector3 previous = actor.frameStartPosition;
             actor.celebration = Mathf.Max(0, actor.celebration - delta);
             if (actor.visual != null) actor.visual.SetCrowdPerformance(SimBarCrowdAction.None, 0f);
             actor.pitActive = false;
             bool held = IsPourInProgress && ReferenceEquals(pourPatron, actor.person);
-            bool concert = !held && TryTickConcertCrowd(actor, delta);
+            bool concert = !JourneyIsFloorClosing && !held && TryTickConcertCrowd(actor, delta);
             if (concert) VenueCrowdParticipants++;
             if (!held && !concert)
             {

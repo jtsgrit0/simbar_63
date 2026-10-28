@@ -146,6 +146,10 @@ Cozy는 손님 인내심 +18초와 느린 주문 유입, Challenge는 인내심 
 
 ## 검증
 
+홀 미션은 `H` 또는 오른쪽 `공연·홀 미션` 버튼으로 엽니다. 공연 중 꽃가루·휴지 연출은 각각 두 번까지 가능하며, 공연 후 청소는 기존 직원이 실제로 이동해 작업합니다. 만취 손님은 세 단계의 정중한 안내와 직원 동행으로 퇴점합니다. 청소와 손님 안내가 남아 있으면 마감 정산을 보류하고, 진행 상태를 저장합니다.
+
+`SimBar > Validation > Check Floor Mission Rules`는 순수 미션 규칙을 검사합니다. 초기 로비에서 `Check Floor Mission Save and Actors`를 실행하면 실제 이동·일시정지·청소 중 저장 복구·중복 정산을 검사합니다. `SimBarRuntimeVerification.CheckFloorAlternateRoutes()`는 공연 중 퇴점과 청소·퇴점 병행 경로를 추가로 검사합니다. 웹 플레이어의 실제 3분 공연과 모바일 조작은 `uv run --with playwright python Tools/qa_floor_missions.py [URL]`로 확인하며, 화면과 결과를 `Library/FloorQa/`에 기록합니다.
+
 Reference 씬을 Play한 상태에서 `SimBar > Validation > Check Running Operations`와 `Check Running Guitar Poses`를 실행할 수 있습니다. 운영 검사는 비용·중복 방지·잔액 부족·최고 단계·자동 서빙·급여·이벤트·저장 복원·메뉴 일시정지를 검증한 뒤 검사 전 상태로 복원합니다. 기타 검사는 여러 시점의 손 위치, 팔 길이, 관절 각도, 손가락·엄지 그립과 어깨 스트랩을 확인합니다.
 
 `SimBar > Validation > Check Running Player Journey`는 로비/도움말·타이밍 버튼·직원과 서빙 경쟁·콤보/FEVER·영업 종료·별/XP·저장 복원·재도전·정산 중복 방지·포커스 자동 일시정지를 검사한 뒤 원래 상태로 복원합니다. 테스트 중에는 운영 메뉴와 타이밍 게임을 먼저 닫아 주세요.

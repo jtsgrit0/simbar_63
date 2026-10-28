@@ -143,7 +143,9 @@ public sealed partial class SimBarExperience
 
     private void OpenServiceMenu()
     {
-        if (serviceMenuRoot == null || serviceMenuOpen || !JourneyIsPlaying || paused || IsPourInProgress) return;
+        if (serviceMenuRoot == null || serviceMenuOpen || !JourneyIsPlaying || IsPourInProgress) return;
+        if (floorMissionDrawerOpen) CloseFloorMissionDrawer();
+        if (paused) return;
         serviceWasPaused = paused; paused = true; serviceMenuOpen = true;
         RefreshServiceMenuLabels();
         serviceMenuRoot.SetActive(true);
