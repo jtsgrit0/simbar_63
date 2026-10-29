@@ -791,6 +791,8 @@ public sealed partial class SimBarExperience : MonoBehaviour
             if (Keyboard.current.digit5Key.wasPressedThisFrame) SelectServiceItem(4);
             if (Keyboard.current.mKey.wasPressedThisFrame) { if (serviceMenuOpen) CloseServiceMenu(); else OpenServiceMenu(); }
             if (Keyboard.current.hKey.wasPressedThisFrame) ToggleFloorMissionDrawer();
+            if (Keyboard.current.cKey.wasPressedThisFrame) FloorQuickPress(SimBarFloorChallenges.Cleanup);
+            if (Keyboard.current.fKey.wasPressedThisFrame) FloorQuickPress(SimBarFloorChallenges.Guest);
             if (Keyboard.current.eKey.wasPressedThisFrame) PrepareRequestedService();
             if (Keyboard.current.pKey.wasPressedThisFrame) TogglePause();
         }
@@ -798,6 +800,7 @@ public sealed partial class SimBarExperience : MonoBehaviour
         if (paused)
         {
             TickPourGame(0f);
+            RefreshFloorMissionUI();
             return;
         }
 

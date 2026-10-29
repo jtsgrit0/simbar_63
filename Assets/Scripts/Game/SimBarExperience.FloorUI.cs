@@ -1,322 +1,254 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-/// <summary>CSS-pixel mission HUD and a scrollable staff / hospitality drawer.</summary>
+/// <summary>Live random-event reaction buttons and a read-only floor status panel.</summary>
 public sealed partial class SimBarExperience
 {
     private bool floorMissionDrawerOpen;
-    private bool floorMissionWasPaused, floorMissionUiVisible, floorMissionUiKorean;
+    private bool floorMissionUiVisible, floorMissionUiKorean;
     private Canvas floorMissionCanvas;
     private SimBarBookingLayout floorMissionLayout;
-    private RectTransform floorMissionUiRoot, floorMissionBackdrop, floorMissionDrawer;
-    private RectTransform floorMissionHeader, floorMissionFooter, floorMissionViewport, floorMissionContent;
-    private RectTransform floorPerformanceCard, floorCleanupCard, floorGuestCard;
-    private ScrollRect floorMissionScroll;
-    private Button floorMissionHudButton, floorMissionCloseButton, floorConfettiButton, floorTissueButton, floorCleanupButton;
-    private readonly Button[] floorGuestButtons = new Button[3];
-    private Text floorMissionTitle, floorMissionSubtitle, floorMissionFeedbackLabel;
-    private Text floorPerformanceTitle, floorPerformanceIntro, floorPerformanceDebt;
-    private Text floorCleanupTitle, floorCleanupStatus, floorCleanupWorkers, floorCleanupReward;
-    private Text floorGuestTitle, floorGuestStatus, floorGuestHint;
-    private RectTransform floorCleanupTrack, floorCleanupFill;
+    private RectTransform floorMissionUiRoot, floorMissionDrawer, floorReactionCard;
+    private RectTransform floorReactionTrack, floorReactionFill, floorDetailViewport, floorDetailContent;
+    private Button floorMissionHudButton, floorMissionCloseButton, floorReactionButton;
+    private Text floorMissionTitle, floorMissionDetail, floorMissionDetailNote;
+    private Text floorReactionTitle, floorReactionClock, floorReactionNarrative;
+    private Text floorReactionCount, floorReactionFeedback;
+    private ScrollRect floorDetailScroll;
 
-    private static readonly Color FloorUiBackground = new Color(0.045f, 0.060f, 0.085f, 0.99f);
-    private static readonly Color FloorUiCard = new Color(0.075f, 0.095f, 0.125f, 1f);
-    private static readonly Color FloorUiLine = new Color(0.16f, 0.20f, 0.25f, 1f);
-    private static readonly Color FloorUiGold = new Color(0.95f, 0.78f, 0.43f, 1f);
-    private static readonly Color FloorUiGreen = new Color(0.16f, 0.40f, 0.34f, 1f);
-    private static readonly Color FloorUiMuted = new Color(0.72f, 0.77f, 0.78f, 1f);
-    private static readonly string[] FloorGuestActionsEnglish = { "1 / PAUSE ORDERS / OFFER WATER", "2 / CALMLY EXPLAIN / REQUEST EXIT", "3 / BELONGINGS / STAFF ESCORT" };
-    private static readonly string[] FloorGuestActionsKorean = { "1 / 주문 잠시 중단·물 안내", "2 / 차분히 설명·정중한 퇴점 요청", "3 / 소지품 확인·직원 동행" };
+    private static readonly Color FloorUiBackground = new Color(.045f,.060f,.085f,.99f);
+    private static readonly Color FloorUiCard = new Color(.075f,.095f,.125f,1f);
+    private static readonly Color FloorUiLine = new Color(.16f,.20f,.25f,1f);
+    private static readonly Color FloorUiGold = new Color(.95f,.78f,.43f,1f);
+    private static readonly Color FloorUiGreen = new Color(.16f,.40f,.34f,1f);
+    private static readonly Color FloorUiMuted = new Color(.72f,.77f,.78f,1f);
 
     private void BuildFloorMissionUI()
     {
-        if (floorMissionCanvas != null) return;
-        var host = new GameObject("Performance and floor missions", typeof(RectTransform), typeof(Canvas), typeof(GraphicRaycaster));
-        host.transform.SetParent(transform, false);
-        floorMissionCanvas = host.GetComponent<Canvas>();
-        floorMissionCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        floorMissionCanvas.sortingOrder = 620;
-        floorMissionUiRoot = BookingPanel("Floor mission HUD root", host.transform, Color.clear);
+        if(floorMissionCanvas!=null) return;
+        var host=new GameObject("Spontaneous floor missions",typeof(RectTransform),typeof(Canvas),typeof(GraphicRaycaster));
+        host.transform.SetParent(transform,false);
+        floorMissionCanvas=host.GetComponent<Canvas>();
+        floorMissionCanvas.renderMode=RenderMode.ScreenSpaceOverlay;
+        floorMissionCanvas.sortingOrder=620;
+        floorMissionUiRoot=BookingPanel("Floor mission HUD root",host.transform,Color.clear);
         BookingStretch(floorMissionUiRoot);
-        // A transparent full-screen Graphic must never intercept the normal bar controls.
-        floorMissionUiRoot.GetComponent<Image>().raycastTarget = false;
-        floorMissionHudButton = BookingButton("Performance and floor mission HUD button", floorMissionUiRoot, "", "", 13, FloorUiBackground, FloorUiGold);
+        floorMissionUiRoot.GetComponent<Image>().raycastTarget=false;
+        floorMissionHudButton=BookingButton("Random floor mission status",floorMissionUiRoot,"","",13,FloorUiBackground,FloorUiGold);
         floorMissionHudButton.onClick.AddListener(ToggleFloorMissionDrawer);
 
-        floorMissionBackdrop = BookingPanel("Floor mission outside close target", floorMissionUiRoot, new Color(0f, 0f, 0f, 0.12f));
-        BookingStretch(floorMissionBackdrop);
-        var outside = floorMissionBackdrop.gameObject.AddComponent<Button>();
-        outside.targetGraphic = floorMissionBackdrop.GetComponent<Image>();
-        outside.onClick.AddListener(CloseFloorMissionDrawer);
-        floorMissionDrawer = BookingPanel("Performance and floor mission drawer", floorMissionUiRoot, FloorUiBackground);
-        floorMissionHeader = BookingPanel("Floor mission fixed header", floorMissionDrawer, FloorUiBackground);
-        floorMissionTitle = BookingText("Floor mission title", floorMissionHeader, "SHOW & FLOOR MISSIONS", "공연·홀 미션", 22, FloorUiGold, true);
-        floorMissionSubtitle = BookingText("Floor mission phase instructions", floorMissionHeader, "", "", 12, FloorUiMuted);
-
-        floorMissionViewport = BookingPanel("Floor mission scrolling viewport", floorMissionDrawer, new Color(1f, 1f, 1f, 0.001f));
-        floorMissionViewport.gameObject.AddComponent<RectMask2D>();
-        floorMissionContent = BookingPanel("Floor mission scrolling content", floorMissionViewport, Color.clear);
-        floorMissionContent.GetComponent<Image>().raycastTarget = false;
-        floorMissionScroll = floorMissionViewport.gameObject.AddComponent<ScrollRect>();
-        floorMissionScroll.viewport = floorMissionViewport;
-        floorMissionScroll.content = floorMissionContent;
-        floorMissionScroll.horizontal = false;
-        floorMissionScroll.vertical = true;
-        floorMissionScroll.movementType = ScrollRect.MovementType.Clamped;
-        floorMissionScroll.scrollSensitivity = 32f;
-        floorMissionScroll.decelerationRate = 0.1f;
-        BuildFloorPerformanceCard();
-        BuildFloorCleanupCard();
-        BuildFloorGuestCard();
-
-        floorMissionFooter = BookingPanel("Floor mission fixed feedback and close", floorMissionDrawer, FloorUiBackground);
-        floorMissionFeedbackLabel = BookingText("Floor mission action feedback", floorMissionFooter, "", "", 12, FloorUiGold);
-        floorMissionFeedbackLabel.resizeTextForBestFit = true;
-        floorMissionFeedbackLabel.resizeTextMinSize = 10;
-        floorMissionFeedbackLabel.resizeTextMaxSize = 12;
-        floorMissionCloseButton = BookingButton("Continue watching the floor", floorMissionFooter, "", "", 15, FloorUiGreen, Color.white);
-        floorMissionCloseButton.onClick.AddListener(CloseFloorMissionDrawer);
-        floorMissionBackdrop.gameObject.SetActive(false);
-        floorMissionDrawer.gameObject.SetActive(false);
-        floorMissionUiKorean = SimBarLocalization.IsKorean;
-        floorMissionLayout = SimBarBookingLayout.Attach(floorMissionCanvas, LayoutFloorMissionUI);
-        RefreshFloorMissionUI();
-    }
-
-    private void BuildFloorPerformanceCard()
-    {
-        floorPerformanceCard = BookingPanel("Stage confetti and tissue performance", floorMissionContent, FloorUiCard);
-        floorPerformanceTitle = BookingText("Stage performance card title", floorPerformanceCard, "1 / STAGE PERFORMANCE", "1 / 꽃가루·휴지 퍼포먼스", 18, Color.white, true);
-        floorPerformanceIntro = BookingText("Stage performance tradeoff", floorPerformanceCard,
-            "Lift the crowd during the show. Each effect can be used twice. Your staff will clean the floor after the performance.",
-            "공연 중 분위기를 올려 보세요. 연출마다 두 번 사용할 수 있고, 공연 후에는 직원들이 바닥을 정리합니다.", 13, FloorUiMuted);
-        floorConfettiButton = BookingButton("Throw stage confetti", floorPerformanceCard, "", "", 15, new Color(0.34f, 0.20f, 0.40f), Color.white);
-        floorTissueButton = BookingButton("Throw tissue streamers", floorPerformanceCard, "", "", 15, new Color(0.18f, 0.32f, 0.43f), Color.white);
-        floorConfettiButton.onClick.AddListener(() => FloorThrow(SimBarFloorMissions.Confetti));
-        floorTissueButton.onClick.AddListener(() => FloorThrow(SimBarFloorMissions.Tissue));
-        floorPerformanceDebt = BookingText("Floor litter obligation", floorPerformanceCard, "", "", 12, FloorUiGold);
-    }
-
-    private void BuildFloorCleanupCard()
-    {
-        floorCleanupCard = BookingPanel("Post-performance employee cleanup", floorMissionContent, FloorUiCard);
-        floorCleanupTitle = BookingText("Cleanup card title", floorCleanupCard, "2 / AFTER-SHOW CLEANUP", "2 / 공연 후 직원 청소", 18, Color.white, true);
-        floorCleanupStatus = BookingText("Cleanup remaining work", floorCleanupCard, "", "", 14, FloorUiGold, true);
-        floorCleanupWorkers = BookingText("Cleanup available and arrived employees", floorCleanupCard, "", "", 13, FloorUiMuted);
-        floorCleanupTrack = BookingPanel("Cleanup progress track", floorCleanupCard, FloorUiLine);
-        floorCleanupTrack.GetComponent<Image>().raycastTarget = false;
-        floorCleanupFill = BookingPanel("Cleanup completed work", floorCleanupTrack, FloorUiGreen);
-        floorCleanupFill.GetComponent<Image>().raycastTarget = false;
-        floorCleanupButton = BookingButton("Assign employees after the show", floorCleanupCard, "", "", 15, FloorUiGreen, Color.white);
-        floorCleanupButton.onClick.AddListener(FloorAssignCleanup);
-        floorCleanupReward = BookingText("Cleanup settlement receipt", floorCleanupCard, "", "", 12, FloorUiMuted);
-    }
-
-    private void BuildFloorGuestCard()
-    {
-        floorGuestCard = BookingPanel("Courteous intoxicated guest exit", floorMissionContent, FloorUiCard);
-        floorGuestTitle = BookingText("Guest care card title", floorGuestCard, "3 / INTOXICATED GUEST EXIT", "3 / 만취 손님 퇴점 안내", 18, Color.white, true);
-        floorGuestStatus = BookingText("Selected guest and conversation progress", floorGuestCard, "", "", 14, FloorUiGold, true);
-        floorGuestHint = BookingText("Guest care sequence explanation", floorGuestCard, "", "", 13, FloorUiMuted);
-        for (int i = 0; i < floorGuestButtons.Length; i++)
+        floorReactionCard=BookingPanel("Timed spontaneous floor reaction",floorMissionUiRoot,FloorUiBackground);
+        floorReactionTitle=BookingText("Reaction event heading",floorReactionCard,"","",18,FloorUiGold,true);
+        floorReactionClock=BookingText("Reaction seconds remaining",floorReactionCard,"","",24,Color.white,true);
+        floorReactionClock.alignment=TextAnchor.UpperRight;
+        floorReactionClock.horizontalOverflow=HorizontalWrapMode.Overflow;
+        floorReactionClock.verticalOverflow=VerticalWrapMode.Overflow;
+        floorReactionClock.resizeTextForBestFit=true;
+        floorReactionClock.resizeTextMinSize=18;
+        floorReactionClock.resizeTextMaxSize=24;
+        floorReactionNarrative=BookingText("Reaction courteous task",floorReactionCard,"","",14,Color.white,true);
+        floorReactionCount=BookingText("Reaction rapid press progress",floorReactionCard,"","",16,FloorUiGold,true);
+        floorReactionTrack=BookingPanel("Reaction press progress track",floorReactionCard,FloorUiLine);
+        floorReactionTrack.GetComponent<Image>().raycastTarget=false;
+        floorReactionFill=BookingPanel("Reaction press progress fill",floorReactionTrack,FloorUiGreen);
+        floorReactionFill.GetComponent<Image>().raycastTarget=false;
+        floorReactionButton=BookingButton("Rapidly tap to respond",floorReactionCard,"","",18,FloorUiGreen,Color.white);
+        floorReactionButton.onClick.AddListener(() =>
         {
-            int choice = i;
-            floorGuestButtons[i] = BookingButton("Courteous guest action " + i, floorGuestCard, "", "", 14, FloorUiLine, Color.white);
-            floorGuestButtons[i].onClick.AddListener(() => FloorGuestChoice(choice));
-        }
+            if(FloorState!=null && FloorState.reaction!=null)
+                FloorQuickPress(FloorState.reaction.activeKind);
+        });
+        floorReactionFeedback=BookingText("Reaction result and retry feedback",floorReactionCard,"","",12,FloorUiMuted);
+
+        floorMissionDrawer=BookingPanel("Read-only spontaneous floor status",floorMissionUiRoot,FloorUiCard);
+        floorMissionTitle=BookingText("Floor status title",floorMissionDrawer,"RANDOM FLOOR EVENTS","돌발 홀 미션 현황",20,FloorUiGold,true);
+        floorMissionDetailNote=BookingText("Floor status live-time note",floorMissionDrawer,
+            "Events occur on their own. The show and reaction clock keep running.",
+            "이벤트는 무작위로 발생합니다. 이 창에서도 공연과 미션 시간은 계속 흐릅니다.",12,FloorUiMuted);
+        floorDetailViewport=BookingPanel("Floor status scrolling viewport",floorMissionDrawer,new Color(1f,1f,1f,.001f));
+        floorDetailViewport.gameObject.AddComponent<RectMask2D>();
+        floorDetailContent=BookingPanel("Floor status scrolling content",floorDetailViewport,Color.clear);
+        floorDetailContent.GetComponent<Image>().raycastTarget=false;
+        floorMissionDetail=BookingText("Read-only floor event and worker status",floorDetailContent,"","",13,Color.white);
+        floorDetailScroll=floorDetailViewport.gameObject.AddComponent<ScrollRect>();
+        floorDetailScroll.viewport=floorDetailViewport; floorDetailScroll.content=floorDetailContent;
+        floorDetailScroll.horizontal=false; floorDetailScroll.vertical=true;
+        floorDetailScroll.movementType=ScrollRect.MovementType.Clamped;
+        floorDetailScroll.scrollSensitivity=28f;
+        floorMissionCloseButton=BookingButton("Close read-only floor status",floorMissionDrawer,
+            "CLOSE / THE SHOW CONTINUES","닫기 / 공연은 계속됩니다",14,FloorUiLine,Color.white);
+        floorMissionCloseButton.onClick.AddListener(CloseFloorMissionDrawer);
+        floorMissionDrawer.gameObject.SetActive(false);
+        floorReactionCard.gameObject.SetActive(false);
+        floorMissionUiKorean=SimBarLocalization.IsKorean;
+        floorMissionLayout=SimBarBookingLayout.Attach(floorMissionCanvas,LayoutFloorMissionUI);
+        RefreshFloorMissionUI();
     }
 
     private void OpenFloorMissionDrawer()
     {
-        if (floorMissionCanvas == null || floorMissionDrawerOpen || JourneyValidationMode
-            || (!JourneyIsPlaying && !JourneyIsFloorClosing) || IsPourInProgress) return;
-        // A deliberate settings pause remains in charge; menu pauses can be exchanged.
-        if (paused && !serviceMenuOpen && !opMenuOpen) return;
-        if (serviceMenuOpen) CloseServiceMenu();
-        if (opMenuOpen) CloseOperations();
-        // Closing management can restore a deliberate pause and its visible panel.
-        if (paused) return;
-        floorMissionWasPaused = JourneyIsFloorClosing ? false : paused;
-        floorMissionDrawerOpen = true;
-        paused = !JourneyIsFloorClosing;
-        if (pausePanel != null) pausePanel.SetActive(false);
-        floorMissionBackdrop.gameObject.SetActive(true);
-        floorMissionDrawer.gameObject.SetActive(true);
+        if(floorMissionCanvas==null || floorMissionDrawerOpen || JourneyValidationMode
+            || (!JourneyIsPlaying && !JourneyIsFloorClosing)) return;
+        if(paused && !serviceMenuOpen && !opMenuOpen) return;
+        if(serviceMenuOpen) CloseServiceMenu();
+        if(opMenuOpen) CloseOperations();
+        if(paused) return;
+        floorMissionDrawerOpen=true;
         floorMissionLayout.RefreshLayout();
-        floorMissionScroll.StopMovement();
-        float focus = 0f;
-        if (FloorState != null)
-        {
-            if (JourneyIsFloorClosing && SimBarFloorMissions.Remaining(FloorState) > 0) focus = -floorCleanupCard.anchoredPosition.y;
-            else if (FloorState.guestActive || (FloorState.guestComplete && !FloorGuestExitFinished)) focus = -floorGuestCard.anchoredPosition.y;
-        }
-        float travel = Mathf.Max(1f, floorMissionContent.rect.height - floorMissionViewport.rect.height);
-        floorMissionScroll.verticalNormalizedPosition = 1f - Mathf.Clamp01(focus / travel);
+        floorDetailScroll.StopMovement();
+        floorDetailScroll.verticalNormalizedPosition=1f;
         RefreshFloorMissionUI();
     }
 
     private void CloseFloorMissionDrawer()
     {
-        if (!floorMissionDrawerOpen) return;
-        floorMissionDrawerOpen = false;
-        if (floorMissionBackdrop != null) floorMissionBackdrop.gameObject.SetActive(false);
-        if (floorMissionDrawer != null) floorMissionDrawer.gameObject.SetActive(false);
-        if (!JourneyValidationMode)
-        {
-            if (JourneyIsFloorClosing) paused = false;
-            else if (JourneyIsPlaying) paused = floorMissionWasPaused;
-        }
-        RefreshFloorMissionUI();
+        floorMissionDrawerOpen=false;
+        if(floorMissionDrawer!=null) floorMissionDrawer.gameObject.SetActive(false);
     }
 
     private void ToggleFloorMissionDrawer()
     {
-        if (floorMissionDrawerOpen) CloseFloorMissionDrawer();
+        if(floorMissionDrawerOpen) CloseFloorMissionDrawer();
         else OpenFloorMissionDrawer();
     }
 
     private void RefreshFloorMissionUI()
     {
-        if (floorMissionCanvas == null) return;
-        bool visible = !JourneyValidationMode && (JourneyIsPlaying || JourneyIsFloorClosing);
-        if (!visible && floorMissionDrawerOpen) CloseFloorMissionDrawer();
-        if (floorMissionCanvas.gameObject.activeSelf != visible) floorMissionCanvas.gameObject.SetActive(visible);
-        if (!visible) { floorMissionUiVisible = false; return; }
-        if (!floorMissionUiVisible) { floorMissionUiVisible = true; floorMissionLayout.RefreshLayout(); }
-        if (floorMissionUiKorean != SimBarLocalization.IsKorean)
+        if(floorMissionCanvas==null) return;
+        bool visible=!JourneyValidationMode && (JourneyIsPlaying || JourneyIsFloorClosing);
+        if(!visible) CloseFloorMissionDrawer();
+        if(floorMissionCanvas.gameObject.activeSelf!=visible) floorMissionCanvas.gameObject.SetActive(visible);
+        if(!visible) { floorMissionUiVisible=false; return; }
+        if(!floorMissionUiVisible) { floorMissionUiVisible=true; floorMissionLayout.RefreshLayout(); }
+        if(floorMissionUiKorean!=SimBarLocalization.IsKorean)
         {
-            floorMissionUiKorean = SimBarLocalization.IsKorean;
-            floorMissionFeedback = "";
-            foreach (Text label in floorMissionCanvas.GetComponentsInChildren<Text>(true)) label.font = BookingFont;
+            floorMissionUiKorean=SimBarLocalization.IsKorean;
+            floorMissionFeedback="";
+            foreach(Text label in floorMissionCanvas.GetComponentsInChildren<Text>(true)) label.font=BookingFont;
         }
-        var state = FloorState;
-        bool hasState = state != null;
-        if (!hasState) state = SimBarFloorMissions.NewState();
-        int remaining = SimBarFloorMissions.Remaining(state);
-        string guestSummary = state.guestComplete ? SimBarLocalization.Text("DONE", "완료")
-            : state.guestActive ? (state.guestStep + 1) + "/3" : SimBarLocalization.Text("WAIT", "대기");
-        floorMissionHudButton.GetComponentInChildren<Text>().text = SimBarLocalization.Format(
-            "SHOW & FLOOR / H\nLitter {0} / Guest {1}", "공연·홀 미션 / H\n바닥 {0} / 안내 {1}", remaining, guestSummary);
-        floorMissionHudButton.interactable = !IsPourInProgress && (!paused || floorMissionDrawerOpen || serviceMenuOpen || opMenuOpen);
-        floorMissionBackdrop.gameObject.SetActive(floorMissionDrawerOpen);
-        floorMissionDrawer.gameObject.SetActive(floorMissionDrawerOpen);
-        if (!floorMissionDrawerOpen) return;
-
-        floorMissionSubtitle.text = JourneyIsFloorClosing
-            ? SimBarLocalization.Text("SHOW ENDED / Orders have stopped.\nFinish the floor missions to settle tonight.", "공연 종료 · 주문은 멈췄습니다.\n청소와 퇴점 안내를 마치면 마감합니다.")
-            : SimBarLocalization.Text("The show pauses while you choose.\nClose this drawer to return to the floor.", "선택하는 동안 영업 시간이 멈춥니다.\n창을 닫으면 공연과 영업이 이어집니다.");
-        floorConfettiButton.GetComponentInChildren<Text>().text = SimBarLocalization.Format("CONFETTI {0}/2", "꽃가루 뿌리기 {0}/2", state.confettiThrows);
-        floorTissueButton.GetComponentInChildren<Text>().text = SimBarLocalization.Format("TISSUE {0}/2", "휴지 퍼포먼스 {0}/2", state.tissueThrows);
-        bool performing = hasState && JourneyIsPlaying && !JourneyIsFloorClosing && !state.cleanupStarted && !IsPourInProgress;
-        floorConfettiButton.interactable = performing && state.confettiThrows < SimBarFloorMissions.ThrowsPerEffect;
-        floorTissueButton.interactable = performing && state.tissueThrows < SimBarFloorMissions.ThrowsPerEffect;
-        floorPerformanceDebt.text = SimBarLocalization.Format("FLOOR TO CLEAN  {0}  /  Staff work follows the show.", "바닥 정리량 {0} / 공연이 끝나면 직원 청소가 필요합니다.", remaining);
-        int assigned = Mathf.Clamp(state.cleanupWorkers, 0, SimBarFloorMissions.MaxCleanupWorkers);
-        int ready = Mathf.Clamp(CleanupReadyWorkers, 0, assigned);
-        float progress = SimBarFloorMissions.CleanupProgress(state);
-        floorCleanupStatus.text = state.cleanupComplete ? SimBarLocalization.Text("FLOOR CLEAN / 100%", "바닥 청소 완료 / 100%")
-            : state.cleanupActive ? SimBarLocalization.Format("CLEANUP {0}% / {1} LEFT", "청소 {0}% / 남은 정리량 {1}", Mathf.RoundToInt(progress * 100f), remaining)
-            : remaining > 0 ? SimBarLocalization.Format("{0} LITTER TO CLEAN", "남은 바닥 정리량 {0}", remaining) : SimBarLocalization.Text("NO LITTER ON THE FLOOR", "현재 치울 꽃가루·휴지가 없습니다.");
-        floorCleanupWorkers.text = state.cleanupComplete ? SimBarLocalization.Text("The assigned floor cleanup is complete.", "직원들의 바닥 정리 작업이 완료됐습니다.")
-            : remaining == 0 ? SimBarLocalization.Text("No cleanup assignment is needed yet.", "현재 필요한 청소 배치가 없습니다.")
-            : state.cleanupActive
-            ? SimBarLocalization.Format("Assigned {0} / Arrived {1}\n{2}", "배치 {0}명 / 현장 도착 {1}명\n{2}", assigned, ready,
-                ready < assigned ? SimBarLocalization.Text("Staff are moving to the cleanup spots.", "직원들이 청소 위치로 이동하고 있습니다.") : SimBarLocalization.Text("Assigned staff are cleaning the floor.", "배치한 직원들이 바닥을 정리하고 있습니다."))
-            : JourneyIsFloorClosing ? SimBarLocalization.Format("Available staff: {0}\nAssign employees to begin cleanup.", "배치 가능한 직원 {0}명\n직원을 배치하면 청소를 시작합니다.", FloorAvailableWorkers)
-            : SimBarLocalization.Format("Available staff: {0}\nCleanup starts after the performance.", "배치 가능한 직원 {0}명\n청소는 공연이 끝난 뒤 시작할 수 있습니다.", FloorAvailableWorkers);
-        floorCleanupButton.interactable = hasState && JourneyIsFloorClosing && remaining > 0 && !state.cleanupActive && !state.cleanupComplete && FloorAvailableWorkers > 0;
-        floorCleanupButton.GetComponentInChildren<Text>().text = state.cleanupComplete ? SimBarLocalization.Text("CLEANUP COMPLETE", "청소 완료")
-            : state.cleanupActive ? SimBarLocalization.Text("STAFF ASSIGNED / WORKING", "직원 배치 완료 / 청소 중")
-            : JourneyIsFloorClosing ? SimBarLocalization.Text("ASSIGN STAFF TO CLEAN", "직원 청소 배치") : SimBarLocalization.Text("AVAILABLE AFTER THE SHOW", "공연 후 직원 배치 가능");
-        floorCleanupReward.text = state.cleanupRewardClaimed ? SimBarLocalization.Text("Cleanup bonus settled.", "청소 보너스 정산 완료")
-            : SimBarLocalization.Format("Cleanup bonus {0} / paid after completed work.", "청소 보너스 {0} / 작업 완료 후 정산", SimBarMoney.Format(SimBarFloorMissions.CleanupReward));
-        BookingPlace(floorCleanupFill, 0f, 0f, Mathf.Max(0f, floorCleanupTrack.rect.width) * progress, 7f);
-        RefreshFloorGuestCard(state, hasState);
-        floorMissionFeedbackLabel.text = string.IsNullOrEmpty(floorMissionFeedback)
-            ? JourneyIsFloorClosing ? SimBarLocalization.Text("Assigned staff keep working while you view the scene.", "현장을 보는 동안에도 배치한 직원들은 계속 작업합니다.")
-                : SimBarLocalization.Text("Choose a stage effect or check the floor missions.", "공연 연출을 선택하거나 홀 미션의 진행 상황을 확인하세요.")
-            : floorMissionFeedback;
-        floorMissionCloseButton.GetComponentInChildren<Text>().text = JourneyIsFloorClosing
-            ? SimBarLocalization.Text("WATCH THE STAFF / CLOSE", "현장 보기 / 직원 작업 계속")
-            : SimBarLocalization.Text("CONTINUE THE SHOW / CLOSE", "공연·영업 계속 / 닫기");
+        var state=FloorState;
+        var reaction=state==null?null:state.reaction;
+        int kind=reaction==null?SimBarFloorChallenges.None:reaction.activeKind;
+        bool active=kind!=SimBarFloorChallenges.None;
+        bool retry=reaction!=null && reaction.cooldown>0f;
+        int remaining=SimBarFloorMissions.Remaining(state);
+        string summary=active?SimBarLocalization.Text("RESPOND NOW / TAP QUICKLY","지금 대응 / 빠르게 연타")
+            :retry?SimBarLocalization.Text("NEXT RESPONSE SHORTLY","잠시 뒤 다음 대응")
+            :remaining>0?SimBarLocalization.Format("PAPER LEFT {0}","남은 정리량 {0}",remaining)
+            :state!=null && state.guestActive?SimBarLocalization.Text("A GUEST NEEDS HELP","도움이 필요한 손님")
+            :SimBarLocalization.Text("WATCH FOR RANDOM EVENTS","무작위 돌발 상황 대기");
+        floorMissionHudButton.GetComponentInChildren<Text>().text=SimBarLocalization.Text("RANDOM FLOOR MISSIONS / H\n","돌발 홀 미션 / H\n")+summary;
+        floorMissionHudButton.interactable=!paused || serviceMenuOpen || opMenuOpen;
+        bool showReaction=!paused && (active || retry);
+        floorReactionCard.gameObject.SetActive(showReaction);
+        // Status never covers an urgent tap target and never pauses the simulation.
+        floorMissionDrawer.gameObject.SetActive(floorMissionDrawerOpen && !paused && !showReaction);
+        if(showReaction)
+        {
+            bool cleanup=kind==SimBarFloorChallenges.Cleanup;
+            int target=cleanup?SimBarFloorChallenges.CleanupPresses:SimBarFloorChallenges.GuestPresses;
+            int presses=reaction==null?0:Mathf.Clamp(reaction.presses,0,target);
+            float seconds=active?Mathf.Max(0f,reaction.secondsLeft):Mathf.Max(0f,reaction.cooldown);
+            floorReactionTitle.text=active
+                ?cleanup?SimBarLocalization.Text("SUDDEN CLEANUP!","돌발 청소 미션!"):SimBarLocalization.Text("GUEST ASSISTANCE!","돌발 손님 안내!")
+                :SimBarLocalization.Text("NEXT RESPONSE SHORTLY","다음 대응 준비");
+            floorReactionClock.text=seconds.ToString("0.0")+SimBarLocalization.Text("s","초");
+            floorReactionClock.color=active && seconds<=2f?new Color(1f,.39f,.31f):Color.white;
+            floorReactionNarrative.text=!active
+                ?SimBarLocalization.Text("Your response is being checked. Any unfinished task will receive another reaction chance.","대응 결과를 확인하고 있습니다. 끝내지 못한 미션은 잠시 뒤 다시 도전할 수 있습니다.")
+                :cleanup?SimBarLocalization.Text("Paper covers the floor after the show. Tap rapidly to help your employees keep cleaning!","공연 뒤 바닥에 종이가 남았어요. 빠르게 연타해 직원들의 청소를 도와주세요!")
+                :FloorGuestReactionNarrative(reaction.activeStage);
+            floorReactionCount.text=active
+                ?SimBarLocalization.Format("QUICK TAPS  {0} / {1}","빠르게 연타  {0} / {1}",presses,target)
+                :SimBarLocalization.Text("WATCH FOR THE NEXT PROMPT","다음 안내가 뜨면 다시 도전하세요");
+            floorReactionButton.interactable=active && !paused;
+            floorReactionButton.GetComponentInChildren<Text>().text=!active
+                ?SimBarLocalization.Text("RETRY SHORTLY","잠시 뒤 다시 대응")
+                :cleanup?SimBarLocalization.Text("[C] TAP QUICKLY / CLEAN","[C] 빠르게 연타 / 청소")
+                :SimBarLocalization.Text("[F] TAP QUICKLY / ASSIST","[F] 빠르게 연타 / 정중한 안내");
+            BookingButtonColor(floorReactionButton,cleanup?FloorUiGreen:new Color(.34f,.26f,.13f),Color.white);
+            floorReactionFeedback.text=string.IsNullOrEmpty(floorMissionFeedback)
+                ?SimBarLocalization.Text("Tap the button repeatedly, or press the displayed key.","버튼을 여러 번 터치하거나 표시된 키를 반복해서 누르세요.")
+                :floorMissionFeedback;
+            BookingPlace(floorReactionFill,0f,0f,Mathf.Max(0f,floorReactionTrack.rect.width)*(active?presses/(float)target:0f),Mathf.Max(0f,floorReactionTrack.rect.height));
+        }
+        if(floorMissionDrawerOpen && !showReaction)
+        {
+            string cleaning=state==null || state.litter==0?SimBarLocalization.Text("No paper to clean yet.","현재 치울 종이가 없습니다.")
+                :state.cleanupComplete?SimBarLocalization.Text("Floor cleanup complete.","바닥 청소 완료")
+                :SimBarLocalization.Format("Paper left {0} / Cleanup {1}%\nStaff available {2} / Arrived and working {3}",
+                    "남은 정리량 {0} / 청소 {1}%\n배치 가능한 직원 {2}명 / 현장 작업 {3}명",remaining,
+                    Mathf.RoundToInt(SimBarFloorMissions.CleanupProgress(state)*100f),FloorAvailableWorkers,CleanupReadyWorkers);
+            string guest=state==null || !state.guestSpawned?SimBarLocalization.Text("No assistance request yet.","아직 안내 요청이 없습니다.")
+                :state.guestComplete?FloorGuestExitFinished?SimBarLocalization.Text("Courteous exit complete.","정중한 퇴점 안내 완료")
+                    :SimBarLocalization.Text("An employee is accompanying the guest and returning.","직원이 손님과 동행한 뒤 복귀하고 있습니다.")
+                :SimBarLocalization.Format("Courteous assistance: stage {0} / 3", "정중한 손님 안내 {0} / 3단계",state.guestStep+1);
+            floorMissionDetail.text=SimBarLocalization.Format("RANDOM STAGE EFFECTS\nConfetti {0} / Tissue {1}\nPerformers choose the moment. Watch the floor after the show.\n\nEMPLOYEE CLEANUP\n{2}\n\nCOURTEOUS GUEST EXIT\n{3}",
+                "무작위 공연 퍼포먼스\n꽃가루 {0}회 / 휴지 {1}회\n공연자들이 때를 정해 퍼포먼스를 합니다. 공연 후 바닥을 살펴보세요.\n\n직원 청소\n{2}\n\n정중한 손님 퇴점 안내\n{3}",
+                state==null?0:state.confettiThrows,state==null?0:state.tissueThrows,cleaning,guest);
+        }
     }
 
-    private void RefreshFloorGuestCard(SimBarFloorMissions.State state, bool hasState)
+    private string FloorGuestReactionNarrative(int stage)
     {
-        string name = SimBarLocalization.Text("Guest needing assistance", "도움이 필요한 손님");
-        floorGuestStatus.text = state.guestComplete ? FloorGuestExitFinished ? SimBarLocalization.Text("COURTEOUS EXIT COMPLETE", "정중한 퇴점 안내 완료")
-                : SimBarLocalization.Text("STAFF ARE ACCOMPANYING THE GUEST", "직원이 출입구까지 동행 중입니다.")
-            : state.guestActive ? SimBarLocalization.Format("{0} / STEP {1} OF 3", "{0} / 안내 {1} / 3", name, state.guestStep + 1)
-            : SimBarLocalization.Text("WATCH FOR A GUEST WHO NEEDS HELP", "도움이 필요한 손님이 나타나면 안내하세요.");
-        floorGuestHint.text = state.guestComplete ? SimBarLocalization.Text("The guest was treated respectfully.\nThe staff member checks belongings and accompanies them to the exit.", "손님을 정중하게 안내했습니다.\n직원이 소지품을 확인하고 출입구까지 동행합니다.")
-            : SimBarLocalization.Text("Pause additional orders, explain calmly, then offer a staff escort. Follow the highlighted step.", "추가 주문을 잠시 멈추고, 차분하게 설명한 뒤 직원 동행을 안내하세요. 강조된 순서부터 진행합니다.");
-        for (int i = 0; i < floorGuestButtons.Length; i++)
-        {
-            bool done = state.guestComplete || (state.guestActive && i < state.guestStep);
-            bool current = state.guestActive && i == state.guestStep;
-            floorGuestButtons[i].GetComponentInChildren<Text>().text = SimBarLocalization.Text(FloorGuestActionsEnglish[i], FloorGuestActionsKorean[i]) + (done ? SimBarLocalization.Text(" / DONE", " / 완료") : "");
-            floorGuestButtons[i].interactable = hasState && state.guestActive && !state.guestComplete && i >= state.guestStep;
-            BookingButtonColor(floorGuestButtons[i], done ? FloorUiGreen : current ? new Color(0.43f, 0.34f, 0.16f) : FloorUiLine, current ? FloorUiGold : Color.white);
-        }
+        if(stage<=0) return SimBarLocalization.Text("A guest has had too much. Tap rapidly to pause additional orders and offer water politely.","술에 취한 손님이 있어요. 빠르게 연타해 추가 주문을 잠시 멈추고 물을 정중히 안내하세요.");
+        if(stage==1) return SimBarLocalization.Text("Keep your voice calm. Tap rapidly to explain and politely ask the guest to leave.","차분하게 설명할 차례예요. 빠르게 연타해 손님께 정중하게 퇴점을 요청하세요.");
+        return SimBarLocalization.Text("Check the guest's belongings. Tap rapidly to arrange an employee escort to the exit.","소지품을 확인할 차례예요. 빠르게 연타해 직원의 출입구 동행을 안내하세요.");
     }
 
     private void LayoutFloorMissionUI(Vector2 size)
     {
-        if (floorMissionDrawer == null || size.x <= 0f || size.y <= 0f) return;
-        float hudWidth = Mathf.Min(230f, size.x - 24f);
-        BookingPlace(floorMissionHudButton.GetComponent<RectTransform>(), size.x - hudWidth - 12f, Mathf.Min(112f, Mathf.Max(12f, size.y - 68f)), hudWidth, 54f);
-        float width = Mathf.Min(420f, size.x - 24f);
-        float height = Mathf.Min(720f, size.y - 24f);
-        float margin = 14f;
-        float inner = width - margin * 2f;
-        float headerHeight = width < 300f ? 120f : 106f;
-        const float footerHeight = 104f;
-        float viewportHeight = Mathf.Max(1f, height - headerHeight - footerHeight);
-        BookingPlace(floorMissionDrawer, size.x - width - 12f, 12f, width, height);
-        BookingPlace(floorMissionHeader, 0f, 0f, width, headerHeight);
-        BookingPlace(floorMissionTitle.rectTransform, margin, 10f, inner, 39f);
-        floorMissionTitle.fontSize = width < 300f ? 19 : 22;
-        BookingPlace(floorMissionSubtitle.rectTransform, margin, 52f, inner, headerHeight - 56f);
-        BookingPlace(floorMissionViewport, margin, headerHeight, inner, viewportHeight);
-        BookingPlace(floorMissionFooter, 0f, height - footerHeight, width, footerHeight);
-        BookingPlace(floorMissionFeedbackLabel.rectTransform, margin, 5f, inner, 42f);
-        BookingPlace(floorMissionCloseButton.GetComponent<RectTransform>(), margin, 56f, inner, 40f);
+        if(floorReactionCard==null || size.x<=0f || size.y<=0f) return;
+        bool compact=size.y<500f;
+        bool veryShort=size.y<300f;
+        float hudWidth=Mathf.Min(230f,size.x-24f);
+        float hudY=compact?12f:112f;
+        BookingPlace(floorMissionHudButton.GetComponent<RectTransform>(),size.x-hudWidth-12f,hudY,hudWidth,veryShort?36f:54f);
+        floorMissionHudButton.GetComponentInChildren<Text>().fontSize=veryShort?11:13;
+        float width=Mathf.Min(340f,size.x-24f);
+        float top=veryShort?56f:compact?74f:180f;
+        float height=Mathf.Min(compact?260f:300f,size.y-top-(veryShort?8f:12f));
+        bool tight=height<245f;
+        float inner=width-28f;
+        BookingPlace(floorReactionCard,size.x-width-12f,top,width,height);
+        BookingPlace(floorReactionTitle.rectTransform,14f,tight?8f:12f,inner-100f,tight?24f:29f);
+        BookingPlace(floorReactionClock.rectTransform,width-108f,8f,94f,45f);
+        floorReactionTitle.fontSize=tight?15:compact?16:18;
+        floorReactionClock.fontSize=compact?22:24;
+        floorReactionClock.resizeTextMaxSize=compact?22:24;
+        float narrativeY=tight?42f:compact?45f:52f;
+        float narrativeHeight=tight?32f:compact?60f:77f;
+        BookingPlace(floorReactionNarrative.rectTransform,14f,narrativeY,inner,narrativeHeight);
+        floorReactionNarrative.fontSize=tight?11:compact?13:14;
+        float countY=tight?79f:compact?111f:139f;
+        BookingPlace(floorReactionCount.rectTransform,14f,countY,inner,tight?19f:25f);
+        floorReactionCount.fontSize=tight?14:16;
+        BookingPlace(floorReactionTrack,14f,tight?104f:countY+29f,inner,tight?5f:7f);
+        float buttonHeight=tight?46f:58f;
+        float buttonY=tight?height-14f-buttonHeight:compact?157f:186f;
+        BookingPlace(floorReactionButton.GetComponent<RectTransform>(),14f,buttonY,inner,buttonHeight);
+        floorReactionButton.GetComponentInChildren<Text>().fontSize=tight || inner<290f?16:18;
+        BookingPlace(floorReactionFeedback.rectTransform,14f,buttonY+66f,inner,Mathf.Max(26f,height-buttonY-73f));
+        floorReactionFeedback.fontSize=compact?11:12;
+        floorReactionFeedback.gameObject.SetActive(!tight);
 
-        float cardInner = inner - 24f;
-        const float performanceHeight = 286f, cleanupHeight = 328f, guestHeight = 430f, gap = 12f;
-        BookingPlace(floorPerformanceCard, 0f, 0f, inner, performanceHeight);
-        BookingPlace(floorPerformanceTitle.rectTransform, 12f, 12f, cardInner, 31f);
-        BookingPlace(floorPerformanceIntro.rectTransform, 12f, 50f, cardInner, 76f);
-        BookingPlace(floorConfettiButton.GetComponent<RectTransform>(), 12f, 136f, cardInner, 43f);
-        BookingPlace(floorTissueButton.GetComponent<RectTransform>(), 12f, 187f, cardInner, 43f);
-        BookingPlace(floorPerformanceDebt.rectTransform, 12f, 240f, cardInner, 42f);
-        float cleanupY = performanceHeight + gap;
-        BookingPlace(floorCleanupCard, 0f, cleanupY, inner, cleanupHeight);
-        BookingPlace(floorCleanupTitle.rectTransform, 12f, 12f, cardInner, 31f);
-        BookingPlace(floorCleanupStatus.rectTransform, 12f, 53f, cardInner, 52f);
-        BookingPlace(floorCleanupWorkers.rectTransform, 12f, 111f, cardInner, 73f);
-        BookingPlace(floorCleanupTrack, 12f, 192f, cardInner, 7f);
-        BookingPlace(floorCleanupButton.GetComponent<RectTransform>(), 12f, 214f, cardInner, 45f);
-        BookingPlace(floorCleanupReward.rectTransform, 12f, 271f, cardInner, 48f);
-        float guestY = cleanupY + cleanupHeight + gap;
-        BookingPlace(floorGuestCard, 0f, guestY, inner, guestHeight);
-        BookingPlace(floorGuestTitle.rectTransform, 12f, 12f, cardInner, 31f);
-        BookingPlace(floorGuestStatus.rectTransform, 12f, 53f, cardInner, 59f);
-        BookingPlace(floorGuestHint.rectTransform, 12f, 120f, cardInner, 90f);
-        for (int i = 0; i < floorGuestButtons.Length; i++) BookingPlace(floorGuestButtons[i].GetComponent<RectTransform>(), 12f, 220f + i * 64f, cardInner, 58f);
-        float contentHeight = guestY + guestHeight;
-        BookingPlace(floorMissionContent, 0f, 0f, inner, Mathf.Max(contentHeight, viewportHeight));
-        if (FloorState != null) BookingPlace(floorCleanupFill, 0f, 0f, cardInner * SimBarFloorMissions.CleanupProgress(FloorState), 7f);
-        int guestFont = cardInner < 285f ? 12 : 14;
-        foreach (var button in floorGuestButtons) button.GetComponentInChildren<Text>().fontSize = guestFont;
+        float detailWidth=Mathf.Min(380f,size.x-24f);
+        float detailHeight=Mathf.Min(390f,size.y-top-(veryShort?8f:12f));
+        float detailInner=detailWidth-28f;
+        BookingPlace(floorMissionDrawer,size.x-detailWidth-12f,top,detailWidth,detailHeight);
+        BookingPlace(floorMissionTitle.rectTransform,14f,12f,detailInner,30f);
+        BookingPlace(floorMissionDetailNote.rectTransform,14f,49f,detailInner,47f);
+        float viewHeight=Mathf.Max(1f,detailHeight-158f);
+        BookingPlace(floorDetailViewport,14f,105f,detailInner,viewHeight);
+        BookingPlace(floorDetailContent,0f,0f,detailInner,Mathf.Max(342f,viewHeight));
+        BookingPlace(floorMissionDetail.rectTransform,0f,0f,detailInner,342f);
+        BookingPlace(floorMissionCloseButton.GetComponent<RectTransform>(),14f,detailHeight-48f,detailInner,38f);
     }
 
     private void DestroyFloorMissionUI()
     {
-        floorMissionDrawerOpen = false;
-        if (floorMissionCanvas != null) Destroy(floorMissionCanvas.gameObject);
-        floorMissionCanvas = null;
-        floorMissionLayout = null;
+        floorMissionDrawerOpen=false;
+        if(floorMissionCanvas!=null) Destroy(floorMissionCanvas.gameObject);
+        floorMissionCanvas=null; floorMissionLayout=null;
     }
 }

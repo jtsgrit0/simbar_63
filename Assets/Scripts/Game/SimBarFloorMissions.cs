@@ -47,6 +47,7 @@ public static class SimBarFloorMissions
         public int guestStep;
         public int guestIndex = -1;
         public int guestSetbacks;
+        public SimBarFloorChallenges.State reaction;
     }
 
     public struct Result
@@ -68,6 +69,7 @@ public static class SimBarFloorMissions
     {
         if (state == null) return;
         state.version = 1;
+        if (state.reaction != null) SimBarFloorChallenges.Sanitize(state.reaction);
         state.confettiThrows = Clamp(state.confettiThrows, 0, ThrowsPerEffect);
         state.tissueThrows = Clamp(state.tissueThrows, 0, ThrowsPerEffect);
         state.litter = state.confettiThrows * ConfettiLitter + state.tissueThrows * TissueLitter;

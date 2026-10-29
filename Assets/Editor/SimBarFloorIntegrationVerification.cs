@@ -11,307 +11,255 @@ public static partial class SimBarRuntimeVerification
     [MenuItem("SimBar/Validation/Check Floor Mission Save and Actors")]
     public static void CheckFloorIntegrationMenu() { Debug.Log(CheckFloorIntegration()); }
 
-    /// <summary>Runs the real callbacks and movement against a temporary night, then restores the live save.</summary>
     public static string CheckFloorIntegration()
     {
         var report = new Report();
-        var host = Object.FindAnyObjectByType<SimBarExperience>();
-        if (!Application.isPlaying || host == null || host.IsPourInProgress || Read<bool>(host, "opMenuOpen"))
-        { report.failures.Add("Enter stable Play Mode and close management/pour controls before floor integration checks."); return report.ToString(); }
-        var initialFloor = Property<SimBarFloorMissions.State>(host, "FloorState");
-        if (initialFloor != null && (initialFloor.litter > 0 || initialFloor.guestSpawned))
-        { report.failures.Add("Run this check from a fresh lobby before starting floor missions, so existing mission actors remain untouched."); return report.ToString(); }
+        var host = FloorVerificationHost(report);
+        if (host == null) return report.ToString();
         var snapshot = new JourneyCheckSnapshot(host);
         var motion = new FloorVerificationMotionSnapshot(host);
         try
         {
-            Write(host, "journeyValidationMode", false);
-            Call(host, "ImportJourneyState", "");
-            Write(host, "cash", 20000f); Write(host, "fans", 256);
-            Write(host, "opActiveEvent", -1); Write(host, "opWageDebt", 0);
-            Array.Clear(Read<int[]>(host, "opStaff"), 0, 3);
-            Call(host, "UpdateOperationsWorldVisuals");
-            FloorJourneyWrite(host, "tutorialComplete", true);
-            SetJourneyPhase(host, "Lobby");
-            Call(host, "StartFreshJourneyNight", false);
-            report.Check(Property<bool>(host, "JourneyIsPlaying") && !Read<bool>(host, "paused"), "A temporary night starts through the real fresh-night callback.");
-
-            int fans = Read<int>(host, "fans"); float cash = Read<float>(host, "cash");
-            Call(host, "FloorThrow", 0); Call(host, "FloorThrow", 1);
-            Call(host, "FloorThrow", 0); Call(host, "FloorThrow", 1);
-            var state = Property<SimBarFloorMissions.State>(host, "FloorState");
-            var effects = Read<SimBarFloorPerformance>(host, "floorPerformance");
-            report.Check(state.confettiThrows == 2 && state.tissueThrows == 2 && state.litter == SimBarFloorMissions.MaxLitter
-                && Read<int>(host, "fans") == fans + 8 && Read<float>(host, "cash") == cash,
-                "Both real performance buttons create bounded paper debt and audience rewards without charging money.");
-            report.Check(effects != null && effects.VisibleLitterCount > 0 && effects.ActiveParticleCount > 0
-                && effects.ActiveParticleCount <= SimBarFloorPerformance.ParticleLimit,
-                "The performance callback creates visible pooled floor litter and airborne paper.");
-            Call(host, "FloorThrow", 0); Call(host, "FloorThrow", 1);
-            report.Check(state.litter == SimBarFloorMissions.MaxLitter && Read<int>(host, "fans") == fans + 8,
-                "Repeated exhausted performance callbacks cannot repeat rewards or litter.");
-            Call(host, "FloorAssignCleanup");
-            report.Check(!state.cleanupStarted && state.cleaned == 0f, "Employees cannot start cleanup while the band is playing.");
-
-            int patronCount = Read<IList>(host, "patrons").Count;
-            int queueCount = FloorQueueCount(host);
+            FloorStartVerificationNight(host); FloorForceSchedule(host, false, false);
             FloorJourneyWrite(host, "secondsLeft", 110f); Call(host, "TickFloorMissions", .1f);
+            var state = Property<SimBarFloorMissions.State>(host, "FloorState");
+            var challenge = FloorChallengeState(host);
+            int fans = Read<int>(host, "fans"); float cash = Read<float>(host, "cash");
+            Call(host, "FloorQuickPress", SimBarFloorChallenges.Cleanup); Call(host, "FloorQuickPress", SimBarFloorChallenges.Guest);
+            report.Check(!state.guestSpawned && state.litter == 0 && Read<int>(host, "fans") == fans && challenge.activeKind == SimBarFloorChallenges.None,
+                "No fixed 70-second event or manual quick button can invent paper, a guest or a reward on an unscheduled night.");
+            FloorForceSchedule(host, true, true, 72f, 75f);
+            Call(host, "TickFloorMissions", .1f);
+            report.Check(state.litter == 0 && !state.guestSpawned, "Future random events remain dormant until their saved due time.");
+            FloorJourneyWrite(host, "secondsLeft", 107f); Call(host, "TickFloorMissions", .1f);
+            var effects = Read<SimBarFloorPerformance>(host, "floorPerformance");
+            report.Check(state.confettiThrows == 1 && state.tissueThrows == 1 && state.litter == 56 && Read<int>(host, "fans") == fans + 4
+                && effects != null && effects.ActiveParticleCount > 0 && effects.VisibleLitterCount > 0 && !state.guestSpawned,
+                "Due spontaneous paper events create their real burst, audience response and persistent litter debt before a later guest event.");
+            Call(host, "TickFloorMissions", .1f);
+            report.Check(state.litter == 56 && Read<int>(host, "fans") == fans + 4 && challenge.paperFired == 2,
+                "Repeated frames at a due time cannot replay a paper performance or audience reward.");
+            int patrons = Read<IList>(host, "patrons").Count, queue = FloorQueueCount(host);
+            FloorJourneyWrite(host, "secondsLeft", 105f); Call(host, "TickFloorMissions", .1f);
             object guest = Read<object>(host, "floorMissionGuest");
-            report.Check(state.guestActive && guest != null && Read<IList>(host, "patrons").Count == patronCount
-                && FloorQueueCount(host) == queueCount && !Read<IList>(host, "patrons").Contains(guest),
-                "The scheduled assistance guest is a dedicated visible actor outside the ordinary service queue.");
-            Call(host, "FloorGuestChoice", 2);
-            report.Check(state.guestStep == 0 && !state.guestComplete, "Skipping to escort does not remove the guest.");
-            Call(host, "FloorGuestChoice", 0);
-            report.Check(state.guestStep == 1 && state.guestActive, "The first courteous action pauses service and offers water.");
+            report.Check(state.guestActive && guest != null && !Read<IList>(host, "patrons").Contains(guest)
+                && Read<IList>(host, "patrons").Count == patrons && FloorQueueCount(host) == queue,
+                "A due guest event creates a dedicated visible assistance actor outside the ordinary service queue.");
+            FloorWaitForKind(host, SimBarFloorChallenges.Guest);
+            int taps = challenge.presses; Call(host, "FloorQuickPress", SimBarFloorChallenges.Cleanup);
+            report.Check(challenge.presses == taps && state.guestStep == 0, "The cleanup key cannot progress a guest reaction.");
+            Call(host, "FloorQuickPress", SimBarFloorChallenges.Guest); Call(host, "FloorQuickPress", SimBarFloorChallenges.Guest);
+            report.Check(challenge.presses == taps + 1 && state.guestStep == 0, "Same-frame duplicate input counts once and cannot skip the dialogue stage.");
+            for (int i = 0; i < 2; i++) { FloorAdvance(host, 1); Call(host, "FloorQuickPress", SimBarFloorChallenges.Guest); }
+            int partialTaps = challenge.presses; float remaining = challenge.secondsLeft;
+            string savedSchedule = FloorScheduleSignature(challenge);
             host.SaveOperations(); Call(host, "ImportJourneyState", ""); Call(host, "LoadOperations");
             Call(host, "JourneyReturnToLobby"); Call(host, "ContinueJourney");
-            state = Property<SimBarFloorMissions.State>(host, "FloorState");
-            report.Check(state.litter == SimBarFloorMissions.MaxLitter && state.confettiThrows == 2 && state.tissueThrows == 2
-                && state.guestStep == 1 && state.guestActive && Read<int>(host, "fans") == fans + 8
-                && effects.ActiveParticleCount == 0,
-                "Real save/load preserves paper debt and dialogue progress without replaying a paper burst or audience reward.");
-
-            Call(host, "TickJourney", 180f);
-            bool closingDrawerWasOpen = Read<bool>(host, "floorMissionDrawerOpen");
-            Call(host, "OnApplicationFocus", false);
-            report.Check(closingDrawerWasOpen && Read<bool>(host, "paused") && !Read<bool>(host, "floorMissionDrawerOpen")
-                && Property<bool>(host, "JourneyIsFloorClosing") && Read<GameObject>(host, "pausePanel").activeSelf,
-                "Losing focus with the closing mission drawer open closes the drawer and leaves an effective visible pause.");
+            state = Property<SimBarFloorMissions.State>(host, "FloorState"); challenge = FloorChallengeState(host);
+            report.Check(challenge.activeKind == SimBarFloorChallenges.Guest && challenge.presses == partialTaps
+                && Mathf.Abs(challenge.secondsLeft - remaining) < .001f && FloorScheduleSignature(challenge) == savedSchedule
+                && state.litter == 56 && state.guestStep == 0 && Read<int>(host, "fans") == fans + 4 && effects.ActiveParticleCount == 0,
+                "Real save/load preserves the random schedule and active reaction taps/time without rerolling, rebursting or repeating rewards.");
+            Write(host, "paused", true); remaining = challenge.secondsLeft; taps = challenge.presses;
+            FloorAdvance(host, 20); Call(host, "FloorQuickPress", SimBarFloorChallenges.Guest);
+            report.Check(challenge.secondsLeft == remaining && challenge.presses == taps && state.guestStep == 0,
+                "Paused runtime time and taps cannot consume or progress a reaction window.");
+            Write(host, "paused", false); FloorAdvance(host, 80);
+            report.Check(challenge.timeouts > 0 && state.guestStep == 0 && !state.guestComplete && Read<int>(host, "fans") == fans + 4,
+                "Missing the guest window retries the same courteous stage without removing the guest or rewarding failure.");
+            FloorCompleteGuestReactions(host, false);
+            report.Check(state.guestComplete && state.guestStep == 3 && !Property<bool>(host, "FloorGuestExitFinished")
+                && Read<int>(host, "fans") == fans + 4 + SimBarFloorMissions.GuestFans,
+                "Three successful rapid-press rounds complete the three courteous stages once and begin a real staff escort.");
+            int escortTicks = 0;
+            while (!Property<bool>(host, "FloorGuestExitFinished") && escortTicks++ < 400) FloorAdvance(host, 1);
+            if (!Property<bool>(host, "FloorGuestExitFinished")) report.measurements.Add("Guest reaction escort timeout: " + FloorActorDiagnostic(host));
+            report.Check(Property<bool>(host, "FloorGuestExitFinished") && Read<object>(host, "floorEscortWorker") == null,
+                "The successful reaction still waits for the actual guest exit and employee return.");
+            Call(host, "TickJourney", 180f); Call(host, "OpenFloorMissionDrawer");
+            bool drawerWasOpen = Read<bool>(host, "floorMissionDrawerOpen"); Call(host, "OnApplicationFocus", false);
+            report.Check(drawerWasOpen && Read<bool>(host, "paused") && !Read<bool>(host, "floorMissionDrawerOpen")
+                && Read<GameObject>(host, "pausePanel").activeSelf, "Focus loss from the closing drawer leaves a visible effective pause.");
             Call(host, "TogglePause");
-            report.Check(!Read<bool>(host, "paused") && Property<bool>(host, "JourneyIsFloorClosing")
-                && !Read<GameObject>(host, "pausePanel").activeSelf && Property<float>(host, "JourneySecondsLeft") == 0f,
-                "The normal resume control works after focus loss during the closing drawer.");
-            Call(host, "CloseFloorMissionDrawer");
-            report.Check(Property<bool>(host, "JourneyIsFloorClosing") && Property<bool>(host, "JourneyHasActiveNight")
-                && !Property<bool>(host, "JourneyIsResults") && Property<float>(host, "JourneySecondsLeft") == 0f
-                && Read<float>(host, "cash") == cash,
-                "Last call stops the show and defers the night receipt until pending floor missions finish.");
-            Call(host, "FloorAssignCleanup");
-            IList crew = Read<IList>(host, "floorCleaningCrew");
-            var employeeStarts = new List<Vector3>();
-            foreach (object worker in crew) employeeStarts.Add(FloorWorkerRoot(worker).position);
-            report.Check(state.cleanupActive && state.cleanupWorkers == 2 && crew.Count == 2
-                && Property<int>(host, "CleanupReadyWorkers") == 0 && state.cleaned == 0f,
-                "Cleanup borrows the two existing base employees, with no work credited before arrival.");
-            FloorAdvance(host, 1);
-            bool employeeMoved = false;
-            for (int i = 0; i < crew.Count; i++) employeeMoved |= Vector3.Distance(employeeStarts[i], FloorWorkerRoot(crew[i]).position) > .01f;
-            report.Check(employeeMoved && state.cleaned == 0f, "Assigned employees visibly walk away from the bar before cleanup progresses.");
-            Call(host, "TogglePause"); float cleaned = state.cleaned;
-            Vector3 pausedPosition = crew.Count > 0 ? FloorWorkerRoot(crew[0]).position : Vector3.zero;
-            FloorAdvance(host, 20);
-            report.Check(Read<bool>(host, "paused") && state.cleaned == cleaned
-                && (crew.Count == 0 || Vector3.Distance(pausedPosition, FloorWorkerRoot(crew[0]).position) < .0001f),
-                "A normal pause freezes both the employees' movement and their cleanup work during closing.");
-            Call(host, "TogglePause");
-
-            int peakReady = 0, cleanupTicks = 0; bool resumedPartial = false, partialPreserved = false;
-            while (!state.cleanupComplete && cleanupTicks++ < 1200)
+            report.Check(Property<bool>(host, "JourneyIsFloorClosing") && !Read<bool>(host, "paused") && state.cleanupActive
+                && Read<IList>(host, "floorCleaningCrew").Count == 2 && Read<float>(host, "cash") == cash,
+                "Last call automatically assigns real employees and defers settlement; the normal resume control remains usable.");
+            int peakReady = 0;
+            for (int i = 0; i < 300; i++) { FloorAdvance(host, 1); peakReady = Mathf.Max(peakReady, Property<int>(host, "CleanupReadyWorkers")); }
+            report.Check(peakReady > 0 && state.cleaned == 0f && challenge.cleanupWorkBudget == 0f && !state.cleanupComplete,
+                "Arrived employees cannot auto-clean while the player ignores the cleanup reaction; elapsed time alone earns no labor.");
+            bool partialSaved = false, partialPreserved = false; int cleanupTicks = 0;
+            while (!Property<bool>(host, "JourneyIsResults") && cleanupTicks++ < 1600)
             {
-                FloorAdvance(host, 1);
-                peakReady = Mathf.Max(peakReady, Property<int>(host, "CleanupReadyWorkers"));
-                if (!resumedPartial && state.cleaned >= 12f && !state.cleanupComplete)
+                if (challenge.activeKind == SimBarFloorChallenges.Cleanup) Call(host, "FloorQuickPress", SimBarFloorChallenges.Cleanup);
+                FloorAdvance(host, 1); peakReady = Mathf.Max(peakReady, Property<int>(host, "CleanupReadyWorkers"));
+                if (!partialSaved && state.cleaned >= 12f && !state.cleanupComplete)
                 {
-                    cleaned = state.cleaned;
-                    host.SaveOperations(); Call(host, "JourneyReturnToLobby");
-                    Call(host, "ImportJourneyState", ""); Call(host, "LoadOperations"); Call(host, "ContinueJourney");
-                    Call(host, "CloseFloorMissionDrawer");
-                    state = Property<SimBarFloorMissions.State>(host, "FloorState");
-                    partialPreserved = Mathf.Abs(state.cleaned - cleaned) < .001f && state.cleanupActive
-                        && state.guestStep == 1 && Property<bool>(host, "JourneyIsFloorClosing");
-                    resumedPartial = true;
+                    float work = state.cleaned, budget = challenge.cleanupWorkBudget;
+                    host.SaveOperations(); Call(host, "JourneyReturnToLobby"); Call(host, "ImportJourneyState", ""); Call(host, "LoadOperations");
+                    Call(host, "ContinueJourney"); Call(host, "CloseFloorMissionDrawer");
+                    state = Property<SimBarFloorMissions.State>(host, "FloorState"); challenge = FloorChallengeState(host);
+                    partialPreserved = Mathf.Abs(state.cleaned - work) < .001f && Mathf.Abs(challenge.cleanupWorkBudget - budget) < .001f
+                        && state.cleanupActive && Property<bool>(host, "JourneyIsFloorClosing"); partialSaved = true;
                 }
             }
-            report.Check(resumedPartial && partialPreserved, "Leaving, saving and continuing a partly cleaned closing preserves exact work and guest dialogue.");
-            report.Check(peakReady > 0 && state.cleanupComplete && SimBarFloorMissions.Remaining(state) == 0
-                && effects.VisibleLitterCount == 0, "Actual arrived employees complete and visibly remove every paper piece within the simulated closing window.");
-            if (!state.cleanupComplete) report.measurements.Add("Cleanup timeout: " + FloorActorDiagnostic(host));
-            report.Check(Property<bool>(host, "JourneyIsFloorClosing") && state.guestActive
-                && !state.cleanupRewardClaimed && Read<float>(host, "cash") == cash,
-                "Finished cleanup alone cannot bypass the remaining guest mission or pay an early receipt.");
-
-            Call(host, "FloorGuestChoice", 2);
-            report.Check(state.guestStep == 1 && !state.guestComplete, "Reloaded dialogue still enforces courteous action order.");
-            Call(host, "FloorGuestChoice", 1); Call(host, "FloorGuestChoice", 2);
-            report.Check(state.guestComplete && !state.guestActive && !Property<bool>(host, "FloorGuestExitFinished")
-                && Property<bool>(host, "JourneyIsFloorClosing"),
-                "The final dialogue starts a real exit walk and keeps the receipt closed while the guest is leaving.");
-            int postGuestFans = Read<int>(host, "fans"); Call(host, "FloorGuestChoice", 2);
-            report.Check(Read<int>(host, "fans") == postGuestFans && postGuestFans == fans + 8 + SimBarFloorMissions.GuestFans,
-                "A repeated guest callback cannot duplicate the courteous-exit reward.");
-            guest = Read<object>(host, "floorMissionGuest"); Transform guestRoot = FloorPublicRead<Transform>(guest, "root");
-            object escortWorker = Read<object>(host, "floorEscortWorker");
-            Transform escortRoot = escortWorker == null ? null : FloorWorkerRoot(escortWorker);
-            object escortActor = escortWorker == null ? null : FloorPublicRead<object>(escortWorker, "actor");
-            string escortName = escortActor == null ? "" : FloorPublicRead<string>(FloorPublicRead<object>(escortActor, "person"), "name");
-            report.Check(escortRoot != null && (escortName == "Server" || escortName == "Bartender")
-                && Read<IList>(host, "motionActors").Contains(escortActor),
-                "The escort reserves an existing bar employee instead of creating an imaginary staff member.");
-            Vector3 guestStart = guestRoot.position, escortStart = escortRoot != null ? escortRoot.position : Vector3.zero;
-            bool escortMoved = false, guestMoved = false; int joinTicks = 0;
-            while (!guestMoved && joinTicks++ < 150)
-            {
-                FloorAdvance(host, 1);
-                escortMoved |= escortRoot != null && Vector3.Distance(escortStart, escortRoot.position) > .1f;
-                guestMoved = Vector3.Distance(guestStart, guestRoot.position) > .1f;
-            }
-            report.Check(escortMoved && guestMoved && !Property<bool>(host, "JourneyIsResults")
-                && Read<bool>(host, "floorEscortJoined") && guestRoot.gameObject.activeSelf,
-                "The existing employee first reaches the guest, then visibly accompanies the guest toward the exit.");
-            int exitTicks = 0;
-            while (!Property<bool>(host, "JourneyIsResults") && joinTicks + exitTicks++ < 400) FloorAdvance(host, 1);
-            if (!Property<bool>(host, "JourneyIsResults")) report.measurements.Add("Escort/exit timeout: " + FloorActorDiagnostic(host));
-            report.Check(Property<bool>(host, "JourneyIsResults") && Read<bool>(host, "paused")
-                && Property<bool>(host, "FloorGuestExitFinished") && !guestRoot.gameObject.activeSelf
-                && Read<object>(host, "floorEscortWorker") == null,
-                "The guest reaches the exit and the real employee returns before the paused nightly result opens.");
-            report.Check(state.cleanupRewardClaimed && FloorJourneyRead<int>(host, "resultFloorTasks") == 2
-                && Mathf.Abs(FloorJourneyRead<float>(host, "resultFloorBonus") - SimBarFloorMissions.CleanupReward) < .001f
+            if (!Property<bool>(host, "JourneyIsResults")) report.measurements.Add("Reaction cleanup timeout: " + FloorActorDiagnostic(host));
+            report.Check(partialSaved && partialPreserved, "A partly worked closing resumes exact employee work and earned reaction labor budget after real save/load.");
+            report.Check(state.cleanupComplete && SimBarFloorMissions.Remaining(state) == 0 && effects.VisibleLitterCount == 0
+                && peakReady > 0 && challenge.completedRounds >= 5 && Property<bool>(host, "JourneyIsResults"),
+                "Earned cleanup pulses plus actual arrived employees remove all visible paper before results open.");
+            report.Check(FloorJourneyRead<int>(host, "resultFloorTasks") == 2 && FloorJourneyRead<float>(host, "resultFloorBonus") == SimBarFloorMissions.CleanupReward
                 && Mathf.Abs(Read<float>(host, "cash") - cash - Property<int>(host, "JourneyResultBonus") - SimBarFloorMissions.CleanupReward) < .001f,
-                "Both completed floor tasks appear on the receipt and cleanup pays exactly once alongside the ordinary night bonus.");
+                "Both reaction-driven floor missions produce one cleanup receipt alongside the ordinary night bonus.");
             cash = Read<float>(host, "cash"); fans = Read<int>(host, "fans"); int xp = Property<int>(host, "JourneyXP");
             host.SaveOperations(); Call(host, "LoadOperations"); Call(host, "ContinueJourney");
-            Call(host, "FinishJourneyNight"); Call(host, "SettleJourneyNight"); Call(host, "FloorGuestChoice", 2);
+            Call(host, "FinishJourneyNight"); Call(host, "SettleJourneyNight"); Call(host, "FloorQuickPress", SimBarFloorChallenges.Guest);
+            Call(host, "FloorQuickPress", SimBarFloorChallenges.Cleanup);
             report.Check(Read<float>(host, "cash") == cash && Read<int>(host, "fans") == fans && Property<int>(host, "JourneyXP") == xp,
-                "Reloading and repeating completion cannot duplicate floor, night or XP receipts.");
-            report.measurements.Add("Real actors: cleanup ticks=" + cleanupTicks + ", peak arrived staff=" + peakReady + ", escort join ticks=" + joinTicks + ", guest exit/return ticks=" + exitTicks
-                + "; maximum 120 simulated cleanup seconds and 40 escort/exit/return seconds; original wallet/preferences restored.");
+                "Completed random events, reaction callbacks and reloaded receipts cannot duplicate cash, audience or XP rewards.");
+            report.measurements.Add("Spontaneous due times72/73/75; guest escort=" + escortTicks + " ticks; hands-off cleanup30sec; reaction cleanup=" + cleanupTicks
+                + " ticks; peak actual staff=" + peakReady + "; active reaction and labor-budget save recovery; original preferences/motion restored.");
         }
         catch (Exception error) { report.failures.Add(error.GetBaseException().ToString()); }
-        finally
-        {
-            if (report.failures.Count > 0) report.measurements.Add("Failure actor state: " + FloorActorDiagnostic(host));
-            Call(host, "CloseFloorMissionDrawer"); snapshot.Restore(host); motion.Restore();
-            Call(host, "SyncFloorWorld"); Call(host, "RefreshFloorMissionUI");
-        }
+        finally { FloorRestoreVerification(host, snapshot, motion, report); }
         return report.ToString();
     }
 
     [MenuItem("SimBar/Validation/Check Live and Concurrent Floor Routes")]
     public static void CheckFloorAlternateRoutesMenu() { Debug.Log(CheckFloorAlternateRoutes()); }
-
     public static string CheckFloorAlternateRoutes()
     {
-        var report = new Report();
-        var host = Object.FindAnyObjectByType<SimBarExperience>();
-        if (!Application.isPlaying || host == null || host.IsPourInProgress || Read<bool>(host, "opMenuOpen"))
-        { report.failures.Add("Enter stable Play Mode and close management/pour controls before alternate floor route checks."); return report.ToString(); }
-        var initialFloor = Property<SimBarFloorMissions.State>(host, "FloorState");
-        if (initialFloor != null && (initialFloor.litter > 0 || initialFloor.guestSpawned))
-        { report.failures.Add("Run alternate floor checks from a fresh lobby before starting floor missions."); return report.ToString(); }
-        var snapshot = new JourneyCheckSnapshot(host);
-        var motion = new FloorVerificationMotionSnapshot(host);
+        var report = new Report(); var host = FloorVerificationHost(report);
+        if (host == null) return report.ToString();
+        var snapshot = new JourneyCheckSnapshot(host); var motion = new FloorVerificationMotionSnapshot(host);
         try
         {
-            FloorStartVerificationNight(host);
-            FloorJourneyWrite(host, "secondsLeft", 110f); Call(host, "TickFloorMissions", .1f);
-            var state = Property<SimBarFloorMissions.State>(host, "FloorState");
-            object queue = Read<object>(host, "orderQueue");
-            Array orders = (Array)queue.GetType().GetMethod("ToArray").Invoke(queue, null);
-            int served = Property<int>(host, "JourneyOrders");
-            float clock = Property<float>(host, "JourneySecondsLeft");
-            Call(host, "FloorGuestChoice", 0); Call(host, "FloorGuestChoice", 1); Call(host, "FloorGuestChoice", 2);
-            object worker = Read<object>(host, "floorEscortWorker");
-            Transform workerRoot = worker == null ? null : FloorWorkerRoot(worker);
-            Vector3 workerStart = workerRoot == null ? Vector3.zero : workerRoot.position;
-            Vector3 workerHome = worker == null ? Vector3.zero : FloorPublicRead<Vector3>(worker, "savedPosition");
+            FloorStartVerificationNight(host); FloorForceSchedule(host, false, true);
+            FloorJourneyWrite(host, "secondsLeft", 140f); Call(host, "TickFloorMissions", .1f);
+            object queue = Read<object>(host, "orderQueue"); Array orders = (Array)queue.GetType().GetMethod("ToArray").Invoke(queue, null);
+            float clock = Property<float>(host, "JourneySecondsLeft"); int served = Property<int>(host, "JourneyOrders");
+            FloorCompleteGuestReactions(host, true);
+            var state = Property<SimBarFloorMissions.State>(host, "FloorState"); object worker = Read<object>(host, "floorEscortWorker");
+            Transform employee = worker == null ? null : FloorWorkerRoot(worker);
+            Vector3 home = worker == null ? Vector3.zero : FloorPublicRead<Vector3>(worker, "savedPosition");
+            Array after = (Array)queue.GetType().GetMethod("ToArray").Invoke(queue, null);
+            bool sameQueue = orders.Length == after.Length;
+            for (int i = 0; sameQueue && i < orders.Length; i++) sameQueue &= ReferenceEquals(orders.GetValue(i), after.GetValue(i));
             report.Check(state.guestComplete && state.litter == 0 && worker != null && Property<bool>(host, "JourneyIsPlaying")
-                && !Read<bool>(host, "paused") && !state.cleanupStarted,
-                "A courteous exit during the show borrows the real Server without creating a cleanup job or pausing service.");
-            int liveTicks = 0;
-            while (workerRoot != null && Vector3.Distance(workerStart, workerRoot.position) < .1f && liveTicks++ < 30)
-                FloorAdvanceLive(host);
-            Array currentOrders = (Array)queue.GetType().GetMethod("ToArray").Invoke(queue, null);
-            bool sameQueue = orders.Length == currentOrders.Length;
-            for (int i = 0; sameQueue && i < orders.Length; i++) sameQueue &= ReferenceEquals(orders.GetValue(i), currentOrders.GetValue(i));
-            report.Check(workerRoot != null && Vector3.Distance(workerStart, workerRoot.position) > .1f
-                && Property<float>(host, "JourneySecondsLeft") < clock && Property<bool>(host, "JourneyIsPlaying")
-                && sameQueue && Property<int>(host, "JourneyOrders") == served,
-                "The escort employee walks while the live clock advances; the route cannot consume or replace an ordinary queued order.");
+                && !Read<bool>(host, "paused") && Property<float>(host, "JourneySecondsLeft") < clock && sameQueue,
+                "Guest reaction rounds keep the show clock running and preserve ordinary queue entries while assigning a real escort employee.");
             Call(host, "CommitPlayerPour", FrontDrink(host), 1f);
-            report.Check(Property<int>(host, "JourneyOrders") == served + 1 && Property<bool>(host, "JourneyIsPlaying")
-                && Read<object>(host, "floorEscortWorker") != null,
-                "The player can still serve an ordinary customer while the Server assists the departing guest.");
-            float serviceCash = Read<float>(host, "cash");
+            report.Check(Property<int>(host, "JourneyOrders") == served + 1 && Read<object>(host, "floorEscortWorker") != null,
+                "Normal player service remains available while the reaction-assisted guest is being escorted.");
+            float serviceCash = Read<float>(host, "cash"); int liveTicks = 0;
             while (!Property<bool>(host, "FloorGuestExitFinished") && liveTicks++ < 400) FloorAdvanceLive(host);
-            if (!Property<bool>(host, "FloorGuestExitFinished")) report.measurements.Add("Live escort timeout: " + FloorActorDiagnostic(host));
-            Transform world = Read<Transform>(host, "worldRoot");
-            report.Check(Property<bool>(host, "FloorGuestExitFinished") && Read<object>(host, "floorEscortWorker") == null
-                && workerRoot != null && Vector3.Distance(world.InverseTransformPoint(workerRoot.position), workerHome) <= .22f,
-                "The live escort reaches the exit and returns the existing employee to the original bar position.");
-            report.Check(Property<bool>(host, "JourneyIsPlaying") && !Read<bool>(host, "paused")
-                && !state.cleanupStarted && !state.cleanupRewardClaimed && Read<float>(host, "cash") == serviceCash,
-                "Completing a guest-only mission leaves the show running and cannot manufacture a cleanup payment.");
+            if (!Property<bool>(host, "FloorGuestExitFinished")) report.measurements.Add("Live reaction escort timeout: " + FloorActorDiagnostic(host));
+            report.Check(Property<bool>(host, "FloorGuestExitFinished") && employee != null
+                && Vector3.Distance(Read<Transform>(host, "worldRoot").InverseTransformPoint(employee.position), home) <= .22f,
+                "The live employee accompanies the guest out and returns to the actual original bar position.");
+            report.Check(Property<bool>(host, "JourneyIsPlaying") && !state.cleanupStarted && Read<float>(host, "cash") == serviceCash,
+                "A completed guest-only random mission neither stops the show nor awards an unearned cleanup bonus.");
             Call(host, "TickJourney", 180f);
             report.Check(Property<bool>(host, "JourneyIsResults") && FloorJourneyRead<int>(host, "resultFloorTasks") == 1
-                && FloorJourneyRead<float>(host, "resultFloorBonus") == 0f,
-                "A later clean-floor last call settles normally with one guest mission and no paper-cleanup bonus.");
+                && FloorJourneyRead<float>(host, "resultFloorBonus") == 0f, "A clean-floor last call settles one guest mission with no paper-cleanup payment.");
 
-            // Start a second temporary night and resolve both jobs at the same time.
-            FloorStartVerificationNight(host);
-            Call(host, "FloorThrow", 0); Call(host, "FloorThrow", 1);
-            FloorJourneyWrite(host, "secondsLeft", 110f); Call(host, "TickFloorMissions", .1f);
-            state = Property<SimBarFloorMissions.State>(host, "FloorState");
-            float openingCash = Read<float>(host, "cash");
-            Call(host, "TickJourney", 180f); Call(host, "CloseFloorMissionDrawer"); Call(host, "FloorAssignCleanup");
+            FloorStartVerificationNight(host); FloorForceSchedule(host, true, true);
+            FloorJourneyWrite(host, "secondsLeft", 140f); Call(host, "TickFloorMissions", .1f);
+            state = Property<SimBarFloorMissions.State>(host, "FloorState"); float openingCash = Read<float>(host, "cash");
+            Call(host, "TickJourney", 180f); Call(host, "CloseFloorMissionDrawer");
             IList crew = Read<IList>(host, "floorCleaningCrew");
-            Call(host, "FloorGuestChoice", 0); Call(host, "FloorGuestChoice", 1); Call(host, "FloorGuestChoice", 2);
-            worker = Read<object>(host, "floorEscortWorker");
-            report.Check(Property<bool>(host, "JourneyIsFloorClosing") && state.cleanupActive && crew.Count == 2
-                && worker != null && crew.Contains(worker) && Property<int>(host, "CleanupReadyWorkers") <= 1,
-                "Concurrent closing lends one actual cleanup employee to the guest escort and excludes that employee from ready labor.");
-            float escortStartCleaned = state.cleaned, cleanedAtReturn = state.cleaned;
-            int concurrentTicks = 0, peakOtherReady = 0;
-            bool escortReturned = false, workerResumed = false, remainedClosingUntilReturn = true, capturedConcurrentBlocker = false;
-            while (!Property<bool>(host, "JourneyIsResults") && concurrentTicks++ < 1600)
+            report.Check(state.cleanupActive && crew.Count == 2 && state.cleaned == 0f,
+                "A simultaneous random paper/guest closing automatically assigns real workers without granting cleanup labor.");
+            FloorCompleteGuestReactions(host, false); worker = Read<object>(host, "floorEscortWorker");
+            object otherWorker = null; foreach (object cleaner in crew) if (!ReferenceEquals(cleaner, worker)) { otherWorker = cleaner; break; }
+            Vector3 otherStart = otherWorker == null ? Vector3.zero : FloorWorkerRoot(otherWorker).position;
+            report.Check(worker != null && crew.Contains(worker) && Property<int>(host, "CleanupReadyWorkers") <= 1,
+                "The final guest reaction borrows one real cleanup employee and excludes the escort from ready cleanup labor.");
+            var challenge = FloorChallengeState(host);
+            int beforeRounds = challenge.completedRounds;
+            int ticks = 0, peakDuringEscort = 0; bool otherMoved = false, escortReturned = false, workerResumed = false, earnedWorkPulse = false;
+            while (!Property<bool>(host, "JourneyIsResults") && ticks++ < 1600)
             {
+                int ready = Property<int>(host, "CleanupReadyWorkers");
+                bool escortActive = Read<object>(host, "floorEscortWorker") != null;
+                if (challenge.activeKind == SimBarFloorChallenges.Cleanup) Call(host, "FloorQuickPress", SimBarFloorChallenges.Cleanup);
                 FloorAdvance(host, 1);
-                if (Read<object>(host, "floorEscortWorker") != null)
+                if (!earnedWorkPulse && challenge.completedRounds > beforeRounds)
+                    earnedWorkPulse = challenge.cleanupWorkBudget > 0f && !state.cleanupComplete && state.cleaned < state.litter;
+                if (escortActive)
                 {
-                    peakOtherReady = Mathf.Max(peakOtherReady, Property<int>(host, "CleanupReadyWorkers"));
-                    remainedClosingUntilReturn &= Property<bool>(host, "JourneyIsFloorClosing") && !state.cleanupRewardClaimed;
-                    if (!capturedConcurrentBlocker)
-                        foreach (object cleaner in crew)
-                            if (!ReferenceEquals(cleaner, worker) && FloorPublicRead<float>(FloorPublicRead<object>(cleaner, "route"), "blocked") >= 2f)
-                            {
-                                report.measurements.Add("Concurrent employee blocked during escort at tick " + concurrentTicks + ": " + FloorActorDiagnostic(host));
-                                capturedConcurrentBlocker = true; break;
-                            }
+                    peakDuringEscort = Mathf.Max(peakDuringEscort, ready);
+                    otherMoved |= otherWorker != null && Vector3.Distance(otherStart, FloorWorkerRoot(otherWorker).position) > .1f;
                 }
-                else if (!escortReturned)
-                { escortReturned = true; cleanedAtReturn = state.cleaned; }
+                else escortReturned = true;
                 if (escortReturned && worker != null && crew.Contains(worker))
-                    workerResumed |= FloorPublicRead<bool>(FloorPublicRead<object>(worker, "route"), "ready") && state.cleaned > escortStartCleaned;
+                    workerResumed |= FloorPublicRead<bool>(FloorPublicRead<object>(worker, "route"), "ready") && state.cleaned > 0f;
             }
-            if (!Property<bool>(host, "JourneyIsResults")) report.measurements.Add("Concurrent closing timeout: " + FloorActorDiagnostic(host));
-            report.Check(peakOtherReady == 1 && cleanedAtReturn > escortStartCleaned && remainedClosingUntilReturn,
-                "During the escort, only the other arrived employee advances cleanup and settlement remains deferred.");
-            report.Check(escortReturned && workerResumed,
-                "The borrowed Server returns to an actual cleanup target and resumes credited floor work.");
+            if (!Property<bool>(host, "JourneyIsResults")) report.measurements.Add("Concurrent reaction closing timeout: " + FloorActorDiagnostic(host));
+            report.Check(earnedWorkPulse, "A rapid cleanup round earns a work budget while physical employees still have to travel and work.");
+            report.Check(peakDuringEscort <= 1 && otherMoved,
+                "The reserved escort cannot count as ready cleanup labor, while the other employee keeps physically moving rather than freezing.");
+            report.Check(escortReturned && workerResumed, "The borrowed employee returns to a cleanup target and resumes actual credited work.");
             report.Check(Property<bool>(host, "JourneyIsResults") && state.cleanupComplete && state.guestComplete
                 && Property<bool>(host, "FloorGuestExitFinished") && SimBarFloorMissions.Remaining(state) == 0,
-                "Concurrent cleanup and courteous exit both finish through real movement before opening the nightly result.");
-            report.Check(FloorJourneyRead<int>(host, "resultFloorTasks") == 2
-                && FloorJourneyRead<float>(host, "resultFloorBonus") == SimBarFloorMissions.CleanupReward
+                "Concurrent reaction-driven jobs finish actual cleanup and escort before opening results.");
+            report.Check(FloorJourneyRead<int>(host, "resultFloorTasks") == 2 && FloorJourneyRead<float>(host, "resultFloorBonus") == SimBarFloorMissions.CleanupReward
                 && Mathf.Abs(Read<float>(host, "cash") - openingCash - Property<int>(host, "JourneyResultBonus") - SimBarFloorMissions.CleanupReward) < .001f,
-                "Concurrent jobs produce the same single cleanup receipt and two completed mission records.");
-            float settledCash = Read<float>(host, "cash"); Call(host, "SettleJourneyNight"); Call(host, "FinishJourneyNight");
-            report.Check(Read<float>(host, "cash") == settledCash, "Concurrent completion is also idempotent under repeated settlement callbacks.");
-            report.measurements.Add("Alternate actor paths: guest-only live escort=" + liveTicks + " ticks; concurrent closing=" + concurrentTicks
-                + " ticks; other ready staff=" + peakOtherReady + "; work completed before escort return=" + cleanedAtReturn.ToString("F2")
-                + "; limits 40 live seconds / 160 concurrent seconds; snapshots restore original save and motion.");
+                "Concurrent rapid reactions still settle exactly one completed cleanup receipt and two mission records.");
+            report.measurements.Add("Guest-only live reaction+escort=" + liveTicks + " ticks; concurrent reaction jobs=" + ticks + " ticks; other ready during escort=" + peakDuringEscort + ".");
         }
         catch (Exception error) { report.failures.Add(error.GetBaseException().ToString()); }
-        finally
-        {
-            if (report.failures.Count > 0) report.measurements.Add("Alternate failure actor state: " + FloorActorDiagnostic(host));
-            Call(host, "CloseFloorMissionDrawer"); snapshot.Restore(host); motion.Restore();
-            Call(host, "SyncFloorWorld"); Call(host, "RefreshFloorMissionUI");
-        }
+        finally { FloorRestoreVerification(host, snapshot, motion, report); }
         return report.ToString();
     }
 
+    private static SimBarExperience FloorVerificationHost(Report report)
+    {
+        var host = Object.FindAnyObjectByType<SimBarExperience>();
+        if (!Application.isPlaying || host == null || host.IsPourInProgress || Read<bool>(host, "opMenuOpen"))
+        { report.failures.Add("Enter stable Play Mode and close management/pour controls before floor reaction integration checks."); return null; }
+        var state = Property<SimBarFloorMissions.State>(host, "FloorState");
+        if (state != null && (state.litter > 0 || state.guestSpawned))
+        { report.failures.Add("Run reaction checks from a fresh lobby before starting floor missions, so existing actors remain untouched."); return null; }
+        return host;
+    }
+    private static SimBarFloorChallenges.State FloorChallengeState(SimBarExperience host)
+    {
+        object floor = Property<SimBarFloorMissions.State>(host, "FloorState");
+        foreach (FieldInfo field in floor.GetType().GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
+            if (field.FieldType == typeof(SimBarFloorChallenges.State))
+            {
+                var state = (SimBarFloorChallenges.State)field.GetValue(floor);
+                if (state != null) return state;
+            }
+        throw new Exception("The running journey has no saved floor challenge state.");
+    }
+    private static void FloorForceSchedule(SimBarExperience host, bool paper, bool guest, float paperAt = 20f, float guestAt = 40f)
+    {
+        var state = FloorChallengeState(host);
+        state.paperCount = paper ? 2 : 0; state.paperFired = 0; state.paperKind0 = 0; state.paperKind1 = 1;
+        state.paperAt0 = paperAt; state.paperAt1 = paperAt + 1f; state.guestScheduled = guest; state.guestFired = false; state.guestAt = guestAt;
+        state.activeKind = SimBarFloorChallenges.None; state.presses = 0; state.secondsLeft = 0f; state.cooldown = 0f;
+        state.cleanupWorkBudget = 0f; state.pressAge = 0f; state.timeouts = 0; state.completedRounds = 0;
+    }
+    private static string FloorScheduleSignature(SimBarFloorChallenges.State state)
+    { return state.seed + "/" + state.paperCount + "/" + state.paperFired + "/" + state.paperKind0 + "/" + state.paperKind1 + "/" + state.paperAt0 + "/" + state.paperAt1 + "/" + state.guestScheduled + "/" + state.guestFired + "/" + state.guestAt; }
+    private static void FloorWaitForKind(SimBarExperience host, int kind)
+    {
+        int ticks = 0;
+        while (FloorChallengeState(host).activeKind != kind && ticks++ < 100) FloorAdvance(host, 1);
+        if (FloorChallengeState(host).activeKind != kind) throw new Exception("Expected reaction kind " + kind + " was not offered by the real runtime.");
+    }
+    private static void FloorCompleteGuestReactions(SimBarExperience host, bool liveClock)
+    {
+        int ticks = 0;
+        while (Property<SimBarFloorMissions.State>(host, "FloorState").guestActive && ticks++ < 300)
+        {
+            if (FloorChallengeState(host).activeKind == SimBarFloorChallenges.Guest) Call(host, "FloorQuickPress", SimBarFloorChallenges.Guest);
+            if (liveClock) FloorAdvanceLive(host); else FloorAdvance(host, 1);
+        }
+        if (!Property<SimBarFloorMissions.State>(host, "FloorState").guestComplete) throw new Exception("Three rapid guest reaction rounds did not complete within30seconds.");
+    }
     private static void FloorStartVerificationNight(SimBarExperience host)
     {
         Write(host, "journeyValidationMode", false); Call(host, "CloseFloorMissionDrawer"); Call(host, "ImportJourneyState", "");
@@ -319,9 +267,13 @@ public static partial class SimBarRuntimeVerification
         Array.Clear(Read<int[]>(host, "opStaff"), 0, 3); Call(host, "UpdateOperationsWorldVisuals");
         FloorJourneyWrite(host, "tutorialComplete", true); SetJourneyPhase(host, "Lobby"); Call(host, "StartFreshJourneyNight", false);
     }
-
     private static void FloorAdvanceLive(SimBarExperience host)
     { Call(host, "TickJourney", .1f); Call(host, "TickVenueMotion", .1f); Call(host, "TickFloorMissions", .1f); }
+    private static void FloorRestoreVerification(SimBarExperience host, JourneyCheckSnapshot snapshot, FloorVerificationMotionSnapshot motion, Report report)
+    {
+        if (report.failures.Count > 0) report.measurements.Add("Reaction failure actor state: " + FloorActorDiagnostic(host));
+        Call(host, "CloseFloorMissionDrawer"); snapshot.Restore(host); motion.Restore(); Call(host, "SyncFloorWorld"); Call(host, "RefreshFloorMissionUI");
+    }
 
     private static void FloorAdvance(SimBarExperience host, int ticks)
     {
@@ -341,6 +293,19 @@ public static partial class SimBarRuntimeVerification
         if (state != null) text.Append(" cleaned=").Append(state.cleaned.ToString("F2")).Append('/').Append(state.litter)
             .Append(" remaining=").Append(SimBarFloorMissions.Remaining(state)).Append(" ready=").Append(Property<int>(host, "CleanupReadyWorkers"))
             .Append(" guestStep=").Append(state.guestStep).Append(" guestComplete=").Append(state.guestComplete);
+        if (state != null)
+        {
+            try
+            {
+                var reaction = FloorChallengeState(host);
+                text.Append(" reaction=").Append(reaction.activeKind).Append('/').Append(reaction.activeStage)
+                    .Append(" taps=").Append(reaction.presses).Append(" window=").Append(reaction.secondsLeft.ToString("F2"))
+                    .Append(" budget=").Append(reaction.cleanupWorkBudget.ToString("F2")).Append(" timeouts=").Append(reaction.timeouts)
+                    .Append(" rounds=").Append(reaction.completedRounds).Append(" paperFired=").Append(reaction.paperFired).Append('/').Append(reaction.paperCount)
+                    .Append(" guestFired=").Append(reaction.guestFired);
+            }
+            catch (Exception error) { text.Append(" reactionUnavailable=").Append(error.Message); }
+        }
         Transform world = Read<Transform>(host, "worldRoot"); int index = 0;
         foreach (object worker in Read<IList>(host, "floorCleaningCrew"))
         {
