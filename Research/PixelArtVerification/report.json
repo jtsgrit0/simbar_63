@@ -1,0 +1,23 @@
+{
+  "url": "http://127.0.0.1:9871/",
+  "errors": [],
+  "checks": [
+    "desktop: real pixel runtime ready",
+    "Live world changes with real actors",
+    "Paused world remains frozen",
+    "mobile: real pixel runtime ready"
+  ],
+  "resources": [
+    "http://127.0.0.1:9871/FastGame/ccda33d8a6e50196/world.js",
+    "http://127.0.0.1:9871/FastGame/ccda33d8a6e50196/art/venue.json",
+    "http://127.0.0.1:9871/FastGame/ccda33d8a6e50196/art/venue.png",
+    "http://127.0.0.1:9871/FastGame/ccda33d8a6e50196/art/sprites.png",
+    "http://127.0.0.1:9871/FastGame/ccda33d8a6e50196/art/sprites.json"
+  ],
+  "artSha256": {
+    "venue.png": "130a7cbc3060ade303503e15e147d9c57fd0e334aa7e0d61f59070cf72fa1333",
+    "sprites.png": "662e06720b78d7c7f8664e290d24454333d6c68539aa5d5cd8cfa8c3262f6a10",
+    "venue.json": "f88614c76acb90adaa21f4c29239c7b3d3efdb12144c55d63f360fab53139d22",
+    "sprites.json": "4f42addf9e5643e10a756777a1f2fee1dfbe91b712130fc058bcab86c38b04b4"
+  }
+}

@@ -10,6 +10,9 @@
 *.css text eol=lf
 *.js text eol=lf
 *.jslib text eol=lf
+*.mjs text eol=lf
+*.json text eol=lf
+*.txt text eol=lf
 *.unity text eol=lf
 *.prefab text eol=lf
 *.asset text eol=lf
@@ -28,6 +31,8 @@
 *.jpeg binary
 *.otf binary
 *.ttf binary
+*.woff2 binary
+*.mp3 binary
 *.wasm binary
 *.data binary
 *.unityweb binary

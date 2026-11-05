@@ -1,0 +1,264 @@
+{
+  "frameWidth": 64,
+  "frameHeight": 64,
+  "columns": 4,
+  "drawHeight": 54,
+  "footX": 32,
+  "footY": 60,
+  "roles": {
+    "guest": {
+      "variantRows": [
+        0,
+        1,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "actions": {
+        "idle": {
+          "frameColumns": [
+            0
+          ]
+        },
+        "walk": {
+          "frameColumns": [
+            1,
+            2
+          ]
+        },
+        "dance": {
+          "frameColumns": [
+            0,
+            3
+          ]
+        }
+      }
+    },
+    "seated": {
+      "variantRows": [
+        0,
+        1,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "cropHeight": 40,
+      "drawHeight": 30,
+      "footY": 40,
+      "frameColumns": [
+        0
+      ]
+    },
+    "barseated": {
+      "variantRows": [
+        0,
+        1,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13
+      ],
+      "cropHeight": 40,
+      "drawHeight": 30,
+      "footY": 64,
+      "frameColumns": [
+        0
+      ]
+    },
+    "bartender": {
+      "row": 2,
+      "actions": {
+        "idle": {
+          "frameColumns": [
+            0
+          ]
+        },
+        "walk": {
+          "frameColumns": [
+            1,
+            2
+          ]
+        },
+        "serve": {
+          "frameColumns": [
+            0,
+            3
+          ]
+        },
+        "clean": {
+          "frameColumns": [
+            3
+          ]
+        }
+      },
+      "drawHeight": 58
+    },
+    "server": {
+      "row": 3,
+      "actions": {
+        "idle": {
+          "frameColumns": [
+            0
+          ]
+        },
+        "walk": {
+          "frameColumns": [
+            1,
+            2
+          ]
+        },
+        "serve": {
+          "frameColumns": [
+            0,
+            3
+          ]
+        },
+        "clean": {
+          "frameColumns": [
+            3
+          ]
+        }
+      },
+      "drawHeight": 58
+    },
+    "hired-0": {
+      "row": 2,
+      "actions": {
+        "idle": {
+          "frameColumns": [
+            0
+          ]
+        },
+        "walk": {
+          "frameColumns": [
+            1,
+            2
+          ]
+        },
+        "clean": {
+          "frameColumns": [
+            3
+          ]
+        }
+      },
+      "drawHeight": 58
+    },
+    "hired-1": {
+      "row": 3,
+      "actions": {
+        "idle": {
+          "frameColumns": [
+            0
+          ]
+        },
+        "walk": {
+          "frameColumns": [
+            1,
+            2
+          ]
+        },
+        "clean": {
+          "frameColumns": [
+            3
+          ]
+        }
+      },
+      "drawHeight": 58
+    },
+    "hired-2": {
+      "row": 3,
+      "actions": {
+        "idle": {
+          "frameColumns": [
+            0
+          ]
+        },
+        "walk": {
+          "frameColumns": [
+            1,
+            2
+          ]
+        },
+        "clean": {
+          "frameColumns": [
+            3
+          ]
+        }
+      },
+      "drawHeight": 58
+    },
+    "singer": {
+      "row": 4,
+      "actions": {
+        "idle": {
+          "frameColumns": [
+            0
+          ]
+        },
+        "perform": {
+          "frameColumns": [
+            0,
+            3
+          ]
+        }
+      }
+    },
+    "guitarist": {
+      "row": 5,
+      "actions": {
+        "idle": {
+          "frameColumns": [
+            0
+          ]
+        },
+        "perform": {
+          "frameColumns": [
+            0,
+            3
+          ]
+        }
+      }
+    },
+    "bassist": {
+      "row": 6,
+      "actions": {
+        "idle": {
+          "frameColumns": [
+            0
+          ]
+        },
+        "perform": {
+          "frameColumns": [
+            0,
+            3
+          ]
+        }
+      }
+    },
+    "drummer": {
+      "row": 7,
+      "actions": {
+        "idle": {
+          "frameColumns": [
+            0
+          ]
+        },
+        "perform": {
+          "frameColumns": [
+            0,
+            3
+          ]
+        }
+      },
+      "drawHeight": 52
+    }
+  }
+}

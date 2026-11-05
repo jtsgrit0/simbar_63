@@ -1,5 +1,28 @@
 # SimBar
 
+웹 기본 플레이어는 브라우저에서 바로 실행하는 픽셀아트 버전입니다. 사장님 초상과 매장·인물은 이전 시안의 픽셀아트를 사용하고, 글자·버튼·메뉴는 선명한 UI로 유지합니다. 배경에 인물을 구워 넣지 않고 실제 게임 상태에 따라 걷기·연주·청소·손님 안내를 따로 그립니다.
+
+로컬 웹 실행과 배포 파일 갱신:
+
+```powershell
+python Tools/prepare_native_pages.py
+python -m http.server 8767 --bind 127.0.0.1 --directory docs
+```
+
+브라우저에서 `http://127.0.0.1:8767/`을 여세요. Unity WebGL을 다시 빌드한 뒤 `prepare_github_pages.py`를 실행해도 기본 화면은 이 버전이며, 원래 Unity 플레이어는 `unity.html`에 보관합니다. Unity 전용 검증은 `--unity-only`로 할 수 있습니다. 브라우저 기본 버전의 동작·저장·공연 섭외·무작위 미션은 게임 안에서 실행되며, 뒤에서 Unity를 불러오는 방식이 아닙니다.
+
+이미지 원본과 실제 제작 프롬프트는 [ArtSource/PixelArt](ArtSource/PixelArt/Prompts.md)에 있습니다. `prepare_pixel_art.py`는 픽셀 간격을 유지하여 PNG 크기와 팔레트만 변환합니다. `prepare_native_font.py`는 게임에서 쓰는 글자로 OFL 글꼴을 다시 만들며 UI 전체 화면을 이미지로 바꾸지 않습니다.
+
+저장 데이터는 기존 `SimBar.Operations.v1` 구조를 유지합니다. 첫 접속 시 같은 주소의 Unity IndexedDB 저장을 읽기 전용으로 가져오고 원문을 백업합니다. 이미 새 게임에서 저장한 진행은 늦게 도착한 이전 데이터로 덮어쓰지 않습니다. 포스터와 MP3는 필요할 때만 요청하며 초기 다운로드에 포함하지 않습니다.
+
+모바일 성능 검사는 다음 명령으로 재현합니다. 실제 이동통신의 모든 상황을 보장하는 수치가 아니라, 캐시가 없는 Chromium에서 지정한 대역폭·지연·CPU 조건으로 실제 게임 엔진과 조작 준비 완료를 재는 검사입니다.
+
+```powershell
+uv run --with playwright python Tools/benchmark_mobile_lte.py --url http://127.0.0.1:8767/ --samples 3 --mbps 10 --latency-ms 70 --cpu-rate 4
+```
+
+관련 검사: `Tools/test_native_delivery.py`, `Tools/test_native_parity.mjs`, `Tools/test_native_saves.mjs`, `Tools/qa_native_ui.py`, `Tools/qa_native_night.py`. 이미지·스크립트는 콘텐츠 해시가 같은 한 묶음으로 배포하여 이전 캐시와 새 게임 파일이 섞이지 않게 합니다.
+
 Unity 6000.6.3f1로 만든 라이브 음악 펍 운영 게임입니다.
 
 **게임 실행: https://jtsgrit0.github.io/simbar_63/**

@@ -1,327 +1,48 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <meta name="theme-color" content="#101417">
-    <meta name="description" content="SimBar — 한국어와 English로 즐기는 브라우저 바 운영 게임.">
-    <title>SimBar</title>
-    <link rel="icon" href="TemplateData/favicon.ico">
-    <link rel="preload" as="script" href="Build/b6e1b9eaaca045fdc9b91a6f5f0efb8c.loader.js?v=341fdd73a9151fcd">
-    <link rel="preload" as="script" href="Build/2e4ab24f889c7fefa5d0541f321d555b.framework.js?v=f4c659d5db78f77b">
-    <script>
-      // Start the large transfers before a stylesheet can block body scripts.
-      window.simbarBootstrap = (() => {
-        const build = {
-  "loaderUrl": "Build/b6e1b9eaaca045fdc9b91a6f5f0efb8c.loader.js?v=341fdd73a9151fcd",
-  "config": {
-    "dataUrl": "Build/ab2aed76b601ea7eb3449025418717d8.data?v=d9b9b8357095d15b",
-    "frameworkUrl": "Build/2e4ab24f889c7fefa5d0541f321d555b.framework.js?v=f4c659d5db78f77b",
-    "codeUrl": "Build/075eb977b86bdfd770e63ddea8684a5f.wasm?v=3fe3939c80c1a2c2",
-    "streamingAssetsUrl": "StreamingAssets",
-    "arguments": [],
-    "companyName": "DefaultCompany",
-    "productName": "simbar_6",
-    "productVersion": "0.1.0"
-  }
-};
-        // The immutable URLs below refer to one exact build. Cache decoded HTTP
-// responses so both Unity's data reader and streaming Wasm compiler can reuse
-// them without downloading or decompressing the same build again.
-function createSimbarAssetFetch(nativeFetch, cacheStorage, baseURI, assetUrls) {
-  let base;
-  try { base = new URL(baseURI); } catch (_) { base = null; }
-  const allowed = new Set();
-  function buildAssetUrl(value) {
-    if (!base || !/^https?:$/.test(base.protocol)) return null;
-    try {
-      const url = new URL(value?.url || value, base);
-      if (url.origin === base.origin && !url.hash
-          && /\/[0-9a-f]{32}\.(data|wasm)$/.test(url.pathname)
-          && [...url.searchParams].length === 1
-          && /^[0-9a-f]{16}$/.test(url.searchParams.get("v") || "")) return url.href;
-    } catch (_) { /* Invalid or unrelated URLs use the original fetch. */ }
-    return null;
-  }
-  for (const value of assetUrls) {
-    const url = buildAssetUrl(value);
-    if (url) allowed.add(url);
-  }
-  const enabled = allowed.size > 0 && !!cacheStorage && typeof cacheStorage.open === "function";
-  const primed = new Map();
-  let cachePromise;
-
-  function pruneOldBuilds(cache) {
-    if (typeof cache.keys !== "function" || typeof cache.delete !== "function") return;
-    // Cleanup is best effort and never awaited by a request. Restrict it to
-    // versioned player assets in this cache, leaving metadata untouched.
-    Promise.resolve().then(() => cache.keys()).then(keys => Promise.all(keys.map(key => {
-      const url = buildAssetUrl(key);
-      return url && !allowed.has(url) ? cache.delete(key) : undefined;
-    }))).catch(() => {});
-  }
-
-  function candidate(input, init) {
-    if (!enabled) return null;
-    try {
-      const request = typeof input === "string" || input instanceof URL ? null : input;
-      const method = String(init?.method || request?.method || "GET").toUpperCase();
-      const mode = init?.cache || request?.cache || "default";
-      const signal = init?.signal || request?.signal;
-      if (method !== "GET" || mode === "no-store" || signal?.aborted) return null;
-      const headers = new Headers(init?.headers || request?.headers);
-      if (headers.has("range")) return null;
-      const url = new URL(request?.url || input, base);
-      if (!allowed.has(url.href)) return null;
-      return {
-        url: url.href,
-        reload: mode === "reload" || mode === "no-cache",
-        signature: JSON.stringify([
-          init?.credentials || request?.credentials || "same-origin",
-          init?.mode || request?.mode || "cors",
-          init?.redirect || request?.redirect || "follow",
-          [...headers.entries()].sort()
-        ])
-      };
-    } catch (_) { return null; }
-  }
-
-  function openCache() {
-    if (!cachePromise) {
-      const name = "SimBarAssets_v1:" + base.origin + new URL(".", base).pathname;
-      cachePromise = Promise.resolve().then(() => cacheStorage.open(name)).then(cache => {
-        pruneOldBuilds(cache);
-        return cache;
-      }).catch(() => null);
-    }
-    return cachePromise;
-  }
-
-  async function load(input, init, asset) {
-    const cache = await openCache();
-    if (cache && !asset.reload) {
-      try {
-        const response = await cache.match(asset.url);
-        if (response && response.status === 200) return response;
-      } catch (_) { /* Storage restrictions must not prevent the game loading. */ }
-    }
-    const response = await nativeFetch(input, init);
-    if (cache && response.status === 200) {
-      try {
-        // Do not wait for disk writes on the startup path. The other stream
-        // branch remains available immediately to the Wasm compiler or Unity.
-        Promise.resolve(cache.put(asset.url, response.clone())).catch(() => {});
-      } catch (_) { /* Quota or unsupported response: keep the network result. */ }
-    }
-    return response;
-  }
-
-  function fetchAsset(input, init) {
-    const asset = candidate(input, init);
-    if (!asset) return nativeFetch(input, init);
-    const pending = primed.get(asset.url);
-    if (!asset.reload && pending && pending.signature === asset.signature) {
-      primed.delete(asset.url);
-      return pending.response.then(response => response || load(input, init, asset));
-    }
-    return load(input, init, asset);
-  }
-
-  function prime(input, init) {
-    const asset = candidate(input, init);
-    if (!asset || asset.reload || primed.has(asset.url)) return;
-    // Only one reader receives this response. A failed speculative request is
-    // retried by the real reader instead of becoming an unhandled rejection.
-    primed.set(asset.url, {
-      signature: asset.signature,
-      response: load(input, init, asset).then(response => response.status === 200 ? response : null).catch(() => null)
-    });
-  }
-
-  return { fetch: fetchAsset, prime, enabled };
-}
-
-        let assetStorage;
-        try { assetStorage = window.caches; } catch (_) { /* Storage may be disabled. */ }
-        const nativeAssetCache = createSimbarAssetFetch(window.fetch.bind(window), assetStorage,
-          document.baseURI, [build.config.dataUrl, build.config.codeUrl]);
-        if (nativeAssetCache.enabled) {
-          window.fetch = nativeAssetCache.fetch;
-          nativeAssetCache.prime(build.config.dataUrl);
-          nativeAssetCache.prime(build.config.codeUrl, { credentials: "same-origin" });
-        }
-        return { build, nativeAssetCache };
-      })();
-    </script>
-    <link rel="stylesheet" href="TemplateData/style.css?v=aefa58239a8fcc60">
-  </head>
-  <body>
-    <main id="game-shell" data-player-state="loading">
-      <header class="game-toolbar">
-        <h1>SimBar</h1>
-        <p id="toolbar-status" role="status" aria-live="polite"></p>
-        <button id="fullscreen-button" type="button" aria-pressed="false" aria-label="전체 화면 / Full screen" title="전체 화면 / Full screen" disabled>
-          <span aria-hidden="true">⛶</span> <span id="fullscreen-label">전체 화면 / Full screen</span>
-        </button>
-      </header>
-      <div id="game-stage">
-        <canvas id="unity-canvas" width="1280" height="720" tabindex="0"
-                aria-label="SimBar 게임 화면 / SimBar game"></canvas>
-        <div id="loading-panel" role="status" aria-live="polite">
-          <div class="loading-card">
-            <p class="loading-title">SimBar</p>
-            <p>게임을 불러오는 중입니다. / Loading game…</p>
-            <progress id="loading-progress" max="100" value="0" aria-label="게임 로딩 / Game loading"></progress>
-            <p id="loading-percent">0%</p>
-          </div>
-        </div>
-        <section id="error-panel" aria-labelledby="error-title" role="alert" hidden>
-          <div class="error-card">
-            <h2 id="error-title">게임을 불러오지 못했습니다. / Unable to load the game.</h2>
-            <p id="error-message"></p>
-            <button id="reload-button" type="button">다시 시도 / Try again</button>
-          </div>
-        </section>
-      </div>
-      <noscript>게임을 실행하려면 JavaScript를 켜 주세요. / Enable JavaScript to play.</noscript>
-    </main>
-    <script>
-      (() => {
-        "use strict";
-        const { build, nativeAssetCache } = window.simbarBootstrap;
-        const shell = document.getElementById("game-shell");
-        const canvas = document.getElementById("unity-canvas");
-        const loadingPanel = document.getElementById("loading-panel");
-        const progress = document.getElementById("loading-progress");
-        const progressText = document.getElementById("loading-percent");
-        const errorPanel = document.getElementById("error-panel");
-        const toolbarStatus = document.getElementById("toolbar-status");
-        const fullscreenButton = document.getElementById("fullscreen-button");
-        const fullscreenLabel = document.getElementById("fullscreen-label");
-        let noticeTimer;
-        let viewportFrame;
-
-        function updateViewport() {
-          cancelAnimationFrame(viewportFrame);
-          viewportFrame = requestAnimationFrame(() => {
-            // Browser address bars and rotation can change the visible height without
-            // changing the layout viewport. Unity alone owns the canvas backing size.
-            const viewport = window.visualViewport;
-            const height = viewport && viewport.scale === 1 ? viewport.height : window.innerHeight;
-            if (height > 0) shell.style.setProperty("--viewport-height", height + "px");
-          });
-        }
-        window.addEventListener("resize", updateViewport, { passive: true });
-        if (window.visualViewport) window.visualViewport.addEventListener("resize", updateViewport, { passive: true });
-        updateViewport();
-
-        function focusGame() {
-          canvas.focus({ preventScroll: true });
-        }
-
-        function notice(message) {
-          clearTimeout(noticeTimer);
-          toolbarStatus.textContent = String(message).replace(/<[^>]*>/g, " ");
-          noticeTimer = setTimeout(() => { toolbarStatus.textContent = ""; }, 8000);
-        }
-
-        function fail(message) {
-          shell.dataset.playerState = "error";
-          loadingPanel.hidden = true;
-          errorPanel.hidden = false;
-          document.getElementById("error-message").textContent = String(message).replace(/<[^>]*>/g, " ");
-          console.error("SimBar:", message);
-        }
-
-        function updateFullscreen() {
-          const active = !!(document.fullscreenElement || document.webkitFullscreenElement);
-          fullscreenButton.setAttribute("aria-pressed", String(active));
-          fullscreenLabel.textContent = active ? "전체 화면 종료 / Exit full screen" : "전체 화면 / Full screen";
-          fullscreenButton.setAttribute("aria-label", fullscreenLabel.textContent);
-          fullscreenButton.title = fullscreenLabel.textContent;
-          updateViewport();
-        }
-
-        fullscreenButton.addEventListener("click", async () => {
-          try {
-            if (document.fullscreenElement || document.webkitFullscreenElement) {
-              if (document.exitFullscreen) await document.exitFullscreen();
-              else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
-            } else if (shell.requestFullscreen) {
-              await shell.requestFullscreen();
-            } else if (shell.webkitRequestFullscreen) {
-              shell.webkitRequestFullscreen();
-            }
-            focusGame();
-          } catch (error) {
-            notice("전체 화면을 켤 수 없습니다. / Full screen is unavailable.");
-            console.warn(error);
-          }
-        });
-        document.addEventListener("fullscreenchange", updateFullscreen);
-        document.addEventListener("webkitfullscreenchange", updateFullscreen);
-        document.getElementById("reload-button").addEventListener("click", () => window.location.reload());
-        canvas.addEventListener("pointerdown", focusGame);
-        fullscreenButton.hidden = !(shell.requestFullscreen || shell.webkitRequestFullscreen);
-
-        // Release builds use Unity's content hashes as filenames. Only those
-        // exact URLs can safely skip revalidation across future deployments.
-        const immutableBuildUrls = new Set([
-          build.loaderUrl, build.config.dataUrl, build.config.frameworkUrl, build.config.codeUrl
-        ].filter((value) => {
-          const url = new URL(value, document.baseURI);
-          return /\/[0-9a-f]{32}\.(data|wasm|framework\.js)(\.unityweb)?$/.test(url.pathname)
-            && /^[0-9a-f]{16}$/.test(url.searchParams.get("v") || "");
-        }).map((value) => new URL(value, document.baseURI).href));
-        const config = {
-          ...build.config,
-          matchWebGLToCanvasSize: true,
-          fullscreenElementID: "game-shell",
-          cacheControl(value) {
-            const url = new URL(value, document.baseURI);
-            if (nativeAssetCache.enabled && immutableBuildUrls.has(url.href)
-                && /\.(data|wasm)$/.test(url.pathname)) return "no-store";
-            if (immutableBuildUrls.has(url.href)) return "immutable";
-            return /\.(data|bundle)(\.(unityweb|br|gz))?$/.test(url.pathname)
-              ? "must-revalidate" : "no-store";
-          },
-          showBanner(message, type) {
-            if (type === "error") fail(message);
-            else notice(message);
-          }
-        };
-        const loader = document.createElement("script");
-        loader.src = build.loaderUrl;
-        let displayedPercent = -1;
-        // Resolves with the Unity instance after startup; rejects if the player cannot load.
-        window.simbarPlayerReady = new Promise((resolve, reject) => {
-          loader.onerror = () => reject(new Error("실행 파일을 내려받지 못했습니다. / Could not download the game loader."));
-          loader.onload = () => {
-            if (typeof createUnityInstance !== "function") {
-              reject(new Error("게임 실행 파일이 올바르지 않습니다. / Invalid game loader."));
-              return;
-            }
-            Promise.resolve().then(() => createUnityInstance(canvas, config, (value) => {
-              const percent = Math.min(100, Math.max(0, Math.round(value * 100)));
-              if (percent !== displayedPercent) {
-                displayedPercent = percent;
-                progress.value = percent;
-                progressText.textContent = percent + "%";
-              }
-            })).then((instance) => {
-              if (shell.dataset.playerState !== "error") {
-                shell.dataset.playerState = "ready";
-                loadingPanel.hidden = true;
-                fullscreenButton.disabled = false;
-                focusGame();
-              }
-              resolve(instance);
-            }, reject);
-          };
-        });
-        window.simbarPlayerReady.catch(fail);
-        document.body.appendChild(loader);
-      })();
-    </script>
-  </body>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#101417">
+  <meta name="description" content="SimBar — 라이브 음악 바 운영 게임">
+  <title>SimBar</title>
+  <link rel="icon" href="TemplateData/favicon.ico">
+  <link rel="modulepreload" href="FastGame/c925beabc4f80e30/boot.js">
+  <link rel="modulepreload" href="FastGame/c925beabc4f80e30/game.js">
+  <link rel="modulepreload" href="FastGame/c925beabc4f80e30/core.js">
+  <link rel="modulepreload" href="FastGame/c925beabc4f80e30/world.js">
+  <link rel="modulepreload" href="FastGame/c925beabc4f80e30/booking.js">
+  <link rel="modulepreload" href="FastGame/c925beabc4f80e30/floor.js">
+  <link rel="modulepreload" href="FastGame/c925beabc4f80e30/navigation.js">
+  <link rel="modulepreload" href="FastGame/c925beabc4f80e30/catalog.js">
+  <link rel="modulepreload" href="FastGame/c925beabc4f80e30/legacy-save.js">
+  <link rel="modulepreload" href="FastGame/c925beabc4f80e30/daily-poster.js">
+  <link rel="modulepreload" href="FastGame/c925beabc4f80e30/music.js">
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="FastGame/c925beabc4f80e30/font.woff2">
+  <link rel="preload" as="image" href="FastGame/c925beabc4f80e30/art/owner-female.png">
+  <link rel="preload" as="image" href="FastGame/c925beabc4f80e30/art/owner-ff.png">
+  <link rel="preload" as="image" href="FastGame/c925beabc4f80e30/art/owner-pet.png">
+  <link rel="preload" as="image" href="FastGame/c925beabc4f80e30/art/seoul.png">
+  <link rel="preload" as="image" href="FastGame/c925beabc4f80e30/art/venue.png">
+  <link rel="preload" as="image" href="FastGame/c925beabc4f80e30/art/sprites.png">
+  <link rel="preload" as="fetch" type="application/json" crossorigin href="FastGame/c925beabc4f80e30/art/venue.json">
+  <link rel="preload" as="fetch" type="application/json" crossorigin href="FastGame/c925beabc4f80e30/art/sprites.json">
+  <link rel="stylesheet" href="TemplateData/style.css?v=aefa58239a8fcc60">
+  <link rel="stylesheet" href="FastGame/c925beabc4f80e30/style.css" data-fast-game-style>
+  <script>window.simbarPlayerReady=new Promise((resolve,reject)=>{window.__simbarResolve=resolve;window.__simbarReject=reject});window.simbarPlayerReady.catch(()=>{});</script>
+</head>
+<body>
+  <main id="game-shell" data-player-state="loading">
+    <header class="game-toolbar">
+      <h1>SimBar</h1><p id="toolbar-status" role="status" aria-live="polite"></p>
+      <button id="fullscreen-button" type="button" aria-pressed="false" title="전체 화면 / Full screen" disabled><span aria-hidden="true">⛶</span> <span id="fullscreen-label">전체 화면 / Full screen</span></button>
+    </header>
+    <div id="game-stage">
+      <div id="loading-panel" role="status"><div class="loading-card"><p class="loading-title">SimBar</p><p>게임을 불러오는 중입니다. / Loading game…</p></div></div>
+      <section id="error-panel" role="alert" hidden><div class="error-card"><h2>게임을 불러오지 못했습니다.</h2><p id="error-message"></p><button type="button" onclick="location.reload()">다시 시도 / Try again</button></div></section>
+    </div>
+    <noscript>게임을 실행하려면 JavaScript를 켜 주세요.</noscript>
+  </main>
+  <script type="module" src="FastGame/c925beabc4f80e30/boot.js"></script>
+</body>
 </html>

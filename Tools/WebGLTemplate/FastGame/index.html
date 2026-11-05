@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#101417">
+  <meta name="description" content="SimBar — 라이브 음악 바 운영 게임">
+  <title>SimBar</title>
+  <link rel="icon" href="TemplateData/favicon.ico">
+  __SIMBAR_ASSET_HINTS__
+  <link rel="stylesheet" href="__SIMBAR_STYLESHEET__">
+  <link rel="stylesheet" href="__SIMBAR_RUNTIME__/style.css" data-fast-game-style>
+  <script>window.simbarPlayerReady=new Promise((resolve,reject)=>{window.__simbarResolve=resolve;window.__simbarReject=reject});window.simbarPlayerReady.catch(()=>{});</script>
+</head>
+<body>
+  <main id="game-shell" data-player-state="loading">
+    <header class="game-toolbar">
+      <h1>SimBar</h1><p id="toolbar-status" role="status" aria-live="polite"></p>
+      <button id="fullscreen-button" type="button" aria-pressed="false" title="전체 화면 / Full screen" disabled><span aria-hidden="true">⛶</span> <span id="fullscreen-label">전체 화면 / Full screen</span></button>
+    </header>
+    <div id="game-stage">
+      <div id="loading-panel" role="status"><div class="loading-card"><p class="loading-title">SimBar</p><p>게임을 불러오는 중입니다. / Loading game…</p></div></div>
+      <section id="error-panel" role="alert" hidden><div class="error-card"><h2>게임을 불러오지 못했습니다.</h2><p id="error-message"></p><button type="button" onclick="location.reload()">다시 시도 / Try again</button></div></section>
+    </div>
+    <noscript>게임을 실행하려면 JavaScript를 켜 주세요.</noscript>
+  </main>
+  <script type="module" src="__SIMBAR_RUNTIME__/boot.js"></script>
+</body>
+</html>

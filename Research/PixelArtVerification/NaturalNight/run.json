@@ -1,0 +1,26 @@
+{
+  "url": "http://127.0.0.1:9873/",
+  "errors": [],
+  "guest": true,
+  "cleanup": true,
+  "timeout": true,
+  "passed": true,
+  "runtime": "FastGame/3a030ca9172ce11a/boot.js",
+  "lastObserved": {
+    "phase": "closing",
+    "kind": 0,
+    "stage": 0,
+    "presses": 0,
+    "timeouts": 1,
+    "ready": 1
+  },
+  "duration": 224.07023690000278,
+  "receipt": {
+    "cash": 12525,
+    "xp": 40,
+    "bonus": 70,
+    "tasks": 2,
+    "guest": true,
+    "clean": true
+  }
+}

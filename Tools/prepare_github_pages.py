@@ -1,8 +1,10 @@
-"""Package the Unity WebGL player for static GitHub Pages hosting.
+"""Package the native game and Unity WebGL fallback for static GitHub Pages.
 
 Run with Python 3: python Tools/prepare_github_pages.py
 The responsive host comes from Tools/WebGLTemplate and survives Unity rebuilds.
 Use --host-only to refresh the host without recopying game assets.
+The native game is the default entry point; the Unity host is saved as
+unity.html. Use --unity-only when reviewing the standalone Unity player.
 Release builds use raw assets so the host's native HTTP compression and Wasm
 streaming compilation can run together. Existing .unityweb fallback assets
 are preserved; older .br/.gz builds are unpacked for compatibility. For .br
@@ -182,6 +184,8 @@ def main():
     parser.add_argument("--brotli", type=Path)
     parser.add_argument("--host-only", action="store_true",
                         help="Update the responsive host using assets already packaged in the output folder.")
+    parser.add_argument("--unity-only", action="store_true",
+                        help="Keep the Unity player as index.html instead of the native game.")
     args = parser.parse_args()
     source, output = args.source.resolve(), args.output.resolve()
     if not (source / "index.html").is_file():
@@ -192,6 +196,11 @@ def main():
         parser.error("Source and output folders must be separate.")
 
     package_player(source, output, brotli=args.brotli, host_only=args.host_only)
+    if not args.unity_only:
+        from prepare_native_pages import prepare_native_pages
+        shutil.copy2(output / "index.html", output / "unity.html")
+        manifest = prepare_native_pages(output=output)
+        print(f"Native game release: {manifest['version']}; Unity fallback: unity.html")
     print(f"GitHub Pages player ready: {output}")
     for path in sorted((output / "Build").iterdir()):
         print(f"  {path.relative_to(output).as_posix()}: {path.stat().st_size:,} bytes")
