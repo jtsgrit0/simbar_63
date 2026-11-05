@@ -114,11 +114,13 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
     let role=String(a.role||'guest').toLowerCase();if(role==='band')role=String(a.id||'singer');if(a.id?.startsWith('bar-seat-'))role='barseated';
     let action=String(a.action||'idle');if(action==='sweep')action='clean';else if(a.moving&&!['mosh','slam','surf','support'].includes(action))action='walk';
     const playing=state.phase==='playing'&&!state.paused,active=(playing||state.phase==='closing')&&!state.paused;
-    const frame=active?Math.floor(seconds*(action==='walk'?7:action==='clean'?6:5)+hash(a.id)%4)%4:0;
+    const band=role==='singer'||role==='guitarist'||role==='bassist'||role==='drummer';
+    const frame=active?Math.floor(seconds*(action==='walk'?7:action==='clean'?6:band?8:5)+hash(a.id)%4)%4:0;
     const p=actorPoint(a,finite(a.y)),ground=actorPoint(a,role==='surfer'?0:finite(a.y)),surf=(action==='surf'||role==='surfer')&&finite(a.y)>.1;
     ellipse(ctx,ground.x,ground.y+1,4,1,'#16182360');
     const atlas=atlasFrame(a,role,action,frame,state),meta=atlas?.meta||{},entry=atlas?.entry||{},size=entry.drawHeight||meta.drawHeight||40;
-    const bob=active&&['dance','mosh','perform','slam'].includes(action)?Math.round(Math.sin(seconds*5+hash(a.id)%9)*.6):0;
+    const bandPhase=hash(a.id)%17;
+    const bob=active&&['dance','mosh','perform','slam'].includes(action)?Math.round(Math.sin(seconds*(band&&action==='perform'?7:5)+bandPhase)*(band?2.2:.6)):0;
     ctx.save();ctx.translate(Math.round(p.x),Math.round(p.y+bob));
     if(surf&&!entry.horizontal){ctx.rotate(-Math.PI/2);ctx.translate(0,-7);}
     if(atlas){const scale=size/atlas.sh,dw=entry.drawWidth||meta.drawWidth||atlas.sw*scale,dh=size,footX=entry.footX??meta.footX??atlas.sw/2,footY=entry.footY??meta.footY??atlas.sh;if(atlas.flip)ctx.scale(-1,1);ctx.drawImage(atlas.sheet,atlas.sx,atlas.sy,atlas.sw,atlas.sh,Math.round(-footX*dw/atlas.sw),Math.round(-footY*dh/atlas.sh),Math.round(dw),Math.round(dh));}
