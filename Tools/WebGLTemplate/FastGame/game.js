@@ -22,10 +22,11 @@ export async function startGame({root,assetsBase='./FastGame/art/',assets:predec
   if(!root)throw new Error('Game stage is missing.');
   if(!document.querySelector('link[data-fast-game-style]'))await new Promise((resolve,reject)=>{const css=document.createElement('link');css.rel='stylesheet';css.href=new URL('./style.css',import.meta.url).href;css.dataset.fastGameStyle='';css.onload=resolve;css.onerror=reject;document.head.append(css);});
   const base=new URL(assetsBase,document.baseURI),asset=name=>new URL(name,base).href;
-  const [female,ff,pet,seoul,venue,sprites]=await Promise.all([['female','owner-female.png'],['ff','owner-ff.png'],['pet','owner-pet.png'],['seoul','seoul.png'],['venue','venue.png'],['sprites','sprites.png']].map(([key,file])=>predecoded[key]||predecoded[file]||loadImage(asset(file))));
+  const [female,ff,pet,seoul,venue]=await Promise.all([['female','owner-female.png'],['ff','owner-ff.png'],['pet','owner-pet.png'],['seoul','seoul.png'],['venue','venue.png']].map(([key,file])=>predecoded[key]||predecoded[file]||loadImage(asset(file))));
   const loadMetadata=async file=>{const response=await fetch(asset(file));if(!response.ok)throw new Error('Could not load '+file);return response.json();};
   const [spriteMeta,venueMeta]=await Promise.all([predecoded.spriteMeta||loadMetadata('sprites.json'),predecoded.venueMeta||loadMetadata('venue.json')]);
-  const assets={female,ff,pet,seoul,venue,sprites,spriteMeta,venueMeta};
+  const atlases=predecoded.atlases||Object.fromEntries(await Promise.all(Object.entries(spriteMeta.atlases||{animation:{file:'sprites.png'}}).map(async([key,definition])=>[key,definition.file==='sprites.png'&&predecoded.sprites?predecoded.sprites:await loadImage(asset(definition.file))])));
+  const assets={female,ff,pet,seoul,venue,sprites:predecoded.sprites||atlases.animation,atlases,spriteMeta,venueMeta};
   await document.fonts.load('16px SimBarUI');
   const g=new SimBarGame();
   const host=document.createElement('div');host.className='fast-game';host.setAttribute('aria-label','SimBar');

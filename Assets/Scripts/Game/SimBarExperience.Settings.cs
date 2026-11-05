@@ -96,6 +96,7 @@ public sealed partial class SimBarExperience
 
     private void OnDestroy()
     {
+        DestroyPixelPresentation();
         SimBarLocalization.Changed -= RefreshLanguageUI;
         if (serviceMenuRoot != null) Destroy(serviceMenuRoot);
         DestroyBookingUI();

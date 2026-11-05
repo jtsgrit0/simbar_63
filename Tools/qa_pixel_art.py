@@ -13,6 +13,9 @@ def capture(args):
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=True)
     report = {"url": args.url, "errors": [], "checks": []}
+    art = Path(__file__).resolve().parent / "WebGLTemplate/FastGame/art"
+    metadata = json.loads((art / "sprites.json").read_text(encoding="utf-8"))
+    atlas_files = [entry["file"] for entry in metadata.get("atlases", {"animation": {"file": "sprites.png"}}).values()]
     executable = sorted((Path(os.environ["LOCALAPPDATA"]) / "ms-playwright").glob(
         "chromium-*/chrome-win64/chrome.exe"), reverse=True)[0]
     with sync_playwright() as playwright:
@@ -29,6 +32,11 @@ def capture(args):
             page.goto(args.url)
             page.wait_for_function("window.simbarGameReadyAt>0")
             assert page.evaluate("window.simbarRuntime") == "pixel-2d"
+            resources = page.evaluate("performance.getEntriesByType('resource').map(r=>({name:r.name,end:r.responseEnd}))")
+            ready = page.evaluate("window.simbarGameReadyAt")
+            for name in atlas_files:
+                matches = [entry for entry in resources if entry["name"].endswith("/art/" + name)]
+                assert matches and all(entry["end"] <= ready for entry in matches), name + " must load before the game is ready."
             report["checks"].append(label + ": real pixel runtime ready")
             page.screenshot(path=str(output / (label + "-title.png")))
             # Exercise the same public action dispatch used by the real controls.
@@ -55,7 +63,7 @@ def capture(args):
                 page.evaluate("simbarGame.act('resume')")
                 page.wait_for_timeout(100)
                 report["resources"] = page.evaluate("""performance.getEntriesByType('resource')
-                    .filter(r=>/world.js|sprites|venue/.test(r.name)).map(r=>r.name)""")
+                    .filter(r=>/world.js|\.png$|\.json$/.test(r.name)).map(r=>r.name)""")
             else:
                 page.set_viewport_size({"width": 844, "height": 390})
                 page.wait_for_timeout(200)
@@ -63,9 +71,8 @@ def capture(args):
             context.close()
         browser.close()
     assert not report["errors"], report["errors"]
-    report["artSha256"] = {name: hashlib.sha256((Path(__file__).resolve().parent /
-        "WebGLTemplate/FastGame/art" / name).read_bytes()).hexdigest()
-        for name in ("venue.png", "sprites.png", "venue.json", "sprites.json")}
+    report["artSha256"] = {name: hashlib.sha256((art / name).read_bytes()).hexdigest()
+        for name in ["venue.png", "venue.json", "sprites.json", *atlas_files]}
     (output / "report.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
     print(json.dumps({"output": str(output), "checks": report["checks"], "errors": report["errors"]}))
 

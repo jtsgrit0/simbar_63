@@ -97,6 +97,7 @@ public sealed partial class SimBarCharacterVisual : MonoBehaviour
             if (renderer is SkinnedMeshRenderer skin) skin.updateWhenOffscreen = true;
         }
         ApplyAudienceAppearance(outfit);
+        ApplyRoleOutfitAppearance(outfit);
         foreach (var bone in model.GetComponentsInChildren<Transform>(true))
         {
             string key = BoneKey(bone.name);

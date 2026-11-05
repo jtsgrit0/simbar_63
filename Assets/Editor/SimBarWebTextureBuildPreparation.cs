@@ -11,7 +11,7 @@ using UnityEngine;
 public sealed class SimBarWebTextureBuildPreparation : IPreprocessBuildWithReport
 {
     private const int JpegQuality = 94;
-    private const string ExporterVersion = "2";
+    private const string ExporterVersion = "3-pixel-png";
     private const string CacheDirectory = "Library/SimBarWebTextures";
 
     public int callbackOrder => -1000;
@@ -61,7 +61,8 @@ public sealed class SimBarWebTextureBuildPreparation : IPreprocessBuildWithRepor
             copy = new Texture2D(width, height, preserveAlpha ? TextureFormat.RGBA32 : TextureFormat.RGB24, false, false);
             copy.SetPixels32(originalPixels);
             copy.Apply(false, false);
-            encoded = preserveAlpha ? ImageConversion.EncodeToPNG(copy) : ImageConversion.EncodeToJPG(copy, JpegQuality);
+            encoded = preserveAlpha || SimBarWebTextures.IsPixelArtResource(definition.resourceKey)
+                ? ImageConversion.EncodeToPNG(copy) : ImageConversion.EncodeToJPG(copy, JpegQuality);
             if (encoded == null || encoded.Length == 0)
                 throw new BuildFailedException("Could not encode startup image: " + definition.sourcePath);
 
@@ -102,7 +103,7 @@ public sealed class SimBarWebTextureBuildPreparation : IPreprocessBuildWithRepor
         }
         File.WriteAllText(cache, inputVersion + ":" + FileHash(target));
         Debug.Log("[SimBar Web Art] " + definition.resourceKey + ": " + width + "x" + height
-            + ", " + encoded.Length.ToString("N0") + (preserveAlpha ? " PNG" : " JPEG")
+            + ", " + encoded.Length.ToString("N0") + (preserveAlpha || SimBarWebTextures.IsPixelArtResource(definition.resourceKey) ? " PNG" : " JPEG")
             + " bytes, mean RGB error " + (meanError * 100d).ToString("F3") + "%.");
     }
 

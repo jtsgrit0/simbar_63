@@ -17,6 +17,17 @@ ASSETS = {
     'OwnerPetSounds.png': ('owner-pet.png', (240, 300)),
     'SeoulNightDistricts.png': ('seoul.png', (640, 360)),
 }
+V2_ASSETS = {
+    'VenueEmpty.png': ('venue.png', (960, 558)),
+    'OwnerFemale.png': ('owner-female.png', (240, 300)),
+    'OwnerFF.png': ('owner-ff.png', (240, 300)),
+    'OwnerPetSounds.png': ('owner-pet.png', (240, 300)),
+    'Wardrobe.png': ('wardrobe.png', (256, 512)),
+    'Walk.png': ('walk.png', (256, 512)),
+    'Pit.png': ('pit.png', (256, 512)),
+    'Poses.png': ('poses.png', (256, 512)),
+    'Band.png': ('band.png', (256, 256)),
+}
 
 def main():
     OUTPUT.mkdir(parents=True, exist_ok=True)
@@ -36,6 +47,14 @@ def main():
                                dither=Image.Dither.NONE)
         image.save(OUTPUT / target, optimize=True)
         print(f'{target}: {size[0]}x{size[1]}, {(OUTPUT / target).stat().st_size:,} bytes')
+    if (SOURCE / 'V2').is_dir():
+        for name, (target, size) in V2_ASSETS.items():
+            image = Image.open(SOURCE / 'V2' / name).convert('RGBA')
+            image = image.resize(size, Image.Resampling.NEAREST)
+            image = image.quantize(colors=256, method=Image.Quantize.FASTOCTREE,
+                                   dither=Image.Dither.NONE)
+            image.save(OUTPUT / target, optimize=True)
+            print(f'v2 {target}: {size}, {(OUTPUT / target).stat().st_size:,} bytes')
 
 if __name__ == '__main__':
     main()

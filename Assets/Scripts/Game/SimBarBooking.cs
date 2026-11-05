@@ -21,7 +21,7 @@ public static class SimBarBooking
         {
             int count = SimBarPosterCatalog.Entries == null ? 0 : SimBarPosterCatalog.Entries.Length;
             if (count >= 31) throw new InvalidOperationException("Poster scouting supports at most 30 stable poster indices.");
-            return (1 << count) - 1;
+            return ((1 << count) - 1) | (1 << SimBarPosterCatalog.DailyPosterIndex);
         }
     }
 
@@ -206,12 +206,15 @@ public static class SimBarBooking
         {
             career.discoveredMask |= plan.bookedMask | plan.attemptedMask | plan.listenedMask;
             int posterCount = SimBarPosterCatalog.Entries == null ? 0 : SimBarPosterCatalog.Entries.Length;
+            int artists;
             for (int i = 0; i < posterCount; i++)
             {
-                int artists;
                 if ((plan.scoutedPosterMask & (1 << i)) != 0 && TryPosterArtists(i, out artists))
                     career.discoveredMask |= artists;
             }
+            if ((plan.scoutedPosterMask & (1 << SimBarPosterCatalog.DailyPosterIndex)) != 0
+                && TryDailyPosterArtists(plan.day, plan.venue, out artists))
+                career.discoveredMask |= artists;
         }
         if (plan.completed) plan.locked = true;
         if (plan.locked)
@@ -255,6 +258,13 @@ public static class SimBarBooking
             && (career.discoveredMask & artists) == artists;
     }
 
+    public static bool IsDailyPosterDiscovered(Career career, int day, int venue)
+    {
+        int artists;
+        return TryDailyPosterArtists(day, venue, out artists) && career != null
+            && (career.discoveredMask & artists) == artists;
+    }
+
     /// <summary>Reviewing a poster costs one two-hour block and permanently unlocks its real artist names.</summary>
     public static Result Scout(Plan plan, Career career, int posterIndex)
     {
@@ -264,6 +274,22 @@ public static class SimBarBooking
         int artists;
         if (!TryPosterArtists(posterIndex, out artists)) return Fail("invalid_poster");
         int posterBit = 1 << posterIndex;
+        if ((plan.scoutedPosterMask & posterBit) != 0) return Fail("already_scouted");
+        if ((career.discoveredMask & artists) == artists) return Fail("already_discovered");
+        plan.scoutedPosterMask |= posterBit;
+        plan.blocks++;
+        career.discoveredMask = (career.discoveredMask | artists | LegacyBandMask) & BandMask;
+        return Ok("scouted");
+    }
+
+    public static Result ScoutDaily(Plan plan, Career career)
+    {
+        string error = ActionError(plan);
+        if (error != null) return Fail(error);
+        if (career == null) return Fail("invalid_career");
+        int artists;
+        if (!TryDailyPosterArtists(plan.day, plan.venue, out artists)) return Fail("invalid_poster");
+        int posterBit = 1 << SimBarPosterCatalog.DailyPosterIndex;
         if ((plan.scoutedPosterMask & posterBit) != 0) return Fail("already_scouted");
         if ((career.discoveredMask & artists) == artists) return Fail("already_discovered");
         plan.scoutedPosterMask |= posterBit;
@@ -481,6 +507,20 @@ public static class SimBarBooking
         foreach (int band in poster.artistIndices)
         {
             if (!ValidBand(band) || band < LegacyBandCount || !Bands12[band].isReal) { mask = 0; return false; }
+            mask |= 1 << band;
+        }
+        return mask != 0;
+    }
+
+    private static bool TryDailyPosterArtists(int day, int venue, out int mask)
+    {
+        mask = 0;
+        if (day < 1 || venue < 0 || venue >= Venues4.Length) return false;
+        var poster = SimBarPosterCatalog.CreateDailyPoster(day, venue);
+        if (poster == null || poster.artistIndices == null) return false;
+        foreach (int band in poster.artistIndices)
+        {
+            if (!ValidBand(band) || band >= LegacyBandCount) { mask = 0; return false; }
             mask |= 1 << band;
         }
         return mask != 0;

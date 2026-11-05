@@ -149,24 +149,49 @@ public sealed class SimBarHudSkin : MonoBehaviour
         }
         Text now = Component<Text>("Now Playing");
         TextStyle(now, 12, TextAnchor.MiddleCenter, Green);
-        if (now != null) Rect(now.rectTransform, new Vector2(0.5f, 1f), new Vector2(0f, -58f), new Vector2(322f, 24f));
+        if (now != null) Rect(now.rectTransform, new Vector2(0.5f, 1f), new Vector2(0f, -96f), new Vector2(322f, 24f));
 
-        Button[] rows = panel.GetComponentsInChildren<Button>(true);
-        Color[] albumColors = { new Color(0.50f, 0.68f, 0.52f), new Color(0.30f, 0.64f, 0.80f), new Color(0.77f, 0.27f, 0.43f), new Color(0.88f, 0.63f, 0.28f), new Color(0.41f, 0.77f, 0.76f), new Color(0.61f, 0.40f, 0.78f) };
-        for (int i = 0; i < rows.Length; i++)
+        Button previous = null;
+        Button playPause = null;
+        Button next = null;
+        foreach (Button button in panel.GetComponentsInChildren<Button>(true))
         {
-            Button row = rows[i];
-            Rect(row.GetComponent<RectTransform>(), new Vector2(0.5f, 1f), new Vector2(-1f, -88f - i * 33.5f), new Vector2(316f, 30f));
-            row.GetComponent<Image>().sprite = Rounded;
-            row.GetComponent<Image>().type = Image.Type.Sliced;
-            ButtonColors(row);
-            Text label = row.GetComponentInChildren<Text>(true);
+            if (button.name == "Music Previous Button") previous = button;
+            else if (button.name == "Music Play Pause Button") playPause = button;
+            else if (button.name == "Music Next Button") next = button;
+        }
+
+        const float controlY = -68f;
+        if (previous != null)
+        {
+            Rect(previous.GetComponent<RectTransform>(), new Vector2(0.5f, 1f), new Vector2(-76f, controlY), new Vector2(58f, 38f));
+            ButtonColors(previous);
+        }
+        if (playPause != null)
+        {
+            Rect(playPause.GetComponent<RectTransform>(), new Vector2(0.5f, 1f), new Vector2(0f, controlY), new Vector2(54f, 38f));
+            ButtonColors(playPause);
+        }
+        if (next != null)
+        {
+            Rect(next.GetComponent<RectTransform>(), new Vector2(0.5f, 1f), new Vector2(76f, controlY), new Vector2(58f, 38f));
+            ButtonColors(next);
+        }
+
+        foreach (Button button in panel.GetComponentsInChildren<Button>(true))
+        {
+            if (!button.name.StartsWith("Music Playlist Row ")) continue;
+            string indexText = button.name.Substring("Music Playlist Row ".Length);
+            int index;
+            if (!int.TryParse(indexText, out index)) continue;
+
+            Rect(button.GetComponent<RectTransform>(), new Vector2(0.5f, 1f), new Vector2(0f, -126f - index * 34f), new Vector2(316f, 30f));
+            button.GetComponent<Image>().sprite = Rounded;
+            button.GetComponent<Image>().type = Image.Type.Sliced;
+            ButtonColors(button);
+            Text label = button.GetComponentInChildren<Text>(true);
             TextStyle(label, 17, TextAnchor.MiddleLeft, new Color(0.94f, 0.94f, 0.91f));
-            if (label != null) Rect(label.rectTransform, Vector2.one * 0.5f, new Vector2(14f, 0f), new Vector2(267f, 30f));
-            Image album = NewImage("Album " + (i + 1), row.transform, albumColors[i % albumColors.Length]);
-            Rect(album.rectTransform, Vector2.one * 0.5f, new Vector2(-143f, 0f), new Vector2(22f, 26f));
-            Image stripe = NewImage("Album Stripe", album.transform, new Color(0.04f, 0.06f, 0.10f, 0.72f));
-            Rect(stripe.rectTransform, Vector2.one * 0.5f, new Vector2(0f, -3f), new Vector2(20f, 6f));
+            if (label != null) Rect(label.rectTransform, Vector2.one * 0.5f, new Vector2(0f, 0f), new Vector2(288f, 30f));
         }
         Image scrollBack = NewImage("Playlist Scroll Track", panel, new Color(0.05f, 0.05f, 0.08f));
         Rect(scrollBack.rectTransform, new Vector2(1f, 0.5f), new Vector2(-6f, -25f), new Vector2(5f, 204f));

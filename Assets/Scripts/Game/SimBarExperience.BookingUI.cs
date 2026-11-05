@@ -309,9 +309,9 @@ public sealed partial class SimBarExperience
         bookingWalletLabel.text = SimBarLocalization.Text("GAME WALLET  ", "게임 보유금  ") + SimBarMoney.Format(cash);
         bookingLaunchButton.interactable = !plan.locked && !plan.completed;
         bookingLaunchButton.GetComponentInChildren<Text>().text = booked > 0 ? SimBarLocalization.Text("OPEN THE NIGHT  ·  3 MIN", "오늘의 밤 열기  ·  3분") : SimBarLocalization.Text("OPEN COMMUNITY MIC  ·  3 MIN", "커뮤니티 오픈마이크 열기  ·  3분");
-        if(bookingShowingPosters && SimBarPosterCatalog.Entries.Length>0)
+        if(bookingShowingPosters && DayPlan!=null)
         {
-            bool knownPoster=SimBarBooking.IsPosterDiscovered(BookingCareer,scoutingPosterIndex);
+            bool knownPoster=SimBarBooking.IsDailyPosterDiscovered(BookingCareer,plan.day,plan.venue);
             bookingLaunchButton.interactable=knownPoster || SimBarBooking.CanAct(plan);
             bookingLaunchButton.GetComponentInChildren<Text>().text=knownPoster?SimBarLocalization.Text("BOOK A DISCOVERED ARTIST >","발굴한 팀 섭외하기 >"):
                 SimBarLocalization.Text("RESEARCH THIS POSTER / 2H","이 포스터 조사하기 / 2시간");
@@ -342,9 +342,19 @@ public sealed partial class SimBarExperience
         var venue = SimBarBooking.Venues4[venueIndex];
         bookingArchiveTitle.text = (SimBarLocalization.IsKorean ? venue.name : venue.nameEnglish) + SimBarLocalization.Text("  /  VERIFIED RECORDS", "  /  확인된 공연 기록");
         bookingArchiveNote.text = SimBarLocalization.Text("Selected dated records. Booking simulation: Poster Scout tab. Checked: ", "확인된 일부 과거 기록 · 게임 섭외는 포스터 발굴 탭에서 · 확인일: ") + SimBarVenueArchive.VerifiedAt;
+        var latestEntries = new System.Collections.Generic.List<SimBarVenueArchive.Entry>();
         foreach (var entry in SimBarVenueArchive.Entries)
         {
-            if (entry.venueId != venue.id) continue;
+            if (entry != null && entry.venueId == venue.id) latestEntries.Add(entry);
+        }
+        latestEntries.Sort((a, b) =>
+        {
+            string aDate = a == null || a.date == null ? "" : a.date;
+            string bDate = b == null || b.date == null ? "" : b.date;
+            return string.CompareOrdinal(bDate, aDate);
+        });
+        foreach (var entry in latestEntries)
+        {
             var row = BookingPanel("Historical performance source", bookingArchive, BookingPaper);
             bookingArchiveRows.Add(row);
             bookingArchiveArtistLabels.Add(BookingText("Historical artist and date", row, entry.artist + "  ·  " + entry.date, entry.artist + "  ·  " + entry.date, 17, BookingInk, true));

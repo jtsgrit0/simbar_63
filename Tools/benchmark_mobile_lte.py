@@ -10,6 +10,7 @@ Requires Playwright: uv run --with playwright python Tools/benchmark_mobile_lte.
 import argparse
 import json
 from pathlib import Path
+import re
 import time
 
 from playwright.sync_api import sync_playwright
@@ -79,6 +80,10 @@ def run_benchmark(args):
                 failures.clear()
                 start = time.perf_counter()
                 page.goto(args.url, wait_until="domcontentloaded", timeout=args.timeout_ms)
+                runtime_module = page.locator('script[type="module"][src$="/boot.js"]').get_attribute("src")
+                if args.expected_release and not re.search(
+                        r"(?:^|/)FastGame/" + re.escape(args.expected_release) + r"/boot\.js$", runtime_module or ""):
+                    raise RuntimeError(f"Expected native release {args.expected_release}, served {runtime_module!r}")
                 page.wait_for_function("(typeof window.simbarGameReadyAt === 'number' && window.simbarGameReadyAt > 0) || document.querySelector('#game-shell')?.dataset.playerState === 'error'")
                 if page.locator("#game-shell").get_attribute("data-player-state") == "error":
                     message = page.locator("#error-message").inner_text()
@@ -97,7 +102,7 @@ def run_benchmark(args):
                 })""")
                 shot = args.output.parent / f"{args.label}-{number}-{mode}.png"
                 page.screenshot(path=str(shot))
-                run = {"run": mode, "observedWallMs": observed, **state,
+                run = {"run": mode, "observedWallMs": observed, "runtimeModule": runtime_module, **state,
                        "totalTransferBytes": sum(int(entry["bytes"]) for entry in requests.values()),
                        "requests": list(requests.values()), "errors": list(errors), "failedRequests": list(failures),
                        "playerState": page.locator("#game-shell").get_attribute("data-player-state"),
@@ -127,6 +132,7 @@ def main():
     parser.add_argument("--url", required=True)
     parser.add_argument("--output", type=Path, default=PROJECT / "Temp/perf/mobile-lte.json")
     parser.add_argument("--label", default="mobile-lte")
+    parser.add_argument("--expected-release", help="Reject a stale or wrong runtime hash before measuring.")
     parser.add_argument("--chromium")
     parser.add_argument("--samples", type=int, default=3)
     parser.add_argument("--mbps", type=float, default=10)
@@ -137,6 +143,8 @@ def main():
     args = parser.parse_args()
     if args.samples < 1 or args.mbps <= 0 or args.latency_ms < 0 or args.cpu_rate < 1:
         parser.error("Samples/bandwidth must be positive; latency nonnegative; CPU rate at least 1.")
+    if args.expected_release and not re.fullmatch(r"[0-9a-f]{16}", args.expected_release):
+        parser.error("Expected release must be a sixteen-character lowercase hexadecimal content hash.")
     result = run_benchmark(args)
     if any(not run["meetsTarget"] for sample in result["samples"] for run in sample["runs"]):
         raise SystemExit(1)

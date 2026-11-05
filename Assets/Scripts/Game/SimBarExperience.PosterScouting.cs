@@ -36,7 +36,11 @@ public sealed partial class SimBarExperience
         scoutingImageFrame=BookingPanel("Complete unaltered poster image", scoutingBoard, BookingPaper);
         var zoom=scoutingImageFrame.gameObject.AddComponent<Button>();
         zoom.targetGraphic=scoutingImageFrame.GetComponent<Image>();
-        zoom.onClick.AddListener(() => Application.OpenURL(ScoutingImageUrl(SimBarPosterCatalog.Entries[scoutingPosterIndex].imagePath)));
+        zoom.onClick.AddListener(() =>
+        {
+            var entry=SimBarPosterCatalog.CreateDailyPoster(DayPlan.day,DayPlan.venue);
+            if(!entry.imagePath.StartsWith("__dynamic_daily__")) Application.OpenURL(ScoutingImageUrl(entry.imagePath));
+        });
         scoutingZoomHint=BookingText("Poster original size hint",scoutingBoard,"TAP POSTER TO OPEN FULL SIZE >","포스터를 누르면 원본 크기로 열립니다 >",12,BookingGreen);
         var imageObject=new GameObject("On demand poster image",typeof(RectTransform),typeof(CanvasRenderer),typeof(RawImage));
         imageObject.transform.SetParent(scoutingImageFrame,false);
@@ -51,13 +55,29 @@ public sealed partial class SimBarExperience
             "Discovery stays with your career. All genres can play every venue. Artist fees, acceptance and growth are game values; no real booking is sent.",
             "발굴한 팀은 다음 날에도 유지됩니다. 모든 장르를 어느 매장에나 제안할 수 있습니다. 출연료·수락·성장은 게임 설정이며 실제 연락을 보내지 않습니다.",13,BookingMuted);
         scoutingSource=BookingButton("Open inspected poster source",scoutingInfo,"POSTER SOURCE", "포스터 출처",13,BookingLine,BookingInk);
-        scoutingSource.onClick.AddListener(() => Application.OpenURL(SimBarPosterCatalog.Entries[scoutingPosterIndex].sourceUrl));
+        scoutingSource.onClick.AddListener(() =>
+        {
+            var entry=SimBarPosterCatalog.CreateDailyPoster(DayPlan.day,DayPlan.venue);
+            if(!string.IsNullOrEmpty(entry.sourceUrl)) Application.OpenURL(entry.sourceUrl);
+        });
         scoutingInstagram=BookingButton("Open venue Instagram",scoutingInfo,"VENUE INSTAGRAM", "공연장 인스타그램",13,BookingLine,BookingInk);
-        scoutingInstagram.onClick.AddListener(() => Application.OpenURL(SimBarPosterCatalog.Entries[scoutingPosterIndex].instagramUrl));
+        scoutingInstagram.onClick.AddListener(() =>
+        {
+            var entry=SimBarPosterCatalog.CreateDailyPoster(DayPlan.day,DayPlan.venue);
+            if(!string.IsNullOrEmpty(entry.instagramUrl)) Application.OpenURL(entry.instagramUrl);
+        });
         scoutingPrevious=BookingButton("Previous inspected poster",scoutingBoard,"< PREVIOUS", "< 이전 포스터",14,BookingLine,BookingInk);
         scoutingNext=BookingButton("Next inspected poster",scoutingBoard,"NEXT >", "다음 포스터 >",14,BookingLine,BookingInk);
-        scoutingPrevious.onClick.AddListener(() => SelectScoutingPoster(scoutingPosterIndex-1));
-        scoutingNext.onClick.AddListener(() => SelectScoutingPoster(scoutingPosterIndex+1));
+        scoutingPrevious.onClick.AddListener(() =>
+        {
+            int previous=(DayPlan==null?0:(DayPlan.venue+3)%4);
+            SelectScoutingVenue(previous);
+        });
+        scoutingNext.onClick.AddListener(() =>
+        {
+            int next=(DayPlan==null?0:(DayPlan.venue+1)%4);
+            SelectScoutingVenue(next);
+        });
     }
 
     private void BookingShowPosters(bool show)
@@ -73,14 +93,24 @@ public sealed partial class SimBarExperience
 
     private void SelectScoutingVenue(int venue)
     {
-        for(int i=0;i<SimBarPosterCatalog.Entries.Length;i++)
-            if(SimBarPosterCatalog.Entries[i].venueId==SimBarBooking.Venues4[venue].id) { SelectScoutingPoster(i); return; }
+        if (venue < 0 || venue >= SimBarBooking.Venues4.Length) return;
+        if (JourneyIsPlanning && !bookingShowingArchive)
+            BookingSelectVenue(venue);
+        SelectLatestPosterForVenue(venue);
+    }
+
+    private void SelectLatestPosterForVenue(int venue)
+    {
+        if (venue < 0 || venue >= SimBarBooking.Venues4.Length) return;
+        if (scoutingRequest != null) scoutingRequest.Abort();
+        scoutingPosterIndex = SimBarPosterCatalog.DailyPosterIndex;
+        scoutingRequestedImage = null;
+        scoutingRenderedIndex = -1;
     }
 
     private void SelectScoutingPoster(int index)
     {
-        if(SimBarPosterCatalog.Entries.Length==0) return;
-        scoutingPosterIndex=(index%SimBarPosterCatalog.Entries.Length+SimBarPosterCatalog.Entries.Length)%SimBarPosterCatalog.Entries.Length;
+        scoutingPosterIndex=SimBarPosterCatalog.DailyPosterIndex;
         if(scoutingRequest!=null) scoutingRequest.Abort();
         scoutingRequestedImage=null;
         RefreshBookingUI();
@@ -91,16 +121,19 @@ public sealed partial class SimBarExperience
     private void BookingScoutPoster()
     {
         if(!JourneyIsPlanning) return;
-        BookingApply(SimBarBooking.Scout(DayPlan,BookingCareer,scoutingPosterIndex));
+        if (scoutingPosterIndex == SimBarPosterCatalog.DailyPosterIndex)
+            BookingApply(SimBarBooking.ScoutDaily(DayPlan,BookingCareer));
+        else
+            BookingApply(SimBarBooking.Scout(DayPlan,BookingCareer,scoutingPosterIndex));
         RefreshPosterScoutingUI();
     }
 
     private void BookingPrimaryAction()
     {
         if(!bookingShowingPosters) { BookingLaunchNight(); return; }
-        if(SimBarPosterCatalog.Entries.Length==0) return;
-        if(!SimBarBooking.IsPosterDiscovered(BookingCareer,scoutingPosterIndex)) { BookingScoutPoster(); return; }
-        bookingSelectedBand=SimBarPosterCatalog.Entries[scoutingPosterIndex].artistIndices[0];
+        var dailyEntry = SimBarPosterCatalog.CreateDailyPoster(DayPlan.day, DayPlan.venue);
+        if(!SimBarBooking.IsDailyPosterDiscovered(BookingCareer,DayPlan.day,DayPlan.venue)) { BookingScoutPoster(); return; }
+        bookingSelectedBand=dailyEntry.artistIndices[0];
         BookingShowPosters(false);
     }
 
@@ -109,9 +142,9 @@ public sealed partial class SimBarExperience
         if(scoutingBoard==null) return;
         scoutingBoard.gameObject.SetActive(bookingShowingPosters);
         BookingButtonColor(bookingPosterTab,bookingShowingPosters?BookingGreen:BookingLine,bookingShowingPosters?Color.white:BookingInk);
-        if(!bookingShowingPosters || !JourneyIsPlanning || SimBarPosterCatalog.Entries.Length==0) return;
-        scoutingPosterIndex=Mathf.Clamp(scoutingPosterIndex,0,SimBarPosterCatalog.Entries.Length-1);
-        var entry=SimBarPosterCatalog.Entries[scoutingPosterIndex];
+        if(!bookingShowingPosters || !JourneyIsPlanning || DayPlan==null) return;
+        scoutingPosterIndex=SimBarPosterCatalog.DailyPosterIndex;
+        var entry=SimBarPosterCatalog.CreateDailyPoster(DayPlan.day,DayPlan.venue);
         bool korean=SimBarLocalization.IsKorean;
         for(int i=0;i<4;i++)
         {
@@ -153,13 +186,19 @@ public sealed partial class SimBarExperience
                 (known?SimBarLocalization.Text("OPEN BOOKING DETAILS >","섭외 상세 보기 >"):SimBarLocalization.Text("LOCKED / RESEARCH POSTER","미발굴 / 포스터 조사 필요"));
             BookingButtonColor(scoutingArtistButtons[i],known?BookingPaleGreen:BookingPaper,BookingInk);
         }
-        bool discovered=SimBarBooking.IsPosterDiscovered(BookingCareer,scoutingPosterIndex);
+        bool discovered=SimBarBooking.IsDailyPosterDiscovered(BookingCareer,DayPlan.day,DayPlan.venue);
         scoutingAction.interactable=!discovered && SimBarBooking.CanAct(DayPlan);
         scoutingAction.GetComponentInChildren<Text>().text=discovered?SimBarLocalization.Text("LINEUP DISCOVERED", "출연진 발굴 완료"):
             SimBarLocalization.Format("RESEARCH POSTER / 2H / {0} ACTS", "포스터 조사 / 2시간 / {0}팀 발굴",entry.artistIndices.Length);
-        if(scoutingTextures.TryGetValue(entry.imagePath,out var texture))
+        if(entry.imagePath.StartsWith("__dynamic_daily__/"))
         {
             scoutingRequestedImage=entry.imagePath;
+            Texture2D texture;
+            if(!scoutingTextures.TryGetValue(entry.imagePath,out texture))
+            {
+                texture=CreateDailyPixelPoster(entry);
+                scoutingTextures[entry.imagePath]=texture;
+            }
             scoutingImage.texture=texture; scoutingImage.color=Color.white;
             scoutingImageStatus.text="";
             FitScoutingImage();
@@ -172,6 +211,41 @@ public sealed partial class SimBarExperience
             scoutingRequestedImage=entry.imagePath;
             StartCoroutine(LoadScoutingPoster(entry.imagePath));
         }
+    }
+
+    private Texture2D CreateDailyPixelPoster(SimBarPosterCatalog.Poster entry)
+    {
+        int size=128;
+        var texture=new Texture2D(size,size,TextureFormat.RGBA32,false);
+        texture.filterMode=FilterMode.Point;
+        int hash=0;
+        unchecked { hash=entry.id.GetHashCode(); }
+        Color[] colors={new Color32(236,215,183,255),new Color32(52,88,92,255),new Color32(214,91,77,255),new Color32(37,43,48,255)};
+        Color[] pixels=new Color[size*size];
+        for(int y=0;y<size;y++) for(int x=0;x<size;x++)
+        {
+            int band=(x/32+(y/32)+(Mathf.Abs(hash)%3))%colors.Length;
+            pixels[y*size+x]=colors[band];
+        }
+        // Poster frame and daily date bands.
+        for(int y=7;y<121;y++) for(int x=7;x<121;x++)
+        {
+            if(y<12 || y>116 || x<12 || x>116 || (y>24 && y<30) || (y>94 && y<100))
+                pixels[y*size+x]=colors[3];
+        }
+        for(int i=0;i<entry.artistIndices.Length;i++)
+        {
+            int artist=entry.artistIndices[i];
+            int gx=16+i*32, gy=42+(artist%4)*12;
+            for(int y=gy;y<gy+9 && y<92;y++) for(int x=gx;x<gx+24 && x<112;x++)
+                pixels[y*size+x]=colors[(i+1)%colors.Length];
+            for(int y=gy+3;y<gy+6;y++) for(int x=gx+3;x<gx+21;x++)
+                pixels[y*size+x]=colors[0];
+        }
+        texture.SetPixels(pixels);
+        texture.Apply(false,true);
+        texture.name="Daily pixel poster " + entry.id;
+        return texture;
     }
 
     private IEnumerator LoadScoutingPoster(string path)

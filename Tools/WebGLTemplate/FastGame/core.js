@@ -269,11 +269,15 @@ export class SimBarGame{
   }
   _buildActors(){
     const make=(id,name,role,x,z,y=0)=>({id,name,role,x,z,y,homeX:x,homeZ:z,targetX:x,targetZ:z,moving:false,action:role==='band'?'perform':'idle',visible:true,facing:0,_path:[],_pathAt:0,_wait:2});
-    this.actors=[make('bartender','Bartender','bartender',-7.3,-.565),make('server','Server','server',-4.2,-.565),make('singer','Singer','band',5.5,2.7,.62),make('guitarist','Guitarist','band',3,3.8,.62),make('bassist','Bassist','band',8,4.6,.62),make('drummer','Drummer','band',6,6.2,.62)];
+    this.actors=[make('bartender','Jessy Bartender','bartender',-7.3,-.565),make('server','Server','server',-4.2,-.565),make('singer','DP Singer / Dragon Pony','band',5.5,2.7,.62),make('guitarist','RUX Guitarist','band',3,3.8,.62),make('bassist','FW Bassist / freewill','band',8,4.6,.62),make('drummer','JW Drummer / Julywantsmore','band',6,6.2,.62)];
+    const bandFacing={singer:-Math.PI/2,guitarist:Math.PI*.25,bassist:-Math.PI*.18,drummer:Math.PI};
+    for(const a of this.actors)if(a.role==='band')a.facing=bandFacing[a.id]??0;
     const positions=[[.1,.7],[1.5,.5],[2.85,.5],[-.1,-.8],[1.2,-1.1],[2.6,-1],[-.2,-2.55],[1.2,-2.6],[2.6,-2.75],[0,-4.4],[1.55,-4.3],[3,-4.55],[8.55,.65],[8.65,-1],[8.6,-2.7],[8.6,-4.7]];
     for(let i=0;i<16;i++){let [x,z]=positions[i];if(i<6){x=5.75+Math.cos(i*Math.PI/3)*1.58;z=-1.25+Math.sin(i*Math.PI/3)*1.58;}else if(i<8){x=5.75+(i===6?-.68:.68);z=-1.25;}const a=make('patron-'+i,catalog.guestNames[i%10],'guest',x,z);a.slot=i;this.actors.push(a);}
     for(let i=0;i<4;i++)this.actors.push(make('bar-seat-'+i,'Bar Guest '+i,'seated',-7.55+i*1.55,-3.15));
     const seats=[[-8.55,6.4],[-7,6.4],[-4.45,6.4],[-2.95,6.4],[-8.35,-6.5],[-6.85,-6.5],[-3.45,-6.5]];seats.forEach(([x,z],i)=>this.actors.push(make('lounge-'+i,'Lounge Guest '+i,'seated',x,z)));
+    this.actors.filter(a=>a.id?.startsWith('bar-seat-')).forEach((a,i)=>{a.facing=[Math.PI/2,-Math.PI/2,Math.PI*.2,-Math.PI*.2][i];});
+    this.actors.filter(a=>a.id?.startsWith('lounge-')).forEach((a,i)=>{a.facing=[-Math.PI/2,Math.PI/2,0,Math.PI/2,-Math.PI/2,Math.PI*.25,-Math.PI*.25][i];});
     for(let i=0;i<3;i++){const a=make('hired-'+i,catalog.staff[i].nameEnglish,'hired-'+i,...[[-5.8,-.565],[-.4,-4.9],[8.75,-3.5]][i]);a.visible=!!this.state.staff[i]&&!this.state.wageDebt;this.actors.push(a);}
     for(let i=0;i<3;i++)this.actors.push(make('support-'+i,'Crowd Supporter '+i,'support',6+(i===0?-.65:i===1?.65:0),-4.25+(i===2?-.65:0)));
     this.actors.push(make('crowd-surfer','Crowd Surfer','surfer',6,-4.25));
@@ -291,10 +295,10 @@ export class SimBarGame{
       if(a.role==='band'){a.action=this.playing?'perform':'idle';continue;}if(a.role==='seated')continue;
       if(!this.playing&&(a.action==='mosh'||a.action==='slam')){a.action='idle';a.moving=false;}
       if(a.action==='queue'||a.action==='return'){if(move(a,dt,1.45,this.actors)){a.moving=false;if(a.action==='return')a.action='idle';}continue;}
-      if(a.role==='guest'&&a.slot<6&&this.playing){const angle=a.slot*Math.PI/3+this.elapsed*.25,goal=point(5.75+Math.cos(angle)*1.58,-1.25+Math.sin(angle)*1.58);a.x=goal.x;a.z=goal.z;a.moving=true;a.action='mosh';}
-      else if(a.role==='guest'&&a.slot<8&&this.playing){const side=a.slot===6?-1:1,separation=.44+Math.abs(Math.sin(this.elapsed*1.6))*.24;a.x=5.75+side*separation;a.z=-1.25;a.action='slam';a.moving=true;}
-      else if(a.role==='surfer'){const t=this.elapsed%24;a.y=this.playing&&t>=2&&t<=18?Math.min(1,(t-2)/2,(18-t)/2)*1.85:0;a.action=a.y>0?'surf':'idle';}
-      else if(a.role==='support'){a.action=this.playing?'support':'idle';}
+      if(a.role==='guest'&&a.slot<6&&this.playing){const angle=a.slot*Math.PI/3+this.elapsed*.25,goal=point(5.75+Math.cos(angle)*1.58,-1.25+Math.sin(angle)*1.58);a.x=goal.x;a.z=goal.z;a.moving=true;a.action='mosh';a.facing=angle+Math.PI/2;}
+      else if(a.role==='guest'&&a.slot<8&&this.playing){const side=a.slot===6?-1:1,separation=.44+Math.abs(Math.sin(this.elapsed*1.6))*.24;a.x=5.75+side*separation;a.z=-1.25;a.action='slam';a.moving=true;a.facing=side<0?Math.PI/2:-Math.PI/2;}
+      else if(a.role==='surfer'){const t=this.elapsed%24;a.y=this.playing&&t>=2&&t<=18?Math.min(1,(t-2)/2,(18-t)/2)*1.85:0;a.action=a.y>0?'surf':'idle';a.facing=Math.sin(this.elapsed*.8)>.2?-Math.PI/2:Math.PI/2;}
+      else if(a.role==='support'){a.action=this.playing?'support':'idle';const surfer=this.actors.find(v=>v.id==='crowd-surfer');if(surfer)a.facing=Math.atan2(surfer.z-a.z,surfer.x-a.x);}
       else if(a.role==='guest'&&a.action!=='queue'){
         if(a._pathAt<a._path.length){if(move(a,dt,1.1,this.actors)){a.action='idle';a._wait=2+this._random()*5;}}
         else{a.moving=false;a._wait-=dt;if(a._wait<=0){const goal=point(1+this._random()*7,-5+this._random()*5.5);if(walkable(goal,false,true)&&walkable(a,false,true)){a.action='wander';setRoute(a,goal,this.actors,true);}a._wait=3+this._random()*5;}}

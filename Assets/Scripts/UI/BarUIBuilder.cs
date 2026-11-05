@@ -21,16 +21,16 @@ public class BarUIBuilder : MonoBehaviour
     private Text fansText;
     private Text timeText;
     private PlaylistMusicController playlistMusicController;
+    private Text playlistPlayPauseIcon;
     private readonly List<Image> playlistRowHighlights = new List<Image>();
 
     private static readonly string[] PlaylistTrackTitles =
     {
-        "Summer of '69 - Bryan Adams",
-        "Livin' on a Prayer - Bon Jovi",
-        "Don't Stop Believin' - Journey",
-        "Sweet Child o' Mine - Guns N' Roses",
-        "Smells Like Teen Spirit - Nirvana",
-        "Highway to Hell - AC/DC"
+        "Electric Shocker",
+        "Hey_spotdown",
+        "No Matter How",
+        "Bedroom Manifesto",
+        "Electric Shocker - Korean Version"
     };
 
     private void Start()
@@ -212,9 +212,10 @@ public class BarUIBuilder : MonoBehaviour
         playlistMusicController = playlistPanel.AddComponent<PlaylistMusicController>();
         playlistMusicController.Configure(playlistClips, PlaylistTrackTitles);
 
-        // The visible rows are already part of playlist.png. Transparent button
-        // overlays preserve that artwork while making every row selectable.
-        float[] rowCenters = { 0.79f, 0.68f, 0.58f, 0.48f, 0.38f, 0.28f };
+        CreatePlaylistControls(playlistPanel);
+
+        // Keep the track rows selectable while rendering no bullet glyphs in the UI.
+        float[] rowCenters = { 0.56f, 0.45f, 0.34f, 0.23f, 0.12f };
         for (int i = 0; i < rowCenters.Length; i++)
         {
             int trackIndex = i;
@@ -223,7 +224,9 @@ public class BarUIBuilder : MonoBehaviour
 
             Image highlight = row.AddComponent<Image>();
             highlight.raycastTarget = true;
-            highlight.color = Color.clear;
+            highlight.color = i == 0
+                ? new Color(0.20f, 0.92f, 0.58f, 0.12f)
+                : new Color(0.035f, 0.045f, 0.085f, 0.96f);
 
             Button button = row.AddComponent<Button>();
             button.transition = Selectable.Transition.None;
@@ -235,11 +238,112 @@ public class BarUIBuilder : MonoBehaviour
             rowTransform.offsetMin = Vector2.zero;
             rowTransform.offsetMax = Vector2.zero;
 
+            Text trackText = new GameObject("TrackTitle", typeof(RectTransform), typeof(Text)).GetComponent<Text>();
+            trackText.transform.SetParent(row.transform, false);
+            trackText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            trackText.fontSize = 12;
+            trackText.fontStyle = FontStyle.Bold;
+            trackText.alignment = TextAnchor.MiddleLeft;
+            trackText.color = i == 0 ? new Color(0.30f, 1f, 0.74f) : Color.white;
+            trackText.text = PlaylistTrackTitles[i];
+            RectTransform trackTextRect = trackText.rectTransform;
+            trackTextRect.anchorMin = Vector2.zero;
+            trackTextRect.anchorMax = Vector2.one;
+            trackTextRect.offsetMin = new Vector2(12f, 0f);
+            trackTextRect.offsetMax = new Vector2(-6f, 0f);
+
             playlistRowHighlights.Add(highlight);
         }
 
         UpdatePlaylistSelection(0);
         playlistMusicController.PlayTrack(0);
+    }
+
+    private void CreatePlaylistControls(GameObject playlistPanel)
+    {
+        Text panelTitle = new GameObject("Playlist Control Title", typeof(RectTransform), typeof(Text)).GetComponent<Text>();
+        panelTitle.transform.SetParent(playlistPanel.transform, false);
+        panelTitle.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        panelTitle.text = "PLAYLIST";
+        panelTitle.fontSize = 16;
+        panelTitle.fontStyle = FontStyle.Bold;
+        panelTitle.alignment = TextAnchor.MiddleCenter;
+        panelTitle.color = Color.white;
+        RectTransform titleRect = panelTitle.rectTransform;
+        titleRect.anchorMin = new Vector2(0.5f, 0.86f);
+        titleRect.anchorMax = new Vector2(0.5f, 0.86f);
+        titleRect.pivot = new Vector2(0.5f, 0.5f);
+        titleRect.anchoredPosition = Vector2.zero;
+        titleRect.sizeDelta = new Vector2(230f, 24f);
+
+        Button previous = CreatePlaylistIconButton(playlistPanel, "Music Previous Button", "◀", new Vector2(0.5f, 0.76f), new Vector2(-62f, 0f), 0.10f, 0.26f);
+        Button playPause = CreatePlaylistIconButton(playlistPanel, "Music Play Pause Button", "Ⅱ", new Vector2(0.5f, 0.76f), Vector2.zero, 0.06f, 0.36f);
+        Button next = CreatePlaylistIconButton(playlistPanel, "Music Next Button", "▶", new Vector2(0.5f, 0.76f), new Vector2(62f, 0f), 0.10f, 0.16f);
+
+        playlistPlayPauseIcon = playPause.GetComponentInChildren<Text>();
+        previous.onClick.AddListener(() => {
+            int index = playlistMusicController == null
+                ? 0
+                : (playlistMusicController.CurrentTrackIndex - 1 + PlaylistTrackTitles.Length) % PlaylistTrackTitles.Length;
+            SelectPlaylistTrack(index);
+        });
+        playPause.onClick.AddListener(TogglePlaylistMusic);
+        next.onClick.AddListener(() => {
+            int index = playlistMusicController == null
+                ? 0
+                : (playlistMusicController.CurrentTrackIndex + 1) % PlaylistTrackTitles.Length;
+            SelectPlaylistTrack(index);
+        });
+    }
+
+    private Button CreatePlaylistIconButton(GameObject playlistPanel, string objectName, string icon, Vector2 anchor, Vector2 position, float green, float cyan)
+    {
+        GameObject buttonObject = new GameObject(objectName);
+        buttonObject.transform.SetParent(playlistPanel.transform, false);
+        Image image = buttonObject.AddComponent<Image>();
+        image.color = new Color(green, cyan, 0.24f, 0.96f);
+
+        RectTransform rect = buttonObject.GetComponent<RectTransform>();
+        rect.anchorMin = anchor;
+        rect.anchorMax = anchor;
+        rect.pivot = new Vector2(0.5f, 0.5f);
+        rect.anchoredPosition = position;
+        rect.sizeDelta = new Vector2(52f, 28f);
+
+        Button button = buttonObject.AddComponent<Button>();
+        Text label = new GameObject("Icon", typeof(RectTransform), typeof(Text)).GetComponent<Text>();
+        label.transform.SetParent(buttonObject.transform, false);
+        label.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        label.text = icon;
+        label.fontSize = 16;
+        label.fontStyle = FontStyle.Bold;
+        label.alignment = TextAnchor.MiddleCenter;
+        label.color = Color.white;
+        RectTransform labelRect = label.rectTransform;
+        labelRect.anchorMin = Vector2.zero;
+        labelRect.anchorMax = Vector2.one;
+        labelRect.offsetMin = Vector2.zero;
+        labelRect.offsetMax = Vector2.zero;
+        return button;
+    }
+
+    private void TogglePlaylistMusic()
+    {
+        if (AudioManager.Instance == null)
+            return;
+
+        if (AudioManager.Instance.IsBGMPlaying())
+        {
+            AudioManager.Instance.PauseBGM();
+            if (playlistPlayPauseIcon != null)
+                playlistPlayPauseIcon.text = "▶";
+        }
+        else
+        {
+            AudioManager.Instance.UnpauseBGM();
+            if (playlistPlayPauseIcon != null)
+                playlistPlayPauseIcon.text = "Ⅱ";
+        }
     }
 
     private void SelectPlaylistTrack(int trackIndex)
@@ -257,7 +361,7 @@ public class BarUIBuilder : MonoBehaviour
         {
             playlistRowHighlights[i].color = i == selectedIndex
                 ? new Color(0.20f, 0.92f, 0.58f, 0.12f)
-                : Color.clear;
+                : new Color(0.035f, 0.045f, 0.085f, 0.96f);
         }
     }
 

@@ -4,6 +4,12 @@ using UnityEngine;
 /// <summary>One-time, instance-owned audience colours; authored skin, faces and textures stay intact.</summary>
 public sealed partial class SimBarCharacterVisual
 {
+    private static readonly Color[] PerformerOutfits =
+    {
+        new Color(0.88f, 0.18f, 0.42f), new Color(0.12f, 0.62f, 0.78f),
+        new Color(0.96f, 0.72f, 0.20f), new Color(0.48f, 0.34f, 0.78f),
+        new Color(0.20f, 0.68f, 0.46f), new Color(0.82f, 0.42f, 0.20f)
+    };
     private static readonly Color[] AudienceTopColours =
     {
         new Color(0.16f, 0.48f, 0.48f), new Color(0.75f, 0.53f, 0.17f),
@@ -69,6 +75,41 @@ public sealed partial class SimBarCharacterVisual
                     ownedMaterials.Add(tinted);
                 }
                 slots[slot] = tinted;
+                changed = true;
+            }
+            if (changed) renderer.sharedMaterials = slots;
+        }
+    }
+
+    private void ApplyRoleOutfitAppearance(Color fallback)
+    {
+        if (model == null || role == "guest") return;
+        int selection = Mathf.Abs(variant * 5 + role.GetHashCode()) % PerformerOutfits.Length;
+        Color outfitColor = role == "bartender" ? new Color(0.18f, 0.42f, 0.36f)
+            : role == "server" ? new Color(0.62f, 0.32f, 0.22f)
+            : Color.Lerp(PerformerOutfits[selection], fallback, 0.12f);
+
+        foreach (Renderer renderer in model.GetComponentsInChildren<Renderer>(true))
+        {
+            string part = renderer.name.ToLowerInvariant();
+            if (!part.Contains("body") && !part.Contains("leg") && !part.Contains("pants")
+                && !part.Contains("torso") && !part.Contains("jacket")) continue;
+            Material[] slots = renderer.sharedMaterials;
+            bool changed = false;
+            for (int slot = 0; slot < slots.Length; slot++)
+            {
+                Material source = slots[slot];
+                if (source == null) continue;
+                string materialName = source.name.ToLowerInvariant();
+                if (materialName.Contains("skin") || materialName.Contains("eye") || materialName.Contains("metal")) continue;
+                Material colored = new Material(source) { name = role + "_Costume_" + variant + "_" + source.name };
+                Color original = source.HasProperty("_BaseColor") ? source.GetColor("_BaseColor")
+                    : source.HasProperty("_Color") ? source.GetColor("_Color") : Color.white;
+                Color mixed = Color.Lerp(original, outfitColor, part.Contains("leg") || part.Contains("pants") ? 0.58f : 0.76f);
+                if (colored.HasProperty("_BaseColor")) colored.SetColor("_BaseColor", mixed);
+                else if (colored.HasProperty("_Color")) colored.color = mixed;
+                ownedMaterials.Add(colored);
+                slots[slot] = colored;
                 changed = true;
             }
             if (changed) renderer.sharedMaterials = slots;

@@ -1,0 +1,812 @@
+{
+  "actorOffsets": [
+    {
+      "id": "drummer",
+      "offset": {
+        "x": -12,
+        "y": 12
+      }
+    }
+  ],
+  "barRegion": {
+    "xMax": -1.35,
+    "xFade": 1.5,
+    "zMin": -1.5,
+    "zMax": 0.5,
+    "offset": {
+      "x": 0,
+      "y": 25
+    }
+  },
+  "occluders": [
+    {
+      "points": [
+        {
+          "x": 140.0,
+          "y": 233.0
+        },
+        {
+          "x": 173.25,
+          "y": 242.25
+        },
+        {
+          "x": 170.38,
+          "y": 309.0
+        },
+        {
+          "x": 140.0,
+          "y": 301.0
+        }
+      ],
+      "depth": 300.0
+    },
+    {
+      "points": [
+        {
+          "x": 173.25,
+          "y": 242.25
+        },
+        {
+          "x": 206.5,
+          "y": 251.5
+        },
+        {
+          "x": 200.75,
+          "y": 317.0
+        },
+        {
+          "x": 170.38,
+          "y": 309.0
+        }
+      ],
+      "depth": 308.0
+    },
+    {
+      "points": [
+        {
+          "x": 206.5,
+          "y": 251.5
+        },
+        {
+          "x": 239.75,
+          "y": 260.75
+        },
+        {
+          "x": 231.12,
+          "y": 325.0
+        },
+        {
+          "x": 200.75,
+          "y": 317.0
+        }
+      ],
+      "depth": 316.0
+    },
+    {
+      "points": [
+        {
+          "x": 239.75,
+          "y": 260.75
+        },
+        {
+          "x": 273.0,
+          "y": 270.0
+        },
+        {
+          "x": 261.5,
+          "y": 333.0
+        },
+        {
+          "x": 231.12,
+          "y": 325.0
+        }
+      ],
+      "depth": 324.0
+    },
+    {
+      "points": [
+        {
+          "x": 273.0,
+          "y": 270.0
+        },
+        {
+          "x": 306.25,
+          "y": 279.25
+        },
+        {
+          "x": 291.88,
+          "y": 341.0
+        },
+        {
+          "x": 261.5,
+          "y": 333.0
+        }
+      ],
+      "depth": 332.0
+    },
+    {
+      "points": [
+        {
+          "x": 306.25,
+          "y": 279.25
+        },
+        {
+          "x": 339.5,
+          "y": 288.5
+        },
+        {
+          "x": 322.25,
+          "y": 349.0
+        },
+        {
+          "x": 291.88,
+          "y": 341.0
+        }
+      ],
+      "depth": 340.0
+    },
+    {
+      "points": [
+        {
+          "x": 339.5,
+          "y": 288.5
+        },
+        {
+          "x": 372.75,
+          "y": 297.75
+        },
+        {
+          "x": 352.62,
+          "y": 357.0
+        },
+        {
+          "x": 322.25,
+          "y": 349.0
+        }
+      ],
+      "depth": 348.0
+    },
+    {
+      "points": [
+        {
+          "x": 372.75,
+          "y": 297.75
+        },
+        {
+          "x": 406.0,
+          "y": 307.0
+        },
+        {
+          "x": 383.0,
+          "y": 365.0
+        },
+        {
+          "x": 352.62,
+          "y": 357.0
+        }
+      ],
+      "depth": 356.0
+    },
+    {
+      "points": [
+        {
+          "x": 687,
+          "y": 253
+        },
+        {
+          "x": 705,
+          "y": 246
+        },
+        {
+          "x": 720,
+          "y": 252
+        },
+        {
+          "x": 728,
+          "y": 269
+        },
+        {
+          "x": 750,
+          "y": 265
+        },
+        {
+          "x": 773,
+          "y": 256
+        },
+        {
+          "x": 793,
+          "y": 266
+        },
+        {
+          "x": 794,
+          "y": 295
+        },
+        {
+          "x": 779,
+          "y": 311
+        },
+        {
+          "x": 710,
+          "y": 312
+        },
+        {
+          "x": 687,
+          "y": 295
+        }
+      ],
+      "depth": 288
+    }
+  ],
+  "frameWidth": 64,
+  "frameHeight": 64,
+  "columns": 4,
+  "drawHeight": 54,
+  "footX": 32,
+  "footY": 60,
+  "defaultAtlas": "wardrobe",
+  "roles": [
+    {
+      "id": "guest",
+      "atlas": "wardrobe",
+      "styles": [
+        "Casual",
+        "Suit",
+        "Beach",
+        "Worker",
+        "Farmer",
+        "Adventurer",
+        "Casual2",
+        "Punk"
+      ],
+      "variantStyles": [
+        {
+          "id": "Casual",
+          "row": 0
+        },
+        {
+          "id": "Suit",
+          "row": 1
+        },
+        {
+          "id": "Beach",
+          "row": 2
+        },
+        {
+          "id": "Worker",
+          "row": 3
+        },
+        {
+          "id": "Farmer",
+          "row": 4
+        },
+        {
+          "id": "Adventurer",
+          "row": 5
+        },
+        {
+          "id": "Casual2",
+          "row": 6
+        },
+        {
+          "id": "Punk",
+          "row": 7
+        }
+      ],
+      "actions": [
+        {
+          "id": "walk",
+          "atlasFrames": [
+            "wardrobe",
+            "walk"
+          ],
+          "hasRow": false,
+          "variantStyles": [],
+          "directionColumns": []
+        },
+        {
+          "id": "dance",
+          "atlas": "pit",
+          "hasRow": false,
+          "variantStyles": [],
+          "directionColumns": []
+        },
+        {
+          "id": "mosh",
+          "atlas": "pit",
+          "hasRow": false,
+          "variantStyles": [],
+          "directionColumns": []
+        },
+        {
+          "id": "slam",
+          "atlas": "pit",
+          "hasRow": false,
+          "variantStyles": [],
+          "directionColumns": []
+        }
+      ],
+      "hasRow": false,
+      "directionColumns": []
+    },
+    {
+      "id": "barseated",
+      "atlas": "poses",
+      "row": 1,
+      "styles": [
+        "Casual2",
+        "Punk"
+      ],
+      "variantStyles": [
+        {
+          "id": "Casual2",
+          "row": 1
+        },
+        {
+          "id": "Punk",
+          "row": 2
+        }
+      ],
+      "hasRow": true,
+      "directionColumns": [],
+      "actions": []
+    },
+    {
+      "id": "seated",
+      "atlas": "poses",
+      "row": 3,
+      "styles": [
+        "Casual",
+        "Suit"
+      ],
+      "variantStyles": [
+        {
+          "id": "Casual",
+          "row": 3
+        },
+        {
+          "id": "Suit",
+          "row": 4
+        }
+      ],
+      "hasRow": true,
+      "directionColumns": [],
+      "actions": []
+    },
+    {
+      "id": "bartender",
+      "atlas": "wardrobe",
+      "style": "Suit",
+      "row": 1,
+      "drawHeight": 58,
+      "actions": [
+        {
+          "id": "walk",
+          "atlasFrames": [
+            "wardrobe",
+            "walk"
+          ],
+          "hasRow": false,
+          "variantStyles": [],
+          "directionColumns": []
+        },
+        {
+          "id": "serve",
+          "atlas": "poses",
+          "row": 0,
+          "hasRow": true,
+          "variantStyles": [],
+          "directionColumns": []
+        },
+        {
+          "id": "clean",
+          "atlas": "poses",
+          "row": 0,
+          "hasRow": true,
+          "variantStyles": [],
+          "directionColumns": []
+        }
+      ],
+      "hasRow": true,
+      "variantStyles": [],
+      "directionColumns": []
+    },
+    {
+      "id": "server",
+      "atlas": "wardrobe",
+      "style": "Suit",
+      "row": 1,
+      "drawHeight": 58,
+      "actions": [
+        {
+          "id": "walk",
+          "atlasFrames": [
+            "wardrobe",
+            "walk"
+          ],
+          "hasRow": false,
+          "variantStyles": [],
+          "directionColumns": []
+        },
+        {
+          "id": "serve",
+          "atlas": "poses",
+          "row": 0,
+          "hasRow": true,
+          "variantStyles": [],
+          "directionColumns": []
+        },
+        {
+          "id": "clean",
+          "atlas": "poses",
+          "row": 0,
+          "hasRow": true,
+          "variantStyles": [],
+          "directionColumns": []
+        }
+      ],
+      "hasRow": true,
+      "variantStyles": [],
+      "directionColumns": []
+    },
+    {
+      "id": "hired-0",
+      "atlas": "wardrobe",
+      "style": "Suit",
+      "row": 1,
+      "drawHeight": 58,
+      "actions": [
+        {
+          "id": "walk",
+          "atlasFrames": [
+            "wardrobe",
+            "walk"
+          ],
+          "hasRow": false,
+          "variantStyles": [],
+          "directionColumns": []
+        },
+        {
+          "id": "serve",
+          "atlas": "poses",
+          "row": 0,
+          "hasRow": true,
+          "variantStyles": [],
+          "directionColumns": []
+        },
+        {
+          "id": "clean",
+          "atlas": "poses",
+          "row": 0,
+          "hasRow": true,
+          "variantStyles": [],
+          "directionColumns": []
+        }
+      ],
+      "hasRow": true,
+      "variantStyles": [],
+      "directionColumns": []
+    },
+    {
+      "id": "hired-1",
+      "atlas": "wardrobe",
+      "style": "Worker",
+      "row": 3,
+      "drawHeight": 58,
+      "actions": [
+        {
+          "id": "walk",
+          "atlasFrames": [
+            "wardrobe",
+            "walk"
+          ],
+          "hasRow": false,
+          "variantStyles": [],
+          "directionColumns": []
+        },
+        {
+          "id": "clean",
+          "atlas": "pit",
+          "hasRow": false,
+          "variantStyles": [],
+          "directionColumns": []
+        }
+      ],
+      "hasRow": true,
+      "variantStyles": [],
+      "directionColumns": []
+    },
+    {
+      "id": "hired-2",
+      "atlas": "wardrobe",
+      "style": "Adventurer",
+      "row": 5,
+      "drawHeight": 58,
+      "actions": [
+        {
+          "id": "walk",
+          "atlasFrames": [
+            "wardrobe",
+            "walk"
+          ],
+          "hasRow": false,
+          "variantStyles": [],
+          "directionColumns": []
+        },
+        {
+          "id": "clean",
+          "atlas": "pit",
+          "hasRow": false,
+          "variantStyles": [],
+          "directionColumns": []
+        }
+      ],
+      "hasRow": true,
+      "variantStyles": [],
+      "directionColumns": []
+    },
+    {
+      "id": "singer",
+      "atlas": "band",
+      "style": "Punk",
+      "row": 0,
+      "hasRow": true,
+      "variantStyles": [],
+      "directionColumns": [],
+      "actions": []
+    },
+    {
+      "id": "guitarist",
+      "atlas": "band",
+      "style": "Casual2",
+      "row": 1,
+      "hasRow": true,
+      "variantStyles": [],
+      "directionColumns": [],
+      "actions": []
+    },
+    {
+      "id": "bassist",
+      "atlas": "band",
+      "style": "Punk",
+      "row": 2,
+      "hasRow": true,
+      "variantStyles": [],
+      "directionColumns": [],
+      "actions": []
+    },
+    {
+      "id": "drummer",
+      "atlas": "band",
+      "style": "Punk",
+      "row": 3,
+      "drawHeight": 52,
+      "hasRow": true,
+      "variantStyles": [],
+      "directionColumns": [],
+      "actions": []
+    },
+    {
+      "id": "support",
+      "atlas": "wardrobe",
+      "styles": [
+        "Casual",
+        "Suit",
+        "Beach",
+        "Worker",
+        "Farmer",
+        "Adventurer",
+        "Casual2",
+        "Punk"
+      ],
+      "variantStyles": [
+        {
+          "id": "Casual",
+          "row": 0
+        },
+        {
+          "id": "Suit",
+          "row": 1
+        },
+        {
+          "id": "Beach",
+          "row": 2
+        },
+        {
+          "id": "Worker",
+          "row": 3
+        },
+        {
+          "id": "Farmer",
+          "row": 4
+        },
+        {
+          "id": "Adventurer",
+          "row": 5
+        },
+        {
+          "id": "Casual2",
+          "row": 6
+        },
+        {
+          "id": "Punk",
+          "row": 7
+        }
+      ],
+      "actions": [
+        {
+          "id": "support",
+          "atlas": "pit",
+          "hasRow": false,
+          "variantStyles": [],
+          "directionColumns": []
+        },
+        {
+          "id": "walk",
+          "atlasFrames": [
+            "wardrobe",
+            "walk"
+          ],
+          "hasRow": false,
+          "variantStyles": [],
+          "directionColumns": []
+        }
+      ],
+      "hasRow": false,
+      "directionColumns": []
+    },
+    {
+      "id": "surfer",
+      "atlas": "wardrobe",
+      "style": "Casual",
+      "row": 0,
+      "actions": [
+        {
+          "id": "surf",
+          "atlas": "poses",
+          "row": 7,
+          "horizontal": true,
+          "footX": 32,
+          "footY": 32,
+          "hasRow": true,
+          "variantStyles": [],
+          "directionColumns": []
+        }
+      ],
+      "hasRow": true,
+      "variantStyles": [],
+      "directionColumns": []
+    }
+  ],
+  "atlases": [
+    {
+      "file": "wardrobe.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "columns": 4,
+      "directionColumns": [
+        {
+          "id": "FR",
+          "column": 0
+        },
+        {
+          "id": "BR",
+          "column": 1
+        },
+        {
+          "id": "BL",
+          "column": 2
+        },
+        {
+          "id": "FL",
+          "column": 3
+        }
+      ],
+      "id": "wardrobe",
+      "resource": "SimBarPixelArt/wardrobe"
+    },
+    {
+      "file": "walk.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "columns": 4,
+      "directionColumns": [
+        {
+          "id": "FR",
+          "column": 0
+        },
+        {
+          "id": "BR",
+          "column": 1
+        },
+        {
+          "id": "BL",
+          "column": 2
+        },
+        {
+          "id": "FL",
+          "column": 3
+        }
+      ],
+      "id": "walk",
+      "resource": "SimBarPixelArt/walk"
+    },
+    {
+      "file": "pit.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "columns": 4,
+      "directionColumns": [
+        {
+          "id": "FR",
+          "column": 0
+        },
+        {
+          "id": "BR",
+          "column": 1
+        },
+        {
+          "id": "BL",
+          "column": 2
+        },
+        {
+          "id": "FL",
+          "column": 3
+        }
+      ],
+      "id": "pit",
+      "resource": "SimBarPixelArt/pit"
+    },
+    {
+      "file": "poses.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "columns": 4,
+      "directionColumns": [
+        {
+          "id": "FR",
+          "column": 0
+        },
+        {
+          "id": "BR",
+          "column": 1
+        },
+        {
+          "id": "BL",
+          "column": 2
+        },
+        {
+          "id": "FL",
+          "column": 3
+        }
+      ],
+      "id": "poses",
+      "resource": "SimBarPixelArt/poses"
+    },
+    {
+      "file": "band.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "columns": 4,
+      "directionColumns": [
+        {
+          "id": "FR",
+          "column": 0
+        },
+        {
+          "id": "BR",
+          "column": 1
+        },
+        {
+          "id": "BL",
+          "column": 2
+        },
+        {
+          "id": "FL",
+          "column": 3
+        }
+      ],
+      "id": "band",
+      "resource": "SimBarPixelArt/band"
+    }
+  ]
+}

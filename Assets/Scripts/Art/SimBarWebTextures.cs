@@ -45,6 +45,8 @@ public static class SimBarWebTextures
     private static readonly Dictionary<string, Texture2D> decoded = new Dictionary<string, Texture2D>();
 
     public static IReadOnlyList<Definition> Definitions => definitions;
+    public static bool IsPixelArtResource(string key) => key.StartsWith("SimBarArt/Owners/", StringComparison.Ordinal)
+        || key.StartsWith("SimBarArt/Seoul/", StringComparison.Ordinal);
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     private static void ResetCache()
@@ -79,11 +81,12 @@ public static class SimBarWebTextures
             return null;
         }
 
-        var texture = new Texture2D(2, 2, TextureFormat.RGB24, definition.mipmaps, false)
+        bool pixelArt = IsPixelArtResource(resourceKey);
+        var texture = new Texture2D(2, 2, TextureFormat.RGB24, definition.mipmaps && !pixelArt, false)
         {
             name = resourceKey.Substring(resourceKey.LastIndexOf('/') + 1),
             wrapMode = TextureWrapMode.Clamp,
-            filterMode = definition.mipmaps ? FilterMode.Trilinear : FilterMode.Bilinear
+            filterMode = pixelArt ? FilterMode.Point : definition.mipmaps ? FilterMode.Trilinear : FilterMode.Bilinear
         };
         if (!ImageConversion.LoadImage(texture, image.bytes, true))
         {

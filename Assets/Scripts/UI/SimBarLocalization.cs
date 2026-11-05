@@ -25,7 +25,7 @@ public static class SimBarLocalization
     private static readonly Dictionary<string, string> translations = new Dictionary<string, string>
     {
         { "CASH", "현금" }, { "FANS", "팬" }, { "TIME", "시간" },
-        { "♪  PLAYLIST", "♪  재생 목록" }, { "BAR SERVICE  •  LIVE QUEUE", "바 서비스  •  주문 대기열" },
+        { "PLAYLIST", "재생 목록" }, { "BAR SERVICE  •  LIVE QUEUE", "바 서비스  •  주문 대기열" },
         { "GUEST SATISFACTION", "손님 만족도" }, { "PERFORMANCE ENERGY", "공연 에너지" },
         { "SERVICE PAUSED", "일시정지" },
         { "Tap the gear or press P to return to the bar.", "설정 버튼이나 P 키를 누르면 영업으로 돌아갑니다." },

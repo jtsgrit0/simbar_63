@@ -27,9 +27,9 @@ public sealed partial class SimBarExperience
 
     private static string OwnerName(int index)
     {
-        if (index == 1) return SimBarLocalization.Text("HONGDAE FF OWNER", "홍대ff 사장");
-        if (index == 2) return SimBarLocalization.Text("ITAEWON PET SOUNDS OWNER", "이태원 펫사운즈 사장");
-        return SimBarLocalization.Text("THE OWNER", "여사장");
+        if (index == 1) return SimBarLocalization.Text("EDISON", "에디슨");
+        if (index == 2) return SimBarLocalization.Text("JAIDEN", "제이든");
+        return SimBarLocalization.Text("JESSY", "제시");
     }
 
     private static string OwnerDescription(int index)

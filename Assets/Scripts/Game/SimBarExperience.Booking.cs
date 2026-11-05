@@ -40,7 +40,10 @@ public sealed partial class SimBarExperience
         bool freshPlan=!JourneyHasActivePlan;
         if (freshPlan)
         {
-            journey.booking = SimBarBooking.NewPlan(journey.day, selectedOwner == 2 ? 1 : 0);
+            int previousVenue = journey.booking != null
+                ? Mathf.Clamp(journey.booking.venue, 0, SimBarBooking.Venues4.Length - 1)
+                : (selectedOwner == 2 ? 1 : 0);
+            journey.booking = SimBarBooking.NewPlan(journey.day, previousVenue);
             journey.dayOpeningCash = cash;
             journey.hasDayOpeningCash = true;
         }
@@ -48,7 +51,12 @@ public sealed partial class SimBarExperience
         SimBarBooking.Sanitize(DayPlan, BookingCareer);
         journey.challenge = challenge;
         journeyPhase = JourneyPhase.Planning;
-        if(freshPlan) { bookingShowingPosters=true; bookingShowingArchive=false; }
+        if(freshPlan)
+        {
+            bookingShowingPosters=true;
+            bookingShowingArchive=false;
+            SelectLatestPosterForVenue(DayPlan.venue);
+        }
         paused = true;
         gameClock = SimBarBooking.Hour(DayPlan);
         bookingFeedback = "";
@@ -116,6 +124,7 @@ public sealed partial class SimBarExperience
             return;
         }
         DayPlan.venue = index;
+        SelectLatestPosterForVenue(index);
         SaveOperations();
         RefreshBookingUI();
     }

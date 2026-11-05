@@ -2,6 +2,7 @@
 public static class SimBarPosterCatalog
 {
     public const string CheckedOn = "2026-10-28";
+    public const int DailyPosterIndex = 30;
     public sealed class Artist
     {
         public readonly string id, name, nameEnglish, sourceUrl;
@@ -56,4 +57,63 @@ public static class SimBarPosterCatalog
         new Poster("subriot-jazz-20251212","subriot","2025-12-12–14","Subriot HBC · Jazz / Blues",SubriotSource,"ScoutPosters/subriot-20251212.png",
             "계정명이 인쇄된 공개 포스터 · 일부 출연진 발굴","https://www.instagram.com/subriot_hbc/","@subriot_hbc",22,23)
     };
+
+    public static Poster CreateDailyPoster(int day, int venueIndex)
+    {
+        day = System.Math.Max(1, day);
+        venueIndex = System.Math.Max(0, System.Math.Min(3, venueIndex));
+        string[] venueIds = { "ff", "pet-sounds", "boogie-woogie", "subriot" };
+        string[] titles =
+        {
+            "DAYLINE FRESH NIGHT",
+            "NEON AUDITION NIGHT",
+            "PAPER STAGE LIVE",
+            "ROOFTOP AFTERWORK"
+        };
+        string[] koreanTitles =
+        {
+            "데이라인 신인 라이브",
+            "네온 오디션 나이트",
+            "페이퍼 스테이지 라이브",
+            "루프탑 애프터워크"
+        };
+        int seed = unchecked(day * 73856093 ^ venueIndex * 19349663);
+        int titleIndex = System.Math.Abs(seed % titles.Length);
+        int start = System.Math.Abs(unchecked(seed * 31 + day) % 12);
+        int count = 3;
+        int[] lineup = new int[count];
+        for (int i = 0; i < count; i++)
+            lineup[i] = (start + (i * 5 + venueIndex + day) % 12) % 12;
+
+        return new Poster(
+            "daily-" + day + "-" + venueIds[venueIndex],
+            venueIds[venueIndex],
+            "영업일 " + day,
+            koreanTitles[titleIndex] + " / " + titles[titleIndex],
+            "",
+            "__dynamic_daily__/day-" + day + "/venue-" + venueIds[venueIndex] + ".png",
+            "가상 신인 라인업으로 매 영업일 새로 제작된 픽셀 포스터",
+            "",
+            "@daily-lineup · 게임 생성 포스터",
+            lineup);
+    }
+
+    public static int LatestPosterIndexForVenue(string venueId)
+    {
+        int latest = -1;
+        string latestDate = "";
+        if (Entries == null || string.IsNullOrEmpty(venueId)) return latest;
+        for (int i = 0; i < Entries.Length; i++)
+        {
+            Poster entry = Entries[i];
+            if (entry == null || entry.venueId != venueId || entry.date == null) continue;
+            string dateKey = entry.date.Length >= 10 ? entry.date.Substring(0, 10) : entry.date;
+            if (latest < 0 || string.CompareOrdinal(dateKey, latestDate) > 0)
+            {
+                latest = i;
+                latestDate = dateKey;
+            }
+        }
+        return latest;
+    }
 }

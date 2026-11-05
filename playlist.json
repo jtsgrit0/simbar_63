@@ -1,0 +1,35 @@
+{
+  "last_updated": "2026-11-04",
+  "tracks": [
+    {
+      "id": "track_001",
+      "title": "Electric Shocker",
+      "artist": "프리윌(freewill)",
+      "audio_url": "https://pub-f61dee98441a42719d944abea5e0e1d2.r2.dev"
+    },
+    {
+      "id": "track_002",
+      "title": "Hey",
+      "artist": "Julywantsmore",
+      "audio_url": "https://pub-f61dee98441a42719d944abea5e0e1d2.r2.dev"
+    },
+    {
+      "id": "track_003",
+      "title": "No Matter How",
+      "artist": "Julywantsmore",
+      "audio_url": "https://pub-f61dee98441a42719d944abea5e0e1d2.r2.dev"
+    },
+    {
+      "id": "track_004",
+      "title": "Bedroom Manifesto",
+      "artist": "프리윌(freewill)",
+      "audio_url": "https://pub-f61dee98441a42719d944abea5e0e1d2.r2.dev"
+    },
+    {
+      "id": "track_005",
+      "title": "Electric Shocker - Korean Version",
+      "artist": "프리윌(freewill)",
+      "audio_url": "https://pub-f61dee98441a42719d944abea5e0e1d2.r2.dev"
+    }
+  ]
+}

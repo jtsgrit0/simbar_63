@@ -1,9 +1,11 @@
+using System.Collections;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.UI;
+using UnityEngine.Networking;
 using UnityEngine.Rendering;
 using UnityEngine.UI;
 
@@ -29,12 +31,11 @@ public sealed partial class SimBarExperience : MonoBehaviour
     };
     private static readonly string[] Playlist =
     {
-        "1. Electric Hearts",
-        "2. Midnight Run",
-        "3. Neon Avenue",
-        "4. Afterparty Echo",
-        "5. Velvet Thunder",
-        "6. Last Call Anthem"
+        "Electric Shocker",
+        "Hey_spotdown",
+        "No Matter How",
+        "Bedroom Manifesto",
+        "Electric Shocker - Korean Version"
     };
     private static readonly string[] GuestNames =
     {
@@ -78,7 +79,10 @@ public sealed partial class SimBarExperience : MonoBehaviour
     private GameObject pausePanel;
     private AudioSource musicSource;
     private readonly AudioClip[] generatedMusicClips = new AudioClip[Playlist.Length];
+    private readonly AudioClip[] loadedMusicClips = new AudioClip[Playlist.Length];
     private bool musicWaitingForInput;
+    private bool musicPaused;
+    private Text musicPlayPauseIcon;
 
     private Material floorMat;
     private Material wallMat;
@@ -111,6 +115,7 @@ public sealed partial class SimBarExperience : MonoBehaviour
         CreateMaterials();
         ConfigureCamera();
         BuildEnvironment();
+        InitializePixelPresentation();
         CreateMusicSource();
         BuildInterface();
         InitializeOperations();
@@ -207,6 +212,7 @@ public sealed partial class SimBarExperience : MonoBehaviour
         musicSource.loop = true;
         musicSource.spatialBlend = 0f;
         musicSource.volume = 0.14f;
+        StartCoroutine(LoadMusicPlaylist());
 #if UNITY_WEBGL && !UNITY_EDITOR
         // Browsers need a user gesture for audio, so keep synthesis off the startup path.
         musicWaitingForInput = true;
@@ -215,10 +221,50 @@ public sealed partial class SimBarExperience : MonoBehaviour
 #endif
     }
 
+    private IEnumerator LoadMusicPlaylist()
+    {
+        string[] filenames =
+        {
+            "Electric Shocker.mp3",
+            "Hey_spotdown.mp3",
+            "No Matter How.mp3",
+            "Bedroom Manifesto.mp3",
+            "Electric Shocker - Korean Version.mp3"
+        };
+
+        for(int i=0;i<filenames.Length;i++)
+        {
+            string fileUrl=Application.streamingAssetsPath.TrimEnd('/')+"/Music/"+Uri.EscapeUriString(filenames[i]);
+            if(!fileUrl.Contains("://")) fileUrl="file:///"+fileUrl.Replace('\\','/');
+            using(var request=UnityWebRequestMultimedia.GetAudioClip(fileUrl,AudioType.MPEG))
+            {
+                request.timeout=20;
+                yield return request.SendWebRequest();
+                if(request.result==UnityWebRequest.Result.Success)
+                {
+                    AudioClip clip=DownloadHandlerAudioClip.GetContent(request);
+                    if(clip!=null)
+                    {
+                        clip.name=Playlist[i];
+                        loadedMusicClips[i]=clip;
+                        if(!musicWaitingForInput && !musicPaused && playlistIndex==i && musicSource!=null)
+                        {
+                            musicSource.Stop();
+                            musicSource.clip=clip;
+                            musicSource.Play();
+                        }
+                    }
+                }
+                else Debug.LogWarning("Could not load music: "+Playlist[i]+" ("+request.error+")");
+            }
+        }
+        RefreshUI();
+    }
+
     private void PlaySelectedMusic()
     {
         if (musicSource == null || musicWaitingForInput) return;
-        AudioClip clip = generatedMusicClips[playlistIndex];
+        AudioClip clip = loadedMusicClips[playlistIndex];
         if (clip == null)
         {
             clip = CreateProceduralTrack(playlistIndex);
@@ -685,16 +731,32 @@ public sealed partial class SimBarExperience : MonoBehaviour
 
     private void CreatePlaylistPanel()
     {
-        GameObject outer = CreatePanel("Playlist Border", canvas.transform, new Vector2(1f, 0.5f), new Vector2(-184f, 84f), new Vector2(340f, 340f), new Color(0.12f, 0.52f, 0.72f, 0.75f));
-        GameObject panel = CreatePanel("Playlist", outer.transform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(330f, 330f), new Color(0.035f, 0.045f, 0.085f, 0.96f));
-        Text title = CreateText("Playlist Title", panel.transform, "♪  PLAYLIST", 25, TextAnchor.MiddleCenter, Color.white);
+        GameObject outer = CreatePanel("Playlist Border", canvas.transform, new Vector2(1f, 0.5f), new Vector2(-184f, 84f), new Vector2(340f, 390f), new Color(0.12f, 0.52f, 0.72f, 0.75f));
+        GameObject panel = CreatePanel("Playlist", outer.transform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(330f, 380f), new Color(0.035f, 0.045f, 0.085f, 0.96f));
+        Text title = CreateText("Playlist Title", panel.transform, "PLAYLIST", 25, TextAnchor.MiddleCenter, Color.white);
         SetRect(title.rectTransform, new Vector2(0.5f, 1f), new Vector2(0f, -27f), new Vector2(300f, 34f));
-        playlistNowText = CreateText("Now Playing", panel.transform, "NOW PLAYING: ELECTRIC HEARTS", 12, TextAnchor.MiddleCenter, new Color(0.30f, 1f, 0.74f));
-        SetRect(playlistNowText.rectTransform, new Vector2(0.5f, 1f), new Vector2(0f, -57f), new Vector2(300f, 22f));
+        playlistNowText = CreateText("Now Playing", panel.transform, "NOW PLAYING: ELECTRIC SHOCKER", 12, TextAnchor.MiddleCenter, new Color(0.30f, 1f, 0.74f));
+        SetRect(playlistNowText.rectTransform, new Vector2(0.5f, 1f), new Vector2(0f, -96f), new Vector2(300f, 22f));
+
+        float controlY = -68f;
+        Button previous = CreateButton("PREVIOUS", panel.transform, new Vector2(0.5f, 1f), new Vector2(-76f, controlY), new Vector2(58f, 38f), new Color(0.10f, 0.16f, 0.24f, 0.96f), 16);
+        previous.name = "Music Previous Button";
+        previous.GetComponentInChildren<Text>().text = "◀";
+        Button playPause = CreateButton("Ⅱ", panel.transform, new Vector2(0.5f, 1f), new Vector2(0f, controlY), new Vector2(54f, 38f), new Color(0.06f, 0.36f, 0.30f, 0.96f), 18);
+        playPause.name = "Music Play Pause Button";
+        Button next = CreateButton("NEXT", panel.transform, new Vector2(0.5f, 1f), new Vector2(76f, controlY), new Vector2(58f, 38f), new Color(0.10f, 0.16f, 0.24f, 0.96f), 16);
+        next.name = "Music Next Button";
+        next.GetComponentInChildren<Text>().text = "▶";
+        musicPlayPauseIcon=playPause.GetComponentInChildren<Text>();
+        previous.onClick.AddListener(PreviousPlaylistTrack);
+        playPause.onClick.AddListener(TogglePlaylistMusic);
+        next.onClick.AddListener(NextPlaylistTrack);
+
         for (int i = 0; i < Playlist.Length; i++)
         {
             int index = i;
-            Button row = CreateButton(Playlist[i], panel.transform, new Vector2(0.5f, 1f), new Vector2(0f, -90f - i * 34f), new Vector2(294f, 29f), new Color(0.10f, 0.12f, 0.19f, 0.88f), 14);
+            Button row = CreateButton(Playlist[i], panel.transform, new Vector2(0.5f, 1f), new Vector2(0f, -126f - i * 34f), new Vector2(294f, 29f), new Color(0.10f, 0.12f, 0.19f, 0.88f), 14);
+            row.name = "Music Playlist Row " + i;
             row.GetComponent<Image>().color = i == 0 ? new Color(0.06f, 0.36f, 0.30f, 0.95f) : new Color(0.10f, 0.12f, 0.19f, 0.88f);
             playlistRows.Add(row.GetComponent<Image>());
             row.onClick.AddListener(() => SelectPlaylist(index));
@@ -979,12 +1041,52 @@ public sealed partial class SimBarExperience : MonoBehaviour
     private void SelectPlaylist(int index)
     {
         playlistIndex = index;
+        musicPaused=false;
         performance = Mathf.Min(1f, performance + 0.08f);
         PlaySelectedMusic();
+        UpdatePlaylistPlayPauseIcon();
         for (int i = 0; i < playlistRows.Count; i++)
             playlistRows[i].color = i == index ? new Color(0.06f, 0.36f, 0.30f, 0.96f) : new Color(0.10f, 0.12f, 0.19f, 0.88f);
-        ShowToast(SimBarLocalization.Text("NOW PLAYING: ", "재생 중: ") + Playlist[index].Substring(3).ToUpperInvariant(), 2.4f);
+        ShowToast(SimBarLocalization.Text("NOW PLAYING: ", "재생 중: ") + Playlist[index].ToUpperInvariant(), 2.4f);
         RefreshUI();
+    }
+
+    private void TogglePlaylistMusic()
+    {
+        if(musicSource==null) return;
+        if(musicWaitingForInput)
+        {
+            musicWaitingForInput=false;
+            musicPaused=false;
+            PlaySelectedMusic();
+        }
+        else if(musicPaused)
+        {
+            musicPaused=false;
+            musicSource.UnPause();
+        }
+        else
+        {
+            musicPaused=true;
+            musicSource.Pause();
+        }
+        UpdatePlaylistPlayPauseIcon();
+    }
+
+    private void NextPlaylistTrack()
+    {
+        SelectPlaylist((playlistIndex+1)%Playlist.Length);
+    }
+
+    private void PreviousPlaylistTrack()
+    {
+        SelectPlaylist((playlistIndex-1+Playlist.Length)%Playlist.Length);
+    }
+
+    private void UpdatePlaylistPlayPauseIcon()
+    {
+        if(musicPlayPauseIcon!=null)
+            musicPlayPauseIcon.text=musicPaused||musicWaitingForInput?"▶":"Ⅱ";
     }
 
     private void TogglePause()
@@ -1016,7 +1118,7 @@ public sealed partial class SimBarExperience : MonoBehaviour
         int minute = Mathf.FloorToInt((gameClock - hour) * 60f);
         timeText.text = (hour % 24).ToString("00") + ":" + minute.ToString("00");
         if (playlistNowText != null)
-            playlistNowText.text = SimBarLocalization.Text("NOW PLAYING: ", "재생 중: ") + Playlist[playlistIndex].Substring(3).ToUpperInvariant();
+            playlistNowText.text = SimBarLocalization.Text("NOW PLAYING: ", "재생 중: ") + Playlist[playlistIndex].ToUpperInvariant();
 
         if (orderQueue.Count == 0)
         {
