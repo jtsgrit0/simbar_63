@@ -7,17 +7,20 @@ const full=document.getElementById('fullscreen-button');
 const updateViewport=()=>{const v=window.visualViewport;const h=v&&v.scale===1?v.height:innerHeight;if(h>0)shell.style.setProperty('--viewport-height',h+'px');};
 window.addEventListener('resize',updateViewport,{passive:true});
 window.visualViewport?.addEventListener('resize',updateViewport,{passive:true});updateViewport();
-const image=async name=>{const i=new Image();i.src=new URL('art/'+name,import.meta.url);await i.decode();return i;};
+const imageCache=new Map();
+const image=name=>{if(!imageCache.has(name))imageCache.set(name,(async()=>{const i=new Image();i.src=new URL('art/'+name,import.meta.url);await i.decode();return i;})());return imageCache.get(name);};
 const metadata=async name=>{const response=await fetch(new URL('art/'+name,import.meta.url));if(!response.ok)throw new Error('Could not load '+name);return response.json();};
 const icons=['setup','cash','fans','time','staff','guestsati','perrform','upgrades','guest','events'];
 try{
   // Assets, font and the read-only old-save lookup overlap on the critical path.
   const identity=migrateLegacySave({timeoutMs:150});
-  const images=Promise.all(['owner-female.png','owner-ff.png','owner-pet.png','seoul.png','venue.png','sprites.png'].map(image));
+  const images=Promise.all(['owner-female.png','owner-ff.png','owner-pet.png','seoul.png','venue.png'].map(image));
+  const descriptors=Promise.all([metadata('sprites.json'),metadata('venue.json')]);
+  const atlasImages=descriptors.then(async([meta])=>Object.fromEntries(await Promise.all(Object.entries(meta.atlases||{animation:{file:'sprites.png'}}).map(async([key,definition])=>[key,await image(definition.file)]))));
   const iconImages=Promise.all(icons.map(n=>image('icons/'+n+'.png')));
   const font=document.fonts.load('16px SimBarUI');
-  const [[female,ff,pet,seoul,venue,sprites],migration,,,[spriteMeta,venueMeta]]=await Promise.all([images,identity,font,iconImages,Promise.all([metadata('sprites.json'),metadata('venue.json')])]);
-  const app=await startGame({root:stage,assetsBase:new URL('art/',import.meta.url).href,assets:{female,ff,pet,seoul,venue,sprites,spriteMeta,venueMeta}});
+  const [[female,ff,pet,seoul,venue],migration,,,[spriteMeta,venueMeta],atlases]=await Promise.all([images,identity,font,iconImages,descriptors,atlasImages]);
+  const app=await startGame({root:stage,assetsBase:new URL('art/',import.meta.url).href,assets:{female,ff,pet,seoul,venue,sprites:atlases.animation,atlases,spriteMeta,venueMeta}});
   window.simbarApplication=app;
   migration.pending?.then(r=>{if(r.imported)app.g.importSave(localStorage.getItem(SAVE_KEY));}).catch(()=>{});
   document.getElementById('loading-panel')?.remove();

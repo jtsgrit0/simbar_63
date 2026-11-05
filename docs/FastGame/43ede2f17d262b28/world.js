@@ -17,11 +17,49 @@ const polygon=(c,points,color)=>{c.fillStyle=color;c.beginPath();points.forEach(
 function ellipse(c,x,y,rx,ry,color){c.fillStyle=color;for(let row=-ry;row<=ry;row++){const w=Math.round(rx*Math.sqrt(Math.max(0,1-row*row/(ry*ry||1))));c.fillRect(Math.round(x-w),Math.round(y+row),w*2+1,1);}}
 function hull(points){const p=points.slice().sort((a,b)=>a.x-b.x||a.y-b.y),turn=(a,b,c)=>(b.x-a.x)*(c.y-a.y)-(b.y-a.y)*(c.x-a.x);let low=[],high=[];for(const a of p){while(low.length>1&&turn(low.at(-2),low.at(-1),a)<=0)low.pop();low.push(a);}for(const a of p.reverse()){while(high.length>1&&turn(high.at(-2),high.at(-1),a)<=0)high.pop();high.push(a);}return low.slice(0,-1).concat(high.slice(0,-1));}
 
+// The four views are actual drawings. Mirroring a front view cannot create a back.
+export function pixelDirection(dx,dz){
+  const right=RIGHT[0]*dx+RIGHT[2]*dz,back=UP[0]*dx+UP[2]*dz;
+  return(back>=0?'B':'F')+(right>=0?'R':'L');
+}
+export function pixelFacing(actor,role,action,state={}){
+  if(role==='barseated')return'BR';
+  if(role==='seated')return Number(String(actor.id).split('-').at(-1))<4?'FL':'BR';
+  const target=(x,z)=>pixelDirection(x-finite(actor.x),z-finite(actor.z));
+  if(['singer','guitarist','bassist','drummer'].includes(role))return target(5.75,-1.25);
+  if(action==='mosh')return pixelDirection(-(finite(actor.z)+1.25),finite(actor.x)-5.75);
+  if(action==='slam')return target(5.75,-1.25);
+  if(action==='support'){
+    const surfer=state.actors?.find(a=>a.id==='crowd-surfer');
+    return target(surfer?.x??6,surfer?.z??-4.25);
+  }
+  if(action==='queue'){
+    const employee=state.actors?.find(a=>a.id==='server')||state.actors?.find(a=>a.id==='bartender');
+    return target(employee?.x??-4.2,employee?.z??-.565);
+  }
+  const employee=['bartender','server'].includes(role)||actor.id?.startsWith('hired-');
+  if(employee&&!actor.moving&&['idle','serve'].includes(action)&&finite(actor.x)<-1.35&&finite(actor.z)>-1.5&&finite(actor.z)<.5)return'FL';
+  if(!actor.moving&&role==='guest'&&action==='idle')return target(5.5,2.7);
+  const facing=finite(actor.facing);return pixelDirection(Math.sin(facing),Math.cos(facing));
+}
+
+export function pixelStyle(actor,entry,meta={}){
+  const explicit=actor.styleKey||actor.modelKey||meta.actorStyles?.[actor.id]||entry.style;
+  const aliases=meta.styleAliases||{};
+  if(explicit){const raw=String(explicit).split('/').at(-1),key=aliases[raw]||raw;if(!entry.variantStyles||entry.variantStyles[key]!=null)return key;}
+  const styles=entry.styles||Object.keys(entry.variantStyles||{});
+  if(!styles.length)return null;
+  const number=Number(String(actor.id).split('-').at(-1));
+  const index=Number.isInteger(actor.slot)?actor.slot:Number.isFinite(number)?number:hash(actor.id);
+  return styles[((index%styles.length)+styles.length)%styles.length];
+}
+
 export function createWorld(canvas,{assets={},getState=()=>({})}={}){
   const ctx=canvas.getContext('2d',{alpha:false});if(!ctx)throw new Error('A 2D game canvas is required.');
   if(!ready(assets.venue))throw new Error('The detailed room artwork must finish loading before the game starts.');
-  if(!ready(assets.sprites))throw new Error('The pixel character artwork must finish loading before the game starts.');
   if(!assets.spriteMeta?.roles?.guest)throw new Error('The pixel character atlas metadata is missing.');
+  if(!assets.spriteMeta.atlases&&!ready(assets.sprites))throw new Error('The pixel character artwork must finish loading before the game starts.');
+  for(const key of Object.keys(assets.spriteMeta.atlases||{}))if(!ready(assets.atlases?.[key]))throw new Error('The '+key+' character atlas must finish loading before the game starts.');
   const particles=[],seenEffects=new Set();
   let width=960,height=558,offsetX=0,cssW=960,cssH=558,last=null,seconds=0,night=null,city=null,occluders=[],plate=null,destroyed=false;
   const project=(x,z,y=0)=>{
@@ -50,20 +88,27 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
     const layers=[...(supplied||bar),...boxes];
     for(const layer of layers){if(!layer.points?.length)continue;const p=layer.points.map(p=>Array.isArray(p)?{x:p[0],y:p[1]}:p),xs=p.map(v=>v.x),ys=p.map(v=>v.y),left=Math.floor(Math.min(...xs)),top=Math.floor(Math.min(...ys)),w=Math.ceil(Math.max(...xs))-left+1,h=Math.ceil(Math.max(...ys))-top+1;if(w<=0||h<=0)continue;const mask=surface(w,h),c=mask.getContext('2d');c.imageSmoothingEnabled=false;c.translate(-left,-top);c.beginPath();p.forEach((v,i)=>i?c.lineTo(Math.round(v.x),Math.round(v.y)):c.moveTo(Math.round(v.x),Math.round(v.y)));c.closePath();c.clip();c.drawImage(plate,0,0,REF_W,REF_H);occluders.push({image:mask,x:left,y:top,depth:Number.isFinite(layer.depth)?layer.depth:project(layer.worldX||0,layer.worldZ||0).y});}
   }
-  function atlasFrame(actor,role,action,frame){
-    const meta=assets.spriteMeta||{},sheet=assets.sprites;if(!ready(sheet))return null;
-    const fw=meta.frameWidth||32,fh=meta.frameHeight||64,columns=meta.columns||Math.max(1,Math.floor(sheet.width/fw));
+  function atlasFrame(actor,role,action,frame,state){
+    const meta=assets.spriteMeta||{};
     let entry=meta.roles?.[role]??meta.roles?.[actor.role]??meta.roles?.guest??meta.roles?.default;
     if(entry==null)return null;if(typeof entry==='number')entry={row:entry};
-    const selected=entry.actions?.[action]||entry.actions?.[['dance','mosh','slam','support'].includes(action)?'dance':action==='walk'?'walk':action==='clean'?'clean':'idle']||entry;
-    const facing=finite(actor.facing),direction=Math.cos(facing)>.5?'back':Math.sin(facing)>.4?'right':Math.sin(facing)<-.4?'left':'front';
-    const variantRows=selected.variantRows||entry.variantRows;
-    let row=selected.directionRows?.[direction]??selected.rows?.[direction]??(variantRows?.length?variantRows[hash(actor.id)%variantRows.length]:selected.row??entry.row??0);
+    const style=pixelStyle(actor,entry,meta);
+    let selected=entry.actions?.[action]||entry.actions?.[['dance','mosh','slam','support'].includes(action)?'dance':action==='walk'?'walk':action==='clean'?'clean':'idle']||entry;
+    if(selected.preserveStyle&&selected.variantStyles&&selected.variantStyles[style]==null)selected=entry;
+    const atlasFrames=selected.atlasFrames||entry.atlasFrames;
+    const atlasKey=(atlasFrames?.length?atlasFrames[frame%atlasFrames.length]:null)||selected.atlas||entry.atlas||meta.defaultAtlas||'animation',definition=meta.atlases?.[atlasKey]||{},sheet=assets.atlases?.[atlasKey]||(!meta.atlases?assets.sprites:null);
+    if(!ready(sheet))throw new Error('Missing pixel character atlas: '+atlasKey);
+    const layout={...meta,...definition,...entry,...selected},fw=layout.frameWidth||64,fh=layout.frameHeight||64,columns=layout.columns||Math.max(1,Math.floor(sheet.width/fw));
+    const direction=selected.direction||entry.direction||pixelFacing(actor,role,action,state);
+    const rowFor=value=>value.variantStyles?.[style]??(value.variantRows?.length?value.variantRows[hash(actor.id)%value.variantRows.length]:value.row);
+    const ownRow=selected!==entry?rowFor(selected):undefined;
+    let row=selected.directionRows?.[direction]??entry.directionRows?.[direction]??selected.rows?.[direction]??ownRow??rowFor(entry)??0;
+    const directionColumns=selected.directionColumns||entry.directionColumns||definition.directionColumns,directionalColumn=directionColumns?.[direction];
     const frameColumns=selected.frameColumns||entry.frameColumns;
-    let frames=selected.frames||entry.frames||columns,col=frameColumns?.length?frameColumns[frame%frameColumns.length]:(selected.column||0)+frame%Math.max(1,Math.min(frames,columns));
-    if(Array.isArray(selected.rects)){const r=selected.rects[frame%selected.rects.length];return{sheet,sx:r[0],sy:r[1],sw:r[2],sh:r[3],flip:false,meta,entry};}
+    let frames=selected.frames||entry.frames||columns,col=directionalColumn!=null?(Array.isArray(directionalColumn)?directionalColumn[frame%directionalColumn.length]:directionalColumn):frameColumns?.length?frameColumns[frame%frameColumns.length]:(selected.column||0)+frame%Math.max(1,Math.min(frames,columns));
+    if(Array.isArray(selected.rects)){const r=selected.rects[frame%selected.rects.length];return{sheet,sx:r[0],sy:r[1],sw:r[2],sh:r[3],flip:false,meta:layout,entry:layout,direction,style,atlasKey};}
     if(row<0||col<0||col>=columns||(row+1)*fh>sheet.height)throw new Error('Pixel character atlas frame is out of bounds.');
-    return{sheet,sx:col*fw,sy:row*fh,sw:fw,sh:entry.cropHeight||fh,flip:direction==='left'&&!selected.directionRows?.left&&!selected.rows?.left,meta,entry};
+    return{sheet,sx:col*fw,sy:row*fh,sw:fw,sh:layout.cropHeight||fh,flip:false,meta:layout,entry:layout,direction,style,atlasKey};
   }
   function drawActor(a,state){
     let role=String(a.role||'guest').toLowerCase();if(role==='band')role=String(a.id||'singer');if(a.id?.startsWith('bar-seat-'))role='barseated';
@@ -72,24 +117,16 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
     const frame=active?Math.floor(seconds*(action==='walk'?7:action==='clean'?6:5)+hash(a.id)%4)%4:0;
     const p=actorPoint(a,finite(a.y)),ground=actorPoint(a,role==='surfer'?0:finite(a.y)),surf=(action==='surf'||role==='surfer')&&finite(a.y)>.1;
     ellipse(ctx,ground.x,ground.y+1,4,1,'#16182360');
-    const atlas=atlasFrame(a,role,action,frame),meta=atlas?.meta||{},entry=atlas?.entry||{},size=entry.drawHeight||meta.drawHeight||40;
+    const atlas=atlasFrame(a,role,action,frame,state),meta=atlas?.meta||{},entry=atlas?.entry||{},size=entry.drawHeight||meta.drawHeight||40;
     const bob=active&&['dance','mosh','perform','slam'].includes(action)?Math.round(Math.sin(seconds*5+hash(a.id)%9)*.6):0;
     ctx.save();ctx.translate(Math.round(p.x),Math.round(p.y+bob));
-    if(surf){ctx.rotate(-Math.PI/2);ctx.translate(0,-7);}
+    if(surf&&!entry.horizontal){ctx.rotate(-Math.PI/2);ctx.translate(0,-7);}
     if(atlas){const scale=size/atlas.sh,dw=entry.drawWidth||meta.drawWidth||atlas.sw*scale,dh=size,footX=entry.footX??meta.footX??atlas.sw/2,footY=entry.footY??meta.footY??atlas.sh;if(atlas.flip)ctx.scale(-1,1);ctx.drawImage(atlas.sheet,atlas.sx,atlas.sy,atlas.sw,atlas.sh,Math.round(-footX*dw/atlas.sw),Math.round(-footY*dh/atlas.sh),Math.round(dw),Math.round(dh));}
     else throw new Error('No pixel character atlas entry for '+role);
     ctx.restore();
     if(action==='clean'){const swing=Math.sin(seconds*7+hash(a.id)%5)*2;polygon(ctx,[{x:p.x+4,y:p.y-16},{x:p.x+5,y:p.y-16},{x:p.x+10+swing,y:p.y+2},{x:p.x+9+swing,y:p.y+2}],'#b69061');ctx.fillStyle='#c7b27e';ctx.fillRect(Math.round(p.x+6+swing),Math.round(p.y+2),7,2);ctx.fillStyle='#857150';for(let i=0;i<3;i++)ctx.fillRect(Math.round(p.x+6+swing+i*2),Math.round(p.y+4),1,2);}
     if((a.id==='assisted-guest'||role==='assisted')&&state.floor?.guestActive){ctx.fillStyle='#f4c86e';ctx.fillRect(Math.round(p.x),Math.round(p.y-48),2,5);ctx.fillRect(Math.round(p.x),Math.round(p.y-41),2,2);}
     if(action==='queue'){ctx.fillStyle='#e1ba73';ctx.fillRect(Math.round(p.x-2),Math.round(p.y-46),5,4);ctx.fillStyle='#34414e';ctx.fillRect(Math.round(p.x-1),Math.round(p.y-45),3,2);}
-    const diversity=hash(a.id);
-    const palette=['#ff7eb6','#67d5dc','#f0c35b','#9b8fe0','#7edb9b','#ed8f5b'];
-    const garment=palette[diversity%palette.length];
-    if(['guest','seated','barseated','band','singer','guitarist','bassist','drummer','surfer','support'].includes(role)){
-      ctx.fillStyle=garment;ctx.fillRect(Math.round(p.x-3),Math.round(p.y-18),7,5);
-      if(diversity&4)ctx.fillStyle='#171a2c',ctx.fillRect(Math.round(p.x-2),Math.round(p.y-17),2,2),ctx.fillRect(Math.round(p.x+2),Math.round(p.y-15),2,2);
-      if(role==='barseated'||role==='seated'||role==='support'||role==='surfer')ctx.fillStyle='#f1d29a',ctx.fillRect(Math.round(p.x-1),Math.round(p.y-26),3,2);
-    }
   }
   function paper(state,dt){
     const f=state.floor||{},session=state.journey?.session||0;

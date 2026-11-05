@@ -1,7 +1,12 @@
 {
-  "version": "c220fba9106315af",
+  "version": "43ede2f17d262b28",
   "algorithm": "sha256",
   "files": [
+    {
+      "path": "art/band.png",
+      "bytes": 18279,
+      "sha256": "8f7942844dc26ebf3e0ff8d9ba0cd2723a98f72a71319a0e05320044545aceb4"
+    },
     {
       "path": "art/icons/cash.png",
       "bytes": 3346,
@@ -54,18 +59,28 @@
     },
     {
       "path": "art/owner-female.png",
-      "bytes": 33252,
-      "sha256": "556658fe2c7d9123c3d19cb07f9f76e4846539d7c70999dc4d5b5ffc6877881a"
+      "bytes": 35529,
+      "sha256": "f188daefa905b0bd5ed9a0f89bc04a5337969ac9d386fa70a04f5d7d65af5119"
     },
     {
       "path": "art/owner-ff.png",
-      "bytes": 28194,
-      "sha256": "b0d5e696b56e0c425c86504cf44b7f5a0d358607a6576d068a9bf5b5731f211b"
+      "bytes": 26665,
+      "sha256": "4a2b0ca8140ba7d554ad7e84e2c3bf3912f5f2af93e509d4e48b8c1dac1cecd2"
     },
     {
       "path": "art/owner-pet.png",
-      "bytes": 34902,
-      "sha256": "4e646072b0ba803808d94a485729134339a08c79f8c4b1eb205046852c1f2ccd"
+      "bytes": 29453,
+      "sha256": "6f50f5f8eebc9a384187bd1f6c5cdd6136440e9ceaae9e47e9393b4e7d3cd895"
+    },
+    {
+      "path": "art/pit.png",
+      "bytes": 37715,
+      "sha256": "eced09ddbca3715b0fdeae20762268805c13774165e5c6683e4db5d5fee7901b"
+    },
+    {
+      "path": "art/poses.png",
+      "bytes": 67733,
+      "sha256": "11f655ae4429522d48579f7361fed12301394c4409fdf34e0a74ee6e4a1104a4"
     },
     {
       "path": "art/seoul.png",
@@ -74,8 +89,8 @@
     },
     {
       "path": "art/sprites.json",
-      "bytes": 4090,
-      "sha256": "dceb50fdac466802d89780d02f0e6b85b4cda1783ccbdd2cc6333cc6eddb0962"
+      "bytes": 3635,
+      "sha256": "52bf11260f000b10db32372ed1a239e50cca9a90588cdc0407c7c918687a8397"
     },
     {
       "path": "art/sprites.png",
@@ -89,8 +104,18 @@
     },
     {
       "path": "art/venue.png",
-      "bytes": 170965,
-      "sha256": "130a7cbc3060ade303503e15e147d9c57fd0e334aa7e0d61f59070cf72fa1333"
+      "bytes": 157238,
+      "sha256": "09932ee996bf6aab45113ac34df105cd19f427c4618fdcd4b9ee456a119c2d64"
+    },
+    {
+      "path": "art/walk.png",
+      "bytes": 30722,
+      "sha256": "774a3bd478f6f876824783f133ab54467f5592f53dc8bc422bbc9b97184d370e"
+    },
+    {
+      "path": "art/wardrobe.png",
+      "bytes": 26041,
+      "sha256": "9b20800804a589c795448ba8d25791e248de991e48e9b923f50e858b0765bd4a"
     },
     {
       "path": "booking.js",
@@ -99,8 +124,8 @@
     },
     {
       "path": "boot.js",
-      "bytes": 3604,
-      "sha256": "bb0003b3417b871340b71af6315eb74b210e314f697788c242d2b205beea55fe"
+      "bytes": 3994,
+      "sha256": "629c2cb56fdac118f7cf875f13817a70789657fe1e2f7a64ba824d84332ca6b2"
     },
     {
       "path": "catalog.js",
@@ -129,8 +154,8 @@
     },
     {
       "path": "game.js",
-      "bytes": 51395,
-      "sha256": "d3e49555036a646456f1b25e46e2265c84f03a76e269bdaa6e95cc5a3d66ca8f"
+      "bytes": 51699,
+      "sha256": "2ac5547334dde8bc2f238e04492b596c38a2f967bff6223e6cd50c74db3f4430"
     },
     {
       "path": "legacy-save.js",
@@ -159,8 +184,8 @@
     },
     {
       "path": "world.js",
-      "bytes": 14920,
-      "sha256": "65a9ee59c44e74b17e927806c21ebd7281649fca143c475e24e114a8608ab254"
+      "bytes": 17505,
+      "sha256": "788614122e021248f5ce074442d477fb6886625247721abcd3f94d107149276e"
     }
   ]
 }
