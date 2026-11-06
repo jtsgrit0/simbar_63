@@ -68,11 +68,30 @@ with all four musicians gone, all eight fans returned to their captured homes,
 and no pending floor mission or escort. The maximum 50ms actor movement was 0.1593m;
 the longest complete night was 245.7s including the 180s performance.
 
-Actual desktop/mobile browser checks passed all19 assertions on the same
-release. The19 include continuous movement, all eight fan returns, both staff
+Actual desktop/mobile browser checks passed all 19 assertions on the same
+release. The 19 include continuous movement, all eight fan returns, both staff
 physically parked before the receipt, pause/save/resume, C/F input and one-time
-settlement. The final Unity WebGL build succeeded with0 errors in229.872s;
+settlement. The final Unity WebGL build succeeded with 0 errors in 229.872s;
 the Reference scene, source/save preservation and output hashes are recorded
 in [`../V4/Unity/build-final-summary.json`](../V4/Unity/build-final-summary.json).
-The staged native manifest's45 file sizes and SHA-256 values were checked
+The staged native manifest's 45 file sizes and SHA-256 values were checked
 against the actual Git index, along with both compiled Unity binary hashes.
+
+## Public GitHub Pages measurement
+
+Source commit: `ec767d5f1cce0bd962dc243aca745203f6dba04a`.
+The Pages deployment succeeded, and the canonical public URL served the same
+`177c90f03ec2b563` runtime tested locally. See [`deployment.json`](deployment.json).
+
+| Sample | Cold startup | Warm startup |
+|---|---:|---:|
+| 1 | 2.7694s | 0.5992s |
+| 2 | 2.1556s | 0.5167s |
+| 3 | 2.1675s | 0.5367s |
+
+All six runs passed the 3s target using the declared 10Mbps/70ms/4× CPU profile.
+All three real Start interactions reached planning; no JavaScript errors or
+failed requests were observed. The cold median was 2.1675s and maximum 2.7694s.
+The report includes browser/resource timings and the exact module version:
+[`public-mobile-lte.json`](public-mobile-lte.json). This is Chromium 156 mobile
+emulation on a desktop, not a physical phone connected to an LTE carrier.
