@@ -1,0 +1,65 @@
+{
+  "release": "9f75a37229a893d8",
+  "results": [
+    {
+      "viewport": "desktop",
+      "background": {
+        "image": "url(\"http://127.0.0.1:9889/FastGame/9f75a37229a893d8/art/venue.png\"), url(\"http://127.0.0.1:9889/FastGame/9f75a37229a893d8/art/seoul.png\")",
+        "rendering": "crisp-edges",
+        "size": "cover, cover"
+      },
+      "owners": [
+        {
+          "alt": "제시",
+          "complete": true,
+          "width": 400,
+          "height": 350
+        },
+        {
+          "alt": "에디슨",
+          "complete": true,
+          "width": 400,
+          "height": 350
+        },
+        {
+          "alt": "제이든",
+          "complete": true,
+          "width": 400,
+          "height": 350
+        }
+      ],
+      "selectionAndStart": true,
+      "errors": []
+    },
+    {
+      "viewport": "mobile",
+      "background": {
+        "image": "url(\"http://127.0.0.1:9889/FastGame/9f75a37229a893d8/art/venue.png\"), url(\"http://127.0.0.1:9889/FastGame/9f75a37229a893d8/art/seoul.png\")",
+        "rendering": "crisp-edges",
+        "size": "cover, cover"
+      },
+      "owners": [
+        {
+          "alt": "제시",
+          "complete": true,
+          "width": 400,
+          "height": 350
+        },
+        {
+          "alt": "에디슨",
+          "complete": true,
+          "width": 400,
+          "height": 350
+        },
+        {
+          "alt": "제이든",
+          "complete": true,
+          "width": 400,
+          "height": 350
+        }
+      ],
+      "selectionAndStart": true,
+      "errors": []
+    }
+  ]
+}

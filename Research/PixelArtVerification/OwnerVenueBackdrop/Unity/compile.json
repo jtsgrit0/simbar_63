@@ -1,0 +1,20 @@
+{
+  "success": true,
+  "command": "recompile",
+  "data": {
+    "status": "completed",
+    "compiling": false,
+    "failed": false,
+    "compilationFailed": false,
+    "errors": [],
+    "warnings": [],
+    "summary": {
+      "errors": 0,
+      "warnings": 0
+    }
+  },
+  "errors": [],
+  "warnings": [
+    "이 프로젝트의 com.unity.pipeline은(는) 이전 명령 이름을 사용합니다. unity pipeline upgrade을(를) 실행하세요."
+  ]
+}

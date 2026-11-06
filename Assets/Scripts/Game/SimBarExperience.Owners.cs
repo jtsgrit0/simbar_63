@@ -60,11 +60,13 @@ public sealed partial class SimBarExperience
     {
         panel.GetComponent<Image>().color = new Color(0.025f, 0.032f, 0.052f, 1f);
         Texture2D night = SimBarWebTextures.Load("SimBarArt/Seoul/SeoulNeonNight");
+        Texture2D venue = LoadPixelTexture("SimBarPixelArt/Venue");
+        if (venue != null) venue.filterMode = FilterMode.Point;
         if (night != null)
         {
             ownerTitleHasFullscreenBackdrop = true;
             // Fill the whole title screen, including the area outside its card.
-            // Share the already loaded city texture with the in-card backdrop.
+            // The city stays visible through the venue plate's transparent corners.
             GameObject street = new GameObject("Owner Title Fullscreen Seoul Night", typeof(RectTransform), typeof(RawImage), typeof(AspectRatioFitter));
             street.transform.SetParent(panel.parent, false);
             street.transform.SetAsFirstSibling();
@@ -80,15 +82,38 @@ public sealed partial class SimBarExperience
             AspectRatioFitter streetFit = street.GetComponent<AspectRatioFitter>();
             streetFit.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
             streetFit.aspectRatio = night.width / (float)night.height;
+        }
+        if (venue != null)
+        {
+            ownerTitleHasFullscreenBackdrop = true;
+            GameObject room = new GameObject("Owner Title Fullscreen Venue", typeof(RectTransform), typeof(RawImage), typeof(AspectRatioFitter));
+            room.transform.SetParent(panel.parent, false);
+            room.transform.SetSiblingIndex(night != null ? 1 : 0);
+            RawImage roomImage = room.GetComponent<RawImage>();
+            roomImage.texture = venue;
+            roomImage.color = new Color(0.72f, 0.72f, 0.78f, 1f);
+            roomImage.raycastTarget = false;
+            RectTransform roomRect = roomImage.rectTransform;
+            roomRect.anchorMin = Vector2.zero;
+            roomRect.anchorMax = Vector2.one;
+            roomRect.offsetMin = Vector2.zero;
+            roomRect.offsetMax = Vector2.zero;
+            AspectRatioFitter roomFit = room.GetComponent<AspectRatioFitter>();
+            roomFit.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
+            roomFit.aspectRatio = venue.width / (float)venue.height;
+        }
+        Texture2D titleBackdrop = venue != null ? venue : night;
+        if (titleBackdrop != null)
+        {
 
-            GameObject backdrop = new GameObject("Owner Title Seoul Night", typeof(RectTransform), typeof(RawImage));
+            GameObject backdrop = new GameObject("Owner Title Venue Backdrop", typeof(RectTransform), typeof(RawImage));
             backdrop.transform.SetParent(panel, false);
             RawImage image = backdrop.GetComponent<RawImage>();
-            image.texture = night;
+            image.texture = titleBackdrop;
             image.color = new Color(0.38f, 0.38f, 0.45f, 1f);
             image.raycastTarget = false;
             SetRect(image.rectTransform, Vector2.one * 0.5f, Vector2.zero, new Vector2(1468f, 888f));
-            image.uvRect = OwnerPortraitCrop(night, 1468f / 888f);
+            image.uvRect = OwnerPortraitCrop(titleBackdrop, 1468f / 888f);
             GameObject shade = CreatePanel("Owner Title Ink Wash", panel, Vector2.one * 0.5f, Vector2.zero, new Vector2(1468f, 888f), new Color(0.012f, 0.018f, 0.033f, 0.79f));
             shade.GetComponent<Image>().raycastTarget = false;
         }

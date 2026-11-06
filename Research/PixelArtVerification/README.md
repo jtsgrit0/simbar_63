@@ -1,5 +1,9 @@
 # Pixel-art game verification
 
+The latest selector-background follow-up is in [`TitleVenue/`](TitleVenue/):
+the supplied owner portraits are unchanged and the existing pixel venue is
+layered over the city on the owner selection screen.
+
 Current owner, illustrated-band, stage-light and after-show verification is
 collected in [`Final/`](Final/). The retained measurements and screenshots below
 describe the earlier baseline release and should not be used as the current

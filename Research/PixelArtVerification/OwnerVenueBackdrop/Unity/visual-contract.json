@@ -1,0 +1,35 @@
+{
+  "venue": "SimBarPixelArt/Venue",
+  "width": 960,
+  "height": 558,
+  "pointFilter": true,
+  "cover": true,
+  "coversViewport": true,
+  "cityBelowVenue": true,
+  "sameCardVenue": true,
+  "raycastPasses": true,
+  "selectedOwner": "ff",
+  "portraits": [
+    {
+      "name": "Journey Owner Portrait 0",
+      "width": 400,
+      "height": 350,
+      "drawWidth": 400.0,
+      "drawHeight": 350.0
+    },
+    {
+      "name": "Journey Owner Portrait 1",
+      "width": 400,
+      "height": 350,
+      "drawWidth": 400.0,
+      "drawHeight": 350.0
+    },
+    {
+      "name": "Journey Owner Portrait 2",
+      "width": 400,
+      "height": 350,
+      "drawWidth": 400.0,
+      "drawHeight": 350.0
+    }
+  ]
+}
