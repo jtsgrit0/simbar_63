@@ -1,0 +1,56 @@
+{
+  "frames": 464,
+  "seconds": 46.4,
+  "pendingGate": true,
+  "bandOnlyGate": true,
+  "allGone": true,
+  "allFans": true,
+  "allFansAtHome": true,
+  "completed": true,
+  "phase": "Results",
+  "settled": true,
+  "onlyOnce": true,
+  "count": 2,
+  "homes": [
+    {
+      "id": "patron-8",
+      "phase": "done",
+      "homeDistance": 0.0
+    },
+    {
+      "id": "patron-9",
+      "phase": "done",
+      "homeDistance": 0.0
+    },
+    {
+      "id": "patron-10",
+      "phase": "done",
+      "homeDistance": 0.0
+    },
+    {
+      "id": "patron-11",
+      "phase": "done",
+      "homeDistance": 0.0
+    },
+    {
+      "id": "patron-12",
+      "phase": "done",
+      "homeDistance": 0.0
+    },
+    {
+      "id": "patron-13",
+      "phase": "done",
+      "homeDistance": 0.0
+    },
+    {
+      "id": "patron-14",
+      "phase": "done",
+      "homeDistance": 0.0
+    },
+    {
+      "id": "patron-15",
+      "phase": "done",
+      "homeDistance": 2.38418579E-07
+    }
+  ]
+}

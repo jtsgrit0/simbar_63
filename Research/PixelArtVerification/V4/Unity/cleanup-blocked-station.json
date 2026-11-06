@@ -1,0 +1,13 @@
+{
+  "goal": {
+    "x": 2.2,
+    "z": -3.45
+  },
+  "heldHomeClearance": 0.450000048,
+  "cachedStable": true,
+  "readyWorkers": 1,
+  "frames": 91,
+  "moved": true,
+  "qteBudgetUnchanged": true,
+  "cleaned": 0.0
+}

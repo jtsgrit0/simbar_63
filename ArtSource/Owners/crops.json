@@ -1,0 +1,258 @@
+{
+  "source": "ArtSource/Owners/Original-owner_p.png",
+  "sha256": "a030c8958e0a4aa7e881bf1028f145e9b6f6a3a9e03c6c2bf08648c8b476b36c",
+  "method": "Lossless original-pixel polygon crops; nearest-neighbor runtime copies; no generation or recoloring",
+  "owners": [
+    {
+      "name": "JESSY",
+      "id": "female",
+      "file": "owner-female.png",
+      "asset": "OwnerFemale",
+      "size": [
+        800,
+        700
+      ],
+      "clip": [
+        [
+          194,
+          17
+        ],
+        [
+          885,
+          17
+        ],
+        [
+          885,
+          437
+        ],
+        [
+          765,
+          437
+        ],
+        [
+          704,
+          481
+        ],
+        [
+          685,
+          547
+        ],
+        [
+          676,
+          598
+        ],
+        [
+          649,
+          644
+        ],
+        [
+          620,
+          704
+        ],
+        [
+          441,
+          704
+        ],
+        [
+          442,
+          641
+        ],
+        [
+          365,
+          635
+        ],
+        [
+          300,
+          631
+        ],
+        [
+          250,
+          623
+        ],
+        [
+          210,
+          611
+        ],
+        [
+          194,
+          589
+        ]
+      ],
+      "bounds": [
+        194,
+        17,
+        886,
+        705
+      ],
+      "offset": [
+        54,
+        6
+      ],
+      "originalCrop": "ArtSource/Owners/OriginalCrops/Jessy.png",
+      "runtimeSize": [
+        400,
+        350
+      ],
+      "sha256": "97a101f9fb1594bed5217699714ef0ebf1037dfbe3ae85820d7eecdb6dcb52f9",
+      "bytes": 184674
+    },
+    {
+      "name": "EDISON",
+      "id": "ff",
+      "file": "owner-ff.png",
+      "asset": "OwnerFF",
+      "size": [
+        656,
+        574
+      ],
+      "clip": [
+        [
+          829,
+          440
+        ],
+        [
+          968,
+          449
+        ],
+        [
+          1056,
+          523
+        ],
+        [
+          1056,
+          1006
+        ],
+        [
+          450,
+          1006
+        ],
+        [
+          450,
+          943
+        ],
+        [
+          487,
+          941
+        ],
+        [
+          489,
+          893
+        ],
+        [
+          500,
+          847
+        ],
+        [
+          523,
+          795
+        ],
+        [
+          566,
+          749
+        ],
+        [
+          604,
+          719
+        ],
+        [
+          661,
+          709
+        ],
+        [
+          666,
+          655
+        ],
+        [
+          691,
+          632
+        ],
+        [
+          679,
+          600
+        ],
+        [
+          683,
+          551
+        ],
+        [
+          713,
+          500
+        ],
+        [
+          766,
+          462
+        ]
+      ],
+      "bounds": [
+        450,
+        440,
+        1057,
+        1007
+      ],
+      "offset": [
+        24,
+        3
+      ],
+      "originalCrop": "ArtSource/Owners/OriginalCrops/Edison.png",
+      "runtimeSize": [
+        400,
+        350
+      ],
+      "sha256": "c46b9ee4cdd87ac6813ea130ff464bb7dc764daf239472bd47cad4dd5a14e560",
+      "bytes": 187568
+    },
+    {
+      "name": "JAIDEN",
+      "id": "pet-sounds",
+      "file": "owner-pet.png",
+      "asset": "OwnerPetSounds",
+      "size": [
+        640,
+        560
+      ],
+      "clip": [
+        [
+          14,
+          701
+        ],
+        [
+          483,
+          701
+        ],
+        [
+          483,
+          935
+        ],
+        [
+          450,
+          935
+        ],
+        [
+          450,
+          1250
+        ],
+        [
+          14,
+          1250
+        ]
+      ],
+      "bounds": [
+        14,
+        701,
+        484,
+        1251
+      ],
+      "offset": [
+        85,
+        5
+      ],
+      "originalCrop": "ArtSource/Owners/OriginalCrops/Jaiden.png",
+      "runtimeSize": [
+        400,
+        350
+      ],
+      "sha256": "add66e2bbd4d15aa78cbd01e9cab36c1a5591cd6084144b6790c1a9188c0e113",
+      "bytes": 161850
+    }
+  ]
+}

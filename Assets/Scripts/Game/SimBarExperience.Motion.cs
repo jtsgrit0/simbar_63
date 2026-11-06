@@ -16,6 +16,7 @@ public sealed partial class SimBarExperience
         public int pathIndex, queueIndex = -1, cycle, index, pitSlot = -1;
         public float wait, speed, stuck, workMin, workMax, celebration;
         public bool moving, routeFailed, pitActive;
+        public string afterShowAction;public float afterShowProgress;
     }
     private readonly List<MotionActor> motionActors = new List<MotionActor>(48);
     private readonly Dictionary<Patron, MotionActor> motionLookup = new Dictionary<Patron, MotionActor>();
@@ -97,6 +98,7 @@ public sealed partial class SimBarExperience
         foreach (MotionActor actor in motionActors)
         {
             if (actor.person.root == null || !actor.person.root.gameObject.activeInHierarchy) continue;
+            if(AfterShowOwns(actor))continue;
             if (IsFloorMissionActor(actor.person.root) || JourneyIsFloorClosing && actor.kind == MotionKind.Band)
             { actor.speed = 0f; actor.moving = false; continue; }
             Vector3 previous = actor.frameStartPosition;
@@ -158,7 +160,7 @@ public sealed partial class SimBarExperience
             Vector3 origin = MotionPosition(actor);
             foreach (MotionActor other in motionActors)
             {
-                if (other == actor || other.kind == MotionKind.Band || other.person.root == null || !other.person.root.gameObject.activeInHierarchy) continue;
+                if (other == actor || !IsSolidVenueActor(other) || other.person.root == null || !other.person.root.gameObject.activeInHierarchy) continue;
                 Vector3 body = MotionPosition(other);
                 if (Mathf.Abs(body.y - origin.y) > 1.1f) continue;
                 float clearance = MotionBodyRadius(actor) + MotionBodyRadius(other);
@@ -261,7 +263,7 @@ public sealed partial class SimBarExperience
         if (actor.pitSlot < 0 && CrowdFloorReserved(next)) return false;
         foreach (MotionActor other in motionActors)
         {
-            if (other == actor || other.kind == MotionKind.Band || other.person.root == null || !other.person.root.gameObject.activeInHierarchy) continue;
+            if (other == actor || !IsSolidVenueActor(other) || other.person.root == null || !other.person.root.gameObject.activeInHierarchy) continue;
             Vector3 position = MotionPosition(other);
             if (Mathf.Abs(next.y - position.y) > 1.1f) continue;
             float clearance = MotionBodyRadius(actor) + MotionBodyRadius(other);

@@ -14,7 +14,10 @@ with sync_playwright() as p:
     def click(action,n=0):page.locator('button[data-action="'+action+'"]').nth(n).click();page.wait_for_timeout(150)
     shot('01-title');assert page.locator('button[data-action="owner"]').count()==3
     click('owner',1);assert page.evaluate('simbarGame.owner')==1
-    click('start');shot('02-posters');assert page.locator('.poster-frame img').count()==1
+    click('start')
+    if page.locator('button[data-action="ui:liveBriefingClose"]').count():
+        shot('02-live-briefing');click('ui:liveBriefingClose')
+    shot('02-posters');assert page.locator('.poster-frame img').count()==1
     assert page.locator('.poster-frame img').get_attribute('src').startswith('data:image/svg+xml')
     # The current C# daily lineup uses the already known twelve fictional acts.
     # Verified real posters remain independently researchable and unlock real acts.

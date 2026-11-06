@@ -1,0 +1,38 @@
+{
+  "release": "177c90f03ec2b563",
+  "reviewedActualBrowserImages": true,
+  "observations": {
+    "desktopAndMobileOwners": "Jessy, Edison and Jaiden show the supplied original busts with hair, faces and props intact. Exact 400x350 pixel-crop identity is independently checked in details/details.json.",
+    "bandAndAudience": "The live band has illustrated human proportions matching the audience. The drummer appears behind the foreground drum kit with sticks in hand; the singer holds the main microphone.",
+    "performanceMotion": "Actual rendered frames show guitar/bass grounded performance poses, spread-leg jumps and landing frames. Sixteen real RAF jump frames and a video are saved in details/.",
+    "seatingAndCostumes": "Bar seats face the counter; opposite lounge rows face their tables. All eight audience costume identities are present in the live game.",
+    "greetings": "All four real rendered high-five and hug midpoint crops were inspected. Raised hands meet and hugging arms contact the partner; crowd overlap is natural.",
+    "room": "Artist lettering for AC/DC, The Beatles, Queen, Nirvana, Taylor Swift and Michael Jackson is visible on the floor. Visible stage beams and source lights illuminate the room.",
+    "buttons": "The three lower navigation labels are centered in their buttons, with their original image glyphs to the left. Measured text-center offsets are below 0.007 CSS pixels."
+  },
+  "behaviorEvidence": {
+    "normalSeededNightsPassed": 20,
+    "maxFanHomeDistanceMetersAcrossSeedSweep": 0.01937223783657761,
+    "nativeMjsSuitesPassed": 6,
+    "actualBrowserAftershowAssertionsPassed": 19,
+    "actualBrowserAftershowWallSeconds": 59.239,
+    "actualBrowserMaxFanHomeDistanceMeters": 0.01738432188134488,
+    "actualBrowserStaffReturnDistancesMeters": [0.048288100502090495, 0.04120755391915531],
+    "fullUiJourneyPassed": true,
+    "zeroJavaScriptErrors": true,
+    "zeroMissingAssets": true
+  },
+  "evidence": [
+    "visual/desktop-title.png",
+    "visual/mobile-title.png",
+    "visual/desktop-game.png",
+    "visual/mobile-game.png",
+    "visual/mobile-landscape-game.png",
+    "aftershow/aftershow-browser-qa.json",
+    "aftershow/video/page@6eb10ea438e6bb302c7379d6750f6b96.webm",
+    "details/details.json",
+    "details/video/page@5bd758da938ae8aec3e7a186b8288d22.webm",
+    "ui/result.json",
+    "seed-sweep.json"
+  ]
+}

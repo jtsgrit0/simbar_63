@@ -26,7 +26,10 @@ export function pixelFacing(actor,role,action,state={}){
   if(role==='barseated')return'BR';
   if(role==='seated')return Number(String(actor.id).split('-').at(-1))<4?'FL':'BR';
   const target=(x,z)=>pixelDirection(x-finite(actor.x),z-finite(actor.z));
-  if(['singer','guitarist','bassist','drummer'].includes(role))return target(5.75,-1.25);
+  if(['highfive','hug','aftershow-wait'].includes(action)&&actor._partner){
+    const partner=state.actors?.find(a=>a.id===actor._partner);if(partner)return target(partner.x,partner.z);
+  }
+  if(['singer','guitarist','bassist','drummer'].includes(role)&&['perform','idle'].includes(action)&&!actor.afterShowPhase)return target(5.75,-1.25);
   if(action==='mosh')return pixelDirection(-(finite(actor.z)+1.25),finite(actor.x)-5.75);
   if(action==='slam')return target(5.75,-1.25);
   if(action==='support'){
@@ -54,6 +57,16 @@ export function pixelStyle(actor,entry,meta={}){
   return styles[((index%styles.length)+styles.length)%styles.length];
 }
 
+// A brief, staggered jump is presentation only. The gameplay positions and the
+// grounded contact shadow continue to use the real stage floor throughout.
+export function pixelBandJump(role,action,seconds,active=true){
+  if(!active||action!=='perform'||!['guitarist','bassist'].includes(role))return null;
+  const phase=(Math.max(0,seconds)+(role==='bassist'?2.6:0))%10.4;
+  if(phase<8.9||phase>=9.9)return null;
+  const progress=phase-8.9,air=Math.max(0,Math.sin(clamp((progress-.125)/.75,0,1)*Math.PI));
+  return{frame:Math.min(7,Math.floor(progress*8)),lift:Math.round(air*7),shadow:1-air*.32};
+}
+
 export function createWorld(canvas,{assets={},getState=()=>({})}={}){
   const ctx=canvas.getContext('2d',{alpha:false});if(!ctx)throw new Error('A 2D game canvas is required.');
   if(!ready(assets.venue))throw new Error('The detailed room artwork must finish loading before the game starts.');
@@ -72,7 +85,11 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
     const offset=assets.venueMeta?.actorOffsets?.[a.id]||[0,0],region=assets.venueMeta?.barRegion;
     const employee=['bartender','server'].includes(a.role)||a.id?.startsWith('hired-');
     const weight=employee&&region&&a.z>=region.zMin&&a.z<=region.zMax?clamp((region.xMax-a.x)/region.xFade,0,1):0;
-    return{x:offset[0]+(region?.offset?.[0]||0)*weight,y:offset[1]+(region?.offset?.[1]||0)*weight};
+    const stageWeight=a.role==='band'&&Number.isFinite(a.stageLevel)?clamp(a.stageLevel,0,1):1;
+    const stageFoot=a.role==='band'&&assets.venueMeta?.bandStageFeet?.[a.id];
+    if(stageFoot){const home=project(finite(a.homeX,a.x),finite(a.homeZ,a.z),finite(a.homeY));return{x:(stageFoot[0]-home.x)*stageWeight,y:(stageFoot[1]-home.y)*stageWeight};}
+    const elevation=finite(assets.venueMeta?.stageElevationPixels)*(a.role==='band'?stageWeight:0);
+    return{x:offset[0]*stageWeight+(region?.offset?.[0]||0)*weight,y:offset[1]*stageWeight+(region?.offset?.[1]||0)*weight-elevation};
   };
   const actorPoint=(a,y=0)=>{const p=project(finite(a.x),finite(a.z),y),o=actorOffset(a);return{x:p.x+o.x,y:p.y+o.y};};
   function resize(){const b=canvas.getBoundingClientRect();cssW=Math.max(1,b.width);cssH=Math.max(1,b.height);width=Math.max(160,Math.min(2304,Math.round(REF_H*cssW/cssH)));height=REF_H;offsetX=(width-REF_W)/2;if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.height=height;city=null;}ctx.imageSmoothingEnabled=false;}
@@ -88,13 +105,20 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
     const layers=[...(supplied||bar),...boxes];
     for(const layer of layers){if(!layer.points?.length)continue;const p=layer.points.map(p=>Array.isArray(p)?{x:p[0],y:p[1]}:p),xs=p.map(v=>v.x),ys=p.map(v=>v.y),left=Math.floor(Math.min(...xs)),top=Math.floor(Math.min(...ys)),w=Math.ceil(Math.max(...xs))-left+1,h=Math.ceil(Math.max(...ys))-top+1;if(w<=0||h<=0)continue;const mask=surface(w,h),c=mask.getContext('2d');c.imageSmoothingEnabled=false;c.translate(-left,-top);c.beginPath();p.forEach((v,i)=>i?c.lineTo(Math.round(v.x),Math.round(v.y)):c.moveTo(Math.round(v.x),Math.round(v.y)));c.closePath();c.clip();c.drawImage(plate,0,0,REF_W,REF_H);occluders.push({image:mask,x:left,y:top,depth:Number.isFinite(layer.depth)?layer.depth:project(layer.worldX||0,layer.worldZ||0).y});}
   }
-  function atlasFrame(actor,role,action,frame,state){
+  function atlasFrame(actor,role,action,frame,state,frameOverride=null){
     const meta=assets.spriteMeta||{};
     let entry=meta.roles?.[role]??meta.roles?.[actor.role]??meta.roles?.guest??meta.roles?.default;
     if(entry==null)return null;if(typeof entry==='number')entry={row:entry};
     const style=pixelStyle(actor,entry,meta);
     let selected=entry.actions?.[action]||entry.actions?.[['dance','mosh','slam','support'].includes(action)?'dance':action==='walk'?'walk':action==='clean'?'clean':'idle']||entry;
     if(selected.preserveStyle&&selected.variantStyles&&selected.variantStyles[style]==null)selected=entry;
+    const phase=['playing','closing'].includes(state.phase),fps=finite(selected.fps||entry.fps);
+    if(fps>0)frame=phase?Math.floor(seconds*fps+(action==='perform'?0:hash(actor.id)%4)):0;
+    if(selected.progressFrames){
+      const count=selected.frameCount||selected.frameColumns?.length||8;
+      frame=Math.min(count-1,Math.floor(clamp(actor.actionProgress,0,1)*count));
+    }
+    if(frameOverride!=null)frame=frameOverride;
     const atlasFrames=selected.atlasFrames||entry.atlasFrames;
     const atlasKey=(atlasFrames?.length?atlasFrames[frame%atlasFrames.length]:null)||selected.atlas||entry.atlas||meta.defaultAtlas||'animation',definition=meta.atlases?.[atlasKey]||{},sheet=assets.atlases?.[atlasKey]||(!meta.atlases?assets.sprites:null);
     if(!ready(sheet))throw new Error('Missing pixel character atlas: '+atlasKey);
@@ -103,6 +127,7 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
     const rowFor=value=>value.variantStyles?.[style]??(value.variantRows?.length?value.variantRows[hash(actor.id)%value.variantRows.length]:value.row);
     const ownRow=selected!==entry?rowFor(selected):undefined;
     let row=selected.directionRows?.[direction]??entry.directionRows?.[direction]??selected.rows?.[direction]??ownRow??rowFor(entry)??0;
+    row+=(selected.directionRowOffsets||entry.directionRowOffsets||definition.directionRowOffsets)?.[direction]||0;
     const directionColumns=selected.directionColumns||entry.directionColumns||definition.directionColumns,directionalColumn=directionColumns?.[direction];
     const frameColumns=selected.frameColumns||entry.frameColumns;
     let frames=selected.frames||entry.frames||columns,col=directionalColumn!=null?(Array.isArray(directionalColumn)?directionalColumn[frame%directionalColumn.length]:directionalColumn):frameColumns?.length?frameColumns[frame%frameColumns.length]:(selected.column||0)+frame%Math.max(1,Math.min(frames,columns));
@@ -113,15 +138,16 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
   function drawActor(a,state){
     let role=String(a.role||'guest').toLowerCase();if(role==='band')role=String(a.id||'singer');if(a.id?.startsWith('bar-seat-'))role='barseated';
     let action=String(a.action||'idle');if(action==='sweep')action='clean';else if(a.moving&&!['mosh','slam','surf','support'].includes(action))action='walk';
-    const playing=state.phase==='playing'&&!state.paused,active=(playing||state.phase==='closing')&&!state.paused;
+    const active=['playing','closing'].includes(state.phase);
     const band=role==='singer'||role==='guitarist'||role==='bassist'||role==='drummer';
-    const frame=active?Math.floor(seconds*(action==='walk'?7:action==='clean'?6:band?8:5)+hash(a.id)%4)%4:0;
+    const jump=assets.spriteMeta.roles?.[role]?.actions?.jump?pixelBandJump(role,action,seconds,active):null;
+    if(jump)action='jump';
+    const frame=active?Math.floor(seconds*(action==='walk'?7:action==='clean'?6:band?8:5)+hash(a.id)%4):0;
     const p=actorPoint(a,finite(a.y)),ground=actorPoint(a,role==='surfer'?0:finite(a.y)),surf=(action==='surf'||role==='surfer')&&finite(a.y)>.1;
-    ellipse(ctx,ground.x,ground.y+1,4,1,'#16182360');
-    const atlas=atlasFrame(a,role,action,frame,state),meta=atlas?.meta||{},entry=atlas?.entry||{},size=entry.drawHeight||meta.drawHeight||40;
-    const bandPhase=hash(a.id)%17;
-    const bob=active&&['dance','mosh','perform','slam'].includes(action)?Math.round(Math.sin(seconds*(band&&action==='perform'?7:5)+bandPhase)*(band?2.2:.6)):0;
-    ctx.save();ctx.translate(Math.round(p.x),Math.round(p.y+bob));
+    if(role!=='drummer'||action!=='perform')ellipse(ctx,ground.x,ground.y+1,Math.round(4*(jump?.shadow||1)),1,jump?'#16182348':'#16182360');
+    const atlas=atlasFrame(a,role,action,frame,state,jump?.frame),meta=atlas?.meta||{},entry=atlas?.entry||{},size=entry.drawHeight||meta.drawHeight||40;
+    const bob=!band&&active&&['dance','mosh','slam'].includes(action)?Math.round(Math.sin(seconds*5+hash(a.id)%17)*.6):0;
+    ctx.save();ctx.translate(Math.round(p.x),Math.round(p.y+bob-(jump?.lift||0)));
     if(surf&&!entry.horizontal){ctx.rotate(-Math.PI/2);ctx.translate(0,-7);}
     if(atlas){const scale=size/atlas.sh,dw=entry.drawWidth||meta.drawWidth||atlas.sw*scale,dh=size,footX=entry.footX??meta.footX??atlas.sw/2,footY=entry.footY??meta.footY??atlas.sh;if(atlas.flip)ctx.scale(-1,1);ctx.drawImage(atlas.sheet,atlas.sx,atlas.sy,atlas.sw,atlas.sh,Math.round(-footX*dw/atlas.sw),Math.round(-footY*dh/atlas.sh),Math.round(dw),Math.round(dh));}
     else throw new Error('No pixel character atlas entry for '+role);
@@ -138,12 +164,51 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
     for(let i=0;i<42;i++){const x=2+random()*7.2,z=-4.1+random()*5.2,p=project(x,z,.025);if(i>=count)continue;const tissue=i%Math.max(1,throws)<finite(f.tissueThrows);ctx.fillStyle=tissue?'#e9e5d9':['#d37da0','#62bdc6','#d4b25c','#9281b4'][i%4];ctx.fillRect(Math.round(p.x),Math.round(p.y),tissue?4:2,1);if(tissue)ctx.fillRect(Math.round(p.x+2),Math.round(p.y+1),3,1);}
     return()=>{for(let i=particles.length-1;i>=0;i--){const a=particles[i];a.age+=dt;a.vy-=dt*3.2;a.x+=a.vx*dt;a.z+=a.vz*dt;a.y+=a.vy*dt;if(a.y<.03||a.age>7){particles.splice(i,1);continue;}const p=project(a.x,a.z,a.y);ctx.fillStyle=a.color;ctx.fillRect(Math.round(p.x),Math.round(p.y),a.kind?4:2,1);if(a.kind)ctx.fillRect(Math.round(p.x+2),Math.round(p.y+1),3,1);}};
   }
-  function stageLights(state){if(state.phase!=='playing'||state.paused)return;ctx.globalCompositeOperation='screen';ctx.globalAlpha=.025+.02*Math.sin(seconds*2);polygon(ctx,[project(1.46,2.2,.58),project(9.3,2.2,.58),project(9.3,6.5,.58),project(1.46,6.5,.58)],'#ed58be');ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';}
+  function stageLights(state){
+    if(!['playing','closing'].includes(state.phase))return;
+    // Match the illustrated truss; targets and alternating 120 BPM banks follow
+    // SimBarReferenceLighting. The gameplay clock freezes these lights on pause.
+    const rig=[
+      {source:[2.55,5.8,4.6],target:[1.8,-1.2,.12],color:'#48d8ff'},
+      {source:[3.85,5.8,4.74],target:[6.5,3,.65],color:'#ff50c9'},
+      {source:[7.25,5.8,5],target:[3.9,-1.8,.12],color:'#60dfff'},
+      {source:[8.6,5.8,5.1],target:[8.2,2.8,.65],color:'#ffc16b'}
+    ];
+    const smooth=n=>{n=clamp(n,0,1);return n*n*(3-2*n);};
+    const ring=(x,z,y,radius)=>Array.from({length:20},(_,i)=>{const a=i*Math.PI/10;return project(x+Math.cos(a)*radius,z+Math.sin(a)*radius*.8,y);});
+    ctx.save();ctx.globalCompositeOperation='screen';
+    for(let i=0;i<rig.length;i++){
+      const light=rig[i],phase=(seconds+.12+(i%2)*.5)%1;
+      const pulse=smooth(phase/.08)*(1-smooth((phase-.30)/.18));
+      const sway=Math.sin(seconds*.72+i*1.7)*.48+Math.sin(seconds*Math.PI*4+i*Math.PI)*.08;
+      const [tx,tz,ty]=light.target,x=tx+sway,z=tz+Math.cos(seconds*.58+i*1.4)*.24;
+      const source=project(...light.source),end=project(x,z,ty),radius=i%2?1.18:1.48;
+      // Several projected rings make a feathered pool without blurring the art.
+      for(let layer=0;layer<4;layer++){
+        ctx.globalAlpha=.05+layer*.018+pulse*.032;
+        polygon(ctx,ring(x,z,ty+.006,radius*(1.25-layer*.23)),light.color);
+      }
+      const haze=ctx.createLinearGradient(source.x,source.y,end.x,end.y);
+      haze.addColorStop(0,light.color+'d9');haze.addColorStop(.3,light.color+'b3');haze.addColorStop(1,light.color+'73');
+      for(let layer=0;layer<3;layer++){
+        ctx.globalAlpha=[.11,.065,.04][layer]+[.07,.045,.025][layer]*pulse;
+        polygon(ctx,hull([source,...ring(x,z,ty,radius*[1,.7,.38][layer])]),haze);
+      }
+      // Small pixel-stepped source flares stay attached to the visible lamps.
+      ctx.globalAlpha=.08+pulse*.08;ellipse(ctx,source.x,source.y,12,8,light.color);
+      ctx.globalAlpha=.2+pulse*.15;ellipse(ctx,source.x,source.y,6,4,light.color);
+      ctx.globalAlpha=.7+pulse*.2;ellipse(ctx,source.x,source.y,2,2,'#fff6df');
+      ctx.globalAlpha=.22+pulse*.1;ctx.fillStyle=light.color;
+      ctx.fillRect(Math.round(source.x-9),Math.round(source.y),19,1);
+      ctx.fillRect(Math.round(source.x),Math.round(source.y-7),1,15);
+    }
+    ctx.restore();
+  }
   function render(timestamp,state=getState()){
     if(destroyed)return;state=state||{};const now=finite(timestamp,performance.now()),dt=last==null?0:clamp((now-last)/1000,0,.1);last=now;const running=['playing','closing'].includes(state.phase)&&!state.paused;if(running)seconds+=dt;
     background();roomLayers();ctx.save();ctx.translate(Math.round(offsetX),0);ctx.imageSmoothingEnabled=false;ctx.drawImage(assets.venue,0,0,REF_W,REF_H);stageLights(state);const airborne=paper(state,running?dt:0);
     const drawables=occluders.map(layer=>({depth:layer.depth,draw:()=>ctx.drawImage(layer.image,layer.x,layer.y)}));
-    for(const actor of state.actors||[]){if(actor.visible===false)continue;drawables.push({depth:actorPoint(actor).y+(actor.action==='surf'?2:0)+(actor.id?.startsWith('bar-seat-')?25:0),draw:()=>drawActor(actor,state)});}
+    for(const actor of state.actors||[]){if(actor.visible===false)continue;let depth=actorPoint(actor).y+(actor.action==='surf'?2:0)+(actor.id?.startsWith('bar-seat-')?25:0);if(actor.id==='drummer'&&actor.action==='perform'&&assets.venueMeta?.drumForegroundDepth>0)depth=Math.min(depth,assets.venueMeta.drumForegroundDepth-1);drawables.push({depth,draw:()=>drawActor(actor,state)});}
     drawables.sort((a,b)=>a.depth-b.depth);for(const item of drawables)item.draw();airborne();ctx.restore();
   }
   function worldToScreen(x,z,y=0){const p=project(x,z,y);return{x:(p.x+offsetX)*cssW/width,y:p.y*cssH/height};}

@@ -1,0 +1,142 @@
+{
+  "originalSha256": "a030c8958e0a4aa7e881bf1028f145e9b6f6a3a9e03c6c2bf08648c8b476b36c",
+  "originalUnchanged": true,
+  "owners": [
+    {
+      "name": "JESSY",
+      "file": "owner-female.png",
+      "originalClipPixelsExact": true,
+      "runtimeIsNearestOriginal": true,
+      "nativeUnityIdentical": true,
+      "runtimeSize": [
+        400,
+        350
+      ],
+      "bytes": 184674
+    },
+    {
+      "name": "EDISON",
+      "file": "owner-ff.png",
+      "originalClipPixelsExact": true,
+      "runtimeIsNearestOriginal": true,
+      "nativeUnityIdentical": true,
+      "runtimeSize": [
+        400,
+        350
+      ],
+      "bytes": 187568
+    },
+    {
+      "name": "JAIDEN",
+      "file": "owner-pet.png",
+      "originalClipPixelsExact": true,
+      "runtimeIsNearestOriginal": true,
+      "nativeUnityIdentical": true,
+      "runtimeSize": [
+        400,
+        350
+      ],
+      "bytes": 161850
+    }
+  ],
+  "screens": [
+    {
+      "label": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "images": [
+        {
+          "alt": "제시",
+          "width": 400,
+          "height": 350,
+          "src": "owner-female.png",
+          "fit": "cover",
+          "visible": true
+        },
+        {
+          "alt": "에디슨",
+          "width": 400,
+          "height": 350,
+          "src": "owner-ff.png",
+          "fit": "cover",
+          "visible": true
+        },
+        {
+          "alt": "제이든",
+          "width": 400,
+          "height": 350,
+          "src": "owner-pet.png",
+          "fit": "cover",
+          "visible": true
+        }
+      ],
+      "selection": [
+        {
+          "ownerIndex": 0,
+          "selectedLabel": "제시"
+        },
+        {
+          "ownerIndex": 1,
+          "selectedLabel": "제시"
+        },
+        {
+          "ownerIndex": 2,
+          "selectedLabel": "에디슨"
+        }
+      ],
+      "errors": [],
+      "screenshot": "Research/PixelArtVerification/OriginalOwners/desktop-owner-title.png"
+    },
+    {
+      "label": "mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "images": [
+        {
+          "alt": "제시",
+          "width": 400,
+          "height": 350,
+          "src": "owner-female.png",
+          "fit": "cover",
+          "visible": true
+        },
+        {
+          "alt": "에디슨",
+          "width": 400,
+          "height": 350,
+          "src": "owner-ff.png",
+          "fit": "cover",
+          "visible": true
+        },
+        {
+          "alt": "제이든",
+          "width": 400,
+          "height": 350,
+          "src": "owner-pet.png",
+          "fit": "cover",
+          "visible": true
+        }
+      ],
+      "selection": [
+        {
+          "ownerIndex": 0,
+          "selectedLabel": "제시"
+        },
+        {
+          "ownerIndex": 1,
+          "selectedLabel": "제시"
+        },
+        {
+          "ownerIndex": 2,
+          "selectedLabel": "에디슨"
+        }
+      ],
+      "errors": [],
+      "screenshot": "Research/PixelArtVerification/OriginalOwners/mobile-owner-title.png"
+    }
+  ]
+}

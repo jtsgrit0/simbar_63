@@ -18,13 +18,13 @@ public sealed partial class SimBarExperience
     }
     [Serializable] private sealed class PixelAction
     {
-        public string id,atlas;public string[] atlasFrames;public int row,drawHeight,cropHeight,footX,footY;public bool hasRow,horizontal,preserveStyle;public int[] frameColumns,variantRows;
-        public PixelStyle[] variantStyles;public PixelDirection[] directionColumns;
+        public string id,atlas,direction;public string[] atlasFrames;public int row,drawHeight,cropHeight,footX,footY;public bool hasRow,horizontal,preserveStyle;public int[] frameColumns,variantRows;
+        public float fps;public int frameCount;public bool progressFrames;public PixelStyle[] variantStyles,directionRows,directionRowOffsets;public PixelDirection[] directionColumns;
     }
     [Serializable] private sealed class PixelRole
     {
-        public string id,atlas;public string[] styles,atlasFrames;public int row,drawHeight,cropHeight,footX,footY;public bool horizontal;public int[] variantRows,frameColumns;
-        public PixelAction[] actions;public PixelStyle[] variantStyles;public PixelDirection[] directionColumns;
+        public string id,atlas,direction;public string[] styles,atlasFrames;public int row,drawHeight,cropHeight,footX,footY;public bool horizontal;public int[] variantRows,frameColumns;
+        public float fps;public PixelAction[] actions;public PixelStyle[] variantStyles,directionRows,directionRowOffsets;public PixelDirection[] directionColumns;
     }
     [Serializable] private sealed class PixelOffset{public string id;public Vector2 offset;}
     [Serializable] private sealed class PixelBar{public float xMax,xFade,zMin,zMax;public Vector2 offset;}
@@ -33,11 +33,11 @@ public sealed partial class SimBarExperience
     {
         public int frameWidth=64,frameHeight=64,columns=4,drawHeight=54,footX=32,footY=60;
         public string defaultAtlas;
-        public PixelOffset[] actorOffsets;public PixelBar barRegion;public PixelOccluder[] occluders;public PixelRole[] roles;public PixelAtlas[] atlases;
+        public PixelOffset[] actorOffsets,bandStageFeet;public float stageElevationPixels,drumForegroundDepth;public PixelBar barRegion;public PixelOccluder[] occluders;public PixelRole[] roles;public PixelAtlas[] atlases;
     }
     private sealed class PixelActorView
     {
-        public MotionActor actor;public RectTransform root;public RawImage image;public Image marker,broom,bristles;public string id,role;public PixelLayer layer;
+        public MotionActor actor;public RectTransform root;public RawImage image;public Image marker,broom,bristles;public SimBarPixelPolygonGraphic shadow;public string id,role;public PixelLayer layer;
         public uint variantSeed;
     }
     private sealed class PixelLayer{public Transform root;public float depth;}
@@ -102,6 +102,7 @@ public sealed partial class SimBarExperience
         pixelRoom.SetParent(canvasObject.transform,false);pixelRoom.anchorMin=pixelRoom.anchorMax=new Vector2(.5f,.5f);
         pixelRoom.pivot=new Vector2(.5f,.5f);pixelRoom.sizeDelta=new Vector2(960f,558f);
         var plate=PixelImage("Approved Empty Room Plate",pixelRoom,venue);PixelRect(plate.rectTransform,Vector2.zero,new Vector2(960f,558f));
+        InitializePixelLights();
         var paperRoot=new GameObject("Mission Paper from Saved State",typeof(RectTransform)).GetComponent<RectTransform>();
         paperRoot.SetParent(pixelRoom,false);PixelRect(paperRoot,Vector2.zero,new Vector2(960f,558f));
         var paperRandom=new System.Random(44091);
@@ -157,6 +158,7 @@ public sealed partial class SimBarExperience
     {
         RestorePixelCamera();
         if(pixelWorldCanvas!=null)Destroy(pixelWorldCanvas.gameObject);
+        pixelLightViews.Clear();pixelLightRoot=null;
         foreach(Texture2D texture in pixelDecodedTextures.Values)if(texture!=null)Destroy(texture);
         pixelDecodedTextures.Clear();pixelAtlasTextures.Clear();pixelAtlases.Clear();
         pixelActorViews.Clear();pixelStaticLayers.Clear();pixelDrawLayers.Clear();pixelParticles.Clear();pixelPaper.Clear();pixelPaperPositions.Clear();
@@ -204,13 +206,15 @@ public sealed partial class SimBarExperience
             for(int i=0;i<opStaffVisuals.Length;i++)if(opStaffVisuals[i]==actor.person.root.gameObject){role=id="hired-"+i;break;}
         var root=new GameObject("Pixel Actor / "+name,typeof(RectTransform)).GetComponent<RectTransform>();
         root.SetParent(pixelRoom,false);root.anchorMin=root.anchorMax=new Vector2(0f,1f);root.pivot=new Vector2(.5f,.5f);root.sizeDelta=Vector2.zero;
+        var shadow=new GameObject("Grounded Person Shadow",typeof(RectTransform),typeof(CanvasRenderer),typeof(SimBarPixelPolygonGraphic)).GetComponent<SimBarPixelPolygonGraphic>();
+        shadow.transform.SetParent(root,false);shadow.color=new Color32(22,24,35,96);shadow.raycastTarget=false;
         var image=PixelImage("Animated Pixel Person",root,pixelCharacters);
         var marker=PixelSolid("Live Order or Guest Marker",root);marker.gameObject.SetActive(false);
         var broom=PixelSolid("Actual Cleaner Broom",root);broom.color=new Color32(182,144,97,255);broom.gameObject.SetActive(false);
         var bristles=PixelSolid("Cleaner Broom Bristles",broom.transform);bristles.color=new Color32(199,178,126,255);
         string modelKey=actor.visual!=null?actor.visual.ModelKey:actor.person.root.name;
         uint variantSeed=PixelHash(id+"|"+modelKey);
-        return new PixelActorView{actor=actor,root=root,image=image,marker=marker,broom=broom,bristles=bristles,id=id,role=role,variantSeed=variantSeed,layer=new PixelLayer{root=root}};
+        return new PixelActorView{actor=actor,root=root,image=image,shadow=shadow,marker=marker,broom=broom,bristles=bristles,id=id,role=role,variantSeed=variantSeed,layer=new PixelLayer{root=root}};
     }
     private static uint PixelHash(string value)
     {
@@ -218,16 +222,30 @@ public sealed partial class SimBarExperience
     }
     private Vector2 PixelActorOffset(PixelActorView view,Vector3 world)
     {
+        float stageWeight=view.actor.kind==MotionKind.Band&&view.actor.home.y>.01f?Mathf.Clamp01(world.y/view.actor.home.y):1f;
+        foreach(PixelOffset value in pixelManifest.bandStageFeet??Array.Empty<PixelOffset>())
+            if(value.id==view.id)return (value.offset-PixelProject(view.actor.home))*stageWeight;
         Vector2 offset=Vector2.zero;
-        foreach(PixelOffset value in pixelManifest.actorOffsets??Array.Empty<PixelOffset>())if(value.id==view.id)offset+=value.offset;
+        foreach(PixelOffset value in pixelManifest.actorOffsets??Array.Empty<PixelOffset>())if(value.id==view.id)offset+=value.offset*stageWeight;
+        if(view.actor.kind==MotionKind.Band)offset.y-=pixelManifest.stageElevationPixels*stageWeight;
         PixelBar region=pixelManifest.barRegion;
         if(region!=null&&(view.role=="bartender"||view.role=="server"||view.role.StartsWith("hired-"))
             &&world.z>=region.zMin&&world.z<=region.zMax)
             offset+=region.offset*Mathf.Clamp01((region.xMax-world.x)/Mathf.Max(.01f,region.xFade));
         return offset;
     }
+    private bool PixelBandJump(PixelActorView view,string action,bool active,out int frame,out float lift,out float shadow)
+    {
+        frame=-1;lift=0f;shadow=1f;
+        if(!active||action!="perform"||(view.role!="guitarist"&&view.role!="bassist"))return false;
+        float phase=Mathf.Repeat(pixelAnimationSeconds+(view.role=="bassist"?2.6f:0f),10.4f);
+        if(phase<8.9f||phase>=9.9f)return false;
+        float progress=phase-8.9f,air=Mathf.Max(0f,Mathf.Sin(Mathf.Clamp01((progress-.125f)/.75f)*Mathf.PI));
+        frame=Mathf.Min(7,Mathf.FloorToInt(progress*8f));lift=Mathf.Round(air*7f);shadow=1f-air*.32f;return true;
+    }
     private string PixelActionFor(MotionActor actor)
     {
+        if(AfterShowOwns(actor))return actor.afterShowAction??"aftershow-wait";
         foreach(FloorWorkerActor worker in floorCleaningCrew)
             if(worker.actor==actor&&worker.route.ready&&FloorState!=null&&FloorState.cleanupActive&&!FloorState.cleanupComplete
                 &&FloorState.reaction!=null&&FloorState.reaction.cleanupWorkBudget>0f)return "clean";
@@ -247,9 +265,11 @@ public sealed partial class SimBarExperience
     {
         MotionActor actor=view.actor;Vector3 world=MotionPosition(actor);Vector2 offset=PixelActorOffset(view,world);
         Vector2 p=PixelProject(world)+offset;PixelRole role=pixelRoles.TryGetValue(view.role,out PixelRole found)?found:pixelRoles["guest"];
-        string action=PixelActionFor(actor);bool active=!paused&&(JourneyIsPlaying||JourneyIsFloorClosing);
+        string action=PixelActionFor(actor);bool active=JourneyIsPlaying||JourneyIsFloorClosing;
+        bool hasJump=false;foreach(PixelAction candidate in role.actions??Array.Empty<PixelAction>())if(candidate.id=="jump"){hasJump=true;break;}
+        int jumpFrame=-1;float jumpLift=0f,shadowScale=1f;
+        if(hasJump&&PixelBandJump(view,action,active,out jumpFrame,out jumpLift,out shadowScale))action="jump";
         int framePhase=(int)(view.variantSeed%4);
-        int frame=active?Mathf.FloorToInt(pixelAnimationSeconds*(action=="walk"?7f:action=="clean"?6f:5f)+framePhase)%4:0;
         PixelAction selected=null;
         foreach(PixelAction candidate in role.actions??Array.Empty<PixelAction>())if(candidate.id==action){selected=candidate;break;}
         if(selected==null&&(action=="mosh"||action=="slam"||action=="surf"||action=="support"))
@@ -271,7 +291,12 @@ public sealed partial class SimBarExperience
             if(!supported)selected=null;
         }
         int[] frames=selected?.frameColumns??role.frameColumns;
+        int cycleLength=frames!=null&&frames.Length>0?frames.Length:4;
         if(frames==null||frames.Length==0)frames=PixelIdleFrame;
+        float fps=selected!=null&&selected.fps>0f?selected.fps:role.fps>0f?role.fps:action=="walk"?7f:action=="clean"?6f:5f;
+        int frame=selected?.progressFrames==true?Mathf.Min(frames.Length-1,Mathf.FloorToInt(Mathf.Clamp01(actor.afterShowProgress)*frames.Length))
+            :active?Mathf.FloorToInt(pixelAnimationSeconds*fps+framePhase)%cycleLength:0;
+        if(jumpFrame>=0)frame=jumpFrame;
         string atlasId=!string.IsNullOrEmpty(selected?.atlas)?selected.atlas:!string.IsNullOrEmpty(role.atlas)?role.atlas:!string.IsNullOrEmpty(pixelManifest.defaultAtlas)?pixelManifest.defaultAtlas:"animation";
         string[] atlasFrames=selected?.atlasFrames??role.atlasFrames;
         if(atlasFrames!=null&&atlasFrames.Length>0)atlasId=atlasFrames[frame%atlasFrames.Length];
@@ -286,9 +311,15 @@ public sealed partial class SimBarExperience
         foreach(PixelStyle style in styles??Array.Empty<PixelStyle>())if(style.id==wardrobe){row=style.row;break;}
         Vector3 forward=PixelFacingForward(view,world);
         string direction=(Vector3.Dot(forward,PixelForward)<0f?"F":"B")+(Vector3.Dot(forward,PixelRight)>=0f?"R":"L");
+        if(!string.IsNullOrEmpty(selected?.direction))direction=selected.direction;
+        else if(!string.IsNullOrEmpty(role.direction))direction=role.direction;
+        PixelStyle[] directionRows=selected?.directionRows!=null&&selected.directionRows.Length>0?selected.directionRows:role.directionRows;
+        PixelStyle[] rowOffsets=selected?.directionRowOffsets!=null&&selected.directionRowOffsets.Length>0?selected.directionRowOffsets:role.directionRowOffsets;
+        foreach(PixelStyle facing in directionRows??Array.Empty<PixelStyle>())if(facing.id==direction){row=facing.row;break;}
+        foreach(PixelStyle facing in rowOffsets??Array.Empty<PixelStyle>())if(facing.id==direction){row+=facing.row;break;}
         PixelDirection[] directions=selected?.directionColumns!=null&&selected.directionColumns.Length>0?selected.directionColumns
             :role.directionColumns!=null&&role.directionColumns.Length>0?role.directionColumns:atlas?.directionColumns;
-        bool directional=directions!=null&&directions.Length>0;
+        bool directional=directions!=null&&directions.Length>0||directionRows!=null&&directionRows.Length>0||rowOffsets!=null&&rowOffsets.Length>0;
         foreach(PixelDirection facing in directions??Array.Empty<PixelDirection>())if(facing.id==direction){col=facing.column;break;}
         float crop=selected!=null&&selected.cropHeight>0?selected.cropHeight:role.cropHeight>0?role.cropHeight:atlas!=null&&atlas.cropHeight>0?atlas.cropHeight:frameHeight;
         float height=selected!=null&&selected.drawHeight>0?selected.drawHeight:role.drawHeight>0?role.drawHeight:atlas!=null&&atlas.drawHeight>0?atlas.drawHeight:pixelManifest.drawHeight,scale=height/crop;
@@ -304,13 +335,16 @@ public sealed partial class SimBarExperience
         float yaw=actor.person.root.localEulerAngles.y;
         float yawSin=Mathf.Sin(yaw*Mathf.Deg2Rad);
         bool flip=!directional&&yawSin<-.18f;
-        float bob=active&&(action=="dance"||action=="perform")?Mathf.Round(Mathf.Sin(pixelAnimationSeconds*5f+(view.variantSeed%9))*0.6f):0f;
+        float bob=active&&action=="dance"?Mathf.Round(Mathf.Sin(pixelAnimationSeconds*5f+(view.variantSeed%9))*0.6f):0f;
         view.root.anchoredPosition=new Vector2(Mathf.Round(p.x),-Mathf.Round(p.y+bob));
         view.root.localScale=new Vector3(flip?-1f:1f,1f,1f);
         bool surf=actor.pitSlot==11&&CrowdSurfWeight>.1f&&actor.pitActive;
         bool horizontal=selected?.horizontal==true||role.horizontal;
-        image.anchoredPosition=surf&&!horizontal?new Vector2(-7f,0f):Vector2.zero;
+        image.anchoredPosition=(surf&&!horizontal?new Vector2(-7f,0f):Vector2.zero)+new Vector2(0f,jumpLift);
         image.localRotation=Quaternion.Euler(0f,0f,surf&&!horizontal?90f:0f);
+        view.shadow.gameObject.SetActive(!(view.role=="drummer"&&action=="perform"));
+        var shadowPoints=new Vector2[12];for(int i=0;i<shadowPoints.Length;i++){float angle=i*Mathf.PI/6f;shadowPoints[i]=new Vector2(Mathf.Cos(angle)*4f*shadowScale,1f+Mathf.Sin(angle));}
+        view.shadow.Initialize(null,shadowPoints);view.shadow.color=new Color32(22,24,35,(byte)(jumpFrame>=0?72:96));
         bool assisted=actor==floorMissionGuestActor&&FloorState!=null&&FloorState.guestActive;
         bool order=actor.person.orderMarker!=null&&actor.person.orderMarker.activeSelf;
         view.marker.gameObject.SetActive(assisted||order);
@@ -325,11 +359,13 @@ public sealed partial class SimBarExperience
             bristles.pivot=new Vector2(.5f,1f);bristles.anchoredPosition=Vector2.zero;bristles.sizeDelta=new Vector2(7f,3f);
         }
         float depth=PixelProject(new Vector3(world.x,0f,world.z)).y+offset.y+(view.role=="barseated"?25f:0f);
+        if(view.role=="drummer"&&action=="perform"&&pixelManifest.drumForegroundDepth>0f)depth=Mathf.Min(depth,pixelManifest.drumForegroundDepth-1f);
         view.layer.depth=depth;pixelDrawLayers.Add(view.layer);
     }
     private Vector3 PixelFacingForward(PixelActorView view,Vector3 world)
     {
         MotionActor actor=view.actor;
+        if(AfterShowOwns(actor)){Vector3 heading=worldRoot.InverseTransformDirection(actor.person.root.forward);heading.y=0f;return heading.normalized;}
         // Face the surface or person being used while leaving the actual motion
         // transforms under the existing simulation's exclusive control.
         if(view.role=="barseated")return Vector3.forward;
@@ -405,6 +441,7 @@ public sealed partial class SimBarExperience
         bool visible=worldRoot!=null&&worldRoot.gameObject.activeInHierarchy;pixelWorldCanvas.enabled=visible;if(!visible)return;
         if(pixelScreenWidth!=Screen.width||pixelScreenHeight!=Screen.height)FitPixelPresentation();
         float delta=!paused&&(JourneyIsPlaying||JourneyIsFloorClosing)?Mathf.Min(.1f,Time.unscaledDeltaTime):0f;
+        UpdatePixelLights();
         pixelAnimationSeconds+=delta;
         // The 3D night-backdrop component can add its own layer on first activation.
         // Keep the camera clear while this separately composited pixel world is active.

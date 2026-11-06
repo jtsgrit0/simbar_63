@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {createWorld,pixelDirection,pixelFacing,pixelStyle} from './WebGLTemplate/FastGame/world.js';
+import {createWorld,pixelDirection,pixelFacing,pixelStyle,pixelBandJump} from './WebGLTemplate/FastGame/world.js';
 import {SimBarGame} from './WebGLTemplate/FastGame/core.js';
 
 assert.deepEqual([[0,1],[1,0],[0,-1],[-1,0]].map(([x,z])=>pixelDirection(x,z)),['BR','FR','FL','BL']);
@@ -11,6 +11,8 @@ assert.equal(pixelFacing({id:'bartender',x:-7,z:-.565,moving:false,facing:0},'ba
 assert.equal(pixelFacing({id:'bartender',x:-7,z:-.565,moving:true,facing:Math.PI/2},'bartender','walk'),'FR');
 assert.equal(pixelFacing({id:'singer',x:5.5,z:2.7,facing:0},'singer','perform'),'FL');
 assert.equal(pixelFacing({id:'guitarist',x:3,z:3.8,facing:0},'guitarist','perform'),'FR');
+assert.equal(pixelFacing({id:'guitarist',x:3,z:3.8,facing:Math.PI,afterShowPhase:'exit'},'guitarist','walk'),'FL');
+assert.equal(pixelFacing({id:'singer',x:1,z:1,facing:Math.PI,_partner:'peer'},'singer','highfive',{actors:[{id:'peer',x:1,z:2}]}),'BR');
 assert.deepEqual([[6.75,-1.25],[5.75,-.25],[4.75,-1.25],[5.75,-2.25]].map(([x,z])=>pixelFacing({x,z},'guest','mosh')),['BR','BL','FL','FR']);
 assert.equal(pixelFacing({x:5.1,z:-1.25},'guest','slam'),'FR');
 assert.equal(pixelFacing({x:6.4,z:-1.25},'guest','slam'),'BL');
@@ -20,8 +22,16 @@ const styles={Casual:0,Suit:1,Beach:2,Worker:3,Farmer:4,Adventurer:5,Casual2:6,P
 assert.equal(pixelStyle({id:'patron-3',slot:3},{variantStyles:styles}),'Worker');
 assert.equal(pixelStyle({id:'patron-3',styleKey:'Guest/Punk'},{variantStyles:styles}),'Punk');
 assert.equal(pixelStyle({id:'bartender'},{style:'Suit'}),'Suit');
+assert.equal(pixelBandJump('guitarist','perform',0),null);
+assert.equal(pixelBandJump('singer','perform',9.4),null);
+assert.equal(pixelBandJump('guitarist','walk',9.4),null);
+const jumpFrames=new Set();for(let n=0;n<8;n++)jumpFrames.add(pixelBandJump('guitarist','perform',8.9+(n+.2)/8).frame);
+assert.deepEqual([...jumpFrames],[0,1,2,3,4,5,6,7]);
+assert.equal(pixelBandJump('guitarist','perform',8.9).lift,0);
+assert.equal(pixelBandJump('guitarist','perform',9.4).lift,7);
+assert.equal(pixelBandJump('guitarist','perform',9.89).lift,0);
 
-function context(){return new Proxy({draws:[],scales:[],rotations:[],drawImage(...args){this.draws.push(args);},scale(...args){this.scales.push(args);},rotate(value){this.rotations.push(value);}},{get(o,key){return key in o?o[key]:(()=>{});}});}
+function context(){return new Proxy({draws:[],scales:[],rotations:[],translations:[],createLinearGradient(){return{addColorStop(){}};},drawImage(...args){this.draws.push(args);},translate(...args){this.translations.push(args);},scale(...args){this.scales.push(args);},rotate(value){this.rotations.push(value);}},{get(o,key){return key in o?o[key]:(()=>{});}});}
 function canvas(){const ctx=context(),value={width:960,height:558,style:{},getContext(){return ctx;},getBoundingClientRect(){return{width:960,height:558};},ctx};ctx.canvas=value;return value;}
 globalThis.document={createElement:()=>canvas()};
 globalThis.ResizeObserver=class{observe(){}disconnect(){}};
@@ -50,9 +60,17 @@ args=draw({id:'bar-seat-0',role:'seated',x:-7,z:-3,action:'idle'});assert.equal(
 args=draw({id:'patron-0',slot:0,role:'guest',x:1,z:1,action:'dance'});assert.equal(args[0],atlases.wardrobe,'An unsupported action style keeps the original outfit.');
 args=draw({id:'crowd-surfer',role:'surfer',x:6,z:-4.25,y:1.85,action:'surf'});assert.equal(args[0],atlases.poses);assert.equal(args[2],7*64);assert.equal(args[6],-27);assert.equal(target.ctx.rotations.length,0,'A drawn horizontal surf pose is not a rotated standing person.');
 world.destroy();
+const stageCanvas=canvas(),stageWorld=createWorld(stageCanvas,{assets:{...assets,venueMeta:{occluders:[],bandStageFeet:{singer:[676,326]}}}});
+const singer={id:'singer',role:'band',homeX:5.7,homeZ:3.5,x:5.7,z:3.5,action:'perform',stageLevel:1};
+stageWorld.render(0,{phase:'playing',actors:[singer]});
+assert.deepEqual(stageCanvas.ctx.translations.at(-1),[676,326],'Stage feet sit on the authored plate anchor.');
+singer.stageLevel=0;stageWorld.render(100,{phase:'closing',actors:[singer]});
+const stageGround=stageWorld.project(singer.x,singer.z);
+assert.deepEqual(stageCanvas.ctx.translations.at(-1),[Math.round(stageGround.x),Math.round(stageGround.y)],'The visual stage correction disappears at floor level.');
+stageWorld.destroy();
 const contract=JSON.parse(readFileSync(new URL('../ArtSource/PixelArt/DirectionalSpriteContract.json',import.meta.url),'utf8'));
-const contractAtlases=Object.fromEntries(Object.keys(contract.atlases).map(key=>[key,{id:key,width:256,height:key==='band'?256:512}]));
-const realWorld=createWorld(canvas(),{assets:{venue:assets.venue,atlases:contractAtlases,spriteMeta:contract,venueMeta:{occluders:[]}}});
+const contractAtlases=Object.fromEntries(Object.entries(contract.atlases).map(([key,definition])=>{const png=readFileSync(new URL('./WebGLTemplate/FastGame/art/'+definition.file,import.meta.url));return[key,{id:key,width:png.readUInt32BE(16),height:png.readUInt32BE(20)}];}));
+const realCanvas=canvas(),realWorld=createWorld(realCanvas,{assets:{venue:assets.venue,atlases:contractAtlases,spriteMeta:contract,venueMeta:{occluders:[]}}});
 const game=new SimBarGame({storage:{getItem(){return null;},setItem(){},removeItem(){}}});
 game.act('start');game.act('launch');game.act('guide');game.act('guide');game.act('guide');
 realWorld.render(0,{phase:game.phase,actors:game.actors});
@@ -60,5 +78,11 @@ for(const actor of game.actors.filter(a=>a.slot>=0&&a.slot<8)){actor.action=acto
 const surfer=game.actors.find(a=>a.id==='crowd-surfer');surfer.action='surf';surfer.y=1.85;
 for(const actor of game.actors.filter(a=>a.role==='support'))actor.action='support';
 realWorld.render(100,{phase:'playing',actors:game.actors});
+if(contractAtlases.performance||contractAtlases.bandPerformanceGuitarist){
+  const columns=new Set(),guitar=game.actors.find(a=>a.id==='guitarist');
+  const performance=contractAtlases.bandPerformanceGuitarist||contractAtlases.performance;
+  for(let time=200;time<=4300;time+=100){realCanvas.ctx.draws=[];realWorld.render(time,{phase:'playing',actors:[guitar]});const image=realCanvas.ctx.draws.find(args=>args[0]===performance);assert(image,'Performance uses its approved role atlas.');columns.add(image[1]);}
+  assert.equal(columns.size,contract.version>=4?8:32,'The complete approved animation must play.');
+}
 realWorld.destroy();
 console.log('PASS: directional furniture/band/pit facing, costume identity, full seated poses, genuine direction cells, two walking poses, explicit action rows, horizontal surfing, and essential atlas gate.');

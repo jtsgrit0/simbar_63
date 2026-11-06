@@ -18,7 +18,7 @@ public sealed partial class SimBarExperience
     }
     private bool FloorTasksPending
     {
-        get { return FloorState!=null && (SimBarFloorMissions.Remaining(FloorState)>0 || FloorState.guestActive || !FloorGuestExitFinished); }
+        get { return FloorState!=null && (SimBarFloorMissions.Remaining(FloorState)>0 || FloorState.guestActive || !FloorGuestExitFinished || FloorStaffReturnPending); }
     }
 
     private void ResetFloorForNewNight()
@@ -195,7 +195,7 @@ public sealed partial class SimBarExperience
         SyncFloorWorld();
         if(floorPerformance!=null) floorPerformance.TickEffects(delta);
         RefreshFloorMissionUI();
-        if(JourneyIsFloorClosing && !FloorTasksPending)
+        if(JourneyIsFloorClosing && !FloorTasksPending && !AfterShowPending)
         {
             journey.floorClosing=false; CloseFloorMissionDrawer(); FinishJourneyNight();
         }
@@ -203,7 +203,9 @@ public sealed partial class SimBarExperience
 
     private bool TryBeginFloorClosing()
     {
-        if(journeyValidationMode || !FloorTasksPending) return false;
+        if(journeyValidationMode) return false;
+        EnsureAfterShow();
+        if(!FloorTasksPending && !AfterShowPending) return false;
         bool entering=!JourneyIsFloorClosing;
         CancelPourGame(false);
         if(serviceMenuOpen) CloseServiceMenu();
@@ -211,6 +213,7 @@ public sealed partial class SimBarExperience
         journey.secondsLeft=0f; gameClock=24f; journey.guidePending=false;
         journey.floorClosing=true; journey.settlementPending=false;
         journeyPhase=JourneyPhase.FloorClosing; paused=false;
+        RestoreAfterShow();
         if(pausePanel!=null) pausePanel.SetActive(false);
         EnsureFloorReaction();
         if(entering)

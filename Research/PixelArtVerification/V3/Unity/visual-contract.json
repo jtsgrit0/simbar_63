@@ -1,0 +1,11 @@
+{
+  "performanceFrames": 32,
+  "pauseFreezesFrame": true,
+  "atlas": "SimBarPixelArt/band-performance",
+  "width": 2048,
+  "height": 1024,
+  "lightBanks": 4,
+  "lightsVisible": true,
+  "conesPerBank": 3,
+  "poolsPerBank": 4
+}

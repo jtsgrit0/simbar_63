@@ -87,6 +87,16 @@ internal sealed class SimBarVenueNavigation
         finally { solidCrowdBodies = null; solidCrowdGoal = Vector3.zero; }
     }
 
+    // After the show the pit is an ordinary public floor. Keep the same furniture
+    // and body clearances, while allowing a person to retreat from an inherited overlap.
+    internal bool FindAfterShowPath(Vector3 start, Vector3 goal, List<Vector3> result,
+        List<Vector3> people, List<Vector4> bodies)
+    {
+        solidCrowdBodies=bodies;solidCrowdGoal=goal;floorBodyAvoidance=true;
+        try{return FindPathCore(start,goal,result,people,false);}
+        finally{solidCrowdBodies=null;solidCrowdGoal=Vector3.zero;floorBodyAvoidance=false;}
+    }
+
     private bool FindPathCore(Vector3 start, Vector3 goal, List<Vector3> result, List<Vector3> people, bool avoidCrowd)
     {
         result.Clear();

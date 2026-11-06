@@ -461,6 +461,13 @@ public sealed class SimBarHudSkin : MonoBehaviour
         Rect(image.rectTransform, Vector2.one * 0.5f, position, size);
     }
 
+    public void AddNavigationIcon(Button button,string key,Rect crop)
+    {
+        AddIcon("Original "+key+" Icon",button.transform,Icon(key,crop),new Vector2(-77f,0f),new Vector2(27f,29f));
+        Text label=button.GetComponentInChildren<Text>();
+        if(label!=null){label.alignment=TextAnchor.MiddleCenter;Rect(label.rectTransform,Vector2.one*.5f,Vector2.zero,new Vector2(208f,37f));}
+    }
+
     // Art/Img contains the supplied reference's cropped cards. Only the icon
     // rectangles are reused; money, time, percentages and playlist remain live.
     private Sprite Icon(string name, Rect topLeftCrop)
@@ -501,6 +508,9 @@ public sealed class SimBarHudSkin : MonoBehaviour
             case "time": return new Vector2(117f, 63f);
             case "setup": return new Vector2(55f, 55f);
             case "staff": return new Vector2(175f, 40f);
+            case "upgrades": return new Vector2(126f, 37f);
+            case "guest": return new Vector2(124f, 38f);
+            case "events": return new Vector2(99f, 39f);
             case "guestsati": return new Vector2(123f, 156f);
             case "perrform": return new Vector2(122f, 156f);
             default: return new Vector2(fallback.width, fallback.height);

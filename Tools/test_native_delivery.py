@@ -26,6 +26,7 @@ class NativeDeliveryTests(unittest.TestCase):
         (self.source / "art").mkdir()
         for name in native.ESSENTIAL_IMAGES:
             (self.source / "art" / name).write_bytes(b"image fixture")
+        (self.source / "art/sprites.png").write_bytes(b"legacy sprite fixture")
         for name in native.ESSENTIAL_METADATA:
             (self.source / "art" / name).write_text("{}")
         (self.source / "art/icons").mkdir()
@@ -99,6 +100,26 @@ class NativeDeliveryTests(unittest.TestCase):
         with self.assertRaisesRegex(FileNotFoundError, "sprites.png"):
             self.package()
         self.assertFalse((self.output / "index.html").exists())
+
+    def test_multidirectional_atlas_images_are_required_and_preloaded(self):
+        (self.source / "art/sprites.png").unlink()
+        (self.source / "art/sprites.json").write_text(json.dumps({"atlases": {
+            "walk": {"file": "walk.png"}, "poses": {"file": "poses.png"}}}))
+        (self.source / "art/walk.png").write_bytes(b"walk fixture")
+        with self.assertRaisesRegex(FileNotFoundError, "poses.png"):
+            self.package()
+        (self.source / "art/poses.png").write_bytes(b"pose fixture")
+        self.package()
+        index = (self.output / "index.html").read_text()
+        self.assertIn('/art/walk.png', index)
+        self.assertIn('/art/poses.png', index)
+        self.assertNotIn('/art/sprites.png', index)
+
+    def test_atlas_paths_cannot_escape_art_folder(self):
+        for name in ("../outside.png", "https://example.org/sprites.png", "C:/sprites.png"):
+            (self.source / "art/sprites.json").write_text(json.dumps({"atlases": {"bad": {"file": name}}}))
+            with self.assertRaisesRegex(ValueError, "inside the local art folder"):
+                self.package()
 
     def test_overlapping_source_output_is_rejected(self):
         with self.assertRaises(ValueError):

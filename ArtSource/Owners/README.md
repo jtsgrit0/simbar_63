@@ -1,5 +1,34 @@
 # Owner selection illustrations
 
+## Current portraits: user-supplied original
+
+The title now uses the user's `owner_p.png`, retained byte-for-byte as
+[`Original-owner_p.png`](Original-owner_p.png). Jessy is the woman at the top,
+Edison is the man with headphones and a laptop at the right, and Jaiden is the
+man holding a record at the lower left. Names and buttons remain live UI.
+
+`Tools/prepare_original_owners.py` separates the three people with explicit
+crop polygons, removes the surrounding printed names/signature, and fits each
+complete bust into the existing 400×350 portrait slot using nearest-neighbor
+scaling. It does not redraw or recolor the original. Hair, hands, headphones,
+laptop and record are kept inside their respective cards. Full-resolution
+lossless crops are retained in `OriginalCrops/`; source hash, polygons, bounds
+and runtime mapping are recorded in [`crops.json`](crops.json).
+
+| Character | Existing save ID | Native image | Unity image |
+|---|---|---|---|
+| 제시 / Jessy | `female` | `owner-female.png` | `OwnerFemale.png` |
+| 에디슨 / Edison | `ff` | `owner-ff.png` | `OwnerFF.png` |
+| 제이든 / Jaiden | `pet-sounds` | `owner-pet.png` | `OwnerPetSounds.png` |
+
+`prepare_pixel_art.py` applies these crops last, and the Unity resource sync
+preserves the same decoded portrait pixels and existing importer GUIDs.
+
+## Earlier portrait production history
+
+The following generated portraits are historical and are superseded by the
+supplied original above.
+
 These portraits are project-bound raster assets for the three-owner title screen.
 The game renders names, selection highlights and buttons as native Unity UI.
 All illustrations use the built-in `image_gen` tool; the selected files are

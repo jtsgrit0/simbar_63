@@ -56,6 +56,7 @@ public sealed partial class SimBarExperience
         public bool floorClosing;
         public float resultFloorBonus;
         public int resultFloorTasks;
+        public AfterShowData afterShow;
     }
 
     private JourneyData journey = new JourneyData();
@@ -291,6 +292,7 @@ public sealed partial class SimBarExperience
         CancelPourGame(false);
         if (opMenuOpen) CloseOperations();
         ResetFloorForNewNight();
+        ResetAfterShow();
         journey.session = journey.session >= 1000000000 ? 1 : journey.session + 1;
         // At rollover the monotonically unique receipt is reset alongside the
         // session, never leaving an old settled id equal to a fresh new night.
@@ -481,6 +483,7 @@ public sealed partial class SimBarExperience
     private string ExportJourneyState()
     {
         if (journey == null) journey = new JourneyData();
+        SyncAfterShow();
         return JsonUtility.ToJson(journey);
     }
 
@@ -532,6 +535,7 @@ public sealed partial class SimBarExperience
         journey.resultProfit = JourneyClamp(journey.resultProfit, 0f, -1000000000f, 1000000000f);
         if (journey.floorMissions == null) journey.floorMissions = SimBarFloorMissions.NewState();
         SimBarFloorMissions.Sanitize(journey.floorMissions);
+        SanitizeAfterShow();
         journey.resultFloorBonus = JourneyClamp(journey.resultFloorBonus, 0f, 0f, SimBarFloorMissions.CleanupReward);
         journey.resultFloorTasks = Mathf.Clamp(journey.resultFloorTasks, 0, 2);
         if (journey.session == 0)
@@ -548,7 +552,7 @@ public sealed partial class SimBarExperience
         // Older saves have an empty floor state and retain their original settlement.
         if (journey.session > 0 && journey.settledSession != journey.session
             && journey.settlementPending
-            && (SimBarFloorMissions.Remaining(journey.floorMissions) > 0 || journey.floorMissions.guestActive))
+            && (SimBarFloorMissions.Remaining(journey.floorMissions) > 0 || journey.floorMissions.guestActive || AfterShowPending))
         {
             journey.inProgress = true;
             journey.floorClosing = true;

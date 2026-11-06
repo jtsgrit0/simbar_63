@@ -19,8 +19,8 @@ PROJECT = Path(__file__).resolve().parent.parent
 TEMPLATE = PROJECT / "Tools/WebGLTemplate"
 SOURCE = TEMPLATE / "FastGame"
 MODULES = ("boot.js", "game.js", "core.js", "world.js", "booking.js", "floor.js",
-           "navigation.js", "catalog.js", "legacy-save.js", "daily-poster.js", "music.js")
-ESSENTIAL_IMAGES = ("owner-female.png", "owner-ff.png", "owner-pet.png", "seoul.png", "venue.png", "sprites.png")
+           "navigation.js", "catalog.js", "legacy-save.js", "daily-poster.js", "music.js", "aftershow.js")
+ESSENTIAL_IMAGES = ("owner-female.png", "owner-ff.png", "owner-pet.png", "seoul.png", "venue.png")
 ESSENTIAL_METADATA = ("venue.json", "sprites.json")
 ICONS = ("setup", "cash", "fans", "time", "staff", "guestsati", "perrform", "upgrades", "guest", "events")
 EXCLUDED = {"index.html", "runtime-manifest.json", "package.json", "package-lock.json",
@@ -33,8 +33,29 @@ def digest(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def essential_images(source):
+    metadata = source / "art/sprites.json"
+    if not metadata.is_file():
+        raise FileNotFoundError("Native runtime is incomplete: art/sprites.json")
+    data = json.loads(metadata.read_text(encoding="utf-8"))
+    atlases = data.get("atlases")
+    if not atlases:
+        return ESSENTIAL_IMAGES + ("sprites.png",)
+    if not isinstance(atlases, dict):
+        raise ValueError("Sprite atlases must be an object of local PNG assets.")
+    names = []
+    for entry in atlases.values():
+        name = entry.get("file") if isinstance(entry, dict) else None
+        if (not isinstance(name, str) or not re.fullmatch(r"[A-Za-z0-9_][A-Za-z0-9_./-]*\.png", name)
+                or ".." in Path(name).parts or Path(name).is_absolute()):
+            raise ValueError("Sprite atlas paths must stay inside the local art folder.")
+        names.append(name)
+    return ESSENTIAL_IMAGES + tuple(sorted(set(names)))
+
+
 def runtime_files(source):
     files = []
+    active_images = set(essential_images(source))
     for path in sorted(source.rglob("*")):
         relative = path.relative_to(source)
         if path.is_symlink():
@@ -45,9 +66,13 @@ def runtime_files(source):
             continue
         if path.suffix not in {".js", ".css", ".woff2", ".png", ".json", ".txt"}:
             continue
+        # Keep retained former atlases in authoring, but the immutable runtime
+        # contains only current manifest sheets plus essential venue/owner art.
+        if relative.parent == Path("art") and path.suffix == ".png" and path.name not in active_images:
+            continue
         files.append(path)
     required = set(MODULES) | {"style.css", "font.woff2", "OFL.txt"}
-    required.update("art/" + name for name in ESSENTIAL_IMAGES + ESSENTIAL_METADATA)
+    required.update("art/" + name for name in essential_images(source) + ESSENTIAL_METADATA)
     required.update("art/icons/" + name + ".png" for name in ICONS)
     missing = required - {path.relative_to(source).as_posix() for path in files}
     if missing:
@@ -120,7 +145,7 @@ def prepare_native_pages(source=SOURCE, output=PROJECT / "docs", *, template=TEM
     runtime = "FastGame/" + version
     hints = [f'<link rel="modulepreload" href="{runtime}/{module}">' for module in MODULES]
     hints.append(f'<link rel="preload" as="font" type="font/woff2" crossorigin href="{runtime}/font.woff2">')
-    for name in ESSENTIAL_IMAGES:
+    for name in essential_images(source):
         if (source / "art" / name).is_file():
             hints.append(f'<link rel="preload" as="image" href="{runtime}/art/{html.escape(name, quote=True)}">')
     for name in ESSENTIAL_METADATA:

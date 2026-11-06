@@ -1,0 +1,153 @@
+{
+  "method": "Lossless visible RGBA; zero RGB only where alpha is zero; PNG compression level 9",
+  "sourceAndOwnerImagesUntouched": true,
+  "files": [
+    {
+      "file": "v4-band-bass-performance.png",
+      "beforeBytes": 141436,
+      "afterBytes": 141250,
+      "savedBytes": 186,
+      "size": [
+        512,
+        256
+      ],
+      "clearedInvisibleRgbPixels": 157,
+      "visibleSha256": "e63df6984a9adbe6bbe978c5a5e16d7e195f9f5f1e5cb86f3e95591893328c60",
+      "nonzeroAlphaPixelsUnchanged": true,
+      "alphaUnchanged": true,
+      "visibleSha256Before": "e63df6984a9adbe6bbe978c5a5e16d7e195f9f5f1e5cb86f3e95591893328c60",
+      "fileSha256": "70a1d0f1db71d489291e8c35263e077870fcd6196079532937e0623b6d9add05"
+    },
+    {
+      "file": "v4-band-drums-performance.png",
+      "beforeBytes": 147448,
+      "afterBytes": 147049,
+      "savedBytes": 399,
+      "size": [
+        512,
+        256
+      ],
+      "clearedInvisibleRgbPixels": 274,
+      "visibleSha256": "3ac7f530a6c74a2c87d35a17ad5407d2473633248027c4b916bf75f80ded9c66",
+      "nonzeroAlphaPixelsUnchanged": true,
+      "alphaUnchanged": true,
+      "visibleSha256Before": "3ac7f530a6c74a2c87d35a17ad5407d2473633248027c4b916bf75f80ded9c66",
+      "fileSha256": "214fd04c951c2cfa6eef11e00ff85aaf0b9a953b1ae9393d7fc9729752b9cdaf"
+    },
+    {
+      "file": "v4-band-greet-a.png",
+      "beforeBytes": 280672,
+      "afterBytes": 279552,
+      "savedBytes": 1120,
+      "size": [
+        512,
+        512
+      ],
+      "clearedInvisibleRgbPixels": 772,
+      "visibleSha256": "39b0c49f88cf6402cf9254393e1952aef0a23593e7e348f869ad3fc15d23adee",
+      "nonzeroAlphaPixelsUnchanged": true,
+      "alphaUnchanged": true,
+      "visibleSha256Before": "39b0c49f88cf6402cf9254393e1952aef0a23593e7e348f869ad3fc15d23adee",
+      "fileSha256": "6674f00583ce27c1987ea3ac4623d7b81939d1a0352884256b4c6382e3765bc9"
+    },
+    {
+      "file": "v4-band-greet-b.png",
+      "beforeBytes": 274865,
+      "afterBytes": 273682,
+      "savedBytes": 1183,
+      "size": [
+        512,
+        512
+      ],
+      "clearedInvisibleRgbPixels": 830,
+      "visibleSha256": "7bc1dbd6ab264508e1343134f64860e5cdda6829b3794767cdffc72f8217c1a9",
+      "nonzeroAlphaPixelsUnchanged": true,
+      "alphaUnchanged": true,
+      "visibleSha256Before": "7bc1dbd6ab264508e1343134f64860e5cdda6829b3794767cdffc72f8217c1a9",
+      "fileSha256": "7c70aeb862f9a68e94c8798e7839d2addab4df142fe59b5f42be2e5b6e385cfe"
+    },
+    {
+      "file": "v4-band-guitar-performance.png",
+      "beforeBytes": 136184,
+      "afterBytes": 135960,
+      "savedBytes": 224,
+      "size": [
+        512,
+        256
+      ],
+      "clearedInvisibleRgbPixels": 154,
+      "visibleSha256": "69c7397cbb9f00f7eb6b9dfd99ecfb6177aab7a608b54868095db6652642cc28",
+      "nonzeroAlphaPixelsUnchanged": true,
+      "alphaUnchanged": true,
+      "visibleSha256Before": "69c7397cbb9f00f7eb6b9dfd99ecfb6177aab7a608b54868095db6652642cc28",
+      "fileSha256": "1d4958e295f8a6ca493875f38d097194d97ff8c4631513b6b9caabbd613dcb15"
+    },
+    {
+      "file": "v4-band-jump.png",
+      "beforeBytes": 271854,
+      "afterBytes": 270925,
+      "savedBytes": 929,
+      "size": [
+        512,
+        512
+      ],
+      "clearedInvisibleRgbPixels": 679,
+      "visibleSha256": "149ab47d8651cd4e92bab50959ec90026f056b2fa68b40526a6c24b07281734d",
+      "nonzeroAlphaPixelsUnchanged": true,
+      "alphaUnchanged": true,
+      "visibleSha256Before": "149ab47d8651cd4e92bab50959ec90026f056b2fa68b40526a6c24b07281734d",
+      "fileSha256": "b5535ddbfb8cf60667212701f717d280da2daa1cc8d9b55c2e12c459995dabc8"
+    },
+    {
+      "file": "v4-band-singer-performance.png",
+      "beforeBytes": 103769,
+      "afterBytes": 103296,
+      "savedBytes": 473,
+      "size": [
+        512,
+        256
+      ],
+      "clearedInvisibleRgbPixels": 326,
+      "visibleSha256": "acddcf355b9010e1c19d167a826a5199ffe83036039ee1b7119e62f8998cdeda",
+      "nonzeroAlphaPixelsUnchanged": true,
+      "alphaUnchanged": true,
+      "visibleSha256Before": "acddcf355b9010e1c19d167a826a5199ffe83036039ee1b7119e62f8998cdeda",
+      "fileSha256": "536dba846678ee292fad7da5c13caaf858dd7c791c8a6506843299ea3f71f97a"
+    },
+    {
+      "file": "v4-band-walk.png",
+      "beforeBytes": 239757,
+      "afterBytes": 238891,
+      "savedBytes": 866,
+      "size": [
+        256,
+        1024
+      ],
+      "clearedInvisibleRgbPixels": 639,
+      "visibleSha256": "8f564a7acb1dd3d48dccbfa5ee11935dd337fc6c34d2f56dc8d9f8b347a2f324",
+      "nonzeroAlphaPixelsUnchanged": true,
+      "alphaUnchanged": true,
+      "visibleSha256Before": "8f564a7acb1dd3d48dccbfa5ee11935dd337fc6c34d2f56dc8d9f8b347a2f324",
+      "fileSha256": "173fdffdbdc6a7995bf8e3379a9f1d29781512603cdaf651d3973c07eeec15d3"
+    },
+    {
+      "file": "v4-guest-social.png",
+      "beforeBytes": 133032,
+      "afterBytes": 133032,
+      "savedBytes": 0,
+      "size": [
+        512,
+        2048
+      ],
+      "clearedInvisibleRgbPixels": 0,
+      "visibleSha256": "3218bbc1e15be735b5c4ec64bf74417448d386bf78f97219daf5d7b1590cce8b",
+      "nonzeroAlphaPixelsUnchanged": true,
+      "alphaUnchanged": true,
+      "visibleSha256Before": "3218bbc1e15be735b5c4ec64bf74417448d386bf78f97219daf5d7b1590cce8b",
+      "fileSha256": "191c5f7059e4bc62eaf8a1ecef451323e91df9fc6c735218f975f3a472796fb4"
+    }
+  ],
+  "beforeBytes": 1729017,
+  "afterBytes": 1723637,
+  "savedBytes": 5380
+}

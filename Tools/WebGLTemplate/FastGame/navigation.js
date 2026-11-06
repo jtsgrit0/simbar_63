@@ -28,7 +28,9 @@ export function pathfind(start,goal,{staff=false,floor=false,people=[]}={}){
   const blocked=p=>people.some(body=>distance(p,body)<.39);
   const bodiesClear=(a,b)=>people.every(body=>{
     const before=distance(a,body),after=distance(b,body);
-    if(before<.39)return after>=before-.00001;
+    // An initially crowded actor must move away from the body immediately.
+    // A farther endpoint alone can still send its first step into that body.
+    if(before<.39)return after>=before-.00001&&(b.x-a.x)*(a.x-body.x)+(b.z-a.z)*(a.z-body.z)>=-.00001;
     const dx=b.x-a.x,dz=b.z-a.z,len=dx*dx+dz*dz,t=len?Math.max(0,Math.min(1,((body.x-a.x)*dx+(body.z-a.z)*dz)/len)):0;
     return Math.hypot(body.x-a.x-t*dx,body.z-a.z-t*dz)>=.38;
   });

@@ -1,0 +1,164 @@
+{
+  "version": 4,
+  "provenance": "OpenAI built-in ImageGen, illustrated Band.png and Wardrobe.png references; generated sources retained.",
+  "cell": [
+    64,
+    64
+  ],
+  "anchor": [
+    32,
+    60
+  ],
+  "nominalStandingBodyHeight": 56,
+  "directionRows": {
+    "FR": 0,
+    "BR": 1,
+    "BL": 2,
+    "FL": 3
+  },
+  "performance": [
+    {
+      "role": "singer",
+      "file": "v4-band-singer-performance.png",
+      "size": [
+        512,
+        256
+      ],
+      "columns": 8,
+      "rows": 4,
+      "framesPerDirection": 8
+    },
+    {
+      "role": "guitar",
+      "file": "v4-band-guitar-performance.png",
+      "size": [
+        512,
+        256
+      ],
+      "columns": 8,
+      "rows": 4,
+      "framesPerDirection": 8
+    },
+    {
+      "role": "bass",
+      "file": "v4-band-bass-performance.png",
+      "size": [
+        512,
+        256
+      ],
+      "columns": 8,
+      "rows": 4,
+      "framesPerDirection": 8
+    },
+    {
+      "role": "drums",
+      "file": "v4-band-drums-performance.png",
+      "size": [
+        512,
+        256
+      ],
+      "columns": 8,
+      "rows": 4,
+      "framesPerDirection": 8
+    }
+  ],
+  "jump": {
+    "file": "v4-band-jump.png",
+    "size": [
+      512,
+      512
+    ],
+    "columns": 8,
+    "rows": 8,
+    "roles": {
+      "guitar": 0,
+      "bass": 4
+    },
+    "poseOrder": [
+      "stand",
+      "crouch",
+      "launch",
+      "spread-apex",
+      "spread-air",
+      "descent",
+      "land-compress",
+      "recover"
+    ],
+    "note": "Feet are normalized at the anchor; renderer provides vertical arc and grounded shadow."
+  },
+  "greeting": {
+    "a": {
+      "file": "v4-band-greet-a.png",
+      "size": [
+        512,
+        512
+      ],
+      "roles": {
+        "singer": 0,
+        "guitar": 4
+      }
+    },
+    "b": {
+      "file": "v4-band-greet-b.png",
+      "size": [
+        512,
+        512
+      ],
+      "roles": {
+        "bass": 0,
+        "drums": 4
+      }
+    },
+    "columns": 8,
+    "rows": 8,
+    "actions": {
+      "highfive": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "hug": [
+        4,
+        5,
+        6,
+        7
+      ]
+    },
+    "note": "No instruments. Role row base plus direction row."
+  },
+  "walk": {
+    "file": "v4-band-walk.png",
+    "size": [
+      256,
+      1024
+    ],
+    "columns": 4,
+    "rows": 16,
+    "roles": {
+      "singer": 0,
+      "guitar": 4,
+      "bass": 8,
+      "drums": 12
+    },
+    "idleColumns": [
+      0
+    ],
+    "walkColumns": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "note": "No instruments. Neutral column0 also serves idle and aftershow wait."
+  },
+  "qa": {
+    "frameCount": 384,
+    "distinctFramesEveryRow": true,
+    "minimumAdjacentChangedPixels": 927,
+    "cornerAlpha": 0,
+    "report": "band-atlas-qa.json",
+    "grayComposite": "alpha-composite-qa.png"
+  },
+  "packing": "pack_band_atlases.py applies only crop, translation, uniform nearest-neighbor sizing and cell layout. It retains generated pixel RGBA; no synthesized animation, no creative bitmap editing."
+}

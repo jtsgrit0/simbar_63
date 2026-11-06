@@ -1,0 +1,6 @@
+# Venue plant removal
+
+Built-in image generation, 2026-11-06. Original full raster `VenueNoPlants.png` is retained. Build preparation only sizes/encodes it. No indoor planters remain, while real foreign musician graffiti and the approved room layout are preserved.
+
+Use case: precise-object-edit. Edit this exact transparent pixel-artpub room plate. Remove EVERY indoor pottedplant/houseplant/planter from the venue: leafy greenplants in pots at boothbackwallcorners, behindbarleft/rightshelfends, bythegraycolumnandstage/counteredges. Removeleaves, stems, pots, plantershadow. Reconstructthewall/floor/shelfpixels that were hidden. The userwants NO indoorhouseplantsorflowerpots anywhere.
+ChangeONLYtheplantremovals. Preservepixel-for-pixelcomposition/camera/roomfootprint/graygraffitifloor/REDbooths/woodbar/densebottles/drumkit/guitars/microphonestands/trusses/neonlights/windows/cityreflection. Keep ALL real floor graffiti exactlyspelledandplaced:THEBEATLES,QUEEN,NIRVANA,TAYLORSWIFT,BLACKPINK,AC/DC. KeepwallBeatlesposterandROCKON/LIVEsignunchanged. Sameexact1.72landscape, alphaoutside, nopadding/zoom/nopeople/noUI. Do not redesignanyfurniture or changefloor edges. Onlyremovetheindoorplantsandpots.

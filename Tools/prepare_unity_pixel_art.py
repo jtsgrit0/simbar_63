@@ -22,6 +22,9 @@ def convert_manifest(raw,sprites):
     bar={**raw.get('barRegion',{})}
     if bar:bar['offset']=point(bar['offset'])
     result={'actorOffsets':[{'id':key,'offset':point(value)} for key,value in raw.get('actorOffsets',{}).items()],
+      'bandStageFeet':[{'id':key,'offset':point(value)} for key,value in raw.get('bandStageFeet',{}).items()],
+      'stageElevationPixels':raw.get('stageElevationPixels',0),
+      'drumForegroundDepth':raw.get('drumForegroundDepth',0),
       'barRegion':bar,'occluders':[{'points':[point(p) for p in layer['points']],'depth':layer['depth']} for layer in raw.get('occluders',[])],
       'frameWidth':sprites['frameWidth'],'frameHeight':sprites['frameHeight'],'columns':sprites['columns'],
       'drawHeight':sprites['drawHeight'],'footX':sprites['footX'],'footY':sprites['footY'],'defaultAtlas':sprites.get('defaultAtlas','animation'),'roles':[],'atlases':atlases}
@@ -29,6 +32,8 @@ def convert_manifest(raw,sprites):
         value={**entry};value['hasRow']='row' in entry
         value['variantStyles']=[{'id':style,**({'row':row} if isinstance(row,int) else row)} for style,row in entry.get('variantStyles',{}).items()]
         value['directionColumns']=[{'id':direction,'column':column} for direction,column in entry.get('directionColumns',{}).items()]
+        value['directionRows']=[{'id':direction,'row':row} for direction,row in entry.get('directionRows',{}).items()]
+        value['directionRowOffsets']=[{'id':direction,'row':row} for direction,row in entry.get('directionRowOffsets',{}).items()]
         return value
     for key,entry in sprites['roles'].items():
         role=convert_entry({'id':key,**entry})
@@ -82,6 +87,14 @@ def main():
         filename=entry['file'];name=ATLAS_NAMES.get(filename,Path(filename).stem)
         if (SOURCE/filename).is_file():compact_image(filename,name)
         else:raise FileNotFoundError('Missing directional atlas: '+filename)
+    # These old generated PNG streams have no authored GUID consumers. Once V4
+    # is active, leaving them under Resources still bundles obsolete model art.
+    if sprites.get('version',0)>=4:
+        active={ATLAS_NAMES.get(entry['file'],Path(entry['file']).stem) for entry in sprites.get('atlases',{}).values()}
+        for stale in ['band','band-performance','band-walk','band-social','guest-social']:
+            if stale in active:continue
+            for old in [DEST/(stale+'.bytes'),DEST/(stale+'.bytes.meta')]:
+                if old.is_file():old.unlink()
     result=convert_manifest(raw,sprites)
     target=DEST/'Presentation.json';target.write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n',encoding='utf-8');meta(target)
     print('Unity pixel art prepared:',DEST)

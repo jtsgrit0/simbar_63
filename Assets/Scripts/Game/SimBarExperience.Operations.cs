@@ -163,11 +163,15 @@ public sealed partial class SimBarExperience
         // Keep the playable service panel visible below the management tabs.
         string[] labels = { "UPGRADES", "GUEST INFO", "EVENTS" };
         int[] pages = { 1, 3, 2 };
+        string[] navIcons={"upgrades","guest","events"};
+        Rect[] navCrops={new Rect(8f,5f,25f,26f),new Rect(8f,4f,23f,30f),new Rect(7f,5f,24f,28f)};
         for (int i = 0; i < labels.Length; i++)
         {
             int page = pages[i];
             Button nav = OpButton(labels[i], canvas.transform, new Vector2(0.5f, 0f), new Vector2(-220f + i * 220f, 185f), new Vector2(208f, 42f), 18);
             nav.gameObject.name = "Operations " + labels[i];
+            SimBarHudSkin skin=canvas.GetComponent<SimBarHudSkin>();
+            if(skin!=null)skin.AddNavigationIcon(nav,navIcons[i],navCrops[i]);
             nav.onClick.AddListener(() => OpenOperations(page));
         }
         GameObject chip = OpPanel("Operations Live Status", canvas.transform, new Vector2(0.5f, 1f), new Vector2(0f, -83f), new Vector2(650f, 34f), new Color(0.035f, 0.045f, 0.075f, 0.90f), false);

@@ -1,0 +1,163 @@
+{
+    "version": 1,
+    "session": 5,
+    "started": true,
+    "completed": false,
+    "elapsed": 6.699995994567871,
+    "members": [
+        {
+            "id": "singer",
+            "phase": "hug",
+            "waypoint": 4,
+            "greeting": 1,
+            "standAttempt": 0,
+            "timer": 0.5,
+            "delay": 0.0,
+            "x": 2.812929391860962,
+            "z": -1.2269728183746338,
+            "stageLevel": 0.0,
+            "blockedTime": 0.0,
+            "visible": true
+        },
+        {
+            "id": "guitarist",
+            "phase": "approach",
+            "waypoint": 5,
+            "greeting": 1,
+            "standAttempt": 0,
+            "timer": 0.0,
+            "delay": 0.0,
+            "x": 6.800000190734863,
+            "z": 0.5999999046325684,
+            "stageLevel": 0.0,
+            "blockedTime": 0.0,
+            "visible": true
+        },
+        {
+            "id": "bassist",
+            "phase": "approach",
+            "waypoint": 5,
+            "greeting": 0,
+            "standAttempt": 0,
+            "timer": 0.0,
+            "delay": 0.0,
+            "x": 4.334814548492432,
+            "z": 0.9114562273025513,
+            "stageLevel": 0.0,
+            "blockedTime": 0.0,
+            "visible": true
+        },
+        {
+            "id": "drummer",
+            "phase": "stage",
+            "waypoint": 3,
+            "greeting": 0,
+            "standAttempt": 0,
+            "timer": 0.0,
+            "delay": 0.0,
+            "x": 4.222209930419922,
+            "z": 2.8534207344055176,
+            "stageLevel": 1.0,
+            "blockedTime": 0.0,
+            "visible": true
+        }
+    ],
+    "audience": [
+        {
+            "id": "patron-8",
+            "phase": "return",
+            "partner": "",
+            "homeX": 0.0926915630698204,
+            "homeZ": 0.6929880380630493,
+            "homeFacing": -0.07771796733140945,
+            "x": 0.9700000286102295,
+            "z": 0.19999989867210388,
+            "targetX": 3.049999952316284,
+            "targetZ": 0.25
+        },
+        {
+            "id": "patron-9",
+            "phase": "greet",
+            "partner": "singer",
+            "homeX": 0.4534551203250885,
+            "homeZ": -0.1963782161474228,
+            "homeFacing": 1.581247329711914,
+            "x": 2.630000114440918,
+            "z": -1.8000001907348633,
+            "targetX": 2.799999952316284,
+            "targetZ": -1.649999976158142
+        },
+        {
+            "id": "patron-10",
+            "phase": "return",
+            "partner": "",
+            "homeX": 2.8460628986358643,
+            "homeZ": 0.507710337638855,
+            "homeFacing": 0.16418232023715973,
+            "x": 7.599999904632568,
+            "z": 0.5999999046325684,
+            "targetX": 7.699999809265137,
+            "targetZ": 0.3499999940395355
+        },
+        {
+            "id": "patron-11",
+            "phase": "gather",
+            "partner": "",
+            "homeX": -0.052400317043066025,
+            "homeZ": -0.8611341714859009,
+            "homeFacing": -0.25912824273109436,
+            "x": 2.799999952316284,
+            "z": 0.9999998807907104,
+            "targetX": 8.0,
+            "targetZ": -1.649999976158142
+        },
+        {
+            "id": "patron-12",
+            "phase": "gather",
+            "partner": "bassist",
+            "homeX": -0.5038297772407532,
+            "homeZ": -0.9542272686958313,
+            "homeFacing": 0.11114180833101273,
+            "x": 3.200000047683716,
+            "z": -2.945000171661377,
+            "targetX": 3.0999999046325684,
+            "targetZ": -3.5999999046325684
+        },
+        {
+            "id": "patron-13",
+            "phase": "gather",
+            "partner": "",
+            "homeX": 2.599003553390503,
+            "homeZ": -0.9999945759773254,
+            "homeFacing": -0.10734722763299942,
+            "x": 4.237365245819092,
+            "z": -3.962634801864624,
+            "targetX": 4.050000190734863,
+            "targetZ": -4.650000095367432
+        },
+        {
+            "id": "patron-14",
+            "phase": "gather",
+            "partner": "",
+            "homeX": -0.03873760625720024,
+            "homeZ": -2.5031166076660156,
+            "homeFacing": -1.3895165920257568,
+            "x": 3.830000162124634,
+            "z": -4.200000286102295,
+            "targetX": 7.650000095367432,
+            "targetZ": -3.200000047683716
+        },
+        {
+            "id": "patron-15",
+            "phase": "gather",
+            "partner": "",
+            "homeX": -0.48405399918556213,
+            "homeZ": -2.664957284927368,
+            "homeFacing": -0.8548736572265625,
+            "x": 5.681317329406738,
+            "z": -3.4813172817230225,
+            "targetX": 8.25,
+            "targetZ": -4.650000095367432
+        }
+    ]
+}

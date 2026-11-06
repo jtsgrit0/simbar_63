@@ -1,0 +1,17 @@
+# Illustrated V4 band assets
+All band art uses built-in ImageGen with the illustrated V2 Band and Wardrobe references. The natural adult forms, shaded faces, seams, studs, chains and four distinct outfits remain consistent when leaving the stage, walking, greeting and exiting. No FBX/3D renders are used in these eight atlases.
+
+Runtime files live in `Tools/WebGLTemplate/FastGame/art/v4-band-*.png`. Every logical cell is64×64px, ground anchor(32,60), nominal standing bodyheight56px. All row directions are FR(front/downright), BR(back/upright), BL(back/upleft), FL(front/downleft). See `band-manifest.json` for layouts. The source tool chose1774×887 for landscape and1254×1254 for square outputs; `*.packed-256.png` are normalized full-size256px-cell source atlases (2048×1024 for performance,2048×2048 for jumps/greetings,1024×4096 for walking).
+
+`*.source.png` preserves every generated candidate; `*.prompt.md` retains exact prompts. Selected sources are singer-performance, guitar-performance-facing, bass-performance-facing, drums-performance, band-greet-a-transparent, band-greet-b, band-walk, firstfourrows of band-jump, and bass-jump. Earlier candidates remain for provenance: targeted ImageGen corrections fixed incorrect instrument back-right poses, removed a translucent light greeting backdrop, and supplied an omitted bass front jump direction.
+
+`pack_band_atlases.py` performs technical cropping, whole-cell placement, uniform nearest-neighbor sizing and layout. It does not draw, mirror, synthesize animation, alter limbs or replace generated artwork. Generated source PNGs and the high-resolution `*.packed-256.png` atlases retain full color and alpha. The eight band runtime sheets then use the reviewed libimagequant 256-color profile with no dithering, matching the NPC palette approach. This reduces startup bytes and does change visible RGBA colors/alpha; it is not lossless. Run:
+```
+uv run --python 3.13 --with pillow==13.0.0 --with imagequant==1.1.5 --with zopfli==0.4.3 python ArtSource/PixelArt/V4/pack_band_atlases.py
+```
+
+`Tools/encode_band_runtime.py` records the full-color and encoded visible SHA-256 values plus measured composite color/alpha error in `Research/PixelArtVerification/Final/band-runtime-encoding.json`. The reviewed side-by-side sheet is retained there as `band-palette-comparison.png`. This palette step is restricted to the eight band runtime sheets; original owner portraits, guests and crowd art are excluded. `Tools/optimize_runtime_atlases.py` then applies only exact PNG recompression, including invisible alpha-zero RGB normalization and optional Zopfli. Repacking preserves a smaller existing PNG when its decoded visible pixels match.
+
+QA passed for384 sprites: every row has8distinct frames, or4for walking; minimum adjacent changed pixels927; no empty cells or cell overflow; all atlas corner alpha0. `band-atlas-qa.json` records bounds and frame changes. `band-atlas-contact-sheet.png` presents all final sprites; `alpha-composite-qa.png` verifies singer transparency on a neutral gray.
+
+The singer atlas intentionally contains no microphone or stand for the fixed stage microphone. Guitar and bass contain one held instrument, grounded performance boots, and genuine arm and fretting changes. Drummer contains exactlytwo held sticks, alternating raised/downstroke poses, and no drumkit; the renderer places the existing kit in front. Jump art contains leg opening and landing poses; the renderer adds the vertical arc.

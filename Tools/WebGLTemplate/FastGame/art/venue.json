@@ -231,7 +231,26 @@
           295
         ]
       ],
-      "depth": 288
+      "depth": 310
     }
-  ]
+  ],
+  "bandStageFeet": {
+    "singer": [
+      676,
+      326
+    ],
+    "guitarist": [
+      635,
+      306
+    ],
+    "bassist": [
+      820,
+      331
+    ],
+    "drummer": [
+      741,
+      287
+    ]
+  },
+  "drumForegroundDepth": 310
 }

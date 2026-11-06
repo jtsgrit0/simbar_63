@@ -1,0 +1,36 @@
+{
+  "success": true,
+  "command": "command",
+  "data": {
+    "command": "run_script",
+    "parameters": {
+      "file": "Research/PixelArtVerification/V4/Unity/PixelV4QA.cs",
+      "entry": "PixelV4QA.VisualContract"
+    },
+    "result": {
+      "diagnostics": [],
+      "compileMs": 275,
+      "executeMs": 122,
+      "assemblyName": "PipelineRunScript_PixelV4QA_cd73892c2e6742199b6e43f59ff6961a",
+      "success": true,
+      "result": {
+        "performanceFrames": 8,
+        "pauseFreezesFrame": true,
+        "atlas": "SimBarPixelArt/v4-band-singer-performance",
+        "width": 512,
+        "height": 256,
+        "lightBanks": 4,
+        "lightsVisible": true,
+        "conesPerBank": 3,
+        "poolsPerBank": 4
+      }
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "E:\\simbar_63"
+    }
+  },
+  "errors": [],
+  "warnings": []
+}

@@ -1,5 +1,12 @@
 # Pixel-art game verification
 
+Current owner, illustrated-band, stage-light and after-show verification is
+collected in [`Final/`](Final/). The retained measurements and screenshots below
+describe the earlier baseline release and should not be used as the current
+release's performance result. Unity parity evidence is in [`V4/Unity/`](V4/Unity/).
+
+## Earlier baseline release
+
 The primary browser player runs its complete game logic directly in JavaScript/Canvas2D. The first interactive frame includes the approved-style empty venue, independently moving adult pixel sprites, owners, city, fonts and original UI icons. There is no background Unity startup and no title-only readiness shortcut. Music and researched poster images load on demand.
 
 Runtime release: `ccda33d8a6e50196`; 805,353 bytes before HTTP headers/compression. Images are generated production assets, not a screenshot with baked UI or people. The same production art and calibration are also copied into the Unity presentation by `Tools/prepare_unity_pixel_art.py`.

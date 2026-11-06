@@ -1,0 +1,5 @@
+# Transparent pose cutout
+
+Built-in ImageGen. Source `PosesCutout.png`. Technical atlas packing locates the eight alpha-isolated row bands, preserves source aspect ratios and aligns each cell's feet (horizontal surfer uses center). No creative pixel edits.
+
+Use case: background-extraction. Edit target is exact pixel character sprite sheet. Preserve EVERY character pixel/pose/gridposition/scale/direction/clothing identically. Remove ONLY all gray cloud/noise/background between and around characters, including low-opacity cloudy pixels. Make all non-character areas fully alpha0 TRANSPARENT. Keep clean crisp character edges with no halo and no floatingnoise/speckles, preserve the original 4-column8-row alignment and dimensions887x1774 (or exactsameaspect). Do NOT move/crop/rearrange/rescale any sprite. Do NOT redraw costumes or faces. No backgroundtexture, no shadow, no checkerboard pattern. This is an actual transparent production atlas cutout, not an image of an atlas on a grey background.

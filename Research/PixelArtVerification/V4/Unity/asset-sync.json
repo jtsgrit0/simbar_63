@@ -1,0 +1,56 @@
+[
+    {
+        "name":  "v4-band-bass-performance.png",
+        "bytes":  39916,
+        "sha256":  "afeba33a68015f57ce5ba55c36c2e46166c4107f9da99dca6f2b6b916f2280aa",
+        "resourceMatch":  true
+    },
+    {
+        "name":  "v4-band-drums-performance.png",
+        "bytes":  41517,
+        "sha256":  "7248eacecb5a95ef8418a9a7d2475fceee66ce9c5074fe783eeefc04ca5ebec2",
+        "resourceMatch":  true
+    },
+    {
+        "name":  "v4-band-greet-a.png",
+        "bytes":  79111,
+        "sha256":  "f3c93f8c7170a8ac61a4438d95bcef9ae4052fa9d128b64f80bdbe88b6f5f95e",
+        "resourceMatch":  true
+    },
+    {
+        "name":  "v4-band-greet-b.png",
+        "bytes":  78960,
+        "sha256":  "9299e32df0527961eb9835bbd31731b66c838ac2b6965ce3ce13a2beb5e7e018",
+        "resourceMatch":  true
+    },
+    {
+        "name":  "v4-band-guitar-performance.png",
+        "bytes":  39011,
+        "sha256":  "96cb1d3ad1602b0234b523eb0e9f1abcee80c3a4c476f8645e193396ea6c7a54",
+        "resourceMatch":  true
+    },
+    {
+        "name":  "v4-band-jump.png",
+        "bytes":  75396,
+        "sha256":  "4a8555c20d949e9a41a65a76f3011f4542cda7ea98d8075fb5860c33fb6cb8ac",
+        "resourceMatch":  true
+    },
+    {
+        "name":  "v4-band-singer-performance.png",
+        "bytes":  29815,
+        "sha256":  "d6ff6d83b81ac440528028943b8d90b17c1cfc91a1036edeec8eb16677a6b286",
+        "resourceMatch":  true
+    },
+    {
+        "name":  "v4-band-walk.png",
+        "bytes":  68619,
+        "sha256":  "9ded44a557b9d7b36693dd8101c7e73df94c225282c99c6b169fd99fabae6c33",
+        "resourceMatch":  true
+    },
+    {
+        "name":  "v4-guest-social.png",
+        "bytes":  120628,
+        "sha256":  "8522dc0a2ab8a709c5eae78e8434e467ecde82f895aba00d1af4760a9e262556",
+        "resourceMatch":  true
+    }
+]

@@ -1,0 +1,308 @@
+{
+  "profile": {
+    "encoder": "libimagequant",
+    "colors": 256,
+    "ditheringLevel": 0,
+    "minQuality": 0,
+    "maxQuality": 100,
+    "visibleRgbaLossless": false,
+    "pngRecompression": "Zopfli, 5 iterations, exact decoded RGBA"
+  },
+  "packageVersions": {
+    "Pillow": "13.0.0",
+    "imagequant": "1.1.5",
+    "zopfli": "0.4.3"
+  },
+  "scope": "Eight V4 band runtime atlases only; owner, guest and crowd images excluded",
+  "fullColorSourceLocation": "ArtSource/PixelArt/V4/*.source.png and *.packed-256.png",
+  "sourceAndFullColorPackedPngsPreserved": true,
+  "animationVerification": {
+    "frames": 384,
+    "allRowsDistinct": true,
+    "allCellsNonempty": true,
+    "minimumAdjacentChangedPixels": 860
+  },
+  "comparison": "band-palette-comparison.png",
+  "files": [
+    {
+      "file": "v4-band-bass-performance.png",
+      "size": [
+        512,
+        256
+      ],
+      "fullColorVisibleSha256": "e63df6984a9adbe6bbe978c5a5e16d7e195f9f5f1e5cb86f3e95591893328c60",
+      "runtimeVisibleSha256": "1af28a16bfac92eccaa27a994319883174c1d91f35697c2b9835aa42b08bd825",
+      "visibleRgbaPixelsChanged": 43158,
+      "alphaPixelsChanged": 23391,
+      "maxAlphaErrorOf255": 36,
+      "compositeBackgrounds": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          32,
+          35,
+          43
+        ],
+        [
+          255,
+          255,
+          255
+        ]
+      ],
+      "compositeMeanChannelErrorOf255": 2.196,
+      "compositeChannelRmseOf255": 3.3906,
+      "maxCompositeChannelErrorOf255": 37,
+      "bytes": 39916,
+      "fileSha256": "afeba33a68015f57ce5ba55c36c2e46166c4107f9da99dca6f2b6b916f2280aa"
+    },
+    {
+      "file": "v4-band-drums-performance.png",
+      "size": [
+        512,
+        256
+      ],
+      "fullColorVisibleSha256": "3ac7f530a6c74a2c87d35a17ad5407d2473633248027c4b916bf75f80ded9c66",
+      "runtimeVisibleSha256": "54f941a2199f4792dbcaab0483bcb0357cdac4fe947f59371036de5fb2577f25",
+      "visibleRgbaPixelsChanged": 44226,
+      "alphaPixelsChanged": 25112,
+      "maxAlphaErrorOf255": 37,
+      "compositeBackgrounds": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          32,
+          35,
+          43
+        ],
+        [
+          255,
+          255,
+          255
+        ]
+      ],
+      "compositeMeanChannelErrorOf255": 2.098,
+      "compositeChannelRmseOf255": 3.2392,
+      "maxCompositeChannelErrorOf255": 34,
+      "bytes": 41517,
+      "fileSha256": "7248eacecb5a95ef8418a9a7d2475fceee66ce9c5074fe783eeefc04ca5ebec2"
+    },
+    {
+      "file": "v4-band-greet-a.png",
+      "size": [
+        512,
+        512
+      ],
+      "fullColorVisibleSha256": "39b0c49f88cf6402cf9254393e1952aef0a23593e7e348f869ad3fc15d23adee",
+      "runtimeVisibleSha256": "91ca844652d9d28f1d75eb5306410600dfb360084adb609d120baa715d1626c0",
+      "visibleRgbaPixelsChanged": 85620,
+      "alphaPixelsChanged": 49664,
+      "maxAlphaErrorOf255": 39,
+      "compositeBackgrounds": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          32,
+          35,
+          43
+        ],
+        [
+          255,
+          255,
+          255
+        ]
+      ],
+      "compositeMeanChannelErrorOf255": 2.017,
+      "compositeChannelRmseOf255": 3.1302,
+      "maxCompositeChannelErrorOf255": 39,
+      "bytes": 79111,
+      "fileSha256": "f3c93f8c7170a8ac61a4438d95bcef9ae4052fa9d128b64f80bdbe88b6f5f95e"
+    },
+    {
+      "file": "v4-band-greet-b.png",
+      "size": [
+        512,
+        512
+      ],
+      "fullColorVisibleSha256": "7bc1dbd6ab264508e1343134f64860e5cdda6829b3794767cdffc72f8217c1a9",
+      "runtimeVisibleSha256": "8cf7ac1bb170ae5eb228e250e1c26d05218190a2a1f75e9894cbea0d8717d8f2",
+      "visibleRgbaPixelsChanged": 88432,
+      "alphaPixelsChanged": 48717,
+      "maxAlphaErrorOf255": 43,
+      "compositeBackgrounds": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          32,
+          35,
+          43
+        ],
+        [
+          255,
+          255,
+          255
+        ]
+      ],
+      "compositeMeanChannelErrorOf255": 2.0812,
+      "compositeChannelRmseOf255": 3.3022,
+      "maxCompositeChannelErrorOf255": 43,
+      "bytes": 78960,
+      "fileSha256": "9299e32df0527961eb9835bbd31731b66c838ac2b6965ce3ce13a2beb5e7e018"
+    },
+    {
+      "file": "v4-band-guitar-performance.png",
+      "size": [
+        512,
+        256
+      ],
+      "fullColorVisibleSha256": "69c7397cbb9f00f7eb6b9dfd99ecfb6177aab7a608b54868095db6652642cc28",
+      "runtimeVisibleSha256": "7b0f5179be3f0e3cdb4d83f3295a66ff7ca8efc989ac5633e3d20f882899f2cb",
+      "visibleRgbaPixelsChanged": 41169,
+      "alphaPixelsChanged": 22691,
+      "maxAlphaErrorOf255": 54,
+      "compositeBackgrounds": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          32,
+          35,
+          43
+        ],
+        [
+          255,
+          255,
+          255
+        ]
+      ],
+      "compositeMeanChannelErrorOf255": 2.1998,
+      "compositeChannelRmseOf255": 3.3621,
+      "maxCompositeChannelErrorOf255": 50,
+      "bytes": 39011,
+      "fileSha256": "96cb1d3ad1602b0234b523eb0e9f1abcee80c3a4c476f8645e193396ea6c7a54"
+    },
+    {
+      "file": "v4-band-jump.png",
+      "size": [
+        512,
+        512
+      ],
+      "fullColorVisibleSha256": "149ab47d8651cd4e92bab50959ec90026f056b2fa68b40526a6c24b07281734d",
+      "runtimeVisibleSha256": "d16c94de7cb94e8c3d0ba46469c05db65001b14d01bd5cde6983c62ee818482c",
+      "visibleRgbaPixelsChanged": 79309,
+      "alphaPixelsChanged": 47748,
+      "maxAlphaErrorOf255": 57,
+      "compositeBackgrounds": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          32,
+          35,
+          43
+        ],
+        [
+          255,
+          255,
+          255
+        ]
+      ],
+      "compositeMeanChannelErrorOf255": 2.4466,
+      "compositeChannelRmseOf255": 3.7241,
+      "maxCompositeChannelErrorOf255": 58,
+      "bytes": 75396,
+      "fileSha256": "4a8555c20d949e9a41a65a76f3011f4542cda7ea98d8075fb5860c33fb6cb8ac"
+    },
+    {
+      "file": "v4-band-singer-performance.png",
+      "size": [
+        512,
+        256
+      ],
+      "fullColorVisibleSha256": "acddcf355b9010e1c19d167a826a5199ffe83036039ee1b7119e62f8998cdeda",
+      "runtimeVisibleSha256": "4f9fc4d5f2a4cfc3813e85cb1b73977100ceb0791559e1db3b45ef14098fb015",
+      "visibleRgbaPixelsChanged": 28844,
+      "alphaPixelsChanged": 17272,
+      "maxAlphaErrorOf255": 33,
+      "compositeBackgrounds": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          32,
+          35,
+          43
+        ],
+        [
+          255,
+          255,
+          255
+        ]
+      ],
+      "compositeMeanChannelErrorOf255": 1.9364,
+      "compositeChannelRmseOf255": 2.9647,
+      "maxCompositeChannelErrorOf255": 31,
+      "bytes": 29815,
+      "fileSha256": "d6ff6d83b81ac440528028943b8d90b17c1cfc91a1036edeec8eb16677a6b286"
+    },
+    {
+      "file": "v4-band-walk.png",
+      "size": [
+        256,
+        1024
+      ],
+      "fullColorVisibleSha256": "8f564a7acb1dd3d48dccbfa5ee11935dd337fc6c34d2f56dc8d9f8b347a2f324",
+      "runtimeVisibleSha256": "62bc462c4241ab826705fdfadc02df56415506fa245aa7db7f290640296cd5e1",
+      "visibleRgbaPixelsChanged": 77273,
+      "alphaPixelsChanged": 44129,
+      "maxAlphaErrorOf255": 32,
+      "compositeBackgrounds": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          32,
+          35,
+          43
+        ],
+        [
+          255,
+          255,
+          255
+        ]
+      ],
+      "compositeMeanChannelErrorOf255": 2.1185,
+      "compositeChannelRmseOf255": 3.3684,
+      "maxCompositeChannelErrorOf255": 37,
+      "bytes": 68619,
+      "fileSha256": "9ded44a557b9d7b36693dd8101c7e73df94c225282c99c6b169fd99fabae6c33"
+    }
+  ],
+  "runtimeBytes": 452345,
+  "sourceReproductionVerification": {
+    "bandAtlasesReproduced": 8,
+    "fullColorSourceHashesMatchHistoricalLosslessRuntime": true,
+    "quantizedVisibleHashesMatchFinalRuntime": true,
+    "retainedSourcePngHashesUnchanged": 28,
+    "method": "Read-only source packer execution with output writes disabled; full-color and quantized visible SHA comparison"
+  }
+}

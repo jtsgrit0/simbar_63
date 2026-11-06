@@ -1,0 +1,36 @@
+﻿{
+  "success": true,
+  "command": "command",
+  "data": {
+    "command": "run_script",
+    "parameters": {
+      "file": "Research/PixelArtVerification/V3/Unity/PixelAfterShowQA.cs",
+      "entry": "PixelAfterShowQA.VisualContract"
+    },
+    "result": {
+      "diagnostics": [],
+      "compileMs": 102,
+      "executeMs": 27,
+      "assemblyName": "PipelineRunScript_PixelAfterShowQA_011a6312b3b64848bfe73a66dff61f5d",
+      "success": true,
+      "result": {
+        "performanceFrames": 32,
+        "pauseFreezesFrame": true,
+        "atlas": "SimBarPixelArt/band-performance",
+        "width": 2048,
+        "height": 1024,
+        "lightBanks": 4,
+        "lightsVisible": true,
+        "conesPerBank": 3,
+        "poolsPerBank": 4
+      }
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "E:\\simbar_63"
+    }
+  },
+  "errors": [],
+  "warnings": []
+}

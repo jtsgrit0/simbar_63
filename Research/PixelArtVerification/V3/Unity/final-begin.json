@@ -1,0 +1,188 @@
+﻿{
+  "success": true,
+  "command": "command",
+  "data": {
+    "command": "run_script",
+    "parameters": {
+      "file": "Research/PixelArtVerification/V3/Unity/PixelAfterShowQA.cs",
+      "entry": "PixelAfterShowQA.Begin"
+    },
+    "result": {
+      "diagnostics": [],
+      "compileMs": 75,
+      "executeMs": 3,
+      "assemblyName": "PipelineRunScript_PixelAfterShowQA_c40418a4482b4db894892fe649b9b870",
+      "success": true,
+      "result": {
+        "version": 1,
+        "session": 5,
+        "started": true,
+        "completed": false,
+        "elapsed": 0,
+        "members": [
+          {
+            "id": "singer",
+            "phase": "stage",
+            "waypoint": 0,
+            "greeting": 0,
+            "standAttempt": 0,
+            "timer": 0,
+            "delay": 0,
+            "x": 5.5,
+            "z": 2.700000047683716,
+            "stageLevel": 1,
+            "blockedTime": 0,
+            "visible": true
+          },
+          {
+            "id": "guitarist",
+            "phase": "stage",
+            "waypoint": 0,
+            "greeting": 0,
+            "standAttempt": 0,
+            "timer": 0,
+            "delay": 0.699999988079071,
+            "x": 3,
+            "z": 3.799999952316284,
+            "stageLevel": 1,
+            "blockedTime": 0,
+            "visible": true
+          },
+          {
+            "id": "bassist",
+            "phase": "stage",
+            "waypoint": 0,
+            "greeting": 0,
+            "standAttempt": 0,
+            "timer": 0,
+            "delay": 1.399999976158142,
+            "x": 8,
+            "z": 4.599999904632568,
+            "stageLevel": 1,
+            "blockedTime": 0,
+            "visible": true
+          },
+          {
+            "id": "drummer",
+            "phase": "stage",
+            "waypoint": 0,
+            "greeting": 0,
+            "standAttempt": 0,
+            "timer": 0,
+            "delay": 2.0999999046325684,
+            "x": 6,
+            "z": 6.199999809265137,
+            "stageLevel": 1,
+            "blockedTime": 0,
+            "visible": true
+          }
+        ],
+        "audience": [
+          {
+            "id": "patron-8",
+            "phase": "gather",
+            "partner": "",
+            "homeX": 0.0926915630698204,
+            "homeZ": 0.6929880380630493,
+            "homeFacing": -0.07771796733140945,
+            "x": 0.0926915630698204,
+            "z": 0.6929880380630493,
+            "targetX": 3.049999952316284,
+            "targetZ": 0.25
+          },
+          {
+            "id": "patron-9",
+            "phase": "gather",
+            "partner": "",
+            "homeX": 0.4534551203250885,
+            "homeZ": -0.1963782161474228,
+            "homeFacing": 1.581247329711914,
+            "x": 0.4534551203250885,
+            "z": -0.1963782161474228,
+            "targetX": 2.799999952316284,
+            "targetZ": -1.649999976158142
+          },
+          {
+            "id": "patron-10",
+            "phase": "gather",
+            "partner": "",
+            "homeX": 2.8460628986358643,
+            "homeZ": 0.507710337638855,
+            "homeFacing": 0.16418232023715973,
+            "x": 2.8460628986358643,
+            "z": 0.507710337638855,
+            "targetX": 7.699999809265136,
+            "targetZ": 0.3499999940395355
+          },
+          {
+            "id": "patron-11",
+            "phase": "gather",
+            "partner": "",
+            "homeX": -0.052400317043066025,
+            "homeZ": -0.8611341714859008,
+            "homeFacing": -0.25912824273109436,
+            "x": -0.052400317043066025,
+            "z": -0.8611341714859008,
+            "targetX": 8,
+            "targetZ": -1.649999976158142
+          },
+          {
+            "id": "patron-12",
+            "phase": "gather",
+            "partner": "",
+            "homeX": -0.5038297772407532,
+            "homeZ": -0.9542272686958312,
+            "homeFacing": 0.11114180833101273,
+            "x": -0.5038297772407532,
+            "z": -0.9542272686958312,
+            "targetX": 3.0999999046325684,
+            "targetZ": -3.5999999046325684
+          },
+          {
+            "id": "patron-13",
+            "phase": "gather",
+            "partner": "",
+            "homeX": 2.599003553390503,
+            "homeZ": -0.9999945759773254,
+            "homeFacing": -0.10734722763299942,
+            "x": 2.599003553390503,
+            "z": -0.9999945759773254,
+            "targetX": 4.050000190734863,
+            "targetZ": -4.650000095367432
+          },
+          {
+            "id": "patron-14",
+            "phase": "gather",
+            "partner": "",
+            "homeX": -0.03873760625720024,
+            "homeZ": -2.5031166076660156,
+            "homeFacing": -1.3895165920257568,
+            "x": -0.03873760625720024,
+            "z": -2.5031166076660156,
+            "targetX": 7.650000095367432,
+            "targetZ": -3.200000047683716
+          },
+          {
+            "id": "patron-15",
+            "phase": "gather",
+            "partner": "",
+            "homeX": -0.48405399918556213,
+            "homeZ": -2.664957284927368,
+            "homeFacing": -0.8548736572265625,
+            "x": -0.48405399918556213,
+            "z": -2.664957284927368,
+            "targetX": 8.25,
+            "targetZ": -4.650000095367432
+          }
+        ]
+      }
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "E:\\simbar_63"
+    }
+  },
+  "errors": [],
+  "warnings": []
+}

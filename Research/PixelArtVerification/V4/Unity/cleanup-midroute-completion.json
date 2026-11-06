@@ -1,0 +1,26 @@
+{
+  "heldForPhysicalReturn": true,
+  "allReturned": true,
+  "physicallyMoved": true,
+  "maximumStep": 0.155000225,
+  "noTeleports": true,
+  "frames": 40,
+  "phase": "Results",
+  "settled": true,
+  "workers": [
+    {
+      "name": "Bartender",
+      "x": -7.3,
+      "z": -0.565,
+      "remaining": 0.0,
+      "behindBar": true
+    },
+    {
+      "name": "Server",
+      "x": -4.1526804,
+      "z": -0.573281,
+      "remaining": 0.0480385423,
+      "behindBar": true
+    }
+  ]
+}

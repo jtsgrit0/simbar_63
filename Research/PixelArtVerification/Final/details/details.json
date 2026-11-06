@@ -1,0 +1,644 @@
+{
+  "ownerChecks": [
+    {
+      "name": "JESSY",
+      "size": [
+        400,
+        350
+      ],
+      "exactOriginalNearestCrop": true
+    },
+    {
+      "name": "EDISON",
+      "size": [
+        400,
+        350
+      ],
+      "exactOriginalNearestCrop": true
+    },
+    {
+      "name": "JAIDEN",
+      "size": [
+        400,
+        350
+      ],
+      "exactOriginalNearestCrop": true
+    }
+  ],
+  "jumpDraws": [
+    {
+      "name": "v4-band-jump.png",
+      "args": [
+        0,
+        448,
+        64,
+        64,
+        -27,
+        -51,
+        54,
+        54
+      ],
+      "key": "448-0",
+      "now": 7564.5999999940395,
+      "elapsed": 6.301800000000002
+    },
+    {
+      "name": "v4-band-jump.png",
+      "args": [
+        64,
+        448,
+        64,
+        64,
+        -27,
+        -51,
+        54,
+        54
+      ],
+      "key": "448-64",
+      "now": 7696.5999999940395,
+      "elapsed": 6.434400000000003
+    },
+    {
+      "name": "v4-band-jump.png",
+      "args": [
+        128,
+        448,
+        64,
+        64,
+        -27,
+        -51,
+        54,
+        54
+      ],
+      "key": "448-128",
+      "now": 7822.9000000059605,
+      "elapsed": 6.565500000000003
+    },
+    {
+      "name": "v4-band-jump.png",
+      "args": [
+        192,
+        448,
+        64,
+        64,
+        -27,
+        -51,
+        54,
+        54
+      ],
+      "key": "448-192",
+      "now": 7942.199999988079,
+      "elapsed": 6.679000000000004
+    },
+    {
+      "name": "v4-band-jump.png",
+      "args": [
+        256,
+        448,
+        64,
+        64,
+        -27,
+        -51,
+        54,
+        54
+      ],
+      "key": "448-256",
+      "now": 8060.699999988079,
+      "elapsed": 6.811300000000005
+    },
+    {
+      "name": "v4-band-jump.png",
+      "args": [
+        320,
+        448,
+        64,
+        64,
+        -27,
+        -51,
+        54,
+        54
+      ],
+      "key": "448-320",
+      "now": 8195.40000000596,
+      "elapsed": 6.944300000000005
+    },
+    {
+      "name": "v4-band-jump.png",
+      "args": [
+        384,
+        448,
+        64,
+        64,
+        -27,
+        -51,
+        54,
+        54
+      ],
+      "key": "448-384",
+      "now": 8313.40000000596,
+      "elapsed": 7.058100000000004
+    },
+    {
+      "name": "v4-band-jump.png",
+      "args": [
+        448,
+        448,
+        64,
+        64,
+        -27,
+        -51,
+        54,
+        54
+      ],
+      "key": "448-448",
+      "now": 8448.5,
+      "elapsed": 7.191700000000004
+    },
+    {
+      "name": "v4-band-jump.png",
+      "args": [
+        0,
+        0,
+        64,
+        64,
+        -27,
+        -51,
+        54,
+        54
+      ],
+      "key": "0-0",
+      "now": 10158.300000011921,
+      "elapsed": 8.901400000000017
+    },
+    {
+      "name": "v4-band-jump.png",
+      "args": [
+        64,
+        0,
+        64,
+        64,
+        -27,
+        -51,
+        54,
+        54
+      ],
+      "key": "0-64",
+      "now": 10287.300000011921,
+      "elapsed": 9.034500000000019
+    },
+    {
+      "name": "v4-band-jump.png",
+      "args": [
+        128,
+        0,
+        64,
+        64,
+        -27,
+        -51,
+        54,
+        54
+      ],
+      "key": "0-128",
+      "now": 10428.5,
+      "elapsed": 9.16830000000002
+    },
+    {
+      "name": "v4-band-jump.png",
+      "args": [
+        192,
+        0,
+        64,
+        64,
+        -27,
+        -51,
+        54,
+        54
+      ],
+      "key": "0-192",
+      "now": 10546.800000011921,
+      "elapsed": 9.281300000000021
+    },
+    {
+      "name": "v4-band-jump.png",
+      "args": [
+        256,
+        0,
+        64,
+        64,
+        -27,
+        -51,
+        54,
+        54
+      ],
+      "key": "0-256",
+      "now": 10674.09999999404,
+      "elapsed": 9.41330000000002
+    },
+    {
+      "name": "v4-band-jump.png",
+      "args": [
+        320,
+        0,
+        64,
+        64,
+        -27,
+        -51,
+        54,
+        54
+      ],
+      "key": "0-320",
+      "now": 10779.699999988079,
+      "elapsed": 9.526500000000022
+    },
+    {
+      "name": "v4-band-jump.png",
+      "args": [
+        384,
+        0,
+        64,
+        64,
+        -27,
+        -51,
+        54,
+        54
+      ],
+      "key": "0-384",
+      "now": 10919.300000011921,
+      "elapsed": 9.659000000000024
+    },
+    {
+      "name": "v4-band-jump.png",
+      "args": [
+        448,
+        0,
+        64,
+        64,
+        -27,
+        -51,
+        54,
+        54
+      ],
+      "key": "0-448",
+      "now": 11046.40000000596,
+      "elapsed": 9.790900000000027
+    }
+  ],
+  "errors": [],
+  "release": "177c90f03ec2b563",
+  "packageIntegrity": {
+    "filesVerified": 45,
+    "runtimeBytes": 1904798,
+    "matchesSource": true
+  },
+  "fansAtReceipt": [
+    {
+      "id": "patron-8",
+      "phase": "done",
+      "distanceFromCapturedHome": 0.013879575050762986
+    },
+    {
+      "id": "patron-9",
+      "phase": "done",
+      "distanceFromCapturedHome": 0.01738432188134488
+    },
+    {
+      "id": "patron-10",
+      "phase": "done",
+      "distanceFromCapturedHome": 0.006132037453301102
+    },
+    {
+      "id": "patron-11",
+      "phase": "done",
+      "distanceFromCapturedHome": 0.007466287645009059
+    },
+    {
+      "id": "patron-12",
+      "phase": "done",
+      "distanceFromCapturedHome": 0.008609999999993345
+    },
+    {
+      "id": "patron-13",
+      "phase": "done",
+      "distanceFromCapturedHome": 0.0
+    },
+    {
+      "id": "patron-14",
+      "phase": "done",
+      "distanceFromCapturedHome": 0.003372124746194238
+    },
+    {
+      "id": "patron-15",
+      "phase": "done",
+      "distanceFromCapturedHome": 0.016330153445659065
+    }
+  ],
+  "actualActorAppearance": [
+    {
+      "id": "patron-0",
+      "role": "guest",
+      "style": "Casual",
+      "facing": "FL",
+      "canvasPoint": {
+        "x": 573.9893446259857,
+        "y": 377.91278027978467
+      }
+    },
+    {
+      "id": "patron-1",
+      "role": "guest",
+      "style": "Suit",
+      "facing": "BL",
+      "canvasPoint": {
+        "x": 398.7638325253623,
+        "y": 337.4859022170598
+      }
+    },
+    {
+      "id": "patron-2",
+      "role": "guest",
+      "style": "Beach",
+      "facing": "BR",
+      "canvasPoint": {
+        "x": 622.0949365303171,
+        "y": 421.73571721138603
+      }
+    },
+    {
+      "id": "patron-3",
+      "role": "guest",
+      "style": "Worker",
+      "facing": "BR",
+      "canvasPoint": {
+        "x": 666.6215330956844,
+        "y": 405.9539262318005
+      }
+    },
+    {
+      "id": "patron-4",
+      "role": "guest",
+      "style": "Farmer",
+      "facing": "BL",
+      "canvasPoint": {
+        "x": 410.3167866175769,
+        "y": 351.5019127232043
+      }
+    },
+    {
+      "id": "patron-5",
+      "role": "guest",
+      "style": "Adventurer",
+      "facing": "FL",
+      "canvasPoint": {
+        "x": 618.515941191353,
+        "y": 362.1309893001992
+      }
+    },
+    {
+      "id": "patron-6",
+      "role": "guest",
+      "style": "Casual2",
+      "facing": "FR",
+      "canvasPoint": {
+        "x": 600.7036382494844,
+        "y": 386.1760025913103
+      }
+    },
+    {
+      "id": "patron-7",
+      "role": "guest",
+      "style": "Punk",
+      "facing": "BL",
+      "canvasPoint": {
+        "x": 440.13625456770274,
+        "y": 378.3189906131416
+      }
+    },
+    {
+      "id": "patron-8",
+      "role": "guest",
+      "style": "Casual",
+      "facing": "BL",
+      "canvasPoint": {
+        "x": 424.1075939650237,
+        "y": 365.11294218856494
+      }
+    },
+    {
+      "id": "patron-9",
+      "role": "guest",
+      "style": "Suit",
+      "facing": "BR",
+      "canvasPoint": {
+        "x": 402.60601832399175,
+        "y": 394.91488034205804
+      }
+    },
+    {
+      "id": "patron-10",
+      "role": "guest",
+      "style": "Beach",
+      "facing": "BR",
+      "canvasPoint": {
+        "x": 465.3679550608552,
+        "y": 400.57833223229426
+      }
+    },
+    {
+      "id": "patron-11",
+      "role": "guest",
+      "style": "Worker",
+      "facing": "BL",
+      "canvasPoint": {
+        "x": 549.6025869695645,
+        "y": 467.8336799766347
+      }
+    },
+    {
+      "id": "patron-12",
+      "role": "guest",
+      "style": "Farmer",
+      "facing": "BR",
+      "canvasPoint": {
+        "x": 521.4052579278789,
+        "y": 388.07108679677157
+      }
+    },
+    {
+      "id": "patron-13",
+      "role": "guest",
+      "style": "Adventurer",
+      "facing": "BL",
+      "canvasPoint": {
+        "x": 709.6846526222331,
+        "y": 412.87403958274933
+      }
+    },
+    {
+      "id": "patron-14",
+      "role": "guest",
+      "style": "Casual2",
+      "facing": "BL",
+      "canvasPoint": {
+        "x": 596.8116118663113,
+        "y": 481.6996975047112
+      }
+    },
+    {
+      "id": "patron-15",
+      "role": "guest",
+      "style": "Punk",
+      "facing": "BR",
+      "canvasPoint": {
+        "x": 651.7790997807523,
+        "y": 474.47448908668713
+      }
+    },
+    {
+      "id": "bar-seat-0",
+      "role": "barseated",
+      "style": "Casual2",
+      "facing": "BR",
+      "canvasPoint": {
+        "x": 198.90271277268985,
+        "y": 308.5272579180386
+      }
+    },
+    {
+      "id": "bar-seat-1",
+      "role": "barseated",
+      "style": "Punk",
+      "facing": "BR",
+      "canvasPoint": {
+        "x": 244.63645564141336,
+        "y": 321.9599623983626
+      }
+    },
+    {
+      "id": "bar-seat-2",
+      "role": "barseated",
+      "style": "Casual2",
+      "facing": "BR",
+      "canvasPoint": {
+        "x": 290.3701985101368,
+        "y": 335.39266687868667
+      }
+    },
+    {
+      "id": "bar-seat-3",
+      "role": "barseated",
+      "style": "Punk",
+      "facing": "BR",
+      "canvasPoint": {
+        "x": 336.1039413788603,
+        "y": 348.82537135901066
+      }
+    },
+    {
+      "id": "lounge-0",
+      "role": "seated",
+      "style": "Casual",
+      "facing": "FL",
+      "canvasPoint": {
+        "x": 315.0481766091197,
+        "y": 139.74682605254753
+      }
+    },
+    {
+      "id": "lounge-1",
+      "role": "seated",
+      "style": "Suit",
+      "facing": "FL",
+      "canvasPoint": {
+        "x": 360.7819194778431,
+        "y": 153.17953053287152
+      }
+    },
+    {
+      "id": "lounge-2",
+      "role": "seated",
+      "style": "Casual",
+      "facing": "FL",
+      "canvasPoint": {
+        "x": 436.0213029070332,
+        "y": 175.2784959682434
+      }
+    },
+    {
+      "id": "lounge-3",
+      "role": "seated",
+      "style": "Suit",
+      "facing": "FL",
+      "canvasPoint": {
+        "x": 480.27976374773334,
+        "y": 188.27788740081508
+      }
+    },
+    {
+      "id": "lounge-4",
+      "role": "seated",
+      "style": "Casual",
+      "facing": "BR",
+      "canvasPoint": {
+        "x": 124.20592810132132,
+        "y": 357.7599530859359
+      }
+    },
+    {
+      "id": "lounge-5",
+      "role": "seated",
+      "style": "Suit",
+      "facing": "BR",
+      "canvasPoint": {
+        "x": 168.46438894202151,
+        "y": 370.7593445185076
+      }
+    },
+    {
+      "id": "lounge-6",
+      "role": "seated",
+      "style": "Casual",
+      "facing": "BR",
+      "canvasPoint": {
+        "x": 268.7835668476084,
+        "y": 400.22463176567004
+      }
+    }
+  ],
+  "buttonAlignment": [
+    {
+      "action": "ui:upgrades",
+      "label": "업그레이드",
+      "textCenterOffset": -3.0517578125e-05,
+      "iconLeftOfText": true,
+      "iconSource": "http://127.0.0.1:9888/FastGame/177c90f03ec2b563/art/icons/upgrades.png"
+    },
+    {
+      "action": "ui:guests",
+      "label": "손님 정보",
+      "textCenterOffset": -0.006591796875,
+      "iconLeftOfText": true,
+      "iconSource": "http://127.0.0.1:9888/FastGame/177c90f03ec2b563/art/icons/guest.png"
+    },
+    {
+      "action": "ui:events",
+      "label": "이벤트",
+      "textCenterOffset": -0.006622314453125,
+      "iconLeftOfText": true,
+      "iconSource": "http://127.0.0.1:9888/FastGame/177c90f03ec2b563/art/icons/events.png"
+    }
+  ],
+  "actualLoadedDrawnFiles": [
+    "venue.png",
+    "poses.png",
+    "v4-band-drums-performance.png",
+    "v4-band-guitar-performance.png",
+    "v4-band-singer-performance.png",
+    "v4-band-bass-performance.png",
+    "pit.png",
+    "walk.png",
+    "wardrobe.png",
+    "v4-band-jump.png"
+  ],
+  "video": "E:\\simbar_63\\Research\\PixelArtVerification\\Final\\details\\video\\page@5bd758da938ae8aec3e7a186b8288d22.webm",
+  "actualJumpFramesCaptured": 16
+}

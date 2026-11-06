@@ -59,3 +59,14 @@ Desktop.ini
 # Asset Store tools are installed locally.
 /Assets/AssetStoreTools/
 /Assets/Plugins/PlasticSCM*
+
+# Reproducible local previews and private QA save backups.
+/Research/PixelArtVerification/Preview/
+/Research/PixelArtVerification/*Preview/
+/Research/PixelArtVerification/**/prefs-backup.json
+/Research/PixelArtVerification/**/AccidentalAssetsResearch/
+/Research/PixelArtVerification/**/AccidentalAssetsResearch.meta
+/Research/BandRenderer/prefs*.json
+/Research/unity-*-commands-band.json
+# Raw repeat-run recordings stay local; reports and selected frames are tracked.
+/Research/PixelArtVerification/**/*.webm

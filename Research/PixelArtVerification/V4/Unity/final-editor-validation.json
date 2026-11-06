@@ -1,0 +1,739 @@
+[
+  {
+    "command": "editor_play",
+    "entry": null,
+    "result": "Entered play mode"
+  },
+  {
+    "command": "run_script",
+    "entry": "PixelV4QA.VisualContract",
+    "result": {
+      "performanceFrames": 8,
+      "pauseFreezesFrame": true,
+      "atlas": "SimBarPixelArt/v4-band-singer-performance",
+      "width": 512,
+      "height": 256,
+      "lightBanks": 4,
+      "lightsVisible": true,
+      "conesPerBank": 3,
+      "poolsPerBank": 4
+    }
+  },
+  {
+    "command": "run_script",
+    "entry": "PixelV4QA.Begin",
+    "result": {
+      "version": 1,
+      "session": 3,
+      "started": true,
+      "completed": false,
+      "elapsed": 0,
+      "returningFan": "",
+      "members": [
+        {
+          "id": "singer",
+          "phase": "stage",
+          "waypoint": 0,
+          "greeting": 0,
+          "standAttempt": 0,
+          "timer": 0,
+          "delay": 0,
+          "x": 5.5,
+          "z": 2.700000047683716,
+          "stageLevel": 1,
+          "blockedTime": 0,
+          "visible": true
+        },
+        {
+          "id": "guitarist",
+          "phase": "stage",
+          "waypoint": 0,
+          "greeting": 0,
+          "standAttempt": 0,
+          "timer": 0,
+          "delay": 0.699999988079071,
+          "x": 3,
+          "z": 3.799999952316284,
+          "stageLevel": 1,
+          "blockedTime": 0,
+          "visible": true
+        },
+        {
+          "id": "bassist",
+          "phase": "stage",
+          "waypoint": 0,
+          "greeting": 0,
+          "standAttempt": 0,
+          "timer": 0,
+          "delay": 1.399999976158142,
+          "x": 8,
+          "z": 4.599999904632568,
+          "stageLevel": 1,
+          "blockedTime": 0,
+          "visible": true
+        },
+        {
+          "id": "drummer",
+          "phase": "stage",
+          "waypoint": 0,
+          "greeting": 0,
+          "standAttempt": 0,
+          "timer": 0,
+          "delay": 2.0999999046325684,
+          "x": 6,
+          "z": 6.199999809265137,
+          "stageLevel": 1,
+          "blockedTime": 0,
+          "visible": true
+        }
+      ],
+      "audience": [
+        {
+          "id": "patron-8",
+          "phase": "gather",
+          "partner": "",
+          "homeX": 0.10000000149011612,
+          "homeZ": 0.699999988079071,
+          "homeFacing": 0.04402518644928932,
+          "x": 0.10000000149011612,
+          "z": 0.699999988079071,
+          "targetX": 3.049999952316284,
+          "targetZ": 0.25
+        },
+        {
+          "id": "patron-9",
+          "phase": "gather",
+          "partner": "",
+          "homeX": 1.5,
+          "homeZ": 0.5,
+          "homeFacing": 0.1832787394523621,
+          "x": 1.5,
+          "z": 0.5,
+          "targetX": 2.799999952316284,
+          "targetZ": -1.649999976158142
+        },
+        {
+          "id": "patron-10",
+          "phase": "gather",
+          "partner": "",
+          "homeX": 2.8499999046325684,
+          "homeZ": 0.5,
+          "homeFacing": -0.11092811822891235,
+          "x": 2.8499999046325684,
+          "z": 0.5,
+          "targetX": 7.699999809265136,
+          "targetZ": 0.3499999940395355
+        },
+        {
+          "id": "patron-11",
+          "phase": "gather",
+          "partner": "",
+          "homeX": -0.10000000149011612,
+          "homeZ": -0.800000011920929,
+          "homeFacing": -0.05870512500405312,
+          "x": -0.10000000149011612,
+          "z": -0.800000011920929,
+          "targetX": 8,
+          "targetZ": -1.649999976158142
+        },
+        {
+          "id": "patron-12",
+          "phase": "gather",
+          "partner": "",
+          "homeX": 1.2000000476837158,
+          "homeZ": -1.100000023841858,
+          "homeFacing": 0.012695354409515858,
+          "x": 1.2000000476837158,
+          "z": -1.100000023841858,
+          "targetX": 3.0999999046325684,
+          "targetZ": -3.5999999046325684
+        },
+        {
+          "id": "patron-13",
+          "phase": "gather",
+          "partner": "",
+          "homeX": 2.5999999046325684,
+          "homeZ": -1,
+          "homeFacing": -0.18486173450946808,
+          "x": 2.5999999046325684,
+          "z": -1,
+          "targetX": 4.050000190734863,
+          "targetZ": -4.650000095367432
+        },
+        {
+          "id": "patron-14",
+          "phase": "gather",
+          "partner": "",
+          "homeX": -0.20000000298023224,
+          "homeZ": -2.549999952316284,
+          "homeFacing": -0.1322115659713745,
+          "x": -0.20000000298023224,
+          "z": -2.549999952316284,
+          "targetX": 7.650000095367432,
+          "targetZ": -3.200000047683716
+        },
+        {
+          "id": "patron-15",
+          "phase": "gather",
+          "partner": "",
+          "homeX": 1.2000000476837158,
+          "homeZ": -2.5999999046325684,
+          "homeFacing": -0.057801779359579086,
+          "x": 1.2000000476837158,
+          "z": -2.5999999046325684,
+          "targetX": 8.25,
+          "targetZ": -4.650000095367432
+        }
+      ]
+    }
+  },
+  {
+    "command": "run_script",
+    "entry": "PixelV4QA.HighFive",
+    "result": {
+      "reached": true,
+      "frames": 53,
+      "state": {
+        "version": 1,
+        "session": 3,
+        "started": true,
+        "completed": false,
+        "elapsed": 5.399997234344482,
+        "returningFan": "",
+        "members": [
+          {
+            "id": "singer",
+            "phase": "highfive",
+            "waypoint": 4,
+            "greeting": 0,
+            "standAttempt": 0,
+            "timer": 0.6000000238418579,
+            "delay": 0,
+            "x": 3.576340675354004,
+            "z": 0.3206499218940735,
+            "stageLevel": 0,
+            "blockedTime": 0,
+            "visible": true
+          },
+          {
+            "id": "guitarist",
+            "phase": "approach",
+            "waypoint": 5,
+            "greeting": 0,
+            "standAttempt": 0,
+            "timer": 0,
+            "delay": 0,
+            "x": 5.199999809265137,
+            "z": 1.149999976158142,
+            "stageLevel": 0,
+            "blockedTime": 0,
+            "visible": true
+          },
+          {
+            "id": "bassist",
+            "phase": "stage",
+            "waypoint": 4,
+            "greeting": 0,
+            "standAttempt": 0,
+            "timer": 0,
+            "delay": 0,
+            "x": 5.5,
+            "z": 1.224914312362671,
+            "stageLevel": 0.044948603957891464,
+            "blockedTime": 0,
+            "visible": true
+          },
+          {
+            "id": "drummer",
+            "phase": "stage",
+            "waypoint": 2,
+            "greeting": 0,
+            "standAttempt": 0,
+            "timer": 0,
+            "delay": 0,
+            "x": 3.200000047683716,
+            "z": 3.6990599632263184,
+            "stageLevel": 1,
+            "blockedTime": 0,
+            "visible": true
+          }
+        ],
+        "audience": [
+          {
+            "id": "patron-8",
+            "phase": "greet",
+            "partner": "singer",
+            "homeX": 0.10000000149011612,
+            "homeZ": 0.699999988079071,
+            "homeFacing": 0.04402518644928932,
+            "x": 3.0439517498016357,
+            "z": 0.04395166039466858,
+            "targetX": 3.049999952316284,
+            "targetZ": 0.25
+          },
+          {
+            "id": "patron-9",
+            "phase": "wait",
+            "partner": "",
+            "homeX": 1.5,
+            "homeZ": 0.5,
+            "homeFacing": 0.1832787394523621,
+            "x": 2.630000114440918,
+            "z": -1.8000001907348633,
+            "targetX": 2.799999952316284,
+            "targetZ": -1.649999976158142
+          },
+          {
+            "id": "patron-10",
+            "phase": "gather",
+            "partner": "guitarist",
+            "homeX": 2.8499999046325684,
+            "homeZ": 0.5,
+            "homeFacing": -0.11092811822891235,
+            "x": 6.800000190734863,
+            "z": 0.9999998807907104,
+            "targetX": 7.699999809265136,
+            "targetZ": 0.3499999940395355
+          },
+          {
+            "id": "patron-11",
+            "phase": "gather",
+            "partner": "",
+            "homeX": -0.10000000149011612,
+            "homeZ": -0.800000011920929,
+            "homeFacing": -0.05870512500405312,
+            "x": 3.0299999713897705,
+            "z": -1.0000001192092896,
+            "targetX": 8,
+            "targetZ": -1.649999976158142
+          },
+          {
+            "id": "patron-12",
+            "phase": "gather",
+            "partner": "",
+            "homeX": 1.2000000476837158,
+            "homeZ": -1.100000023841858,
+            "homeFacing": 0.012695354409515858,
+            "x": 3.200000047683716,
+            "z": -2.6000001430511475,
+            "targetX": 3.0999999046325684,
+            "targetZ": -3.5999999046325684
+          },
+          {
+            "id": "patron-13",
+            "phase": "wait",
+            "partner": "",
+            "homeX": 2.5999999046325684,
+            "homeZ": -1,
+            "homeFacing": -0.18486173450946808,
+            "x": 4,
+            "z": -4.429999828338623,
+            "targetX": 4.050000190734863,
+            "targetZ": -4.650000095367432
+          },
+          {
+            "id": "patron-14",
+            "phase": "gather",
+            "partner": "",
+            "homeX": -0.20000000298023224,
+            "homeZ": -2.549999952316284,
+            "homeFacing": -0.1322115659713745,
+            "x": 2.718682765960694,
+            "z": -3.8813173770904545,
+            "targetX": 7.650000095367432,
+            "targetZ": -3.200000047683716
+          },
+          {
+            "id": "patron-15",
+            "phase": "gather",
+            "partner": "",
+            "homeX": 1.2000000476837158,
+            "homeZ": -2.5999999046325684,
+            "homeFacing": -0.057801779359579086,
+            "x": 4.5626349449157715,
+            "z": -3.6373655796051025,
+            "targetX": 8.25,
+            "targetZ": -4.650000095367432
+          }
+        ]
+      }
+    }
+  },
+  {
+    "command": "run_script",
+    "entry": "PixelV4QA.CaptureHighFive",
+    "result": {
+      "action": "highfive",
+      "memberPixelX": 588,
+      "memberPixelY": -347,
+      "fanPixelX": 568,
+      "fanPixelY": -347,
+      "pixelDistance": 20,
+      "worldDistance": 0.5999999,
+      "progress": 0.545454562
+    }
+  },
+  {
+    "command": "run_script",
+    "entry": "PixelV4QA.Hug",
+    "result": {
+      "reached": true,
+      "frames": 46,
+      "state": {
+        "version": 1,
+        "session": 3,
+        "started": true,
+        "completed": false,
+        "elapsed": 10.10000228881836,
+        "returningFan": "",
+        "members": [
+          {
+            "id": "singer",
+            "phase": "hug",
+            "waypoint": 4,
+            "greeting": 1,
+            "standAttempt": 0,
+            "timer": 0.8000000715255737,
+            "delay": 0,
+            "x": 3.016077041625977,
+            "z": -1.6062276363372805,
+            "stageLevel": 0,
+            "blockedTime": 0,
+            "visible": true
+          },
+          {
+            "id": "guitarist",
+            "phase": "highfive",
+            "waypoint": 5,
+            "greeting": 0,
+            "standAttempt": 0,
+            "timer": 1.0000001192092896,
+            "delay": 0,
+            "x": 7.2631516456604,
+            "z": -0.2160632610321045,
+            "stageLevel": 0,
+            "blockedTime": 0,
+            "visible": true
+          },
+          {
+            "id": "bassist",
+            "phase": "approach",
+            "waypoint": 5,
+            "greeting": 0,
+            "standAttempt": 0,
+            "timer": 0,
+            "delay": 0,
+            "x": 4.124228477478027,
+            "z": 0.3242283761501312,
+            "stageLevel": 0,
+            "blockedTime": 0,
+            "visible": true
+          },
+          {
+            "id": "drummer",
+            "phase": "approach",
+            "waypoint": 7,
+            "greeting": 0,
+            "standAttempt": 0,
+            "timer": 0,
+            "delay": 0,
+            "x": 5.799999713897705,
+            "z": 1.149999976158142,
+            "stageLevel": 0,
+            "blockedTime": 0,
+            "visible": true
+          }
+        ],
+        "audience": [
+          {
+            "id": "patron-8",
+            "phase": "done",
+            "partner": "",
+            "homeX": 0.10000000149011612,
+            "homeZ": 0.699999988079071,
+            "homeFacing": 0.04402518644928932,
+            "x": 0.10000000149011612,
+            "z": 0.699999988079071,
+            "targetX": 3.049999952316284,
+            "targetZ": 0.25
+          },
+          {
+            "id": "patron-9",
+            "phase": "greet",
+            "partner": "singer",
+            "homeX": 1.5,
+            "homeZ": 0.5,
+            "homeFacing": 0.1832787394523621,
+            "x": 2.630000114440918,
+            "z": -1.8000001907348633,
+            "targetX": 2.799999952316284,
+            "targetZ": -1.649999976158142
+          },
+          {
+            "id": "patron-10",
+            "phase": "greet",
+            "partner": "guitarist",
+            "homeX": 2.8499999046325684,
+            "homeZ": 0.5,
+            "homeFacing": -0.11092811822891235,
+            "x": 7.4439520835876465,
+            "z": 0.3560478687286377,
+            "targetX": 7.699999809265136,
+            "targetZ": 0.3499999940395355
+          },
+          {
+            "id": "patron-11",
+            "phase": "gather",
+            "partner": "",
+            "homeX": -0.10000000149011612,
+            "homeZ": -0.800000011920929,
+            "homeFacing": -0.05870512500405312,
+            "x": 7.525269508361816,
+            "z": -0.925269603729248,
+            "targetX": 8,
+            "targetZ": -1.649999976158142
+          },
+          {
+            "id": "patron-12",
+            "phase": "wait",
+            "partner": "bassist",
+            "homeX": 1.2000000476837158,
+            "homeZ": -1.100000023841858,
+            "homeFacing": 0.012695354409515858,
+            "x": 2.9149999618530273,
+            "z": -3.8000001907348633,
+            "targetX": 3.0999999046325684,
+            "targetZ": -3.5999999046325684
+          },
+          {
+            "id": "patron-13",
+            "phase": "wait",
+            "partner": "",
+            "homeX": 2.5999999046325684,
+            "homeZ": -1,
+            "homeFacing": -0.18486173450946808,
+            "x": 4,
+            "z": -4.429999828338623,
+            "targetX": 4.050000190734863,
+            "targetZ": -4.650000095367432
+          },
+          {
+            "id": "patron-14",
+            "phase": "gather",
+            "partner": "drummer",
+            "homeX": -0.20000000298023224,
+            "homeZ": -2.549999952316284,
+            "homeFacing": -0.1322115659713745,
+            "x": 5.714999675750732,
+            "z": -5.800000190734863,
+            "targetX": 7.650000095367432,
+            "targetZ": -3.200000047683716
+          },
+          {
+            "id": "patron-15",
+            "phase": "wait",
+            "partner": "",
+            "homeX": 1.2000000476837158,
+            "homeZ": -2.5999999046325684,
+            "homeFacing": -0.057801779359579086,
+            "x": 8,
+            "z": -4.600000381469727,
+            "targetX": 8.25,
+            "targetZ": -4.650000095367432
+          }
+        ]
+      }
+    }
+  },
+  {
+    "command": "run_script",
+    "entry": "PixelV4QA.CaptureHug",
+    "result": {
+      "action": "hug",
+      "memberPixelX": 542,
+      "memberPixelY": -374,
+      "fanPixelX": 528,
+      "fanPixelY": -374,
+      "pixelDistance": 14,
+      "worldDistance": 0.431975931,
+      "progress": 0.533333361
+    }
+  },
+  {
+    "command": "run_script",
+    "entry": "PixelV4QA.QueueCheckpoint",
+    "result": {
+      "reached": true,
+      "frames": 6,
+      "returning": 2,
+      "movingReturners": 1,
+      "returningFan": "patron-10",
+      "onePhysicalWalker": true
+    }
+  },
+  {
+    "command": "run_script",
+    "entry": "PixelV4QA.PauseContract",
+    "result": {
+      "stateFrozen": true,
+      "clockFrozen": true,
+      "lightFrozen": true,
+      "lightVisible": true
+    }
+  },
+  {
+    "command": "run_script",
+    "entry": "PixelV4QA.Resume",
+    "result": {
+      "samePositions": true,
+      "sameAudience": true,
+      "sameElapsed": true,
+      "sameReturningFan": true,
+      "returningFan": "patron-10",
+      "bytes": 4749
+    }
+  },
+  {
+    "command": "run_script",
+    "entry": "PixelV4QA.Complete",
+    "result": {
+      "frames": 464,
+      "seconds": 46.4,
+      "pendingGate": true,
+      "bandOnlyGate": true,
+      "allGone": true,
+      "allFans": true,
+      "allFansAtHome": true,
+      "completed": true,
+      "phase": "Results",
+      "settled": true,
+      "onlyOnce": true,
+      "count": 2,
+      "homes": [
+        {
+          "id": "patron-8",
+          "phase": "done",
+          "homeDistance": 0
+        },
+        {
+          "id": "patron-9",
+          "phase": "done",
+          "homeDistance": 0
+        },
+        {
+          "id": "patron-10",
+          "phase": "done",
+          "homeDistance": 0
+        },
+        {
+          "id": "patron-11",
+          "phase": "done",
+          "homeDistance": 0
+        },
+        {
+          "id": "patron-12",
+          "phase": "done",
+          "homeDistance": 0
+        },
+        {
+          "id": "patron-13",
+          "phase": "done",
+          "homeDistance": 0
+        },
+        {
+          "id": "patron-14",
+          "phase": "done",
+          "homeDistance": 0
+        },
+        {
+          "id": "patron-15",
+          "phase": "done",
+          "homeDistance": 2.38418579e-07
+        }
+      ]
+    }
+  },
+  {
+    "command": "run_script",
+    "entry": "PixelCleanupConcurrencyQA.BlockedStation",
+    "result": {
+      "goal": {
+        "x": 2.2,
+        "z": -3.45
+      },
+      "heldHomeClearance": 0.450000048,
+      "cachedStable": true,
+      "readyWorkers": 1,
+      "frames": 91,
+      "moved": true,
+      "qteBudgetUnchanged": true,
+      "cleaned": 0
+    }
+  },
+  {
+    "command": "run_script",
+    "entry": "PixelCleanupConcurrencyQA.HiredParkReservation",
+    "result": {
+      "hiredName": "Hired QA",
+      "goal": {
+        "x": 1.75,
+        "z": -3.9
+      },
+      "heldHomeClearance": 0.450000048,
+      "cachedStable": true,
+      "clear": true
+    }
+  },
+  {
+    "command": "run_script",
+    "entry": "PixelCleanupConcurrencyQA.MidRouteCompletion",
+    "result": {
+      "heldForPhysicalReturn": true,
+      "allReturned": true,
+      "physicallyMoved": true,
+      "maximumStep": 0.155000225,
+      "noTeleports": true,
+      "frames": 40,
+      "phase": "Results",
+      "settled": true,
+      "workers": [
+        {
+          "name": "Bartender",
+          "x": -7.3,
+          "z": -0.565,
+          "remaining": 0,
+          "behindBar": true
+        },
+        {
+          "name": "Server",
+          "x": -4.1526804,
+          "z": -0.573281,
+          "remaining": 0.0480385423,
+          "behindBar": true
+        }
+      ]
+    }
+  },
+  {
+    "command": "editor_stop",
+    "entry": null,
+    "result": "Exited play mode"
+  },
+  {
+    "command": "run_script",
+    "entry": "PixelV4QA.Restore",
+    "result": {
+      "restored": true
+    }
+  },
+  {
+    "command": "run_script",
+    "entry": "PixelV4QA.PreservationContract",
+    "result": {
+      "savedValueRestored": true,
+      "scene": "Assets/Scenes/SimBar_Reference.unity",
+      "sceneDirty": false,
+      "playing": false
+    }
+  }
+]

@@ -1,0 +1,1308 @@
+﻿{
+  "success": true,
+  "command": "command",
+  "data": {
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "E:\\simbar_63"
+    },
+    "server": {
+      "version": "0.0.1",
+      "port": 7800
+    },
+    "commands": [
+      {
+        "name": "add_animator_layer",
+        "description": "Add a layer to an AnimatorController.",
+        "tags": [
+          "animation/animator"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "add_animator_parameter",
+        "description": "Add a parameter (Float | Int | Bool | Trigger) to an AnimatorController. A duplicate name returns code 'duplicate_parameter'.",
+        "tags": [
+          "animation/animator"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "add_animator_state",
+        "description": "Add a state to a layer, optionally with a motion (AnimationClip or BlendTree) and as the layer default. A layer name with no match returns code 'layer_not_found'.",
+        "tags": [
+          "animation/animator"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "add_animator_transition",
+        "description": "Add a transition between two states (or from AnyState/Entry, to Exit) on a layer, with optional conditions. Validates that the states exist and each condition's parameter exists and its mode matches the parameter type.",
+        "tags": [
+          "animation/animator"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "add_component",
+        "description": "Add a component (by type name) to a GameObject.",
+        "tags": [
+          "gameobjects/components"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "add_scene_to_build",
+        "description": "Add a scene to the Build Settings scene list (idempotent). Optionally enable it.",
+        "tags": [
+          "scenes",
+          "build/settings"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "add_timeline_clip",
+        "description": "Add a clip to a named track on a TimelineAsset. For Animation tracks pass an AnimationClip asset; for Audio tracks an AudioClip. Requires the com.unity.timeline package.",
+        "tags": [
+          "animation/timeline"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "add_timeline_track",
+        "description": "Add a track (Animation | Audio | Activation | Control | Playable | Signal | Marker) to a TimelineAsset, optionally nested under a parent group/track. Requires the com.unity.timeline package.",
+        "tags": [
+          "animation/timeline"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "apply_prefab_overrides",
+        "description": "Apply a prefab instance's overrides back to its source prefab asset.",
+        "tags": [
+          "prefabs"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "attach_script",
+        "description": "Add a MonoBehaviour to a GameObject by its (compiled) type name OR by its script asset path. Provide exactly one of 'type' or 'script'. If the type isn't compiled yet, returns a recoverable error: recompile, poll recompile_status, then retry.",
+        "tags": [
+          "scripts"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "audit",
+        "description": "Run a Project Auditor static-analysis scan. Returns immediately; poll audit_status until status is 'completed', then read the CSV.",
+        "tags": [
+          "observability/audit"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "audit_status",
+        "description": "Get the status of the last audit: idle | scanning | completed | failed | interrupted | unavailable.",
+        "tags": [
+          "observability/audit"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "bake_lighting",
+        "description": "Trigger an async lightmap bake of the open scene(s) via Lightmapping.BakeAsync(). Returns immediately; poll lighting_bake_status until completed.",
+        "tags": [
+          "baking/lighting"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "bake_navmesh",
+        "description": "Trigger an async legacy NavMesh bake of the open scene(s) via UnityEditor.AI.NavMeshBuilder. Returns immediately; poll navmesh_bake_status until completed.",
+        "tags": [
+          "baking/navmesh"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "bake_navmesh_surfaces",
+        "description": "Bake NavMeshSurface components (AI Navigation package). v1 stub: returns package_not_found when the package is absent.",
+        "tags": [
+          "baking/navmesh"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "bake_occlusion_culling",
+        "description": "Trigger an async occlusion-culling bake of the open scene(s) via StaticOcclusionCulling.GenerateInBackground(). Returns immediately; poll occlusion_bake_status until completed.",
+        "tags": [
+          "baking/occlusion"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "batch",
+        "description": "Run multiple registered commands in one transactional request. Later ops can reference earlier results with \"$<id-or-index>.<jsonPath>\" (e.g. \"$0.instanceId\"; \"$$\" escapes a literal '$'). transactional=true (default) groups every op into one Undo step and reverts all applied ops if any op fails; commands that mutate outside the Undo system (asset/file/settings writes) are rejected unless transactional=false. on_error=abort|continue (continue forces transactional=false); dry_run validates without mutating; time_budget_ms (default 50000) bounds execution — when exceeded the remaining ops are skipped and a transactional batch rolls back (submit long batches with \"job\": true). Excludes build, switch_build_target, package_*, editor_play/stop/pause, recompile, eval, eval_file, run_script, menu, open_scene/create_scene, async commands (run_tests/list_tests), runtime-only commands, and nested batch.",
+        "tags": [
+          "batch"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "build",
+        "description": "Trigger an async Player build and report the full BuildReport. Returns immediately (queued); poll build_status until status is 'completed'. DetailedBuildReport is included by default unless 'options' is supplied. Use dry_run to validate without building.",
+        "tags": [
+          "build"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "build_status",
+        "description": "Status of the current/most recent build: idle | queued | building | completed, with the full BuildReport (files, packedAssets, buildSteps, errors, warnings) once completed. Retained until the next build.",
+        "tags": [
+          "build"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "cancel_lighting_bake",
+        "description": "Cancel an in-progress lighting bake (Lightmapping.Cancel()).",
+        "tags": [
+          "baking/lighting"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "cancel_navmesh_bake",
+        "description": "Cancel an in-progress NavMesh bake (NavMeshBuilder.Cancel()).",
+        "tags": [
+          "baking/navmesh"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "cancel_occlusion_bake",
+        "description": "Cancel an in-progress occlusion bake (StaticOcclusionCulling.Cancel()).",
+        "tags": [
+          "baking/occlusion"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "cancel_tests",
+        "description": "Cancel running test execution",
+        "tags": [
+          "tests"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "capture_game_view",
+        "description": "Capture the game view as a PNG. source=screen (default) captures what the Game window shows, incl. Screen Space - Overlay UI; source=camera renders a single camera instead and misses overlay UI. Returns it inline as base64, unless save_path is set (path-only result; pass include_inline_image=true to get both).",
+        "tags": [
+          "capture"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "capture_scene_view",
+        "description": "Render the active Scene View to a PNG. Returns it inline as base64, unless save_path is set (path-only result; pass include_inline_image=true to get both).",
+        "tags": [
+          "capture"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "cleanup_codereload",
+        "description": "Remove old code reload DLL versions and clear registry",
+        "tags": [
+          "scripts/codereload"
+        ],
+        "package": "Unity.Pipeline"
+      },
+      {
+        "name": "clear_baked_lighting",
+        "description": "Clear baked lightmap data for the open scene(s). Destructive: requires confirm=true.",
+        "tags": [
+          "baking/lighting"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "clear_console",
+        "description": "Clear the captured log buffer and the Unity Editor console.",
+        "tags": [
+          "observability/console"
+        ],
+        "package": "Unity.Pipeline"
+      },
+      {
+        "name": "clear_navmesh",
+        "description": "Clear the baked NavMesh for the open scene(s). Destructive: requires confirm=true.",
+        "tags": [
+          "baking/navmesh"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "clear_occlusion_culling",
+        "description": "Clear baked occlusion-culling data for the open scene(s). Destructive: requires confirm=true.",
+        "tags": [
+          "baking/occlusion"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "codereload_status",
+        "description": "Show current code reload registry status and statistics",
+        "tags": [
+          "scripts/codereload"
+        ],
+        "package": "Unity.Pipeline"
+      },
+      {
+        "name": "console",
+        "description": "Get captured Unity console output (Editor or Player; supports tail, level filtering, and follow via a cursor)",
+        "tags": [
+          "observability/console"
+        ],
+        "package": "Unity.Pipeline"
+      },
+      {
+        "name": "console_status",
+        "description": "Console ground truth and buffer counters without pulling entries: compile-failure flag, Editor console counts, and the buffer's retained counts and cursor.",
+        "tags": [
+          "observability/console"
+        ],
+        "package": "Unity.Pipeline"
+      },
+      {
+        "name": "copy_asset",
+        "description": "Copy an asset to a new path under the authoring root. The copy gets a fresh GUID.",
+        "tags": [
+          "assets"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "create_animation_clip",
+        "description": "Create an empty .anim AnimationClip asset under the authoring root, with an optional frame rate and loop flag.",
+        "tags": [
+          "animation/clip"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "create_animator_controller",
+        "description": "Create an .controller AnimatorController asset (with a default Base Layer) under the authoring root.",
+        "tags": [
+          "animation/animator"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "create_asset",
+        "description": "Create a new ScriptableObject (or other UnityEngine.Object) asset of the given type at a path under the authoring root.",
+        "tags": [
+          "assets"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "create_folder",
+        "description": "Create a folder under the authoring root (creates intermediate folders).",
+        "tags": [
+          "assets"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "create_gameobject",
+        "description": "Create an empty GameObject or a built-in primitive (cube/sphere/capsule/cylinder/plane/quad) in the active scene.",
+        "tags": [
+          "gameobjects"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "create_gameobjects",
+        "description": "Batch-create N empty GameObjects or primitives in one call. Optional positions/rotations/scales are arrays of [x,y,z] (length must equal count). Returns the created identities.",
+        "tags": [
+          "gameobjects"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "create_prefab",
+        "description": "Save a GameObject as a prefab asset at a project path; the source becomes a connected instance.",
+        "tags": [
+          "prefabs"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "create_prefab_variant",
+        "description": "Create a prefab variant asset that inherits from a base prefab.",
+        "tags": [
+          "prefabs"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "create_scene",
+        "description": "Create a new scene and save it to the given path under the authoring root.",
+        "tags": [
+          "scenes"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "create_script",
+        "description": "Create a new C# script (default base class MonoBehaviour) from a template under the authoring root. NOTE: the type does not exist until a recompile completes — to attach it, call recompile, poll recompile_status, then attach_script.",
+        "tags": [
+          "scripts"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "create_timeline",
+        "description": "Create a .playable TimelineAsset under the authoring root (optional frame rate). Requires the com.unity.timeline package.",
+        "tags": [
+          "animation/timeline"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "delete_asset",
+        "description": "Delete an asset from the project. Destructive: requires confirm=true.",
+        "tags": [
+          "assets"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "delete_gameobject",
+        "description": "Delete a GameObject from the scene (reversible via Undo).",
+        "tags": [
+          "gameobjects"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "editor_focus",
+        "description": "Bring the Unity Editor window to the foreground",
+        "tags": [
+          "editor"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "editor_pause",
+        "description": "Toggle pause state of Unity Editor play mode",
+        "tags": [
+          "editor/playmode"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "editor_play",
+        "description": "Enter Unity Editor play mode",
+        "tags": [
+          "editor/playmode"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "editor_status",
+        "description": "Get detailed Unity Editor status and state information",
+        "tags": [
+          "editor"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "editor_stop",
+        "description": "Exit Unity Editor play mode",
+        "tags": [
+          "editor/playmode"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "eval",
+        "description": "Evaluate C# code dynamically using Roslyn compiler",
+        "tags": [
+          "scripts/eval"
+        ],
+        "package": "Unity.Pipeline"
+      },
+      {
+        "name": "eval_file",
+        "description": "Evaluate C# code read from a .cs file on disk",
+        "tags": [
+          "scripts/eval"
+        ],
+        "package": "Unity.Pipeline"
+      },
+      {
+        "name": "find_assets",
+        "description": "Find assets by type and/or name and/or label, returning their path, GUID and type. At least one filter is required.",
+        "tags": [
+          "assets"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "find_gameobjects",
+        "description": "Find GameObjects in loaded scenes by name, tag, component type, and/or hierarchy path (filters are combined). Returns structured identities.",
+        "tags": [
+          "gameobjects"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "get_animation_clip",
+        "description": "Read an AnimationClip's metadata and all float curve bindings (optionally with keyframes).",
+        "tags": [
+          "animation/clip"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "get_animator_controller",
+        "description": "Read an AnimatorController's full structure: parameters, layers, states (with motion / default), and transitions (with conditions).",
+        "tags": [
+          "animation/animator"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "get_audio_settings",
+        "description": "Read project Audio settings (volume, rolloff scale, doppler factor).",
+        "tags": [
+          "settings/audio"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "get_authoring_root",
+        "description": "Get the base folder (under Assets/) that bare authoring paths resolve against.",
+        "tags": [
+          "authoring"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "get_build_settings",
+        "description": "Read the current build configuration from EditorUserBuildSettings / EditorBuildSettings.",
+        "tags": [
+          "build/settings"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "get_component_properties",
+        "description": "Get a component's serialized properties as a JSON map. Address the component by handle, or by GameObject handle + type.",
+        "tags": [
+          "gameobjects/components"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "get_graphics_settings",
+        "description": "Read GraphicsSettings (default render pipeline).",
+        "tags": [
+          "settings/graphics"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "get_import_settings",
+        "description": "Read an asset's import settings, structured by importer type (texture/model/audio), including the default-platform fields and (for textures/audio) one platform override block.",
+        "tags": [
+          "assets/import"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "get_input_settings",
+        "description": "Read the legacy Input Manager axes (names and count).",
+        "tags": [
+          "settings/input"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "get_lighting_settings",
+        "description": "Read the active LightingSettings (lightmapper, bounces, resolution, directional mode, AO, etc.).",
+        "tags": [
+          "baking/lighting"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "get_material_properties",
+        "description": "Read a material's shader, render queue, enabled keywords, and all shader properties with their current values (Color as [r,g,b,a], Vector as [x,y,z,w], Texture as an object reference).",
+        "tags": [
+          "materials"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "get_navmesh_settings",
+        "description": "Read the default agent's legacy NavMesh bake settings (agentRadius/Height/Slope/Climb, minRegionArea, voxelSize).",
+        "tags": [
+          "baking/navmesh"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "get_performance_stats",
+        "description": "Read render, memory, and frame-timing stats (structured, read-only).",
+        "tags": [
+          "observability/performance"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "get_physics_settings",
+        "description": "Read Physics settings (gravity, solver iterations, bounce threshold).",
+        "tags": [
+          "settings/physics"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "get_player_settings",
+        "description": "Read PlayerSettings (company/product/version, scripting backend, API level).",
+        "tags": [
+          "settings/player"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "get_quality_settings",
+        "description": "Read QualitySettings (current level, level names, vSync, anti-aliasing).",
+        "tags": [
+          "settings/quality"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "get_runtime_pipeline_settings",
+        "description": "Read Pipeline Runtime settings (enableInBuilds, port, requestTimeoutMs, enableAuditLogging, autoStart, maxWorkItemsPerFrame). Reports the settings in effect, falling back to built-in defaults when none have been authored; never creates the settings file.",
+        "tags": [
+          "settings/runtime_pipeline"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "get_scene_hierarchy",
+        "description": "Return the GameObject tree of an open scene (or the active scene). Each node carries instanceId + hierarchyPath usable by GameObject commands.",
+        "tags": [
+          "scenes"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "get_selection",
+        "description": "Read the current Editor selection as structured object identities.",
+        "tags": [
+          "navigation"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "get_serialized_fields",
+        "description": "Read serialized fields of a component/asset. Returns each top-level field's name, type and value (object references are returned as re-usable handles). Pass 'field' to read a single SerializedProperty path. Pass format='value' to return just the value(s) — a token-efficient read for scalars.",
+        "tags": [
+          "scripts",
+          "gameobjects/components"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "get_shader_properties",
+        "description": "Introspect a shader's declared property list (name, description, type Color|Vector|Float|Range|TexEnv|Int, range, textureDimension, flags). Provide 'shader' (by name) OR 'material' (read the shader off that material).",
+        "tags": [
+          "materials/shaders"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "get_tags_layers",
+        "description": "Read the project's tags and (named) layers.",
+        "tags": [
+          "settings/tags_layers"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "get_time_settings",
+        "description": "Read Time settings (fixedDeltaTime, maximumDeltaTime, timeScale).",
+        "tags": [
+          "settings/time"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "get_timeline",
+        "description": "Read a TimelineAsset's structure: frame rate, duration, and its tracks with their clips. Requires the com.unity.timeline package.",
+        "tags": [
+          "animation/timeline"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "import_asset",
+        "description": "Import an external file (e.g. a texture, model, audio clip) into the project by copying it to a path under the authoring root, then importing it.",
+        "tags": [
+          "assets/import"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "instantiate_prefab",
+        "description": "Instantiate a prefab asset into a loaded scene and return the created instance.",
+        "tags": [
+          "prefabs"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "lighting_bake_status",
+        "description": "Get the status of the last lighting bake: idle | baking | completed.",
+        "tags": [
+          "baking/lighting"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "list_build_profiles",
+        "description": "List Build Profile assets in the project (Unity 6 only). Returns feature_unavailable on earlier versions.",
+        "tags": [
+          "build/settings"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "list_build_targets",
+        "description": "List the known BuildTarget values with their group and whether build support is installed.",
+        "tags": [
+          "build/targets"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "list_open_scenes",
+        "description": "List all currently open scenes with their load/active/dirty state.",
+        "tags": [
+          "scenes"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "list_shaders",
+        "description": "Discover available shaders so an agent can pick a valid name for set_material_properties / create_asset. Returns [{ name, assetPath|null, isBuiltin, isSupported }].",
+        "tags": [
+          "materials/shaders"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "list_tests",
+        "description": "List all available tests (EditMode and/or PlayMode) without running them",
+        "tags": [
+          "tests"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "log",
+        "description": "Write a message to Unity console",
+        "tags": [
+          "observability/console",
+          "runtime"
+        ],
+        "package": "Unity.Pipeline"
+      },
+      {
+        "name": "menu",
+        "description": "Execute an Editor menu item by path, or list available items when no path is given",
+        "tags": [
+          "editor"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "move_asset",
+        "description": "Move (or rename via a new path) an asset to a new location under the authoring root. Preserves the asset's GUID.",
+        "tags": [
+          "assets"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "navmesh_bake_status",
+        "description": "Get the status of the last NavMesh bake: idle | baking | completed.",
+        "tags": [
+          "baking/navmesh"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "occlusion_bake_status",
+        "description": "Get the status of the last occlusion bake: idle | baking | completed.",
+        "tags": [
+          "baking/occlusion"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "open_scene",
+        "description": "Open an existing scene from the given path.",
+        "tags": [
+          "scenes"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "package_add",
+        "description": "Add a UPM package by name@version, git URL, or 'file:' local path. Async by default (returns in_progress; poll package_status); pass wait=true to block until added. A recompile/domain reload follows — poll recompile_status. Requires confirm=true; use dry_run to preview.",
+        "tags": [
+          "packages"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "package_list",
+        "description": "List packages by scope: installed (default) | available (registry) | all (both). Returns the full result synchronously — available/all block until the registry query completes.",
+        "tags": [
+          "packages"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "package_remove",
+        "description": "Remove a UPM package by name. Async by default (returns in_progress; poll package_status); pass wait=true to block until removed. A recompile/domain reload follows — poll recompile_status. Requires confirm=true; use dry_run to preview.",
+        "tags": [
+          "packages"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "package_resolve",
+        "description": "Resolve/refresh packages from the manifest (re-fetch and re-link). May trigger a recompile/domain reload — poll recompile_status. Its outcome is recorded for package_status.",
+        "tags": [
+          "packages"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "package_search",
+        "description": "Search packages available in the registry. Provide a name (e.g. com.unity.foo) or omit to list all. Returns the full result synchronously (blocks until the registry query completes).",
+        "tags": [
+          "packages"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "package_status",
+        "description": "Status of the last async package operation (add/remove/resolve): idle | in_progress | completed | failed, with the added package, manifest, and any error.",
+        "tags": [
+          "packages"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "quit",
+        "description": "Gracefully quit the Unity application",
+        "tags": [
+          "runtime/application"
+        ],
+        "package": "Unity.Pipeline"
+      },
+      {
+        "name": "read_text_file",
+        "description": "Read a UTF-8 text file under the authoring root and return its contents.",
+        "tags": [
+          "assets/text"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "recompile",
+        "description": "Force a script recompile (works while unfocused/minimized). Poll recompile_status for completion.",
+        "tags": [
+          "scripts/compile"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "recompile_status",
+        "description": "Get the status of the last recompile: idle | triggered | compiling | completed | up_to_date.",
+        "tags": [
+          "scripts/compile"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "reload_file",
+        "description": "Compile and apply in-place [CodeReload] edits from a source file",
+        "tags": [
+          "scripts/codereload"
+        ],
+        "package": "Unity.Pipeline"
+      },
+      {
+        "name": "reload_file_editor_interpreter",
+        "description": "Compile in-place [CodeReload] edits and run them through the IlInterpreter VM in this process instead of Assembly.Load (IL2CPP-safe; only a minimal host API + the target type are available)",
+        "tags": [
+          "scripts/codereload"
+        ],
+        "package": "Unity.Pipeline"
+      },
+      {
+        "name": "reload_file_player_interpreter",
+        "description": "Compile a file's (or folder's) [CodeReload] method(s) and push the IL to a connected player (IL2CPP-safe) over PlayerConnection. Folders are walked recursively and pushed once.",
+        "tags": [
+          "scripts/codereload"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "remove_animation_curve",
+        "description": "Remove a float curve binding from an AnimationClip (SetEditorCurve(clip, binding, null)). Destructive: requires confirm=true.",
+        "tags": [
+          "animation/clip"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "remove_component",
+        "description": "Remove a component from a GameObject. Provide either a component handle (target) or a GameObject handle (target) plus a type name.",
+        "tags": [
+          "gameobjects/components"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "remove_scene_from_build",
+        "description": "Remove a scene from the Build Settings scene list (idempotent).",
+        "tags": [
+          "scenes",
+          "build/settings"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "rename_asset",
+        "description": "Rename an asset in place (keeps it in the same folder, keeps its GUID).",
+        "tags": [
+          "assets"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "rename_gameobject",
+        "description": "Rename a GameObject.",
+        "tags": [
+          "gameobjects"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "report_evals",
+        "description": "Aggregate local eval-usage telemetry into a ranked report: API fingerprint frequency, one-liner percentage, error rate, and command-coverage suggestions.",
+        "tags": [
+          "observability/eval_usage"
+        ],
+        "package": "Unity.Pipeline"
+      },
+      {
+        "name": "revert_prefab_overrides",
+        "description": "Revert a prefab instance's overrides so it matches its source prefab asset.",
+        "tags": [
+          "prefabs"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "run_script",
+        "description": "Compile a project C# file in memory (no domain reload) and execute a named static entry point. The builder-pattern path for bulk construction. Still arbitrary code execution — shares eval's capability gate.",
+        "tags": [
+          "scripts/eval"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "run_tests",
+        "description": "Execute Unity tests with filtering options",
+        "tags": [
+          "tests"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "runtime_status",
+        "description": "Get comprehensive runtime application status",
+        "tags": [
+          "runtime"
+        ],
+        "package": "Unity.Pipeline"
+      },
+      {
+        "name": "save_all",
+        "description": "Save all open scenes that have unsaved changes.",
+        "tags": [
+          "scenes"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "save_prefab_contents",
+        "description": "Open a prefab asset in an isolated prefab stage, apply a declarative edit, and save it back (nested-prefab safe).",
+        "tags": [
+          "prefabs"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "save_scene",
+        "description": "Save an open scene. Saves the active scene when no path is given.",
+        "tags": [
+          "scenes"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "screenshot",
+        "description": "Capture the Scene or Game view as a PNG and return its file path",
+        "tags": [
+          "capture"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "search",
+        "description": "Run a Unity Search query and return structured results.",
+        "tags": [
+          "navigation"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "set_active",
+        "description": "Set a GameObject's active self-state (activeSelf).",
+        "tags": [
+          "gameobjects"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "set_active_scene",
+        "description": "Set which open scene is the active scene (new objects are created in the active scene).",
+        "tags": [
+          "scenes"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "set_animation_curve",
+        "description": "Add or replace a single float curve binding on an AnimationClip (via AnimationUtility.SetEditorCurve). Replacing an existing binding overwrites it rather than duplicating.",
+        "tags": [
+          "animation/clip"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "set_audio_settings",
+        "description": "Change project Audio settings. Requires confirm=true; use dry_run to preview. Not undoable via Ctrl+Z.",
+        "tags": [
+          "settings/audio"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "set_authoring_root",
+        "description": "Set the base folder (under Assets/) that bare authoring paths resolve against and are confined to. Use 'Assets' for full project access.",
+        "tags": [
+          "authoring"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "set_autotick",
+        "description": "Keep the editor ticking while unfocused by forcing EditorApplication.SignalTick at a throttled rate",
+        "tags": [
+          "editor"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "set_build_settings",
+        "description": "Set mutable EditorUserBuildSettings fields. Does NOT manage scenes (use add_scene_to_build / remove_scene_from_build) or switch target (use switch_build_target). Use dry_run to preview.",
+        "tags": [
+          "build/settings"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "set_component_properties",
+        "description": "Set serialized properties on a component (one Undo step). 'properties' maps property name -> value; object references accept an ObjectRef handle.",
+        "tags": [
+          "gameobjects/components"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "set_graphics_settings",
+        "description": "Set the default render pipeline asset. Requires confirm=true; use dry_run to preview. Not undoable via Ctrl+Z.",
+        "tags": [
+          "settings/graphics"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "set_import_settings",
+        "description": "Set import settings on an asset's AssetImporter (default platform top-level properties, or a texture/audio per-platform override) and re-import it.",
+        "tags": [
+          "assets/import"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "set_input_settings",
+        "description": "Tune a legacy Input Manager axis (sensitivity/gravity/dead) by name. Requires confirm=true; use dry_run to preview. Not undoable via Ctrl+Z.",
+        "tags": [
+          "settings/input"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "set_layer",
+        "description": "Set a GameObject's layer by name or numeric index (0-31).",
+        "tags": [
+          "gameobjects"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "set_lighting_settings",
+        "description": "Apply a subset of lighting settings to the active LightingSettings. Returns { applied[], unknown[] }.",
+        "tags": [
+          "baking/lighting"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "set_material_properties",
+        "description": "Set shader properties on a material (Float/Range/Int=number; Color=[r,g,b,a] or \"#RRGGBBAA\" hex; Vector=[x,y,z,w]; Texture=an object reference or null to clear), optionally reassign the shader, set the render queue, and toggle keywords. Unknown names / type mismatches are reported in unknown[].",
+        "tags": [
+          "materials"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "set_navmesh_settings",
+        "description": "Apply a subset of legacy NavMesh bake settings to the default agent. Returns { applied[], unknown[] }.",
+        "tags": [
+          "baking/navmesh"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "set_parent",
+        "description": "Reparent a GameObject under a new parent, or detach it to scene root when no parent is given.",
+        "tags": [
+          "gameobjects"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "set_physics_settings",
+        "description": "Change Physics settings. Requires confirm=true; use dry_run to preview. Not undoable via Ctrl+Z.",
+        "tags": [
+          "settings/physics"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "set_player_settings",
+        "description": "Change PlayerSettings. Requires confirm=true; use dry_run to preview. Not undoable via Ctrl+Z. Scripting backend / API level changes trigger a domain reload.",
+        "tags": [
+          "settings/player"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "set_quality_settings",
+        "description": "Change QualitySettings. Requires confirm=true; use dry_run to preview. Not undoable via Ctrl+Z.",
+        "tags": [
+          "settings/quality"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "set_runtime_pipeline_settings",
+        "description": "Change Pipeline Runtime settings. Requires confirm=true; use dry_run to preview. Not undoable via Ctrl+Z. Refused while in Play Mode: the running driver already loaded its own settings, so a change would silently not apply until the next Play session or build. port, requestTimeoutMs, and maxWorkItemsPerFrame are rejected outright if outside the same bounds the Project Settings page enforces.",
+        "tags": [
+          "settings/runtime_pipeline"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "set_selection",
+        "description": "Set the Editor selection to the given assets/scene objects.",
+        "tags": [
+          "navigation"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "set_serialized_field",
+        "description": "Set a serialized field on a component/asset. Supports primitives, enums, Vector/Color/Rect/Bounds, object references (value = an ObjectRef: asset by guid/fileId/path or scene object by instanceId/hierarchyPath), and array elements via 'name.Array.data[i]' (or 'name.Array.size' to resize).",
+        "tags": [
+          "scripts",
+          "gameobjects/components"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "set_tag",
+        "description": "Set a GameObject's tag (the tag must already exist in the project).",
+        "tags": [
+          "gameobjects"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "set_tags_layers",
+        "description": "Add/remove tags and assign user layer names (index 8-31). Requires confirm=true; use dry_run to preview. Not undoable via Ctrl+Z.",
+        "tags": [
+          "settings/tags_layers"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "set_target_framerate",
+        "description": "Set the target frame rate for the application",
+        "tags": [
+          "runtime/application"
+        ],
+        "package": "Unity.Pipeline"
+      },
+      {
+        "name": "set_time_settings",
+        "description": "Change Time settings. Requires confirm=true; use dry_run to preview. Not undoable via Ctrl+Z.",
+        "tags": [
+          "settings/time"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "set_timescale",
+        "description": "Set the time scale for the application",
+        "tags": [
+          "runtime/application"
+        ],
+        "package": "Unity.Pipeline"
+      },
+      {
+        "name": "set_transform",
+        "description": "Set a GameObject's local position/rotation(euler)/scale. Omitted channels are left unchanged.",
+        "tags": [
+          "gameobjects"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "simulate_key",
+        "description": "Simulate a keyboard key event (Input System). Drives the running app.",
+        "tags": [
+          "runtime/input"
+        ],
+        "package": "Unity.Pipeline"
+      },
+      {
+        "name": "simulate_pointer",
+        "description": "Simulate a mouse/pointer event at screen coordinates (Input System).",
+        "tags": [
+          "runtime/input"
+        ],
+        "package": "Unity.Pipeline"
+      },
+      {
+        "name": "switch_build_target",
+        "description": "Switch the active build target (destructive, long-running: triggers a full reimport + domain reload). Requires confirm=true. Returns immediately; poll switch_build_target_status.",
+        "tags": [
+          "build/targets"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "switch_build_target_status",
+        "description": "Status of the last target switch: idle | switching | completed (with success + activeBuildTarget).",
+        "tags": [
+          "build/targets"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "test_status",
+        "description": "Get status of running async test execution",
+        "tags": [
+          "tests"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "unpack_prefab",
+        "description": "Unpack a prefab instance into plain GameObjects (outermost level or completely).",
+        "tags": [
+          "prefabs"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "wait_cancel",
+        "description": "Cancel an async wait started with wait_for (async=true).",
+        "tags": [
+          "wait"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "wait_for",
+        "description": "Wait server-side until a member condition holds, then optionally act in the same frame. Sync waits hold the exec queue (every other command waits behind them, including one the condition may depend on) — keep them short and self-contained; set async=true and poll wait_status for anything else.",
+        "tags": [
+          "wait"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "wait_status",
+        "description": "Get the status/result of an async wait started with wait_for (async=true).",
+        "tags": [
+          "wait"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      },
+      {
+        "name": "write_text_file",
+        "description": "Write UTF-8 text to a file under the authoring root, then import it. Overwriting an existing file requires confirm=true.",
+        "tags": [
+          "assets/text"
+        ],
+        "package": "Unity.Pipeline.Editor"
+      }
+    ],
+    "count": 160,
+    "total": 160,
+    "offset": 0,
+    "limit": 200
+  },
+  "errors": [],
+  "warnings": []
+}

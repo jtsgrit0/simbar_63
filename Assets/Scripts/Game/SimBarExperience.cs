@@ -870,6 +870,7 @@ public sealed partial class SimBarExperience : MonoBehaviour
         if (JourneyIsFloorClosing)
         {
             TickVenueMotion(delta);
+            TickAfterShow(delta);
             TickFloorMissions(delta);
             if (toastTimer > 0f) toastTimer -= delta;
             else if (toastText != null) toastText.transform.parent.gameObject.SetActive(false);

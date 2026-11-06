@@ -19,6 +19,9 @@ public sealed partial class SimBarExperience
         public Vector3 savedPosition;
         public Quaternion savedRotation;
         public int hiredIndex = -1;
+        public Vector3 cleanupGoal,parkGoal;
+        public int cleanupGoalSegment=-1,parkSession=-1;
+        public bool hasCleanupGoal,hasParkGoal;
         public readonly FloorActorRoute route = new FloorActorRoute();
     }
 
@@ -136,7 +139,66 @@ public sealed partial class SimBarExperience
             if (!FloorWalkable(candidate)) candidate=goal-offset;
             if (FloorWalkable(candidate)) goal=candidate;
         }
-        return goal;
+        if(index<0||index>=floorCleaningCrew.Count)return goal;
+        var worker=floorCleaningCrew[index];
+        if(worker.hasCleanupGoal&&worker.cleanupGoalSegment==segment&&FloorWorkerStationClear(worker,worker.cleanupGoal,segment,false))return worker.cleanupGoal;
+        worker.cleanupGoal=FloorWorkerClearStation(worker,index,goal,segment,false);
+        worker.cleanupGoalSegment=segment;worker.hasCleanupGoal=true;
+        return worker.cleanupGoal;
+    }
+
+    private bool FloorWorkerStationClear(FloorWorkerActor worker,Vector3 point,int segment,bool parking)
+    {
+        if(parking?!FloorNavigation.IsWalkable(point):!FloorWalkable(point))return false;
+        foreach(var other in motionActors)
+        {
+            if(other==worker.actor||other.kind==MotionKind.Band||other.person.root==null||!other.person.root.gameObject.activeInHierarchy)continue;
+            bool crew=false;foreach(var member in floorCleaningCrew)if(member.actor==other){crew=true;break;}
+            if(!crew&&FlatDistance(MotionPosition(other),point)<.45f)return false;
+        }
+        // A fan can still be greeting the band when the worker selects a stop.
+        // Reserve their captured home before they start the return walk.
+        if(journey.afterShow!=null)foreach(var fan in journey.afterShow.audience)
+            if(FlatDistance(point,new Vector3(fan.homeX,0f,fan.homeZ))<.45f)return false;
+        foreach(var other in floorCleaningCrew)
+        {
+            if(other==worker)continue;
+            if(parking&&other.hasParkGoal&&other.parkSession==journey.session&&FlatDistance(point,other.parkGoal)<.45f)return false;
+            if(!parking&&other.hasCleanupGoal&&other.cleanupGoalSegment==segment&&FlatDistance(point,other.cleanupGoal)<.45f)return false;
+        }
+        return true;
+    }
+
+    private Vector3 FloorWorkerClearStation(FloorWorkerActor worker,int index,Vector3 origin,int segment,bool parking)
+    {
+        if(FloorWorkerStationClear(worker,origin,segment,parking))return origin;
+        foreach(float radius in new[]{.45f,.7f,1f})for(int turn=0;turn<8;turn++)
+        {
+            float angle=(turn+index*2)*Mathf.PI/4f;
+            Vector3 candidate=origin+new Vector3(Mathf.Cos(angle)*radius,0f,Mathf.Sin(angle)*radius);
+            if(FloorWorkerStationClear(worker,candidate,segment,parking))return candidate;
+        }
+        return origin;
+    }
+
+    private Vector3 FloorWorkerParkGoal(int index)
+    {
+        var worker=floorCleaningCrew[index];
+        if(worker.hasParkGoal&&worker.parkSession==journey.session&&FloorWorkerStationClear(worker,worker.parkGoal,0,true))return worker.parkGoal;
+        worker.parkGoal=FloorWorkerClearStation(worker,index,worker.actor.home,0,true);
+        worker.parkSession=journey.session;worker.hasParkGoal=true;
+        return worker.parkGoal;
+    }
+
+    private bool FloorStaffReturnPending
+    {
+        get
+        {
+            if(!JourneyIsFloorClosing||FloorState==null||!FloorState.cleanupComplete)return false;
+            for(int i=0;i<floorCleaningCrew.Count;i++)
+                if(FloorWorkerAvailable(floorCleaningCrew[i])&&FlatDistance(MotionPosition(floorCleaningCrew[i].actor),FloorWorkerParkGoal(i))>.05f)return true;
+            return false;
+        }
     }
 
     private bool FloorWorkerAvailable(FloorWorkerActor worker)
@@ -164,7 +226,7 @@ public sealed partial class SimBarExperience
         Vector3 start=worldRoot.InverseTransformPoint(actorRoot.position);
         floorActorOccupancy.Clear(); floorActorBodies.Clear();
         foreach (MotionActor other in motionActors)
-            if (other.person.root != null && other.person.root != actorRoot && !IsFloorEscortPair(actorRoot,other.person.root) && other.kind != MotionKind.Band
+            if (other.person.root != null && other.person.root != actorRoot && !IsFloorEscortPair(actorRoot,other.person.root) && IsSolidVenueActor(other)
                 && other.person.root.gameObject.activeInHierarchy)
             {
                 Vector3 body=MotionPosition(other);
@@ -172,7 +234,8 @@ public sealed partial class SimBarExperience
                 floorActorOccupancy.Add(body);
                 floorActorBodies.Add(new Vector4(body.x,body.y,body.z,.42f));
             }
-        FloorActorNavigation(actorRoot).FindAislePath(start,goal,route.points,floorActorOccupancy,floorActorBodies);
+        if(JourneyIsFloorClosing)FloorActorNavigation(actorRoot).FindAfterShowPath(start,goal,route.points,floorActorOccupancy,floorActorBodies);
+        else FloorActorNavigation(actorRoot).FindAislePath(start,goal,route.points,floorActorOccupancy,floorActorBodies);
     }
 
     private void TickFloorActors(float delta)
@@ -188,9 +251,9 @@ public sealed partial class SimBarExperience
             if (!FloorWorkerAvailable(worker)) continue;
             MotionActor actor=worker.actor; Vector3 before=MotionPosition(actor);
             bool cleaning=FloorState != null && FloorState.cleanupActive && !FloorState.cleanupComplete;
-            Vector3 goal=FloorWorkerGoal(i);
             if (cleaning)
             {
+                Vector3 goal=FloorWorkerGoal(i);
                 if (!worker.route.bridge && (worker.route.goal-goal).sqrMagnitude>.01f)
                     BuildFloorRoute(worker.route,actor.person.root,goal);
                 if (!worker.route.bridge && worker.route.points.Count==0 && FlatDistance(before,goal)>.2f)
@@ -202,6 +265,16 @@ public sealed partial class SimBarExperience
                 if (worker.route.bridge && worker.route.cursor>=worker.route.points.Count)
                 { worker.route.bridge=false; BuildFloorRoute(worker.route,actor.person.root,goal); }
                 worker.route.ready=!worker.route.bridge && FlatDistance(MotionPosition(actor),goal)<=.2f;
+            }
+            else if(JourneyIsFloorClosing&&FloorState!=null&&FloorState.cleanupComplete)
+            {
+                Vector3 goal=FloorWorkerParkGoal(i);
+                if(worker.route.bridge||(worker.route.goal-goal).sqrMagnitude>.0016f)
+                {worker.route.bridge=false;BuildFloorRoute(worker.route,actor.person.root,goal);}
+                if(FlatDistance(before,goal)>.05f)MoveFloorRoute(worker.route,actor.person.root,1.55f,delta,.05f);
+                if(FlatDistance(MotionPosition(actor),goal)<=.05f)
+                {worker.route.points.Clear();worker.route.cursor=0;actor.person.root.localRotation=Quaternion.RotateTowards(actor.person.root.localRotation,worker.savedRotation,160f*delta);}
+                worker.route.ready=false;
             }
             float speed=Vector3.Distance(before,MotionPosition(actor))/delta;
             bool sweeping=cleaning && worker.route.ready;
@@ -219,11 +292,11 @@ public sealed partial class SimBarExperience
         TickFloorGuest(delta);
     }
 
-    private void MoveFloorRoute(FloorActorRoute route,Transform actorRoot,float speed,float delta)
+    private void MoveFloorRoute(FloorActorRoute route,Transform actorRoot,float speed,float delta,float arrival=.2f)
     {
         Vector3 position=worldRoot.InverseTransformPoint(actorRoot.position);
         SimBarVenueNavigation navigation=FloorActorNavigation(actorRoot);
-        while (route.cursor<route.points.Count && FlatDistance(position,route.points[route.cursor])<.08f)
+        while (route.cursor<route.points.Count && FlatDistance(position,route.points[route.cursor])<Mathf.Min(.08f,arrival))
         {
             // Being near a corner does not make the next segment safe. In particular,
             // cutting the first staff-aisle node can leave a worker outside the aisle.
@@ -232,7 +305,7 @@ public sealed partial class SimBarExperience
         }
         if (route.cursor>=route.points.Count)
         {
-            if (!route.bridge && FlatDistance(position,route.goal)>.2f)
+            if (!route.bridge && FlatDistance(position,route.goal)>arrival)
             {
                 route.blocked+=delta;
                 if (route.blocked>=.8f) BuildFloorRoute(route,actorRoot,route.goal);
@@ -245,7 +318,7 @@ public sealed partial class SimBarExperience
         if (clear)
             foreach (MotionActor other in motionActors)
             {
-                if (other.person.root==null || other.person.root==actorRoot || IsFloorEscortPair(actorRoot,other.person.root) || other.kind==MotionKind.Band || !other.person.root.gameObject.activeInHierarchy) continue;
+                if (other.person.root==null || other.person.root==actorRoot || IsFloorEscortPair(actorRoot,other.person.root) || !IsSolidVenueActor(other) || !other.person.root.gameObject.activeInHierarchy) continue;
                 Vector3 body=MotionPosition(other);
                 if (Mathf.Abs(body.y-position.y)>1f) continue;
                 float before=FlatDistance(position,body),after=FlatDistance(next,body);
@@ -404,7 +477,7 @@ public sealed partial class SimBarExperience
         foreach (MotionActor other in motionActors)
         {
             if (other.person.root==null || other.person.root==escortRoot || IsFloorEscortPair(escortRoot,other.person.root)
-                || other.kind==MotionKind.Band || !other.person.root.gameObject.activeInHierarchy) continue;
+                || !IsSolidVenueActor(other) || !other.person.root.gameObject.activeInHierarchy) continue;
             Vector3 body=MotionPosition(other);
             if (Mathf.Abs(body.y-start.y)>1f) continue;
             Vector3 offset=body-start; offset.y=0f;

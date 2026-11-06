@@ -27,7 +27,7 @@ public sealed partial class SimBarCharacterVisual : MonoBehaviour
     private readonly List<Material> ownedMaterials = new List<Material>();
 
     /// <summary>Creates a visual only; gameplay/colliders remain the caller's responsibility.</summary>
-    public static GameObject Create(string role, Transform parent, Vector3 localPosition, Color outfit, int variant = 0)
+    public static GameObject Create(string role, Transform parent, Vector3 localPosition, Color outfit, int variant = 0, bool preserveAuthoredColors = false)
     {
         if (library == null) library = Resources.Load<SimBarArtLibrary>("SimBarArtLibrary");
         var entry = library != null ? library.Find(role == "barseated" ? "seated" : role, variant) : null;
@@ -37,11 +37,11 @@ public sealed partial class SimBarCharacterVisual : MonoBehaviour
         root.transform.SetParent(parent, false);
         root.transform.localPosition = localPosition;
         var visual = root.AddComponent<SimBarCharacterVisual>();
-        visual.Initialize(entry, role, outfit, variant);
+        visual.Initialize(entry, role, outfit, variant, preserveAuthoredColors);
         return root;
     }
 
-    private void Initialize(SimBarArtLibrary.CharacterAsset entry, string characterRole, Color outfit, int characterVariant)
+    private void Initialize(SimBarArtLibrary.CharacterAsset entry, string characterRole, Color outfit, int characterVariant, bool preserveAuthoredColors)
     {
         role = characterRole;
         sourceModelKey = entry.key;
@@ -96,8 +96,11 @@ public sealed partial class SimBarCharacterVisual : MonoBehaviour
             renderer.sharedMaterials = materials;
             if (renderer is SkinnedMeshRenderer skin) skin.updateWhenOffscreen = true;
         }
-        ApplyAudienceAppearance(outfit);
-        ApplyRoleOutfitAppearance(outfit);
+        if (!preserveAuthoredColors)
+        {
+            ApplyAudienceAppearance(outfit);
+            ApplyRoleOutfitAppearance(outfit);
+        }
         foreach (var bone in model.GetComponentsInChildren<Transform>(true))
         {
             string key = BoneKey(bone.name);
@@ -270,6 +273,7 @@ public sealed partial class SimBarCharacterVisual : MonoBehaviour
 
     private void UpdateAccessories(float timeSeconds, float energy)
     {
+        if (offStagePresentation) return;
         if (guitarPerformance != null) guitarPerformance.Apply(timeSeconds + phase * 0.025f, energy);
         if (microphone != null && bones.TryGetValue("handr", out var hand))
         {
