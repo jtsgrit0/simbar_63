@@ -1,0 +1,119 @@
+[
+  {
+    "entry": "Backup",
+    "result": {
+      "saved": true
+    }
+  },
+  {
+    "entry": "Owners",
+    "result": {
+      "selectedOwner": "ff",
+      "descriptions": [
+        "자기야 오늘밤 라이브 하러와",
+        "평생 Rock&Roll",
+        "오늘밤은 무슨 음악을 들을까?"
+      ],
+      "portraits": [
+        {
+          "name": "Journey Owner Portrait 0",
+          "width": 400,
+          "height": 350,
+          "drawWidth": 400,
+          "drawHeight": 350
+        },
+        {
+          "name": "Journey Owner Portrait 1",
+          "width": 400,
+          "height": 350,
+          "drawWidth": 400,
+          "drawHeight": 350
+        },
+        {
+          "name": "Journey Owner Portrait 2",
+          "width": 400,
+          "height": 350,
+          "drawWidth": 400,
+          "drawHeight": 350
+        }
+      ]
+    }
+  },
+  {
+    "entry": "English",
+    "result": {
+      "descriptions": [
+        "Darling, come play live tonight.",
+        "Rock&Roll for life.",
+        "What shall we listen to tonight?"
+      ]
+    }
+  },
+  {
+    "entry": "BartenderStand",
+    "result": {
+      "action": "idle",
+      "moving": false,
+      "x": -8.95,
+      "z": -0.565,
+      "pixelX": 205,
+      "pixelY": 270,
+      "texture": "SimBarPixelArt/wardrobe",
+      "uv": "(x:0.750000, y:0.750000, width:0.250000, height:0.125000)",
+      "depth": 270.054718
+    }
+  },
+  {
+    "entry": "BartenderServe",
+    "result": {
+      "action": "serve",
+      "moving": false,
+      "x": -8.95,
+      "z": -0.565,
+      "pixelX": 205,
+      "pixelY": 270,
+      "texture": "SimBarPixelArt/wardrobe",
+      "uv": "(x:0.750000, y:0.750000, width:0.250000, height:0.125000)",
+      "depth": 270.054718
+    }
+  },
+  {
+    "entry": "BartenderWalk",
+    "result": {
+      "action": "walk",
+      "moving": true,
+      "x": -8.422,
+      "z": -0.565,
+      "pixelX": 221,
+      "pixelY": 275,
+      "texture": "SimBarPixelArt/wardrobe",
+      "uv": "(x:0.000000, y:0.750000, width:0.250000, height:0.125000)",
+      "depth": 274.6305
+    }
+  },
+  {
+    "entry": "PatrolAndPause",
+    "result": {
+      "minX": -8.884,
+      "maxX": -7.102,
+      "maxStep": 0.0659999847,
+      "movingFrames": 128,
+      "standingFrames": 72,
+      "inAisle": true,
+      "pausePositionFrozen": true,
+      "pauseFrameFrozen": true,
+      "pauseClockFrozen": true
+    }
+  },
+  {
+    "entry": "Restore",
+    "result": {
+      "prefsRestored": true,
+      "gameViewRestored": true,
+      "scene": "Assets/Scenes/SimBar_Reference.unity",
+      "sceneDirty": false,
+      "playing": false,
+      "runInBackground": false
+    }
+  }
+]

@@ -1,0 +1,11 @@
+{
+  "minX": -8.884,
+  "maxX": -7.102,
+  "maxStep": 0.0659999847,
+  "movingFrames": 128,
+  "standingFrames": 72,
+  "inAisle": true,
+  "pausePositionFrozen": true,
+  "pauseFrameFrozen": true,
+  "pauseClockFrozen": true
+}

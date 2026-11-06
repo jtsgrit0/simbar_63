@@ -25,3 +25,12 @@ walking depth lets the drummer move in front of the kit before descending the
 steps. This avoids keeping an exiting musician hidden behind the drums.
 
 Visual checks are in `Research/PixelArtVerification/SeatedDrummer/`.
+
+The staff aisle now uses bar-region offset [0,17], raising the employees by
+eight pixels from the former [0,25] calibration. The counter still covers the
+legs while the standing upper body and forearms are visible. The bartender
+uses the full Suit standing frame during stationary bar service and the
+matching walking frames when patrolling between the two service ends.
+The native patrol follows the existing Unity 9-second/.66m/s cycle; cleanup
+and escort ownership continue to take precedence. Before/after crops and
+pause/save/economy checks are in `Research/PixelArtVerification/BartenderPatrol/`.

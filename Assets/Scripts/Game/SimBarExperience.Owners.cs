@@ -34,9 +34,9 @@ public sealed partial class SimBarExperience
 
     private static string OwnerDescription(int index)
     {
-        if (index == 1) return SimBarLocalization.Text("LIVE LOUD. KEEP THE STAGE ALIVE.", "라이브의 열기, 무대의 심장.");
-        if (index == 2) return SimBarLocalization.Text("GOOD RECORDS. A GREAT NIGHT.", "좋은 레코드, 오래 남는 밤.");
-        return SimBarLocalization.Text("YOUR HOUSE. YOUR RULES.", "나만의 바, 나만의 밤.");
+        if (index == 1) return SimBarLocalization.Text("Rock&Roll for life.", "평생 Rock&Roll");
+        if (index == 2) return SimBarLocalization.Text("What shall we listen to tonight?", "오늘밤은 무슨 음악을 들을까?");
+        return SimBarLocalization.Text("Darling, come play live tonight.", "자기야 오늘밤 라이브 하러와");
     }
 
     private void LoadOwnerSelection()

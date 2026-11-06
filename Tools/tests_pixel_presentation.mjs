@@ -38,7 +38,7 @@ globalThis.ResizeObserver=class{observe(){}disconnect(){}};
 const definition=file=>({file,frameWidth:64,frameHeight:64,columns:4,directionColumns:{FR:0,BR:1,BL:2,FL:3}});
 const meta={frameWidth:64,frameHeight:64,drawHeight:54,footX:32,footY:60,defaultAtlas:'wardrobe',atlases:{wardrobe:definition('wardrobe.png'),walk:definition('walk.png'),poses:definition('poses.png')},roles:{
   guest:{atlas:'wardrobe',variantStyles:styles,actions:{walk:{atlasFrames:['wardrobe','walk']},mosh:{atlas:'poses',row:5},dance:{atlas:'poses',variantStyles:{Adventurer:5},preserveStyle:true}}},
-  bartender:{atlas:'wardrobe',style:'Suit',variantStyles:styles,actions:{serve:{atlas:'poses',row:0}}},
+  bartender:{atlas:'wardrobe',style:'Suit',variantStyles:styles,actions:{walk:{atlasFrames:['wardrobe','walk']},serve:{atlas:'poses',row:0}}},
   barseated:{atlas:'poses',row:1},seated:{atlas:'poses',row:3},
   surfer:{atlas:'wardrobe',style:'Casual',row:0,actions:{surf:{atlas:'poses',row:7,horizontal:true,footX:32,footY:32}}}
 }};
@@ -60,6 +60,13 @@ args=draw({id:'bar-seat-0',role:'seated',x:-7,z:-3,action:'idle'});assert.equal(
 args=draw({id:'patron-0',slot:0,role:'guest',x:1,z:1,action:'dance'});assert.equal(args[0],atlases.wardrobe,'An unsupported action style keeps the original outfit.');
 args=draw({id:'crowd-surfer',role:'surfer',x:6,z:-4.25,y:1.85,action:'surf'});assert.equal(args[0],atlases.poses);assert.equal(args[2],7*64);assert.equal(args[6],-27);assert.equal(target.ctx.rotations.length,0,'A drawn horizontal surf pose is not a rotated standing person.');
 world.destroy();
+const barCanvas=canvas(),barWorld=createWorld(barCanvas,{assets:{...assets,venueMeta:{occluders:[],barRegion:{xMax:-1.35,zMin:-1.5,zMax:.5,offset:[0,25],xFade:1.5}}}});
+const bartender={id:'bartender',role:'bartender',x:-8,z:-.565,moving:false,action:'serve'};
+const barDraw=time=>{barCanvas.ctx.draws=[];barWorld.render(time,{phase:'playing',actors:[bartender]});return barCanvas.ctx.draws.find(args=>Object.values(atlases).includes(args[0]));};
+args=barDraw(0);assert.equal(args[0],atlases.wardrobe,'A working bartender stands upright behind the counter.');assert.equal(args[2],64,'The standing and walking outfit stays Suit.');
+bartender.moving=true;bartender.action='walk';const staffWalkAtlases=new Set();for(let n=0;n<12;n++)staffWalkAtlases.add(barDraw(n*100)[0].id);assert.deepEqual([...staffWalkAtlases].sort(),['walk','wardrobe']);
+bartender.moving=false;bartender.action='serve';bartender.x=2;bartender.z=0;assert.equal(barDraw(1300)[0],atlases.poses,'Off-bar service keeps the existing serving pose.');
+barWorld.destroy();
 const stageCanvas=canvas(),stageWorld=createWorld(stageCanvas,{assets:{...assets,venueMeta:{occluders:[],bandStageFeet:{singer:[676,326]}}}});
 const singer={id:'singer',role:'band',homeX:5.7,homeZ:3.5,x:5.7,z:3.5,action:'perform',stageLevel:1};
 stageWorld.render(0,{phase:'playing',actors:[singer]});

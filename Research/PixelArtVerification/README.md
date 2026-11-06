@@ -1,6 +1,10 @@
 # Pixel-art game verification
 
-The latest owner-card backgrounds, seated furniture masks and drummer
+The latest owner pose/size/layout, caption, rim-light and standing bartender
+follow-up is verified in [`OwnerRefinement/`](OwnerRefinement/),
+[`OwnerRefinements/`](OwnerRefinements/) and [`BartenderPatrol/`](BartenderPatrol/).
+
+The earlier owner-card backgrounds, seated furniture masks and drummer
 placement are verified in [`SeatedDrummer/`](SeatedDrummer/) and
 [`OwnerCardBackdrops/`](OwnerCardBackdrops/).
 

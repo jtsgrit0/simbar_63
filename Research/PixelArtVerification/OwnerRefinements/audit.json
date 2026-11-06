@@ -1,0 +1,122 @@
+{
+  "passed": true,
+  "originalSheetAndCropsByteIdentical": 4,
+  "owners": [
+    {
+      "name": "JESSY",
+      "originalFigureRGBPreserved": false,
+      "sourceProvenance": "Built-in ImageGen left-wrist and pink-nail pose edit, then nearest-neighbor geometry",
+      "transform": {
+        "rotationDegreesCCW": 8.0,
+        "scale": 1.15,
+        "placement": [
+          26,
+          2
+        ],
+        "unclippedSize": [
+          348,
+          392
+        ],
+        "displayBounds": [
+          26,
+          2,
+          374,
+          350
+        ],
+        "resampling": "nearest-neighbor",
+        "autoFit": false
+      },
+      "opaquePinkCharacterPixels": 121,
+      "exteriorRim": {
+        "color": [
+          255,
+          62,
+          154
+        ],
+        "opacity": 0.5,
+        "width": 2,
+        "maxAlpha": 128
+      },
+      "runtimeBytes": 212034,
+      "compositionMatchesStoredLayers": true
+    },
+    {
+      "name": "EDISON",
+      "originalFigureRGBPreserved": true,
+      "sourceProvenance": "approved original figure RGB",
+      "transform": {
+        "rotationDegreesCCW": 0.0,
+        "scale": 1.0,
+        "placement": [
+          0,
+          0
+        ],
+        "unclippedSize": [
+          400,
+          350
+        ],
+        "displayBounds": [
+          18,
+          6,
+          380,
+          350
+        ],
+        "resampling": "nearest-neighbor",
+        "autoFit": false
+      },
+      "opaquePinkCharacterPixels": 31,
+      "exteriorRim": {
+        "color": [
+          42,
+          211,
+          255
+        ],
+        "opacity": 0.5,
+        "width": 2,
+        "maxAlpha": 128
+      },
+      "runtimeBytes": 218030,
+      "compositionMatchesStoredLayers": true
+    },
+    {
+      "name": "JAIDEN",
+      "originalFigureRGBPreserved": true,
+      "sourceProvenance": "approved original figure RGB",
+      "transform": {
+        "rotationDegreesCCW": 0.0,
+        "scale": 1.0,
+        "placement": [
+          0,
+          11
+        ],
+        "unclippedSize": [
+          400,
+          350
+        ],
+        "displayBounds": [
+          60,
+          20,
+          339,
+          350
+        ],
+        "resampling": "nearest-neighbor",
+        "autoFit": false
+      },
+      "opaquePinkCharacterPixels": 37,
+      "exteriorRim": {
+        "color": [
+          255,
+          167,
+          48
+        ],
+        "opacity": 0.5,
+        "width": 2,
+        "maxAlpha": 128
+      },
+      "runtimeBytes": 189602,
+      "compositionMatchesStoredLayers": true
+    }
+  ],
+  "runtimeTotalBytes": 619666,
+  "repackByteIdentical": true
+}

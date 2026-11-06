@@ -327,6 +327,19 @@ export class SimBarGame{
   _readyWorkers(){if(!this.floor.cleanupActive||this.floor.cleanupComplete)return[];return this.crew.map((id,i)=>({a:this.actors.find(a=>a.id===id),i})).filter(({a,i})=>a&&a.visible&&a.id!==this.escort?.worker&&(!a.id.startsWith('hired-')||this._onDuty(+a.id.slice(-1)))&&distance(a,this._cleanGoal(i))<=.22).map(x=>x.a);}
   _ensureGuest(){let a=this.actors.find(a=>a.id==='assisted-guest');if(!a){a={id:'assisted-guest',name:catalog.guestNames[this.floor.guestIndex%10]||'Guest',role:'assisted',x:-.65,z:-.25,y:0,homeX:-.65,homeZ:-.25,targetX:-.65,targetZ:-.25,moving:false,action:'needs-help',visible:true,_path:[],_pathAt:0};this.actors.push(a);}return a;}
   _beginEscort(){const guest=this._ensureGuest(),worker=this.actors.find(a=>a.id==='server');this.escort={worker:worker.id,phase:'join',homeX:worker.homeX,homeZ:worker.homeZ};worker.action='escort';worker._partner=guest.id;guest._partner=worker.id;setRoute(worker,point(guest.x-.5,guest.z-.3),this.actors,true);}
+  _tickBartender(a,dt){
+    if(!this.playing){a.moving=false;a.action='idle';return;}
+    // The authored staff aisle is straight and clear. Keep the same guarded
+    // 9-second work cycle as the Unity bartender, without a grid-path zigzag.
+    const cycle=this.elapsed%9,x=this.pour?-9+2*clamp(this.pour.item/2,0,1):cycle<4.5?-8.95:-7.05,goal=point(x,-.565);
+    const changed=distance(point(a.targetX,a.targetZ),goal)>.01;
+    if(changed||distance(a,goal)>.035&&(!a._path?.length||a._pathAt>=a._path.length)){
+      a.targetX=goal.x;a.targetZ=goal.z;a._floorRoute=false;a._path=[goal];a._pathAt=0;a._blocked=0;
+    }
+    if(distance(a,goal)>.035)move(a,dt,.66,this.actors);
+    if(distance(a,goal)<=.035){a._path=[];a._pathAt=0;a.moving=false;a.action='serve';}
+    else a.action='walk';
+  }
   _tickActors(dt){
     for(const a of this.actors){
       if(a.id.startsWith('hired-'))a.visible=this._onDuty(+a.id.slice(-1));if(!a.visible)continue;
@@ -337,6 +350,7 @@ export class SimBarGame{
         a.action='idle';a.moving=false;
         continue;
       }if(a.role==='seated')continue;
+      if(a.id==='bartender'){this._tickBartender(a,dt);continue;}
       if(!this.playing&&(a.action==='mosh'||a.action==='slam')){a.action='idle';a.moving=false;}
       if(a.action==='queue'||a.action==='return'){if(move(a,dt,1.45,this.actors)){a.moving=false;if(a.action==='return')a.action='idle';}continue;}
       if(a.role==='guest'&&a.slot<6&&this.playing){

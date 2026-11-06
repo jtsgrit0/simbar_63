@@ -1,0 +1,95 @@
+{
+  "snapshots": [
+    {
+      "offset": 25,
+      "elapsed": 6.149999999999986,
+      "actor": {
+        "id": "bartender",
+        "name": "Jessy Bartender",
+        "role": "bartender",
+        "x": -7.828000000000005,
+        "z": -0.565,
+        "y": 0,
+        "homeX": -7.3,
+        "homeZ": -0.565,
+        "targetX": -7.05,
+        "targetZ": -0.565,
+        "moving": true,
+        "action": "walk",
+        "visible": true,
+        "facing": 1.5707963267948966,
+        "_path": [
+          {
+            "x": -7.05,
+            "z": -0.565
+          }
+        ],
+        "_pathAt": 0,
+        "_wait": 2,
+        "_floorRoute": false,
+        "_blocked": 0
+      }
+    },
+    {
+      "offset": 19,
+      "elapsed": 6.149999999999986,
+      "actor": {
+        "id": "bartender",
+        "name": "Jessy Bartender",
+        "role": "bartender",
+        "x": -7.828000000000005,
+        "z": -0.565,
+        "y": 0,
+        "homeX": -7.3,
+        "homeZ": -0.565,
+        "targetX": -7.05,
+        "targetZ": -0.565,
+        "moving": true,
+        "action": "walk",
+        "visible": true,
+        "facing": 1.5707963267948966,
+        "_path": [
+          {
+            "x": -7.05,
+            "z": -0.565
+          }
+        ],
+        "_pathAt": 0,
+        "_wait": 2,
+        "_floorRoute": false,
+        "_blocked": 0
+      }
+    },
+    {
+      "offset": 17,
+      "elapsed": 6.149999999999986,
+      "actor": {
+        "id": "bartender",
+        "name": "Jessy Bartender",
+        "role": "bartender",
+        "x": -7.828000000000005,
+        "z": -0.565,
+        "y": 0,
+        "homeX": -7.3,
+        "homeZ": -0.565,
+        "targetX": -7.05,
+        "targetZ": -0.565,
+        "moving": true,
+        "action": "walk",
+        "visible": true,
+        "facing": 1.5707963267948966,
+        "_path": [
+          {
+            "x": -7.05,
+            "z": -0.565
+          }
+        ],
+        "_pathAt": 0,
+        "_wait": 2,
+        "_floorRoute": false,
+        "_blocked": 0
+      }
+    }
+  ],
+  "errors": []
+}

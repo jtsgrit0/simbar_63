@@ -141,6 +141,8 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
   function drawActor(a,state){
     let role=String(a.role||'guest').toLowerCase();if(role==='band')role=String(a.id||'singer');if(a.id?.startsWith('bar-seat-'))role='barseated';
     let action=String(a.action||'idle');if(action==='sweep')action='clean';else if(a.moving&&!['mosh','slam','surf','support'].includes(action))action='walk';
+    const bar=assets.venueMeta?.barRegion;
+    if(role==='bartender'&&!a.moving&&bar&&a.x<bar.xMax&&a.z>=bar.zMin&&a.z<=bar.zMax&&['idle','serve'].includes(action))action='idle';
     const active=['playing','closing'].includes(state.phase);
     const band=role==='singer'||role==='guitarist'||role==='bassist'||role==='drummer';
     const jump=assets.spriteMeta.roles?.[role]?.actions?.jump?pixelBandJump(role,action,seconds,active):null;

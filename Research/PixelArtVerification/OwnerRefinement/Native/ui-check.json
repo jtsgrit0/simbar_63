@@ -1,0 +1,40 @@
+{
+  "release": "52288ceea581f302",
+  "passed": true,
+  "checks": [
+    {
+      "viewport": "desktop",
+      "korean": [
+        "자기야 오늘밤 라이브 하러와",
+        "평생 Rock&Roll",
+        "오늘밤은 무슨 음악을 들을까?"
+      ],
+      "english": [
+        "Darling, come play live tonight.",
+        "Rock&Roll for life.",
+        "What shall we listen to tonight?"
+      ],
+      "fontCoverage": true,
+      "selectionAndStart": true,
+      "bartenderSpan": 1.8809999999999958,
+      "errors": []
+    },
+    {
+      "viewport": "mobile",
+      "korean": [
+        "자기야 오늘밤 라이브 하러와",
+        "평생 Rock&Roll",
+        "오늘밤은 무슨 음악을 들을까?"
+      ],
+      "english": [
+        "Darling, come play live tonight.",
+        "Rock&Roll for life.",
+        "What shall we listen to tonight?"
+      ],
+      "fontCoverage": true,
+      "selectionAndStart": true,
+      "bartenderSpan": 1.8809999999999958,
+      "errors": []
+    }
+  ]
+}

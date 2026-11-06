@@ -277,6 +277,9 @@ public sealed partial class SimBarExperience
         MotionActor actor=view.actor;Vector3 world=MotionPosition(actor);Vector2 offset=PixelActorOffset(view,world);
         PixelRole role=pixelRoles.TryGetValue(view.role,out PixelRole found)?found:pixelRoles["guest"];
         string action=PixelActionFor(actor);bool active=JourneyIsPlaying||JourneyIsFloorClosing;
+        PixelBar bar=pixelManifest.barRegion;
+        if(view.role=="bartender"&&!actor.moving&&(action=="idle"||action=="serve")&&bar!=null
+            &&world.x<bar.xMax&&world.z>=bar.zMin&&world.z<=bar.zMax)action="idle";
         bool seated=view.seat!=null&&(view.role=="seated"||view.role=="barseated")&&actor.kind==MotionKind.Stationary&&!actor.moving&&(action=="idle"||action=="sit"||action=="drink");
         Vector2 p=seated?view.seat.feet:PixelProject(world)+offset;
         if(view.layer.after!=null)foreach(Transform mask in view.layer.after)mask.gameObject.SetActive(seated);

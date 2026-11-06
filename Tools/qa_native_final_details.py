@@ -33,7 +33,47 @@ for owner in OWNERS:
     expected=expected.resize((400,350),Image.Resampling.NEAREST)
     actual=Image.open(ART/owner['file']).convert('RGBA')
     entry=next(value for value in owner_manifest['owners'] if value['name']==owner['name'])
-    if 'foregroundMask' in entry:
+    if 'displayFigure' in entry:
+        for key in ['displayCharacter','displayFigure','displayForegroundMask','lightMask']:
+            assert hashlib.sha256((ROOT/entry[key]).read_bytes()).hexdigest()==entry[key+'Sha256']
+        matte=Image.open(ROOT/entry['foregroundMask']).convert('L')
+        character=Image.open(ROOT/entry['displayCharacter']).convert('RGBA')
+        figure=Image.open(ROOT/entry['displayFigure']).convert('RGBA')
+        light_alpha=Image.open(ROOT/entry['lightMask']).convert('L')
+        opaque=character.getchannel('A').tobytes()
+        original=expected.copy();original.putalpha(matte)
+        dx,dy=entry['transform']['placement']
+        exact_original=owner['name'] in ['EDISON','JAIDEN']
+        if exact_original:
+            shifted=Image.new('RGBA',expected.size)
+            shifted.paste(original,(dx,dy))
+            assert shifted.getchannel('A').tobytes()==character.getchannel('A').tobytes(),owner['name']
+            shifted_rgb,character_rgb=shifted.convert('RGB').tobytes(),character.convert('RGB').tobytes()
+            assert all(shifted_rgb[i*3:i*3+3]==character_rgb[i*3:i*3+3]
+                       for i,alpha in enumerate(opaque) if alpha),owner['name']
+        else:
+            source_path=ROOT/entry['figureSource']
+            assert hashlib.sha256(source_path.read_bytes()).hexdigest()==entry['figureSourceSha256']
+            source=Image.open(source_path).convert('RGBA')
+            colors=set(source.get_flattened_data())
+            assert all(pixel in colors for pixel in character.get_flattened_data() if pixel[3]),owner['name']
+            assert entry['transform']['scale']==1.15 and not entry['transform']['autoFit']
+        assert entry['rim']['opacity']==.5 and max(light_alpha.tobytes())==128
+        assert all(not light or alpha<255 for light,alpha in zip(light_alpha.tobytes(),figure.getchannel('A').tobytes()))
+        room=ImageOps.fit(Image.open(ROOT/entry['backdrop']).convert('RGBA'),tuple(entry['backgroundPixelSize']),
+                          method=Image.Resampling.NEAREST).resize(expected.size,Image.Resampling.NEAREST)
+        light=Image.new('RGBA',expected.size,tuple(entry['rim']['color'])+(0,));light.putalpha(light_alpha)
+        room.alpha_composite(light);room.alpha_composite(figure)
+        assert room.tobytes()==actual.tobytes(),owner['name']
+        if owner['name']=='JAIDEN':
+            assert character.getchannel('A').getbbox()[3]==350
+        if owner['name']=='EDISON':
+            assert figure.getchannel('A').getbbox()[3]==350
+        report['ownerChecks'].append({'name':owner['name'],'size':actual.size,
+          'originalCharacterRGBPreservedWithPlacement':exact_original,
+          'figureProvenance':entry['figureProvenance'],'transform':entry['transform'],
+          'exteriorRimOpacity':entry['rim']['opacity'],'compositionMatchesSources':True})
+    elif 'foregroundMask' in entry:
         matte_path=ROOT/entry['foregroundMask']
         assert hashlib.sha256(matte_path.read_bytes()).hexdigest()==entry['foregroundMaskSha256']
         matte=Image.open(matte_path).convert('L')

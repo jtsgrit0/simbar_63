@@ -1,0 +1,11 @@
+{
+  "action": "idle",
+  "moving": false,
+  "x": -8.95,
+  "z": -0.565,
+  "pixelX": 205.0,
+  "pixelY": 270.0,
+  "texture": "SimBarPixelArt/wardrobe",
+  "uv": "(x:0.750000, y:0.750000, width:0.250000, height:0.125000)",
+  "depth": 270.054718
+}

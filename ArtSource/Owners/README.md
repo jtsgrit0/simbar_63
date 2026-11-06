@@ -1,40 +1,54 @@
 # Owner selection illustrations
 
-## Current portraits: user-supplied original
+## Current owner figures and presentation
 
-The title uses the user's `owner_p.png`, retained byte-for-byte as
-[`Original-owner_p.png`](Original-owner_p.png). Jessy is the woman at the top,
-Edison is the man with headphones and a laptop at the right, and Jaiden is the
-man holding a record at the lower left. Names and buttons remain live UI.
+The title figures derive from the user's `owner_p.png`, retained byte-for-byte
+as [`Original-owner_p.png`](Original-owner_p.png). Jessy is the woman at the
+top, Edison is the man with headphones and a laptop at the right, and Jaiden
+is the man holding a record at the lower left. The supplied sheet and approved
+full-size paper crops in `OriginalCrops/` remain unchanged.
 
-`Tools/prepare_original_owners.py` separates the three people with explicit
-crop polygons, removes the surrounding printed names/signature, and fits each
-complete bust into the existing 400×350 portrait slot using nearest-neighbor
-scaling. Hair, hands, headphones, laptop and record are kept inside their
-respective cards. The supplied sheet and full-resolution approved paper crops
-in `OriginalCrops/` remain unchanged.
+The latest user-requested pose and framing changes are documented in
+[`Refinements/README.md`](Refinements/README.md):
 
-The ivory paper behind each figure is replaced with that owner's former
-live-house setting: Jessy's magenta record shelves and band set, Edison's cyan
+- Jessy has a reviewed built-in ImageGen pose edit with her left wrist raised
+  and visible pink nails. The card then applies an 8° counterclockwise correction
+  and a literal 115% nearest-neighbor enlargement. Hair and the raised hand stay
+  visible; the approved lower-body crop meets the card's bottom border.
+- Edison retains his original figure RGB and position. A separately generated
+  black DJ controller fills the space below the laptop, behind the original
+  arms and computer.
+- Jaiden retains his original RGB and shape and moves down 11px until his
+  foreground touches the bottom of the 400×350 image.
+- Each figure has a crisp 2px outside rim in the room's magenta, cyan or amber
+  at 50% opacity. The lighting is a separate mask and does not recolor opaque
+  pixels inside the figure.
+
+The rooms remain Jessy's magenta record shelves and band set, Edison's cyan
 stage and amplifiers, and Jaiden's amber record shelves and band set. Built-in
-ImageGen restored the background-only rooms from the retained V2 portraits;
-the selected 1341×1173 plates and exact prompts are documented in
-[`Backdrops/README.md`](Backdrops/README.md). This uses the built-in ImageGen
-tool, not the CLI/API fallback. Prompt inputs are the three retained
-`ArtSource/PixelArt/V2/Owner*.png` portraits, with the former foreground people
-removed from the room plates.
-These generated backgrounds contain no replacement foreground person.
+ImageGen restored these background-only rooms from the retained V2 portraits;
+the selected 1341×1173 plates and exact prompts remain in
+[`Backdrops/README.md`](Backdrops/README.md). Both background restorations and
+new pose/support assets use the built-in tool, not the CLI/API fallback.
 
-Foreground matting is mechanical: remove only border-connected ivory paper
-and two reviewed empty openings between Jessy's hair outlines. Enclosed eye,
-skin, headphone, laptop and white-shirt colors stay. The masks are retained in
-`ForegroundMasks/`. Every retained character RGB pixel is copied exactly from
-the approved original nearest-neighbor crop; no face, clothes or pose is
-regenerated or recolored. The background is sampled at 200×175 and enlarged
-with nearest-neighbor to keep its pixel spacing consistent behind the figure.
-The 400×350 cards are lossless PNGs, with no palette reduction of the figure.
-Source hashes, masks, paper-opening seeds, retained-pixel counts and runtime
-mapping are recorded in [`crops.json`](crops.json).
+`Tools/prepare_original_owners.py` performs the technical packing. Original
+paper matting removes only border-connected ivory and two reviewed openings
+in Jessy's original hair. Original eyes, skin, headphones, laptop, white shirt
+and record colors remain protected in `ForegroundMasks/`. The new Jessy pose
+is explicitly tracked as an edited source instead of inheriting a false claim
+that it is pixel-identical to the original pose.
+
+The script reads `Refinements/presentation.json`, copies or samples figure
+layers with nearest-neighbor, composites the DJ support and exterior light
+masks, and packs the final 400×350 cards over fixed room layers. No palette
+reduction, smoothing or automatic shrink-to-fit follows the 115% enlargement.
+Near-invisible generated alpha 1–7 residue is ignored only in the working
+presentation; all original generated source PNGs remain unchanged.
+
+Source/mask hashes, placements, scale, rotation and provenance are recorded in
+[`crops.json`](crops.json). Independent source, RGB, palette, bottom-alignment
+and composition checks are in
+[`OwnerRefinements`](../../Research/PixelArtVerification/OwnerRefinements/).
 
 | Character | Existing save ID | Native image | Unity image |
 |---|---|---|---|
@@ -42,8 +56,8 @@ mapping are recorded in [`crops.json`](crops.json).
 | 에디슨 / Edison | `ff` | `owner-ff.png` | `OwnerFF.png` |
 | 제이든 / Jaiden | `pet-sounds` | `owner-pet.png` | `OwnerPetSounds.png` |
 
-`prepare_pixel_art.py` applies these crops last, and the Unity resource sync
-preserves the same decoded portrait pixels and existing importer GUIDs.
+`prepare_pixel_art.py` applies these composed cards last. The Unity resource
+sync preserves the same decoded runtime pixels and existing importer GUIDs.
 
 ## Earlier portrait production history
 

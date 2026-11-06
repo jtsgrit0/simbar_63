@@ -1,0 +1,30 @@
+{
+  "owners": [
+    {
+      "name": "OwnerFemale",
+      "bytes": 212034,
+      "sha256": "b3ccc4bb00f0ea11f847f324ae3831601e410a3583c301796fd9f6a76b8a4f20",
+      "startupAndResourceExact": true
+    },
+    {
+      "name": "OwnerFF",
+      "bytes": 218030,
+      "sha256": "be581e80e16730260d2468d17e3e3fb2897062e35eaec463fdcee72220e2a350",
+      "startupAndResourceExact": true
+    },
+    {
+      "name": "OwnerPetSounds",
+      "bytes": 189602,
+      "sha256": "f139dd68c81f915f20c1380eba95482a0524081393f965070b7f04358a57f417",
+      "startupAndResourceExact": true
+    }
+  ],
+  "barOffsetNative": [
+    0,
+    17
+  ],
+  "barOffsetUnity": {
+    "x": 0,
+    "y": 17
+  }
+}

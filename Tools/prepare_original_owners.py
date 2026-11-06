@@ -1,17 +1,18 @@
-"""Pack the original owner figures over their restored live-house backdrops.
+"""Pack reviewed owner figures over their restored live-house backdrops.
 
 The supplied sheet and full-size paper crops remain unchanged. Foreground
 matting is deterministic: flood only border-connected ivory paper, plus the
-two enclosed paper openings in Jessy's hair. Every retained figure RGB value
-is copied from the original nearest-neighbor crop, without redraw or recolor.
-The background-only room plates are separately restored production assets.
+two enclosed paper openings in Jessy's original hair. Edison and Jaiden retain
+original figure RGB. Jessy's requested hand-pose edit is a separately reviewed
+source. Presentation transforms use nearest-neighbor sampling and a separate
+50-percent exterior pixel-light layer. Original source files stay unchanged.
 """
 from collections import deque
 from pathlib import Path
 import hashlib
 import json
 
-from PIL import Image, ImageDraw, ImageOps
+from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageOps
 
 ROOT = Path(__file__).resolve().parent.parent
 SOURCE = ROOT / 'ArtSource/Owners/Original-owner_p.png'
@@ -19,9 +20,16 @@ OUTPUT = ROOT / 'Tools/WebGLTemplate/FastGame/art'
 FULL_CROPS = ROOT / 'ArtSource/Owners/OriginalCrops'
 BACKDROPS = ROOT / 'ArtSource/Owners/Backdrops'
 FOREGROUND_MASKS = ROOT / 'ArtSource/Owners/ForegroundMasks'
+REFINEMENTS = ROOT / 'ArtSource/Owners/Refinements'
+PRESENTATION = REFINEMENTS / 'presentation.json'
+DISPLAY_FIGURES = REFINEMENTS / 'DisplayFigures'
+DISPLAY_MASKS = REFINEMENTS / 'DisplayMasks'
+LIGHT_MASKS = REFINEMENTS / 'LightMasks'
 SOURCE_SHA256 = 'a030c8958e0a4aa7e881bf1028f145e9b6f6a3a9e03c6c2bf08648c8b476b36c'
 RUNTIME_SIZE = (400, 350)
 BACKGROUND_PIXEL_SIZE = (200, 175)
+RIM_COLORS = {'JESSY': (255, 62, 154), 'EDISON': (42, 211, 255),
+              'JAIDEN': (255, 167, 48)}
 
 # These are empty openings between hair outlines, not highlights or skin.
 # Other enclosed pale regions (eyes, headphones, laptop and white shirt) stay.
@@ -125,6 +133,155 @@ def composite_owner(portrait, matte, backdrop):
     return result
 
 
+def relative(path):
+    return Path(path).relative_to(ROOT).as_posix()
+
+
+def file_hash(path):
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def place_layer(canvas, layer, x, y):
+    """Composite an integer-positioned layer, clipping only at the card border."""
+    x, y = int(x), int(y)
+    left, top = max(0, x), max(0, y)
+    right, bottom = min(canvas.width, x + layer.width), min(canvas.height, y + layer.height)
+    if right > left and bottom > top:
+        fragment = layer.crop((left - x, top - y, right - x, bottom - y))
+        canvas.alpha_composite(fragment, (left, top))
+
+
+def original_figure(portrait, matte):
+    figure = portrait.copy()
+    figure.putalpha(matte)
+    return figure
+
+
+def clean_transparency(image, noise_floor):
+    """Ignore nearly invisible generated coverage; keep source files and RGB intact."""
+    if noise_floor:
+        image = image.copy()
+        image.putalpha(image.getchannel('A').point(lambda alpha: alpha if alpha >= noise_floor else 0))
+    return image
+
+
+def load_refinements():
+    if not PRESENTATION.is_file():
+        return None
+    data = json.loads(PRESENTATION.read_text(encoding='utf-8'))
+    if data.get('version') != 1 or tuple(data.get('runtimeSize', ())) != RUNTIME_SIZE:
+        raise ValueError('Owner refinement presentation requires version 1 and 400x350 cards.')
+    if set(data.get('owners', {})) != {owner['name'] for owner in OWNERS}:
+        raise ValueError('All three owner refinement configurations are required.')
+    return data
+
+
+def refined_figure(portrait, matte, name, config):
+    """Apply only pixel sampling, RGBA placement and a separate exterior light ring."""
+    source = original_figure(portrait, matte)
+    provenance = 'approved original figure RGB'
+    metadata = {'originalForegroundMask': relative(FOREGROUND_MASKS / (name.title() + '.png'))}
+    if config.get('source'):
+        path = ROOT / config['source']
+        if not path.is_file():
+            raise FileNotFoundError('Reviewed owner refinement source is required: ' + str(path))
+        source = Image.open(path).convert('RGBA')
+        alpha = source.getchannel('A')
+        if alpha.getextrema() != (0, 255) or not alpha.getbbox():
+            raise ValueError('Edited foreground must be a reviewed transparent cutout: ' + name)
+        source = clean_transparency(source, int(config.get('transparencyNoiseFloor', 0)))
+        source = source.resize(RUNTIME_SIZE, Image.Resampling.NEAREST)
+        metadata.update({'figureSource': relative(path), 'figureSourceSha256': file_hash(path)})
+        provenance = config.get('provenance', 'reviewed generated foreground edit')
+
+    angle = float(config.get('rotationDegreesCCW', 0))
+    scale = float(config.get('scale', 1))
+    transformed = source
+    if angle:
+        transformed = transformed.rotate(angle, Image.Resampling.NEAREST, expand=True,
+                                         fillcolor=(0, 0, 0, 0))
+    if scale != 1:
+        size = (round(transformed.width * scale), round(transformed.height * scale))
+        transformed = transformed.resize(size, Image.Resampling.NEAREST)
+    bounds = transformed.getchannel('A').getbbox()
+    if not bounds:
+        raise ValueError('Owner figure has no visible pixels: ' + name)
+    if angle or scale != 1:
+        transformed = transformed.crop(bounds)
+        x = (RUNTIME_SIZE[0] - transformed.width) // 2 + int(config.get('xOffset', 0))
+        y = int(config.get('top', 2))
+    else:
+        x, y = int(config.get('xOffset', 0)), int(config.get('yOffset', 0))
+        if config.get('align') == 'bottom':
+            y = RUNTIME_SIZE[1] - bounds[3]
+
+    character = Image.new('RGBA', RUNTIME_SIZE)
+    place_layer(character, transformed, x, y)
+    figure = Image.new('RGBA', RUNTIME_SIZE)
+    support_meta = {}
+    if config.get('support'):
+        support_path = ROOT / config['support']
+        support = clean_transparency(Image.open(support_path).convert('RGBA'),
+                                     int(config.get('transparencyNoiseFloor', 0)))
+        support_bounds = support.getchannel('A').getbbox()
+        if not support_bounds or support.getchannel('A').getextrema()[0] != 0:
+            raise ValueError('DJ support requires a transparent source asset.')
+        support = support.crop(support_bounds)
+        rectangle = config['supportRect']
+        size = (int(rectangle[2] - rectangle[0]), int(rectangle[3] - rectangle[1]))
+        support = ImageOps.fit(support, size, method=Image.Resampling.NEAREST)
+        place_layer(figure, support, rectangle[0], rectangle[1])
+        support_meta = {'supportSource': relative(support_path),
+                        'supportSha256': file_hash(support_path), 'supportRect': rectangle}
+    figure.alpha_composite(character)
+    display_alpha = figure.getchannel('A')
+    radius = int(config.get('rimWidth', 2))
+    opacity = float(config.get('rimOpacity', .5))
+    if radius < 1 or not 0 <= opacity <= 1:
+        raise ValueError('Owner rim requires a positive width and normalized opacity.')
+    outer = ImageChops.subtract(display_alpha.filter(ImageFilter.MaxFilter(radius * 2 + 1)),
+                                display_alpha)
+    light_alpha = outer.point(lambda value: round(value * opacity))
+    color = tuple(config.get('rimColor', RIM_COLORS[name]))
+    light = Image.new('RGBA', RUNTIME_SIZE, color + (0,))
+    light.putalpha(light_alpha)
+
+    for folder in (DISPLAY_FIGURES, DISPLAY_MASKS, LIGHT_MASKS):
+        folder.mkdir(parents=True, exist_ok=True)
+    character_path = DISPLAY_FIGURES / (name.title() + '-character.png')
+    figure_path = DISPLAY_FIGURES / (name.title() + '.png')
+    alpha_path = DISPLAY_MASKS / (name.title() + '.png')
+    light_path = LIGHT_MASKS / (name.title() + '.png')
+    character.save(character_path, optimize=True)
+    figure.save(figure_path, optimize=True)
+    display_alpha.save(alpha_path, optimize=True)
+    light_alpha.save(light_path, optimize=True)
+    metadata.update({
+        'presentationVersion': 1, 'figureProvenance': provenance,
+        'displayCharacter': relative(character_path), 'displayCharacterSha256': file_hash(character_path),
+        'displayFigure': relative(figure_path), 'displayFigureSha256': file_hash(figure_path),
+        'displayForegroundMask': relative(alpha_path), 'displayForegroundMaskSha256': file_hash(alpha_path),
+        'lightMask': relative(light_path), 'lightMaskSha256': file_hash(light_path),
+        'transform': {'rotationDegreesCCW': angle, 'scale': scale, 'placement': [x, y],
+                      'unclippedSize': transformed.size, 'displayBounds': display_alpha.getbbox(),
+                      'resampling': 'nearest-neighbor', 'autoFit': False},
+        'rim': {'color': color, 'opacity': opacity, 'width': radius, 'maxAlpha': max(light_alpha.tobytes())},
+        'transparencyNoiseFloor': int(config.get('transparencyNoiseFloor', 0)),
+        **support_meta,
+    })
+    return figure, light, metadata
+
+
+def composite_refined_owner(portrait, matte, backdrop, name, config):
+    room = ImageOps.fit(backdrop.convert('RGBA'), BACKGROUND_PIXEL_SIZE,
+                        method=Image.Resampling.NEAREST, centering=(.5, .5))
+    room = room.resize(RUNTIME_SIZE, Image.Resampling.NEAREST)
+    figure, light, metadata = refined_figure(portrait, matte, name, config)
+    room.alpha_composite(light)
+    room.alpha_composite(figure)
+    return room, metadata
+
+
 def prepare_owners(output=OUTPUT, runtime_size=RUNTIME_SIZE):
     if not SOURCE.is_file():
         raise FileNotFoundError('The supplied original owner sheet is required: ' + str(SOURCE))
@@ -143,9 +300,14 @@ def prepare_owners(output=OUTPUT, runtime_size=RUNTIME_SIZE):
         raise ValueError('Backdrop portraits use the reviewed 400x350 display size.')
     if use_backdrops:
         FOREGROUND_MASKS.mkdir(parents=True, exist_ok=True)
+    refinements = load_refinements()
+    if refinements and not use_backdrops:
+        raise ValueError('Owner refinements require the restored room backdrops.')
     manifest = {'source': SOURCE.relative_to(ROOT).as_posix(),
                 'sha256': hashlib.sha256(SOURCE.read_bytes()).hexdigest(),
-                'method': ('Original-RGB figure matte over separately restored room backdrops; nearest-neighbor only'
+                'method': ('Reviewed figure refinements, nearest-neighbor transforms and exterior pixel rim over restored rooms'
+                           if refinements else
+                           'Original-RGB figure matte over separately restored room backdrops; nearest-neighbor only'
                            if use_backdrops else
                            'Lossless original-pixel polygon crops; nearest-neighbor runtime copies; no generation or recoloring'),
                 'owners': []}
@@ -163,6 +325,7 @@ def prepare_owners(output=OUTPUT, runtime_size=RUNTIME_SIZE):
             matte = foreground_mask(runtime, owner['name'])
             matte_path = FOREGROUND_MASKS / (owner['name'].title() + '.png')
             matte.save(matte_path, optimize=True)
+            original_runtime = runtime
             runtime = composite_owner(runtime, matte, Image.open(background_path))
             extra = {'backdrop': background_path.relative_to(ROOT).as_posix(),
                      'backdropSha256': hashlib.sha256(background_path.read_bytes()).hexdigest(),
@@ -172,6 +335,14 @@ def prepare_owners(output=OUTPUT, runtime_size=RUNTIME_SIZE):
                      'paperOpeningSeeds': PAPER_OPENINGS[owner['name']],
                      'retainedCharacterPixels': sum(value != 0 for value in matte.tobytes()),
                      'retainedCharacterRGBExact': True}
+            if refinements:
+                runtime, presentation = composite_refined_owner(
+                    original_runtime, matte, Image.open(background_path), owner['name'],
+                    refinements['owners'][owner['name']])
+                extra.update(presentation)
+                # Translation preserves Jaiden's RGB, but only Edison keeps the old positions.
+                extra['retainedCharacterRGBExact'] = owner['name'] in ('EDISON', 'JAIDEN')
+                extra['retainedCharacterPositionsExact'] = owner['name'] == 'EDISON'
         target = output / owner['file']
         runtime.save(target, optimize=True)
         manifest['owners'].append({**owner, 'bounds': bounds, 'offset': offset,

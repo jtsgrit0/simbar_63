@@ -1,7 +1,7 @@
 {
   "source": "ArtSource/Owners/Original-owner_p.png",
   "sha256": "a030c8958e0a4aa7e881bf1028f145e9b6f6a3a9e03c6c2bf08648c8b476b36c",
-  "method": "Original-RGB figure matte over separately restored room backdrops; nearest-neighbor only",
+  "method": "Reviewed figure refinements, nearest-neighbor transforms and exterior pixel rim over restored rooms",
   "owners": [
     {
       "name": "JESSY",
@@ -112,9 +112,54 @@
         ]
       ],
       "retainedCharacterPixels": 61909,
-      "retainedCharacterRGBExact": true,
-      "sha256": "f41a49ec2192c70a645c0290c8ec23c2e6dfdd7837f226b50e03b36b4c38e23e",
-      "bytes": 214997
+      "retainedCharacterRGBExact": false,
+      "originalForegroundMask": "ArtSource/Owners/ForegroundMasks/Jessy.png",
+      "figureSource": "ArtSource/Owners/Refinements/Jessy.left-wrist.source.png",
+      "figureSourceSha256": "bc8c70beb29e54c5197277fa6b4206ab74cd4572c3c321a02f699da8898cf09d",
+      "presentationVersion": 1,
+      "figureProvenance": "Built-in ImageGen left-wrist and pink-nail pose edit, then nearest-neighbor geometry",
+      "displayCharacter": "ArtSource/Owners/Refinements/DisplayFigures/Jessy-character.png",
+      "displayCharacterSha256": "a7d16d91aa38b04bc2711a6b24f6109c24b89068392bfbb5f7499a5e2e9362cc",
+      "displayFigure": "ArtSource/Owners/Refinements/DisplayFigures/Jessy.png",
+      "displayFigureSha256": "a7d16d91aa38b04bc2711a6b24f6109c24b89068392bfbb5f7499a5e2e9362cc",
+      "displayForegroundMask": "ArtSource/Owners/Refinements/DisplayMasks/Jessy.png",
+      "displayForegroundMaskSha256": "4b13b71f57c05bdb7b6cff28e2603ae9bbba043eebf19aa40f63b8afdab9de9c",
+      "lightMask": "ArtSource/Owners/Refinements/LightMasks/Jessy.png",
+      "lightMaskSha256": "bbdb77fd4c762496869cf292ce6b291ddab29f8c18a217cffdd090419def79be",
+      "transform": {
+        "rotationDegreesCCW": 8.0,
+        "scale": 1.15,
+        "placement": [
+          26,
+          2
+        ],
+        "unclippedSize": [
+          348,
+          392
+        ],
+        "displayBounds": [
+          26,
+          2,
+          374,
+          350
+        ],
+        "resampling": "nearest-neighbor",
+        "autoFit": false
+      },
+      "rim": {
+        "color": [
+          255,
+          62,
+          154
+        ],
+        "opacity": 0.5,
+        "width": 2,
+        "maxAlpha": 128
+      },
+      "transparencyNoiseFloor": 8,
+      "retainedCharacterPositionsExact": false,
+      "sha256": "b3ccc4bb00f0ea11f847f324ae3831601e410a3583c301796fd9f6a76b8a4f20",
+      "bytes": 212034
     },
     {
       "name": "EDISON",
@@ -229,8 +274,59 @@
       "paperOpeningSeeds": [],
       "retainedCharacterPixels": 79953,
       "retainedCharacterRGBExact": true,
-      "sha256": "c23b2580b4d630da52a405b65e251c15fab71e698bd4fe6f26ab466db8cf7695",
-      "bytes": 215066
+      "originalForegroundMask": "ArtSource/Owners/ForegroundMasks/Edison.png",
+      "presentationVersion": 1,
+      "figureProvenance": "approved original figure RGB",
+      "displayCharacter": "ArtSource/Owners/Refinements/DisplayFigures/Edison-character.png",
+      "displayCharacterSha256": "b577ac775d9e0097e4c862b6485ff21eafa3f4a7846e2eb0dd17947634dc8fcb",
+      "displayFigure": "ArtSource/Owners/Refinements/DisplayFigures/Edison.png",
+      "displayFigureSha256": "06b3635ab9e51c7e2ad955ac61a3a619335697d7833a04a6b0c05dd6faa5553b",
+      "displayForegroundMask": "ArtSource/Owners/Refinements/DisplayMasks/Edison.png",
+      "displayForegroundMaskSha256": "0dafd04a0c53a982fd879a57cf5804567253485cb7e7838235ad741b0c6ba357",
+      "lightMask": "ArtSource/Owners/Refinements/LightMasks/Edison.png",
+      "lightMaskSha256": "deb9400b19b2d3a496d1b6b9dda2a2408be9d4bf3ad0cf61083fd3bb37441a9e",
+      "transform": {
+        "rotationDegreesCCW": 0.0,
+        "scale": 1.0,
+        "placement": [
+          0,
+          0
+        ],
+        "unclippedSize": [
+          400,
+          350
+        ],
+        "displayBounds": [
+          18,
+          6,
+          380,
+          350
+        ],
+        "resampling": "nearest-neighbor",
+        "autoFit": false
+      },
+      "rim": {
+        "color": [
+          42,
+          211,
+          255
+        ],
+        "opacity": 0.5,
+        "width": 2,
+        "maxAlpha": 128
+      },
+      "transparencyNoiseFloor": 8,
+      "supportSource": "ArtSource/Owners/Refinements/Edison.dj-box.source.png",
+      "supportSha256": "ac644a346c13d6576725f8e90873015d5c195472fc3d8fc84cedcab049d241a7",
+      "supportRect": [
+        18,
+        289,
+        380,
+        350
+      ],
+      "retainedCharacterPositionsExact": true,
+      "sha256": "be581e80e16730260d2468d17e3e3fb2897062e35eaec463fdcee72220e2a350",
+      "bytes": 218030
     },
     {
       "name": "JAIDEN",
@@ -293,8 +389,51 @@
       "paperOpeningSeeds": [],
       "retainedCharacterPixels": 67075,
       "retainedCharacterRGBExact": true,
-      "sha256": "5bcb7991e50607cfe1c291c18080a592b120210e900cb0623eca3d13a665dfcc",
-      "bytes": 188835
+      "originalForegroundMask": "ArtSource/Owners/ForegroundMasks/Jaiden.png",
+      "presentationVersion": 1,
+      "figureProvenance": "approved original figure RGB",
+      "displayCharacter": "ArtSource/Owners/Refinements/DisplayFigures/Jaiden-character.png",
+      "displayCharacterSha256": "84c6860163c17b7e3e69062d2787ca91d652431cae7bbdfb62cee35093d50d81",
+      "displayFigure": "ArtSource/Owners/Refinements/DisplayFigures/Jaiden.png",
+      "displayFigureSha256": "84c6860163c17b7e3e69062d2787ca91d652431cae7bbdfb62cee35093d50d81",
+      "displayForegroundMask": "ArtSource/Owners/Refinements/DisplayMasks/Jaiden.png",
+      "displayForegroundMaskSha256": "451a10c5ec2e802188306c7e0d80b61d106e69e24b3e507dd6d93781c276a461",
+      "lightMask": "ArtSource/Owners/Refinements/LightMasks/Jaiden.png",
+      "lightMaskSha256": "c1f0843c4dd458d3385ec6ecae42dc00f7f0974f8d7c563424541b11a73fa902",
+      "transform": {
+        "rotationDegreesCCW": 0.0,
+        "scale": 1.0,
+        "placement": [
+          0,
+          11
+        ],
+        "unclippedSize": [
+          400,
+          350
+        ],
+        "displayBounds": [
+          60,
+          20,
+          339,
+          350
+        ],
+        "resampling": "nearest-neighbor",
+        "autoFit": false
+      },
+      "rim": {
+        "color": [
+          255,
+          167,
+          48
+        ],
+        "opacity": 0.5,
+        "width": 2,
+        "maxAlpha": 128
+      },
+      "transparencyNoiseFloor": 0,
+      "retainedCharacterPositionsExact": false,
+      "sha256": "f139dd68c81f915f20c1380eba95482a0524081393f965070b7f04358a57f417",
+      "bytes": 189602
     }
   ]
 }

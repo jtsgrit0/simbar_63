@@ -1,0 +1,11 @@
+{
+  "action": "walk",
+  "moving": true,
+  "x": -8.422,
+  "z": -0.565,
+  "pixelX": 221.0,
+  "pixelY": 275.0,
+  "texture": "SimBarPixelArt/wardrobe",
+  "uv": "(x:0.000000, y:0.750000, width:0.250000, height:0.125000)",
+  "depth": 274.6305
+}

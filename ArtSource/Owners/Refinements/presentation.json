@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "runtimeSize": [400, 350],
+  "owners": {
+    "JESSY": {
+      "source": "ArtSource/Owners/Refinements/Jessy.left-wrist.source.png",
+      "provenance": "Built-in ImageGen left-wrist and pink-nail pose edit, then nearest-neighbor geometry",
+      "rotationDegreesCCW": 8,
+      "scale": 1.15,
+      "top": 2,
+      "xOffset": 0,
+      "transparencyNoiseFloor": 8,
+      "rimColor": [255, 62, 154],
+      "rimOpacity": 0.5,
+      "rimWidth": 2
+    },
+    "EDISON": {
+      "support": "ArtSource/Owners/Refinements/Edison.dj-box.source.png",
+      "supportRect": [18, 289, 380, 350],
+      "transparencyNoiseFloor": 8,
+      "rimColor": [42, 211, 255],
+      "rimOpacity": 0.5,
+      "rimWidth": 2
+    },
+    "JAIDEN": {
+      "align": "bottom",
+      "rimColor": [255, 167, 48],
+      "rimOpacity": 0.5,
+      "rimWidth": 2
+    }
+  }
+}
