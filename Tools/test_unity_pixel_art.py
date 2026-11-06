@@ -28,6 +28,8 @@ class PixelManifestTests(unittest.TestCase):
         self.assertTrue(surf['horizontal']);self.assertEqual((surf['footX'],surf['footY']),(32,32))
         self.assertEqual(roles['barseated']['styles'],['Casual2','Punk'])
         self.assertEqual(len(result['occluders']),len(venue['occluders']))
+        self.assertEqual([v['actors'] for v in result['occluders']],[v.get('actors',[]) for v in venue['occluders']])
+        self.assertEqual({v['id']:{'feet':[v['feet']['x'],v['feet']['y']],'depth':v['depth'],'hideShadow':v['hideShadow']} for v in result['seatedActors']},venue.get('seatedActors',{}))
         self.assertEqual({v['id']:[v['offset']['x'],v['offset']['y']] for v in result['bandStageFeet']},venue.get('bandStageFeet',{}))
         perform=next(a for a in roles['singer']['actions'] if a['id']=='perform')
         self.assertEqual(perform['frameColumns'],list(range(8 if source.get('version',0)>=4 else 32)));self.assertEqual(perform['fps'],8)

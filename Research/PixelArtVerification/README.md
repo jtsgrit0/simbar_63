@@ -1,6 +1,10 @@
 # Pixel-art game verification
 
-The latest selector-background follow-up is in [`TitleVenue/`](TitleVenue/):
+The latest owner-card backgrounds, seated furniture masks and drummer
+placement are verified in [`SeatedDrummer/`](SeatedDrummer/) and
+[`OwnerCardBackdrops/`](OwnerCardBackdrops/).
+
+The earlier selector-background follow-up is in [`TitleVenue/`](TitleVenue/):
 the supplied owner portraits are unchanged and the existing pixel venue is
 layered over the city on the owner selection screen.
 

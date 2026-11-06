@@ -1,7 +1,7 @@
 """Independent pixel identity and real RAF jump/contact evidence."""
 from pathlib import Path
 import base64, hashlib, json, re, time
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageOps
 from playwright.sync_api import sync_playwright
 from benchmark_web_loading import chromium_executable
 from prepare_original_owners import SOURCE, SOURCE_SHA256, OWNERS
@@ -24,6 +24,7 @@ report['release']=version
 report['packageIntegrity']={'filesVerified':len(manifest['files']),'runtimeBytes':sum(f['bytes'] for f in manifest['files']),'matchesSource':True}
 src=Image.open(SOURCE).convert('RGBA')
 assert hashlib.sha256(SOURCE.read_bytes()).hexdigest()==SOURCE_SHA256
+owner_manifest=json.loads((ROOT/'ArtSource/Owners/crops.json').read_text(encoding='utf-8'))
 for owner in OWNERS:
     mask=Image.new('L',src.size);ImageDraw.Draw(mask).polygon(owner['clip'],fill=255)
     bounds=mask.getbbox();crop=src.crop(bounds)
@@ -31,8 +32,28 @@ for owner in OWNERS:
     expected.paste(crop,((expected.width-crop.width)//2,(expected.height-crop.height)//2),mask.crop(bounds))
     expected=expected.resize((400,350),Image.Resampling.NEAREST)
     actual=Image.open(ART/owner['file']).convert('RGBA')
-    assert expected.size==actual.size and expected.tobytes()==actual.tobytes(),owner['name']
-    report['ownerChecks'].append({'name':owner['name'],'size':actual.size,'exactOriginalNearestCrop':True})
+    entry=next(value for value in owner_manifest['owners'] if value['name']==owner['name'])
+    if 'foregroundMask' in entry:
+        matte_path=ROOT/entry['foregroundMask']
+        assert hashlib.sha256(matte_path.read_bytes()).hexdigest()==entry['foregroundMaskSha256']
+        matte=Image.open(matte_path).convert('L')
+        alpha=matte.tobytes()
+        assert matte.size==expected.size and set(alpha)<={0,255}
+        original_rgb,actual_rgb=expected.convert('RGB').tobytes(),actual.convert('RGB').tobytes()
+        assert all(original_rgb[i*3:i*3+3]==actual_rgb[i*3:i*3+3]
+                   for i,value in enumerate(alpha) if value),owner['name']
+        background_path=ROOT/entry['backdrop']
+        assert hashlib.sha256(background_path.read_bytes()).hexdigest()==entry['backdropSha256']
+        room=ImageOps.fit(Image.open(background_path).convert('RGBA'),tuple(entry['backgroundPixelSize']),
+                          method=Image.Resampling.NEAREST).resize(expected.size,Image.Resampling.NEAREST)
+        room.paste(expected,(0,0),matte)
+        assert room.tobytes()==actual.tobytes(),owner['name']
+        report['ownerChecks'].append({'name':owner['name'],'size':actual.size,
+          'retainedOriginalCharacterRGBExact':True,'retainedCharacterPixels':sum(bool(v) for v in alpha),
+          'restoredRoomMatchesSource':True,'paperOpeningSeeds':entry['paperOpeningSeeds']})
+    else:
+        assert expected.size==actual.size and expected.tobytes()==actual.tobytes(),owner['name']
+        report['ownerChecks'].append({'name':owner['name'],'size':actual.size,'exactOriginalNearestCrop':True})
 
 afterdir=OUT.parent/'aftershow'
 saved=json.loads((afterdir/'final-save.json').read_text(encoding='utf-8'))

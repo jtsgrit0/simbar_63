@@ -1,0 +1,113 @@
+{
+  "seatCount": 11,
+  "anchors": true,
+  "depths": true,
+  "shadows": true,
+  "masks": true,
+  "globalLayers": 17,
+  "drummerX": 741.0,
+  "drummerY": 265.0,
+  "drummerDepth": 281.9453,
+  "drummerBehindKit": true,
+  "seats": [
+    {
+      "id": "bar-seat-0",
+      "x": 214.0,
+      "y": 318.0,
+      "depth": 318.0,
+      "shadowHidden": true,
+      "targetedMaskImmediatelyAfter": true,
+      "worldPositionUnchanged": true
+    },
+    {
+      "id": "bar-seat-1",
+      "x": 261.0,
+      "y": 332.0,
+      "depth": 332.0,
+      "shadowHidden": true,
+      "targetedMaskImmediatelyAfter": true,
+      "worldPositionUnchanged": true
+    },
+    {
+      "id": "bar-seat-2",
+      "x": 308.0,
+      "y": 345.0,
+      "depth": 345.0,
+      "shadowHidden": true,
+      "targetedMaskImmediatelyAfter": true,
+      "worldPositionUnchanged": true
+    },
+    {
+      "id": "bar-seat-3",
+      "x": 355.0,
+      "y": 359.0,
+      "depth": 359.0,
+      "shadowHidden": true,
+      "targetedMaskImmediatelyAfter": true,
+      "worldPositionUnchanged": true
+    },
+    {
+      "id": "lounge-0",
+      "x": 319.0,
+      "y": 150.0,
+      "depth": 150.0,
+      "shadowHidden": true,
+      "targetedMaskImmediatelyAfter": true,
+      "worldPositionUnchanged": true
+    },
+    {
+      "id": "lounge-1",
+      "x": 365.0,
+      "y": 163.0,
+      "depth": 163.0,
+      "shadowHidden": true,
+      "targetedMaskImmediatelyAfter": true,
+      "worldPositionUnchanged": true
+    },
+    {
+      "id": "lounge-2",
+      "x": 444.0,
+      "y": 189.0,
+      "depth": 189.0,
+      "shadowHidden": true,
+      "targetedMaskImmediatelyAfter": true,
+      "worldPositionUnchanged": true
+    },
+    {
+      "id": "lounge-3",
+      "x": 488.0,
+      "y": 202.0,
+      "depth": 202.0,
+      "shadowHidden": true,
+      "targetedMaskImmediatelyAfter": true,
+      "worldPositionUnchanged": true
+    },
+    {
+      "id": "lounge-4",
+      "x": 132.0,
+      "y": 363.0,
+      "depth": 363.0,
+      "shadowHidden": true,
+      "targetedMaskImmediatelyAfter": true,
+      "worldPositionUnchanged": true
+    },
+    {
+      "id": "lounge-5",
+      "x": 176.0,
+      "y": 376.0,
+      "depth": 376.0,
+      "shadowHidden": true,
+      "targetedMaskImmediatelyAfter": true,
+      "worldPositionUnchanged": true
+    },
+    {
+      "id": "lounge-6",
+      "x": 277.0,
+      "y": 405.0,
+      "depth": 405.0,
+      "shadowHidden": true,
+      "targetedMaskImmediatelyAfter": true,
+      "worldPositionUnchanged": true
+    }
+  ]
+}

@@ -1,0 +1,195 @@
+{
+  "passed": true,
+  "originalChecks": [
+    {
+      "path": "ArtSource/Owners/Original-owner_p.png",
+      "byteUnchangedFromApprovedCommit": true,
+      "sha256": "a030c8958e0a4aa7e881bf1028f145e9b6f6a3a9e03c6c2bf08648c8b476b36c"
+    },
+    {
+      "path": "ArtSource/Owners/OriginalCrops/Jessy.png",
+      "byteUnchangedFromApprovedCommit": true,
+      "sha256": "888d61531c25ab47e1b1fb3e24ba3309e447dc4b97556051c602f46191eef999"
+    },
+    {
+      "path": "ArtSource/Owners/OriginalCrops/Edison.png",
+      "byteUnchangedFromApprovedCommit": true,
+      "sha256": "dfb0a8e88b858b59c1bbd67138e089368fad6d7e65f350f045d8d6115916aaaf"
+    },
+    {
+      "path": "ArtSource/Owners/OriginalCrops/Jaiden.png",
+      "byteUnchangedFromApprovedCommit": true,
+      "sha256": "da3d473184ce708639f9162f6b10c83c83b2f370f4b895805b4b043a3dd54e9f"
+    }
+  ],
+  "characterChecks": [
+    {
+      "name": "JESSY",
+      "runtimeSize": [
+        400,
+        350
+      ],
+      "runtimeBytes": 214997,
+      "retainedCharacterPixels": 61909,
+      "retainedCharacterRGBMismatches": 0,
+      "restoredRoomMatchesSource": true,
+      "removedEnclosedPaperSeeds": [
+        [
+          184,
+          47
+        ],
+        [
+          260,
+          36
+        ]
+      ],
+      "protectedDetails": [
+        {
+          "feature": "leftEye",
+          "point": [
+            213,
+            126
+          ],
+          "preserved": true,
+          "rgba": [
+            240,
+            222,
+            213,
+            255
+          ]
+        },
+        {
+          "feature": "rightEye",
+          "point": [
+            263,
+            139
+          ],
+          "preserved": true,
+          "rgba": [
+            255,
+            252,
+            231,
+            255
+          ]
+        }
+      ]
+    },
+    {
+      "name": "EDISON",
+      "runtimeSize": [
+        400,
+        350
+      ],
+      "runtimeBytes": 215066,
+      "retainedCharacterPixels": 79953,
+      "retainedCharacterRGBMismatches": 0,
+      "restoredRoomMatchesSource": true,
+      "removedEnclosedPaperSeeds": [],
+      "protectedDetails": [
+        {
+          "feature": "leftHeadphone",
+          "point": [
+            185,
+            192
+          ],
+          "preserved": true,
+          "rgba": [
+            255,
+            242,
+            206,
+            255
+          ]
+        },
+        {
+          "feature": "rightHeadphone",
+          "point": [
+            259,
+            218
+          ],
+          "preserved": true,
+          "rgba": [
+            250,
+            249,
+            250,
+            255
+          ]
+        },
+        {
+          "feature": "laptop",
+          "point": [
+            150,
+            260
+          ],
+          "preserved": true,
+          "rgba": [
+            219,
+            168,
+            152,
+            255
+          ]
+        }
+      ]
+    },
+    {
+      "name": "JAIDEN",
+      "runtimeSize": [
+        400,
+        350
+      ],
+      "runtimeBytes": 188835,
+      "retainedCharacterPixels": 67075,
+      "retainedCharacterRGBMismatches": 0,
+      "restoredRoomMatchesSource": true,
+      "removedEnclosedPaperSeeds": [],
+      "protectedDetails": [
+        {
+          "feature": "whiteShirt",
+          "point": [
+            118,
+            208
+          ],
+          "preserved": true,
+          "rgba": [
+            255,
+            255,
+            252,
+            255
+          ]
+        },
+        {
+          "feature": "whiteSleeve",
+          "point": [
+            71,
+            292
+          ],
+          "preserved": true,
+          "rgba": [
+            253,
+            227,
+            186,
+            255
+          ]
+        },
+        {
+          "feature": "record",
+          "point": [
+            220,
+            285
+          ],
+          "preserved": true,
+          "rgba": [
+            180,
+            99,
+            156,
+            255
+          ]
+        }
+      ]
+    }
+  ],
+  "runtimeOwnerBytes": 618898,
+  "additionalRuntimeImageRequests": 0,
+  "backgroundTool": "built-in ImageGen, background-only edits of retained V2 portraits",
+  "characterMethod": "Original RGB with border-connected ivory matte and two reviewed empty hair openings; nearest-neighbor background packing only",
+  "repackByteIdentical": true
+}

@@ -1,0 +1,226 @@
+[
+  {
+    "entry": "Owners",
+    "result": {
+      "selectedOwner": "ff",
+      "portraits": [
+        {
+          "name": "Journey Owner Portrait 0",
+          "width": 400,
+          "height": 350,
+          "drawWidth": 400,
+          "drawHeight": 350
+        },
+        {
+          "name": "Journey Owner Portrait 1",
+          "width": 400,
+          "height": 350,
+          "drawWidth": 400,
+          "drawHeight": 350
+        },
+        {
+          "name": "Journey Owner Portrait 2",
+          "width": 400,
+          "height": 350,
+          "drawWidth": 400,
+          "drawHeight": 350
+        }
+      ]
+    }
+  },
+  {
+    "entry": "Performance",
+    "result": {
+      "seatCount": 11,
+      "anchors": true,
+      "depths": true,
+      "shadows": true,
+      "masks": true,
+      "globalLayers": 17,
+      "drummerX": 741,
+      "drummerY": 265,
+      "drummerDepth": 281.9453,
+      "drummerBehindKit": true,
+      "seats": [
+        {
+          "id": "bar-seat-0",
+          "x": 214,
+          "y": 318,
+          "depth": 318,
+          "shadowHidden": true,
+          "targetedMaskImmediatelyAfter": true,
+          "worldPositionUnchanged": true
+        },
+        {
+          "id": "bar-seat-1",
+          "x": 261,
+          "y": 332,
+          "depth": 332,
+          "shadowHidden": true,
+          "targetedMaskImmediatelyAfter": true,
+          "worldPositionUnchanged": true
+        },
+        {
+          "id": "bar-seat-2",
+          "x": 308,
+          "y": 345,
+          "depth": 345,
+          "shadowHidden": true,
+          "targetedMaskImmediatelyAfter": true,
+          "worldPositionUnchanged": true
+        },
+        {
+          "id": "bar-seat-3",
+          "x": 355,
+          "y": 359,
+          "depth": 359,
+          "shadowHidden": true,
+          "targetedMaskImmediatelyAfter": true,
+          "worldPositionUnchanged": true
+        },
+        {
+          "id": "lounge-0",
+          "x": 319,
+          "y": 150,
+          "depth": 150,
+          "shadowHidden": true,
+          "targetedMaskImmediatelyAfter": true,
+          "worldPositionUnchanged": true
+        },
+        {
+          "id": "lounge-1",
+          "x": 365,
+          "y": 163,
+          "depth": 163,
+          "shadowHidden": true,
+          "targetedMaskImmediatelyAfter": true,
+          "worldPositionUnchanged": true
+        },
+        {
+          "id": "lounge-2",
+          "x": 444,
+          "y": 189,
+          "depth": 189,
+          "shadowHidden": true,
+          "targetedMaskImmediatelyAfter": true,
+          "worldPositionUnchanged": true
+        },
+        {
+          "id": "lounge-3",
+          "x": 488,
+          "y": 202,
+          "depth": 202,
+          "shadowHidden": true,
+          "targetedMaskImmediatelyAfter": true,
+          "worldPositionUnchanged": true
+        },
+        {
+          "id": "lounge-4",
+          "x": 132,
+          "y": 363,
+          "depth": 363,
+          "shadowHidden": true,
+          "targetedMaskImmediatelyAfter": true,
+          "worldPositionUnchanged": true
+        },
+        {
+          "id": "lounge-5",
+          "x": 176,
+          "y": 376,
+          "depth": 376,
+          "shadowHidden": true,
+          "targetedMaskImmediatelyAfter": true,
+          "worldPositionUnchanged": true
+        },
+        {
+          "id": "lounge-6",
+          "x": 277,
+          "y": 405,
+          "depth": 405,
+          "shadowHidden": true,
+          "targetedMaskImmediatelyAfter": true,
+          "worldPositionUnchanged": true
+        }
+      ]
+    }
+  },
+  {
+    "entry": "StandingGuard",
+    "result": {
+      "movingUnpinned": true,
+      "standingUnpinned": true,
+      "masksOff": true,
+      "shadowVisible": true,
+      "restoredAnchor": true
+    }
+  },
+  {
+    "entry": "Pause",
+    "result": {
+      "clockFrozen": true,
+      "actorsFrozen": true
+    }
+  },
+  {
+    "entry": "BeginAfterShow",
+    "result": {
+      "started": true
+    }
+  },
+  {
+    "entry": "DrummerBehind",
+    "result": {
+      "reached": true,
+      "frames": 21,
+      "stageLevel": 1,
+      "depth": 281.5658,
+      "x": 737,
+      "y": 265,
+      "phase": "stage"
+    }
+  },
+  {
+    "entry": "DrummerFront",
+    "result": {
+      "reached": true,
+      "frames": 70,
+      "stageLevel": 1.0,
+      "depth": 328.7187,
+      "x": 651.0,
+      "y": 312.0,
+      "phase": "stage"
+    }
+  },
+  {
+    "entry": "DrummerFloor",
+    "result": {
+      "reached": true,
+      "frames": 31,
+      "stageLevel": 0,
+      "depth": 352.128571,
+      "x": 666,
+      "y": 352,
+      "phase": "approach"
+    }
+  },
+  {
+    "entry": "FinishAfterShow",
+    "result": {
+      "frames": 515,
+      "phase": "Results",
+      "complete": true,
+      "allBandGone": true,
+      "allFansHome": true
+    }
+  },
+  {
+    "entry": "Restore",
+    "result": {
+      "prefsRestored": true,
+      "scene": "Assets/Scenes/SimBar_Reference.unity",
+      "sceneDirty": false,
+      "playing": false,
+      "runInBackground": false
+    }
+  }
+]

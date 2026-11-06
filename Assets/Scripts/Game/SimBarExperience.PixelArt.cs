@@ -28,19 +28,20 @@ public sealed partial class SimBarExperience
     }
     [Serializable] private sealed class PixelOffset{public string id;public Vector2 offset;}
     [Serializable] private sealed class PixelBar{public float xMax,xFade,zMin,zMax;public Vector2 offset;}
-    [Serializable] private sealed class PixelOccluder{public Vector2[] points;public float depth;}
+    [Serializable] private sealed class PixelOccluder{public Vector2[] points;public float depth;public string[] actors;}
+    [Serializable] private sealed class PixelSeat{public string id;public Vector2 feet;public float depth;public bool hideShadow;}
     [Serializable] private sealed class PixelManifest
     {
         public int frameWidth=64,frameHeight=64,columns=4,drawHeight=54,footX=32,footY=60;
         public string defaultAtlas;
-        public PixelOffset[] actorOffsets,bandStageFeet;public float stageElevationPixels,drumForegroundDepth;public PixelBar barRegion;public PixelOccluder[] occluders;public PixelRole[] roles;public PixelAtlas[] atlases;
+        public PixelOffset[] actorOffsets,bandStageFeet;public float stageElevationPixels,drumForegroundDepth;public PixelBar barRegion;public PixelOccluder[] occluders;public PixelSeat[] seatedActors;public PixelRole[] roles;public PixelAtlas[] atlases;
     }
     private sealed class PixelActorView
     {
         public MotionActor actor;public RectTransform root;public RawImage image;public Image marker,broom,bristles;public SimBarPixelPolygonGraphic shadow;public string id,role;public PixelLayer layer;
-        public uint variantSeed;
+        public uint variantSeed;public PixelSeat seat;
     }
-    private sealed class PixelLayer{public Transform root;public float depth;}
+    private sealed class PixelLayer{public Transform root;public float depth;public List<Transform> after;}
     private sealed class PixelParticle{public Vector3 position,velocity;public float age;public bool tissue;public Color color;public Image image;}
     private Canvas pixelWorldCanvas;
     private RectTransform pixelRoom;
@@ -116,6 +117,7 @@ public sealed partial class SimBarExperience
         for(int i=0;i<64;i++){var particle=new PixelParticle{image=PixelSolid("Airborne Paper "+i,pixelAirborne)};particle.image.gameObject.SetActive(false);pixelParticles.Add(particle);}
         foreach(PixelOccluder layer in pixelManifest.occluders??Array.Empty<PixelOccluder>())
         {
+            if(layer.actors!=null&&layer.actors.Length>0)continue;
             var polygon=new GameObject("Pixel Furniture Foreground",typeof(RectTransform),typeof(CanvasRenderer),typeof(SimBarPixelPolygonGraphic)).GetComponent<SimBarPixelPolygonGraphic>();
             polygon.transform.SetParent(pixelRoom,false);polygon.Initialize(venue,layer.points);
             pixelStaticLayers.Add(new PixelLayer{root=polygon.transform,depth=layer.depth});
@@ -214,7 +216,16 @@ public sealed partial class SimBarExperience
         var bristles=PixelSolid("Cleaner Broom Bristles",broom.transform);bristles.color=new Color32(199,178,126,255);
         string modelKey=actor.visual!=null?actor.visual.ModelKey:actor.person.root.name;
         uint variantSeed=PixelHash(id+"|"+modelKey);
-        return new PixelActorView{actor=actor,root=root,image=image,shadow=shadow,marker=marker,broom=broom,bristles=bristles,id=id,role=role,variantSeed=variantSeed,layer=new PixelLayer{root=root}};
+        var view=new PixelActorView{actor=actor,root=root,image=image,shadow=shadow,marker=marker,broom=broom,bristles=bristles,id=id,role=role,variantSeed=variantSeed,layer=new PixelLayer{root=root}};
+        foreach(PixelSeat seat in pixelManifest.seatedActors??Array.Empty<PixelSeat>())if(seat.id==id){view.seat=seat;break;}
+        foreach(PixelOccluder layer in pixelManifest.occluders??Array.Empty<PixelOccluder>())
+        {
+            if(layer.actors==null||Array.IndexOf(layer.actors,id)<0)continue;
+            var mask=new GameObject("Pixel Seated Furniture / "+id,typeof(RectTransform),typeof(CanvasRenderer),typeof(SimBarPixelPolygonGraphic)).GetComponent<SimBarPixelPolygonGraphic>();
+            mask.transform.SetParent(pixelRoom,false);mask.Initialize(LoadPixelTexture("SimBarPixelArt/Venue"),layer.points);
+            if(view.layer.after==null)view.layer.after=new List<Transform>();view.layer.after.Add(mask.transform);
+        }
+        return view;
     }
     private static uint PixelHash(string value)
     {
@@ -264,8 +275,11 @@ public sealed partial class SimBarExperience
     private void UpdatePixelActor(PixelActorView view)
     {
         MotionActor actor=view.actor;Vector3 world=MotionPosition(actor);Vector2 offset=PixelActorOffset(view,world);
-        Vector2 p=PixelProject(world)+offset;PixelRole role=pixelRoles.TryGetValue(view.role,out PixelRole found)?found:pixelRoles["guest"];
+        PixelRole role=pixelRoles.TryGetValue(view.role,out PixelRole found)?found:pixelRoles["guest"];
         string action=PixelActionFor(actor);bool active=JourneyIsPlaying||JourneyIsFloorClosing;
+        bool seated=view.seat!=null&&(view.role=="seated"||view.role=="barseated")&&actor.kind==MotionKind.Stationary&&!actor.moving&&(action=="idle"||action=="sit"||action=="drink");
+        Vector2 p=seated?view.seat.feet:PixelProject(world)+offset;
+        if(view.layer.after!=null)foreach(Transform mask in view.layer.after)mask.gameObject.SetActive(seated);
         bool hasJump=false;foreach(PixelAction candidate in role.actions??Array.Empty<PixelAction>())if(candidate.id=="jump"){hasJump=true;break;}
         int jumpFrame=-1;float jumpLift=0f,shadowScale=1f;
         if(hasJump&&PixelBandJump(view,action,active,out jumpFrame,out jumpLift,out shadowScale))action="jump";
@@ -342,7 +356,7 @@ public sealed partial class SimBarExperience
         bool horizontal=selected?.horizontal==true||role.horizontal;
         image.anchoredPosition=(surf&&!horizontal?new Vector2(-7f,0f):Vector2.zero)+new Vector2(0f,jumpLift);
         image.localRotation=Quaternion.Euler(0f,0f,surf&&!horizontal?90f:0f);
-        view.shadow.gameObject.SetActive(!(view.role=="drummer"&&action=="perform"));
+        view.shadow.gameObject.SetActive(!(seated&&view.seat.hideShadow)&&!(view.role=="drummer"&&action=="perform"));
         var shadowPoints=new Vector2[12];for(int i=0;i<shadowPoints.Length;i++){float angle=i*Mathf.PI/6f;shadowPoints[i]=new Vector2(Mathf.Cos(angle)*4f*shadowScale,1f+Mathf.Sin(angle));}
         view.shadow.Initialize(null,shadowPoints);view.shadow.color=new Color32(22,24,35,(byte)(jumpFrame>=0?72:96));
         bool assisted=actor==floorMissionGuestActor&&FloorState!=null&&FloorState.guestActive;
@@ -358,7 +372,7 @@ public sealed partial class SimBarExperience
             var bristles=view.bristles.rectTransform;bristles.anchorMin=bristles.anchorMax=new Vector2(.5f,0f);
             bristles.pivot=new Vector2(.5f,1f);bristles.anchoredPosition=Vector2.zero;bristles.sizeDelta=new Vector2(7f,3f);
         }
-        float depth=PixelProject(new Vector3(world.x,0f,world.z)).y+offset.y+(view.role=="barseated"?25f:0f);
+        float depth=seated?view.seat.depth:PixelProject(new Vector3(world.x,0f,world.z)).y+offset.y;
         if(view.role=="drummer"&&action=="perform"&&pixelManifest.drumForegroundDepth>0f)depth=Mathf.Min(depth,pixelManifest.drumForegroundDepth-1f);
         view.layer.depth=depth;pixelDrawLayers.Add(view.layer);
     }
@@ -449,15 +463,25 @@ public sealed partial class SimBarExperience
         pixelDrawLayers.Clear();pixelDrawLayers.AddRange(pixelStaticLayers);
         pixelRemovedActors.Clear();
         foreach(var pair in pixelActorViews)if(pair.Key.person.root==null||!motionActors.Contains(pair.Key))pixelRemovedActors.Add(pair.Key);
-        foreach(var actor in pixelRemovedActors){Destroy(pixelActorViews[actor].root.gameObject);pixelActorViews.Remove(actor);}
+        foreach(var actor in pixelRemovedActors)
+        {
+            var view=pixelActorViews[actor];Destroy(view.root.gameObject);
+            if(view.layer.after!=null)foreach(Transform mask in view.layer.after)Destroy(mask.gameObject);
+            pixelActorViews.Remove(actor);
+        }
         foreach(MotionActor actor in motionActors)
         {
             if(actor.person.root==null)continue;
             if(!pixelActorViews.TryGetValue(actor,out PixelActorView view)){view=CreatePixelActor(actor);pixelActorViews.Add(actor,view);}
-            bool active=actor.person.root.gameObject.activeInHierarchy;view.root.gameObject.SetActive(active);if(active)UpdatePixelActor(view);
+            bool active=actor.person.root.gameObject.activeInHierarchy;view.root.gameObject.SetActive(active);
+            if(active)UpdatePixelActor(view);else if(view.layer.after!=null)foreach(Transform mask in view.layer.after)mask.gameObject.SetActive(false);
         }
         UpdatePixelPaper();pixelDrawLayers.Sort((a,b)=>a.depth.CompareTo(b.depth));
-        foreach(PixelLayer layer in pixelDrawLayers)layer.root.SetAsLastSibling();
+        foreach(PixelLayer layer in pixelDrawLayers)
+        {
+            layer.root.SetAsLastSibling();
+            if(layer.after!=null)foreach(Transform mask in layer.after)mask.SetAsLastSibling();
+        }
         UpdateAirbornePixelPaper(delta);pixelAirborne.SetAsLastSibling();
     }
 }

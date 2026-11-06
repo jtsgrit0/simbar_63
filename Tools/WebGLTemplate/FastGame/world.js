@@ -81,7 +81,10 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
     const position=[x-EYE[0],y-EYE[1],z-EYE[2]],scale=REF_H/(2*ORTHO);
     return{x:REF_W/2+dot(position,RIGHT)*scale,y:REF_H/2-dot(position,UP)*scale};
   };
+  const seatFor=a=>a.role==='seated'&&!a.moving&&['idle','sit','drink'].includes(a.action||'idle')?assets.venueMeta?.seatedActors?.[a.id]:null;
   const actorOffset=a=>{
+    const seat=seatFor(a);
+    if(seat){const ground=project(finite(a.x),finite(a.z));return{x:seat.feet[0]-ground.x,y:seat.feet[1]-ground.y};}
     const offset=assets.venueMeta?.actorOffsets?.[a.id]||[0,0],region=assets.venueMeta?.barRegion;
     const employee=['bartender','server'].includes(a.role)||a.id?.startsWith('hired-');
     const weight=employee&&region&&a.z>=region.zMin&&a.z<=region.zMax?clamp((region.xMax-a.x)/region.xFade,0,1):0;
@@ -103,7 +106,7 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
     const bar=Array.from({length:8},(_,i)=>{const x0=-9.95+i*1.09,x1=x0+1.1;return{points:boxMask(x0,x1,-2.35,-.88,1.48),worldX:(x0+x1)/2,worldZ:-2.35};});
     const boxes=(assets.venueMeta?.occluderBoxes||[]).map(({x0,x1,z0,z1,height,worldX=(x0+x1)/2,worldZ=z0})=>({points:boxMask(x0,x1,z0,z1,height),worldX,worldZ}));
     const layers=[...(supplied||bar),...boxes];
-    for(const layer of layers){if(!layer.points?.length)continue;const p=layer.points.map(p=>Array.isArray(p)?{x:p[0],y:p[1]}:p),xs=p.map(v=>v.x),ys=p.map(v=>v.y),left=Math.floor(Math.min(...xs)),top=Math.floor(Math.min(...ys)),w=Math.ceil(Math.max(...xs))-left+1,h=Math.ceil(Math.max(...ys))-top+1;if(w<=0||h<=0)continue;const mask=surface(w,h),c=mask.getContext('2d');c.imageSmoothingEnabled=false;c.translate(-left,-top);c.beginPath();p.forEach((v,i)=>i?c.lineTo(Math.round(v.x),Math.round(v.y)):c.moveTo(Math.round(v.x),Math.round(v.y)));c.closePath();c.clip();c.drawImage(plate,0,0,REF_W,REF_H);occluders.push({image:mask,x:left,y:top,depth:Number.isFinite(layer.depth)?layer.depth:project(layer.worldX||0,layer.worldZ||0).y});}
+    for(const layer of layers){if(!layer.points?.length)continue;const p=layer.points.map(p=>Array.isArray(p)?{x:p[0],y:p[1]}:p),xs=p.map(v=>v.x),ys=p.map(v=>v.y),left=Math.floor(Math.min(...xs)),top=Math.floor(Math.min(...ys)),w=Math.ceil(Math.max(...xs))-left+1,h=Math.ceil(Math.max(...ys))-top+1;if(w<=0||h<=0)continue;const mask=surface(w,h),c=mask.getContext('2d');c.imageSmoothingEnabled=false;c.translate(-left,-top);c.beginPath();p.forEach((v,i)=>i?c.lineTo(Math.round(v.x),Math.round(v.y)):c.moveTo(Math.round(v.x),Math.round(v.y)));c.closePath();c.clip();c.drawImage(plate,0,0,REF_W,REF_H);occluders.push({image:mask,x:left,y:top,actors:layer.actors||null,depth:Number.isFinite(layer.depth)?layer.depth:project(layer.worldX||0,layer.worldZ||0).y});}
   }
   function atlasFrame(actor,role,action,frame,state,frameOverride=null){
     const meta=assets.spriteMeta||{};
@@ -144,7 +147,7 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
     if(jump)action='jump';
     const frame=active?Math.floor(seconds*(action==='walk'?7:action==='clean'?6:band?8:5)+hash(a.id)%4):0;
     const p=actorPoint(a,finite(a.y)),ground=actorPoint(a,role==='surfer'?0:finite(a.y)),surf=(action==='surf'||role==='surfer')&&finite(a.y)>.1;
-    if(role!=='drummer'||action!=='perform')ellipse(ctx,ground.x,ground.y+1,Math.round(4*(jump?.shadow||1)),1,jump?'#16182348':'#16182360');
+    if(!seatFor(a)?.hideShadow&&(role!=='drummer'||action!=='perform'))ellipse(ctx,ground.x,ground.y+1,Math.round(4*(jump?.shadow||1)),1,jump?'#16182348':'#16182360');
     const atlas=atlasFrame(a,role,action,frame,state,jump?.frame),meta=atlas?.meta||{},entry=atlas?.entry||{},size=entry.drawHeight||meta.drawHeight||40;
     const bob=!band&&active&&['dance','mosh','slam'].includes(action)?Math.round(Math.sin(seconds*5+hash(a.id)%17)*.6):0;
     ctx.save();ctx.translate(Math.round(p.x),Math.round(p.y+bob-(jump?.lift||0)));
@@ -207,8 +210,8 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
   function render(timestamp,state=getState()){
     if(destroyed)return;state=state||{};const now=finite(timestamp,performance.now()),dt=last==null?0:clamp((now-last)/1000,0,.1);last=now;const running=['playing','closing'].includes(state.phase)&&!state.paused;if(running)seconds+=dt;
     background();roomLayers();ctx.save();ctx.translate(Math.round(offsetX),0);ctx.imageSmoothingEnabled=false;ctx.drawImage(assets.venue,0,0,REF_W,REF_H);stageLights(state);const airborne=paper(state,running?dt:0);
-    const drawables=occluders.map(layer=>({depth:layer.depth,draw:()=>ctx.drawImage(layer.image,layer.x,layer.y)}));
-    for(const actor of state.actors||[]){if(actor.visible===false)continue;let depth=actorPoint(actor).y+(actor.action==='surf'?2:0)+(actor.id?.startsWith('bar-seat-')?25:0);if(actor.id==='drummer'&&actor.action==='perform'&&assets.venueMeta?.drumForegroundDepth>0)depth=Math.min(depth,assets.venueMeta.drumForegroundDepth-1);drawables.push({depth,draw:()=>drawActor(actor,state)});}
+    const drawables=occluders.filter(layer=>!layer.actors?.length).map(layer=>({depth:layer.depth,draw:()=>ctx.drawImage(layer.image,layer.x,layer.y)}));
+    for(const actor of state.actors||[]){if(actor.visible===false)continue;const seat=seatFor(actor);let depth=seat?.depth??actorPoint(actor).y+(actor.action==='surf'?2:0);if(actor.id==='drummer'&&actor.action==='perform'&&assets.venueMeta?.drumForegroundDepth>0)depth=Math.min(depth,assets.venueMeta.drumForegroundDepth-1);drawables.push({depth,draw:()=>{drawActor(actor,state);for(const layer of occluders)if(seat&&layer.actors?.includes(actor.id))ctx.drawImage(layer.image,layer.x,layer.y);}});}
     drawables.sort((a,b)=>a.depth-b.depth);for(const item of drawables)item.draw();airborne();ctx.restore();
   }
   function worldToScreen(x,z,y=0){const p=project(x,z,y);return{x:(p.x+offsetX)*cssW/width,y:p.y*cssH/height};}

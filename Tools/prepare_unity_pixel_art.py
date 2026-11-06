@@ -23,9 +23,10 @@ def convert_manifest(raw,sprites):
     if bar:bar['offset']=point(bar['offset'])
     result={'actorOffsets':[{'id':key,'offset':point(value)} for key,value in raw.get('actorOffsets',{}).items()],
       'bandStageFeet':[{'id':key,'offset':point(value)} for key,value in raw.get('bandStageFeet',{}).items()],
+      'seatedActors':[{'id':key,'feet':point(value['feet']),'depth':value['depth'],'hideShadow':value.get('hideShadow',False)} for key,value in raw.get('seatedActors',{}).items()],
       'stageElevationPixels':raw.get('stageElevationPixels',0),
       'drumForegroundDepth':raw.get('drumForegroundDepth',0),
-      'barRegion':bar,'occluders':[{'points':[point(p) for p in layer['points']],'depth':layer['depth']} for layer in raw.get('occluders',[])],
+      'barRegion':bar,'occluders':[{'points':[point(p) for p in layer['points']],'depth':layer.get('depth',0),'actors':layer.get('actors',[])} for layer in raw.get('occluders',[])],
       'frameWidth':sprites['frameWidth'],'frameHeight':sprites['frameHeight'],'columns':sprites['columns'],
       'drawHeight':sprites['drawHeight'],'footX':sprites['footX'],'footY':sprites['footY'],'defaultAtlas':sprites.get('defaultAtlas','animation'),'roles':[],'atlases':atlases}
     def convert_entry(entry):

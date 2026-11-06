@@ -79,14 +79,8 @@ def main():
     encoded=json.dumps(data,ensure_ascii=False,indent=2)+'\n'
     target.write_text(encoded,encoding='utf-8')
     (ROOT/'ArtSource/PixelArt/DirectionalSpriteContract.json').write_text(encoded,encoding='utf-8')
-    venue=ART/'venue.json'
-    room=json.loads(venue.read_text(encoding='utf-8'))
-    room['bandStageFeet']={'singer':[676,326],'guitarist':[635,306],'bassist':[820,331],'drummer':[741,287]}
-    # The authored foreground kit covers the drummer's lower body and keeps the
-    # cymbals/sticks attached to the same illustrated drum position.
-    if room.get('occluders'):room['occluders'][-1]['depth']=310
-    room['drumForegroundDepth']=310
-    venue.write_text(json.dumps(room,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+    from prepare_venue_presentation import prepare_venue_presentation
+    prepare_venue_presentation(ART)
     print('Registered illustrated V4 band:',', '.join(data['atlases']))
 
 if __name__=='__main__':main()

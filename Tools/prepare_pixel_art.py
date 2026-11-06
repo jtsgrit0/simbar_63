@@ -136,6 +136,8 @@ def main():
     # Keep this last so an older V1/V2 owner export cannot replace their artwork.
     from prepare_original_owners import prepare_owners
     prepare_owners(OUTPUT)
+    from prepare_venue_presentation import prepare_venue_presentation
+    prepare_venue_presentation(OUTPUT)
 
 if __name__ == '__main__':
     main()

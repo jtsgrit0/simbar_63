@@ -2,7 +2,7 @@
 
 ## Current portraits: user-supplied original
 
-The title now uses the user's `owner_p.png`, retained byte-for-byte as
+The title uses the user's `owner_p.png`, retained byte-for-byte as
 [`Original-owner_p.png`](Original-owner_p.png). Jessy is the woman at the top,
 Edison is the man with headphones and a laptop at the right, and Jaiden is the
 man holding a record at the lower left. Names and buttons remain live UI.
@@ -10,10 +10,31 @@ man holding a record at the lower left. Names and buttons remain live UI.
 `Tools/prepare_original_owners.py` separates the three people with explicit
 crop polygons, removes the surrounding printed names/signature, and fits each
 complete bust into the existing 400×350 portrait slot using nearest-neighbor
-scaling. It does not redraw or recolor the original. Hair, hands, headphones,
-laptop and record are kept inside their respective cards. Full-resolution
-lossless crops are retained in `OriginalCrops/`; source hash, polygons, bounds
-and runtime mapping are recorded in [`crops.json`](crops.json).
+scaling. Hair, hands, headphones, laptop and record are kept inside their
+respective cards. The supplied sheet and full-resolution approved paper crops
+in `OriginalCrops/` remain unchanged.
+
+The ivory paper behind each figure is replaced with that owner's former
+live-house setting: Jessy's magenta record shelves and band set, Edison's cyan
+stage and amplifiers, and Jaiden's amber record shelves and band set. Built-in
+ImageGen restored the background-only rooms from the retained V2 portraits;
+the selected 1341×1173 plates and exact prompts are documented in
+[`Backdrops/README.md`](Backdrops/README.md). This uses the built-in ImageGen
+tool, not the CLI/API fallback. Prompt inputs are the three retained
+`ArtSource/PixelArt/V2/Owner*.png` portraits, with the former foreground people
+removed from the room plates.
+These generated backgrounds contain no replacement foreground person.
+
+Foreground matting is mechanical: remove only border-connected ivory paper
+and two reviewed empty openings between Jessy's hair outlines. Enclosed eye,
+skin, headphone, laptop and white-shirt colors stay. The masks are retained in
+`ForegroundMasks/`. Every retained character RGB pixel is copied exactly from
+the approved original nearest-neighbor crop; no face, clothes or pose is
+regenerated or recolored. The background is sampled at 200×175 and enlarged
+with nearest-neighbor to keep its pixel spacing consistent behind the figure.
+The 400×350 cards are lossless PNGs, with no palette reduction of the figure.
+Source hashes, masks, paper-opening seeds, retained-pixel counts and runtime
+mapping are recorded in [`crops.json`](crops.json).
 
 | Character | Existing save ID | Native image | Unity image |
 |---|---|---|---|

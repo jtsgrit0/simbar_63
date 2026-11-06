@@ -1,0 +1,138 @@
+{
+  "success": true,
+  "command": "command",
+  "data": {
+    "command": "run_script",
+    "parameters": {
+      "file": "Research/PixelArtVerification/SeatedDrummer/Unity/SeatingParityQA.cs",
+      "entry": "SeatingParityQA.Performance"
+    },
+    "result": {
+      "diagnostics": [],
+      "compileMs": 200,
+      "executeMs": 38,
+      "assemblyName": "PipelineRunScript_SeatingParityQA_79379eabc2cd473db559feddecf9e8f8",
+      "success": true,
+      "result": {
+        "seatCount": 11,
+        "anchors": true,
+        "depths": true,
+        "shadows": true,
+        "masks": true,
+        "globalLayers": 17,
+        "drummerX": 741,
+        "drummerY": 265,
+        "drummerDepth": 281.9453,
+        "drummerBehindKit": true,
+        "seats": [
+          {
+            "id": "bar-seat-0",
+            "x": 214,
+            "y": 318,
+            "depth": 318,
+            "shadowHidden": true,
+            "targetedMaskImmediatelyAfter": true,
+            "worldPositionUnchanged": true
+          },
+          {
+            "id": "bar-seat-1",
+            "x": 261,
+            "y": 332,
+            "depth": 332,
+            "shadowHidden": true,
+            "targetedMaskImmediatelyAfter": true,
+            "worldPositionUnchanged": true
+          },
+          {
+            "id": "bar-seat-2",
+            "x": 308,
+            "y": 345,
+            "depth": 345,
+            "shadowHidden": true,
+            "targetedMaskImmediatelyAfter": true,
+            "worldPositionUnchanged": true
+          },
+          {
+            "id": "bar-seat-3",
+            "x": 355,
+            "y": 359,
+            "depth": 359,
+            "shadowHidden": true,
+            "targetedMaskImmediatelyAfter": true,
+            "worldPositionUnchanged": true
+          },
+          {
+            "id": "lounge-0",
+            "x": 319,
+            "y": 150,
+            "depth": 150,
+            "shadowHidden": true,
+            "targetedMaskImmediatelyAfter": true,
+            "worldPositionUnchanged": true
+          },
+          {
+            "id": "lounge-1",
+            "x": 365,
+            "y": 163,
+            "depth": 163,
+            "shadowHidden": true,
+            "targetedMaskImmediatelyAfter": true,
+            "worldPositionUnchanged": true
+          },
+          {
+            "id": "lounge-2",
+            "x": 444,
+            "y": 189,
+            "depth": 189,
+            "shadowHidden": true,
+            "targetedMaskImmediatelyAfter": true,
+            "worldPositionUnchanged": true
+          },
+          {
+            "id": "lounge-3",
+            "x": 488,
+            "y": 202,
+            "depth": 202,
+            "shadowHidden": true,
+            "targetedMaskImmediatelyAfter": true,
+            "worldPositionUnchanged": true
+          },
+          {
+            "id": "lounge-4",
+            "x": 132,
+            "y": 363,
+            "depth": 363,
+            "shadowHidden": true,
+            "targetedMaskImmediatelyAfter": true,
+            "worldPositionUnchanged": true
+          },
+          {
+            "id": "lounge-5",
+            "x": 176,
+            "y": 376,
+            "depth": 376,
+            "shadowHidden": true,
+            "targetedMaskImmediatelyAfter": true,
+            "worldPositionUnchanged": true
+          },
+          {
+            "id": "lounge-6",
+            "x": 277,
+            "y": 405,
+            "depth": 405,
+            "shadowHidden": true,
+            "targetedMaskImmediatelyAfter": true,
+            "worldPositionUnchanged": true
+          }
+        ]
+      }
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "E:\\simbar_63"
+    }
+  },
+  "errors": [],
+  "warnings": []
+}

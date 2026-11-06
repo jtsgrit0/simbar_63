@@ -1,0 +1,123 @@
+{
+  "passed": true,
+  "errors": [],
+  "pausePixelsEqual": true,
+  "escort": {
+    "id": "assisted-guest",
+    "role": "assisted",
+    "x": -0.7543551627855565,
+    "z": -0.21521494573814737,
+    "anchorDefined": false,
+    "chairs": [
+      {
+        "id": "bar-seat-0",
+        "x": -7.55,
+        "z": -3.15
+      },
+      {
+        "id": "bar-seat-1",
+        "x": -6,
+        "z": -3.15
+      },
+      {
+        "id": "bar-seat-2",
+        "x": -4.449999999999999,
+        "z": -3.15
+      },
+      {
+        "id": "bar-seat-3",
+        "x": -2.8999999999999995,
+        "z": -3.15
+      },
+      {
+        "id": "lounge-0",
+        "x": -8.55,
+        "z": 6.4
+      },
+      {
+        "id": "lounge-1",
+        "x": -7,
+        "z": 6.4
+      },
+      {
+        "id": "lounge-2",
+        "x": -4.45,
+        "z": 6.4
+      },
+      {
+        "id": "lounge-3",
+        "x": -2.95,
+        "z": 6.4
+      },
+      {
+        "id": "lounge-4",
+        "x": -8.35,
+        "z": -6.5
+      },
+      {
+        "id": "lounge-5",
+        "x": -6.85,
+        "z": -6.5
+      },
+      {
+        "id": "lounge-6",
+        "x": -3.45,
+        "z": -6.5
+      }
+    ]
+  },
+  "drummerStages": [
+    {
+      "key": "behind-kit",
+      "phase": "closing",
+      "action": "walk",
+      "stageLevel": 1,
+      "foot": {
+        "x": 723.7392002721268,
+        "y": 259.930237341297
+      },
+      "visible": true,
+      "x": 5.1649999999999965,
+      "z": 5.55
+    },
+    {
+      "key": "front-of-kit",
+      "phase": "closing",
+      "action": "walk",
+      "stageLevel": 1,
+      "foot": {
+        "x": 684.4247700923863,
+        "y": 310.2287631894686
+      },
+      "visible": true,
+      "x": 5.337260037760217,
+      "z": 2.6389884542768822
+    },
+    {
+      "key": "floor",
+      "phase": "closing",
+      "action": "walk",
+      "stageLevel": 0,
+      "foot": {
+        "x": 666.3841397948847,
+        "y": 352.12855005380004
+      },
+      "visible": true,
+      "x": 5.8,
+      "z": 1.15
+    },
+    {
+      "key": "gone",
+      "phase": "closing",
+      "action": "walk",
+      "stageLevel": 0,
+      "foot": {
+        "x": 655.3679369910581,
+        "y": 487.5440364246782
+      },
+      "visible": false,
+      "x": 8.8,
+      "z": -5.376152635572948
+    }
+  ]
+}

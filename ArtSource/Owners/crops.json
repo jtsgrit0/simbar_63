@@ -1,7 +1,7 @@
 {
   "source": "ArtSource/Owners/Original-owner_p.png",
   "sha256": "a030c8958e0a4aa7e881bf1028f145e9b6f6a3a9e03c6c2bf08648c8b476b36c",
-  "method": "Lossless original-pixel polygon crops; nearest-neighbor runtime copies; no generation or recoloring",
+  "method": "Original-RGB figure matte over separately restored room backdrops; nearest-neighbor only",
   "owners": [
     {
       "name": "JESSY",
@@ -93,8 +93,28 @@
         400,
         350
       ],
-      "sha256": "97a101f9fb1594bed5217699714ef0ebf1037dfbe3ae85820d7eecdb6dcb52f9",
-      "bytes": 184674
+      "backdrop": "ArtSource/Owners/Backdrops/Jessy.png",
+      "backdropSha256": "33be0059cebee975645c0392e1213394aff7a1b8a60d1cecf0e9eeab7a37f94d",
+      "backgroundPixelSize": [
+        200,
+        175
+      ],
+      "foregroundMask": "ArtSource/Owners/ForegroundMasks/Jessy.png",
+      "foregroundMaskSha256": "92d4ecbd9da8fbaeb7f741d55a3667b618ad527f31f917baca771e556a995893",
+      "paperOpeningSeeds": [
+        [
+          184,
+          47
+        ],
+        [
+          260,
+          36
+        ]
+      ],
+      "retainedCharacterPixels": 61909,
+      "retainedCharacterRGBExact": true,
+      "sha256": "f41a49ec2192c70a645c0290c8ec23c2e6dfdd7837f226b50e03b36b4c38e23e",
+      "bytes": 214997
     },
     {
       "name": "EDISON",
@@ -198,8 +218,19 @@
         400,
         350
       ],
-      "sha256": "c46b9ee4cdd87ac6813ea130ff464bb7dc764daf239472bd47cad4dd5a14e560",
-      "bytes": 187568
+      "backdrop": "ArtSource/Owners/Backdrops/Edison.png",
+      "backdropSha256": "4ea6064e0c2b8f74096d63a90241dd4f2180d29b6ae76ac4e5a73865052a8041",
+      "backgroundPixelSize": [
+        200,
+        175
+      ],
+      "foregroundMask": "ArtSource/Owners/ForegroundMasks/Edison.png",
+      "foregroundMaskSha256": "6862d842922181fccd17bf29a0d189cc690e559d9257aa2302fdf14206772f7c",
+      "paperOpeningSeeds": [],
+      "retainedCharacterPixels": 79953,
+      "retainedCharacterRGBExact": true,
+      "sha256": "c23b2580b4d630da52a405b65e251c15fab71e698bd4fe6f26ab466db8cf7695",
+      "bytes": 215066
     },
     {
       "name": "JAIDEN",
@@ -251,8 +282,19 @@
         400,
         350
       ],
-      "sha256": "add66e2bbd4d15aa78cbd01e9cab36c1a5591cd6084144b6790c1a9188c0e113",
-      "bytes": 161850
+      "backdrop": "ArtSource/Owners/Backdrops/Jaiden.png",
+      "backdropSha256": "1ebd30687cccc747fdd16a4487fc94c53219807c3d47371dc8c9a66895893cb2",
+      "backgroundPixelSize": [
+        200,
+        175
+      ],
+      "foregroundMask": "ArtSource/Owners/ForegroundMasks/Jaiden.png",
+      "foregroundMaskSha256": "868549978d9bbdadb21a2605b4c8313b26b1c1051eba2b169fb6d6b1fb6e865c",
+      "paperOpeningSeeds": [],
+      "retainedCharacterPixels": 67075,
+      "retainedCharacterRGBExact": true,
+      "sha256": "5bcb7991e50607cfe1c291c18080a592b120210e900cb0623eca3d13a665dfcc",
+      "bytes": 188835
     }
   ]
 }
