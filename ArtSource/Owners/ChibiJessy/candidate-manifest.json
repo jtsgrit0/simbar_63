@@ -1,0 +1,88 @@
+{
+  "status": "parent-visual-approved-frozen",
+  "generator": "builtin image_gen.imagegen",
+  "generationDate": "2026-11-07",
+  "source": {
+    "path": "ArtSource/Owners/ChibiJessy/selector-jessy-chibi.source.png",
+    "width": 1341,
+    "height": 1173,
+    "bytes": 1929222,
+    "sha256": "d4583ea3275fdd1b3b29ee30063c124559508df102394e05073d4ff0f37e3e20",
+    "unchangedGeneratedSource": true,
+    "mode": "RGB",
+    "generatedOriginalPath": "C:/Users/Jtsgr/.codex/generated_images/01a1b360-6c99-7dc0-a087-70686b56ec5b/exec-9b4cfbfa-d6ac-4cf5-8a0a-3715c0f85e5d.png",
+    "generatedOriginalSha256": "d4583ea3275fdd1b3b29ee30063c124559508df102394e05073d4ff0f37e3e20"
+  },
+  "prompt": {
+    "path": "ArtSource/Owners/ChibiJessy/prompt.md",
+    "sha256": "4842a13b1c5fc27e695a4a8a20b4d06acb075456049ac5c1e9e332aa196e7d47"
+  },
+  "references": [
+    {
+      "path": "Tools/WebGLTemplate/FastGame/art/owner-female.png",
+      "sha256": "8d85760c18009360078d98158b03d2eae5cb423dde3cdb8cea13fb1105de3fa0"
+    },
+    {
+      "path": "ArtSource/Owners/Supplied/Jessy-owner_p_j.PNG",
+      "sha256": "a27e380f6743eb2cf3359e2e593cff12f63f5dbc371de112d6e0196924775961"
+    },
+    {
+      "path": "Tools/WebGLTemplate/FastGame/art/owner-ff.png",
+      "sha256": "be581e80e16730260d2468d17e3e3fb2897062e35eaec463fdcee72220e2a350"
+    },
+    {
+      "path": "Tools/WebGLTemplate/FastGame/art/owner-pet.png",
+      "sha256": "f139dd68c81f915f20c1380eba95482a0524081393f965070b7f04358a57f417"
+    }
+  ],
+  "candidate": {
+    "path": "Library/JessyChibiPreview/owner-female.chibi-candidate.png",
+    "width": 400,
+    "height": 350,
+    "bytes": 246544,
+    "sha256": "b7a819cd786976b9cba63061fb4cf9f81a6bfd372b362eda3d58a92e85886559",
+    "mode": "RGB"
+  },
+  "technicalExport": {
+    "method": "Pillow ImageOps.fit",
+    "size": [
+      400,
+      350
+    ],
+    "resample": "NEAREST",
+    "centering": [
+      0.5,
+      0.5
+    ],
+    "sourceBoxExact": [
+      0.2142857142857,
+      0,
+      1340.7857142857142,
+      1173
+    ]
+  },
+  "reviewNotes": {
+    "highestDarkCurlY": 7,
+    "copperTopY": 10,
+    "status": "Approved: complete outer hair outline is inside the card with 7 px top clearance. Root explicitly accepted this visual result."
+  },
+  "approval": {
+    "reviewer": "root agent",
+    "date": "2026-11-07",
+    "notes": "Both candidates visually approved. Selector complete top curls have 7 px clearance, accepted as fully visible with no further generation; chibi face, short torso, crossed arms and pink nails approved. Office full hair margin and unchanged prop positions approved."
+  },
+  "integration": {
+    "owner": "root agent",
+    "runtimeTarget": "Tools/WebGLTemplate/FastGame/art/owner-female.png",
+    "canonicalWorkingCard": "ArtSource/Owners/ChibiJessy/selector-jessy-chibi.card.png",
+    "canonicalSourceRect": [
+      0,
+      0,
+      400,
+      350
+    ],
+    "canonicalMode": "RGBA",
+    "canonicalConversion": "Decode approved RGB candidate and convert to RGBA with alpha255; retain exactly the same RGB pixels. No drawing or second generation. Existing packer then uses full integer source rect. Root creates canonical file and owns runtime delivery.",
+    "rawPreservation": "Generated RAW remains unchanged. Fractional source box is the recorded technical fit transformation; do not approximate it using rounded integer crop."
+  }
+}

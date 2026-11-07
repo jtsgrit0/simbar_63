@@ -1,0 +1,625 @@
+{
+  "passed": true,
+  "errors": [],
+  "httpErrors": [],
+  "failedRequests": [],
+  "checks": [
+    "Generated RAWs retained unchanged; selector ImageOps.fit to canonical RGBA to runtime is pixel-exact with no vertical crop, and the whole office RAW nearest resize is exact.",
+    "Only Jessy selector and office runtime PNGs changed; all other packaged images, logic, CSS, fonts, album art and original source archives match the previous release.",
+    "All three selector badges/states, names and taglines work on desktop and mobile; full images use pixelated sampling with unchanged aspect.",
+    "All six selected-owner office/fallback and Freewill-only desk workflows pass; computed monitor/phone overlays retain shared geometry, keyboard/save/launch and complete finale/cleanup pass."
+  ],
+  "screenshots": [
+    "desktop-selector-owner-0.png",
+    "desktop-jessy-card-detail.png",
+    "desktop-selector-owner-1.png",
+    "desktop-selector-owner-2.png",
+    "mobile-selector-owner-0.png",
+    "mobile-jessy-card-detail.png",
+    "mobile-selector-owner-1.png",
+    "mobile-selector-owner-2.png"
+  ],
+  "selectors": {
+    "desktop": [
+      {
+        "selectedOwner": 0,
+        "cards": [
+          {
+            "name": "제시",
+            "tagline": "자기야 오늘밤 라이브 하러와",
+            "selected": true,
+            "badge": "선택됨",
+            "badgeVisible": true,
+            "src": "http://127.0.0.1:64061/FastGame/ef3109e361da0274/art/owner-female.png",
+            "naturalSize": [
+              400,
+              350
+            ],
+            "rendering": "pixelated",
+            "displayAspect": 1.1428571795932716,
+            "bounds": {
+              "x": 193.77906799316406,
+              "y": 243.7141876220703,
+              "width": 283.9189453125,
+              "height": 314.65789794921875,
+              "top": 243.7141876220703,
+              "right": 477.69801330566406,
+              "bottom": 558.3720855712891,
+              "left": 193.77906799316406
+            }
+          },
+          {
+            "name": "에디슨",
+            "tagline": "평생 Rock&Roll",
+            "selected": false,
+            "badge": "02",
+            "badgeVisible": true,
+            "src": "http://127.0.0.1:64061/FastGame/ef3109e361da0274/art/owner-ff.png",
+            "naturalSize": [
+              400,
+              350
+            ],
+            "rendering": "pixelated",
+            "displayAspect": 1.1428571795932716,
+            "bounds": {
+              "x": 498.04229736328125,
+              "y": 243.7141876220703,
+              "width": 283.9083251953125,
+              "height": 314.65789794921875,
+              "top": 243.7141876220703,
+              "right": 781.9506225585938,
+              "bottom": 558.3720855712891,
+              "left": 498.04229736328125
+            }
+          },
+          {
+            "name": "제이든",
+            "tagline": "오늘밤은 무슨 음악을 들을까?",
+            "selected": false,
+            "badge": "03",
+            "badgeVisible": true,
+            "src": "http://127.0.0.1:64061/FastGame/ef3109e361da0274/art/owner-pet.png",
+            "naturalSize": [
+              400,
+              350
+            ],
+            "rendering": "pixelated",
+            "displayAspect": 1.1428571795932716,
+            "bounds": {
+              "x": 802.294921875,
+              "y": 243.7141876220703,
+              "width": 283.9189453125,
+              "height": 314.65789794921875,
+              "top": 243.7141876220703,
+              "right": 1086.2138671875,
+              "bottom": 558.3720855712891,
+              "left": 802.294921875
+            }
+          }
+        ]
+      },
+      {
+        "selectedOwner": 1,
+        "cards": [
+          {
+            "name": "제시",
+            "tagline": "자기야 오늘밤 라이브 하러와",
+            "selected": false,
+            "badge": "01",
+            "badgeVisible": true,
+            "src": "http://127.0.0.1:64061/FastGame/ef3109e361da0274/art/owner-female.png",
+            "naturalSize": [
+              400,
+              350
+            ],
+            "rendering": "pixelated",
+            "displayAspect": 1.1428571795932716,
+            "bounds": {
+              "x": 193.77906799316406,
+              "y": 243.7141876220703,
+              "width": 283.90838623046875,
+              "height": 314.65789794921875,
+              "top": 243.7141876220703,
+              "right": 477.6874542236328,
+              "bottom": 558.3720855712891,
+              "left": 193.77906799316406
+            }
+          },
+          {
+            "name": "에디슨",
+            "tagline": "평생 Rock&Roll",
+            "selected": true,
+            "badge": "선택됨",
+            "badgeVisible": true,
+            "src": "http://127.0.0.1:64061/FastGame/ef3109e361da0274/art/owner-ff.png",
+            "naturalSize": [
+              400,
+              350
+            ],
+            "rendering": "pixelated",
+            "displayAspect": 1.1428570510168212,
+            "bounds": {
+              "x": 498.03167724609375,
+              "y": 243.7141876220703,
+              "width": 283.9189453125,
+              "height": 314.65789794921875,
+              "top": 243.7141876220703,
+              "right": 781.9506225585938,
+              "bottom": 558.3720855712891,
+              "left": 498.03167724609375
+            }
+          },
+          {
+            "name": "제이든",
+            "tagline": "오늘밤은 무슨 음악을 들을까?",
+            "selected": false,
+            "badge": "03",
+            "badgeVisible": true,
+            "src": "http://127.0.0.1:64061/FastGame/ef3109e361da0274/art/owner-pet.png",
+            "naturalSize": [
+              400,
+              350
+            ],
+            "rendering": "pixelated",
+            "displayAspect": 1.1428571795932716,
+            "bounds": {
+              "x": 802.294921875,
+              "y": 243.7141876220703,
+              "width": 283.9189453125,
+              "height": 314.65789794921875,
+              "top": 243.7141876220703,
+              "right": 1086.2138671875,
+              "bottom": 558.3720855712891,
+              "left": 802.294921875
+            }
+          }
+        ]
+      },
+      {
+        "selectedOwner": 2,
+        "cards": [
+          {
+            "name": "제시",
+            "tagline": "자기야 오늘밤 라이브 하러와",
+            "selected": false,
+            "badge": "01",
+            "badgeVisible": true,
+            "src": "http://127.0.0.1:64061/FastGame/ef3109e361da0274/art/owner-female.png",
+            "naturalSize": [
+              400,
+              350
+            ],
+            "rendering": "pixelated",
+            "displayAspect": 1.1428571795932716,
+            "bounds": {
+              "x": 193.77906799316406,
+              "y": 243.7141876220703,
+              "width": 283.9189453125,
+              "height": 314.65789794921875,
+              "top": 243.7141876220703,
+              "right": 477.69801330566406,
+              "bottom": 558.3720855712891,
+              "left": 193.77906799316406
+            }
+          },
+          {
+            "name": "에디슨",
+            "tagline": "평생 Rock&Roll",
+            "selected": false,
+            "badge": "02",
+            "badgeVisible": true,
+            "src": "http://127.0.0.1:64061/FastGame/ef3109e361da0274/art/owner-ff.png",
+            "naturalSize": [
+              400,
+              350
+            ],
+            "rendering": "pixelated",
+            "displayAspect": 1.1428571795932716,
+            "bounds": {
+              "x": 498.04229736328125,
+              "y": 243.7141876220703,
+              "width": 283.9083251953125,
+              "height": 314.65789794921875,
+              "top": 243.7141876220703,
+              "right": 781.9506225585938,
+              "bottom": 558.3720855712891,
+              "left": 498.04229736328125
+            }
+          },
+          {
+            "name": "제이든",
+            "tagline": "오늘밤은 무슨 음악을 들을까?",
+            "selected": true,
+            "badge": "선택됨",
+            "badgeVisible": true,
+            "src": "http://127.0.0.1:64061/FastGame/ef3109e361da0274/art/owner-pet.png",
+            "naturalSize": [
+              400,
+              350
+            ],
+            "rendering": "pixelated",
+            "displayAspect": 1.1428574367461724,
+            "bounds": {
+              "x": 802.294921875,
+              "y": 243.7141876220703,
+              "width": 283.9189453125,
+              "height": 314.65789794921875,
+              "top": 243.7141876220703,
+              "right": 1086.2138671875,
+              "bottom": 558.3720855712891,
+              "left": 802.294921875
+            }
+          }
+        ]
+      }
+    ],
+    "mobile": [
+      {
+        "selectedOwner": 0,
+        "cards": [
+          {
+            "name": "제시",
+            "tagline": "자기야 오늘밤 라이브 하러와",
+            "selected": true,
+            "badge": "선택됨",
+            "badgeVisible": true,
+            "src": "http://127.0.0.1:64061/FastGame/ef3109e361da0274/art/owner-female.png",
+            "naturalSize": [
+              400,
+              350
+            ],
+            "rendering": "pixelated",
+            "displayAspect": 1.1428575896113173,
+            "bounds": {
+              "x": 29.88231658935547,
+              "y": 375.9962463378906,
+              "width": 105.05863189697266,
+              "height": 116.4329833984375,
+              "top": 375.9962463378906,
+              "right": 134.94094848632812,
+              "bottom": 492.4292297363281,
+              "left": 29.88231658935547
+            }
+          },
+          {
+            "name": "에디슨",
+            "tagline": "평생 Rock&Roll",
+            "selected": false,
+            "badge": "02",
+            "badgeVisible": true,
+            "src": "http://127.0.0.1:64061/FastGame/ef3109e361da0274/art/owner-ff.png",
+            "naturalSize": [
+              400,
+              350
+            ],
+            "rendering": "pixelated",
+            "displayAspect": 1.1428567953819153,
+            "bounds": {
+              "x": 142.4689483642578,
+              "y": 375.9962463378906,
+              "width": 105.05471801757812,
+              "height": 116.4329833984375,
+              "top": 375.9962463378906,
+              "right": 247.52366638183594,
+              "bottom": 492.4292297363281,
+              "left": 142.4689483642578
+            }
+          },
+          {
+            "name": "제이든",
+            "tagline": "오늘밤은 무슨 음악을 들을까?",
+            "selected": false,
+            "badge": "03",
+            "badgeVisible": true,
+            "src": "http://127.0.0.1:64061/FastGame/ef3109e361da0274/art/owner-pet.png",
+            "naturalSize": [
+              400,
+              350
+            ],
+            "rendering": "pixelated",
+            "displayAspect": 1.1428567953819153,
+            "bounds": {
+              "x": 255.05166625976562,
+              "y": 375.9962463378906,
+              "width": 105.05865478515625,
+              "height": 116.4329833984375,
+              "top": 375.9962463378906,
+              "right": 360.1103210449219,
+              "bottom": 492.4292297363281,
+              "left": 255.05166625976562
+            }
+          }
+        ]
+      },
+      {
+        "selectedOwner": 1,
+        "cards": [
+          {
+            "name": "제시",
+            "tagline": "자기야 오늘밤 라이브 하러와",
+            "selected": false,
+            "badge": "01",
+            "badgeVisible": true,
+            "src": "http://127.0.0.1:64061/FastGame/ef3109e361da0274/art/owner-female.png",
+            "naturalSize": [
+              400,
+              350
+            ],
+            "rendering": "pixelated",
+            "displayAspect": 1.1428567953819153,
+            "bounds": {
+              "x": 29.88231658935547,
+              "y": 375.9962463378906,
+              "width": 105.05472564697266,
+              "height": 116.4329833984375,
+              "top": 375.9962463378906,
+              "right": 134.93704223632812,
+              "bottom": 492.4292297363281,
+              "left": 29.88231658935547
+            }
+          },
+          {
+            "name": "에디슨",
+            "tagline": "평생 Rock&Roll",
+            "selected": true,
+            "badge": "선택됨",
+            "badgeVisible": true,
+            "src": "http://127.0.0.1:64061/FastGame/ef3109e361da0274/art/owner-ff.png",
+            "naturalSize": [
+              400,
+              350
+            ],
+            "rendering": "pixelated",
+            "displayAspect": 1.142857415873583,
+            "bounds": {
+              "x": 142.4650421142578,
+              "y": 375.9962463378906,
+              "width": 105.05862426757812,
+              "height": 116.4329833984375,
+              "top": 375.9962463378906,
+              "right": 247.52366638183594,
+              "bottom": 492.4292297363281,
+              "left": 142.4650421142578
+            }
+          },
+          {
+            "name": "제이든",
+            "tagline": "오늘밤은 무슨 음악을 들을까?",
+            "selected": false,
+            "badge": "03",
+            "badgeVisible": true,
+            "src": "http://127.0.0.1:64061/FastGame/ef3109e361da0274/art/owner-pet.png",
+            "naturalSize": [
+              400,
+              350
+            ],
+            "rendering": "pixelated",
+            "displayAspect": 1.1428567953819153,
+            "bounds": {
+              "x": 255.05166625976562,
+              "y": 375.9962463378906,
+              "width": 105.05865478515625,
+              "height": 116.4329833984375,
+              "top": 375.9962463378906,
+              "right": 360.1103210449219,
+              "bottom": 492.4292297363281,
+              "left": 255.05166625976562
+            }
+          }
+        ]
+      },
+      {
+        "selectedOwner": 2,
+        "cards": [
+          {
+            "name": "제시",
+            "tagline": "자기야 오늘밤 라이브 하러와",
+            "selected": false,
+            "badge": "01",
+            "badgeVisible": true,
+            "src": "http://127.0.0.1:64061/FastGame/ef3109e361da0274/art/owner-female.png",
+            "naturalSize": [
+              400,
+              350
+            ],
+            "rendering": "pixelated",
+            "displayAspect": 1.1428567953819153,
+            "bounds": {
+              "x": 29.88231658935547,
+              "y": 375.9962463378906,
+              "width": 105.05863189697266,
+              "height": 116.4329833984375,
+              "top": 375.9962463378906,
+              "right": 134.94094848632812,
+              "bottom": 492.4292297363281,
+              "left": 29.88231658935547
+            }
+          },
+          {
+            "name": "에디슨",
+            "tagline": "평생 Rock&Roll",
+            "selected": false,
+            "badge": "02",
+            "badgeVisible": true,
+            "src": "http://127.0.0.1:64061/FastGame/ef3109e361da0274/art/owner-ff.png",
+            "naturalSize": [
+              400,
+              350
+            ],
+            "rendering": "pixelated",
+            "displayAspect": 1.1428567953819153,
+            "bounds": {
+              "x": 142.4689483642578,
+              "y": 375.9962463378906,
+              "width": 105.05471801757812,
+              "height": 116.4329833984375,
+              "top": 375.9962463378906,
+              "right": 247.52366638183594,
+              "bottom": 492.4292297363281,
+              "left": 142.4689483642578
+            }
+          },
+          {
+            "name": "제이든",
+            "tagline": "오늘밤은 무슨 음악을 들을까?",
+            "selected": true,
+            "badge": "선택됨",
+            "badgeVisible": true,
+            "src": "http://127.0.0.1:64061/FastGame/ef3109e361da0274/art/owner-pet.png",
+            "naturalSize": [
+              400,
+              350
+            ],
+            "rendering": "pixelated",
+            "displayAspect": 1.1428575896113173,
+            "bounds": {
+              "x": 255.05166625976562,
+              "y": 375.9962463378906,
+              "width": 105.05865478515625,
+              "height": 116.4329833984375,
+              "top": 375.9962463378906,
+              "right": 360.1103210449219,
+              "bottom": 492.4292297363281,
+              "left": 255.05166625976562
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "selectorArt": {
+    "raw": {
+      "path": "ArtSource/Owners/ChibiJessy/selector-jessy-chibi.source.png",
+      "width": 1341,
+      "height": 1173,
+      "bytes": 1929222,
+      "sha256": "d4583ea3275fdd1b3b29ee30063c124559508df102394e05073d4ff0f37e3e20",
+      "unchangedGeneratedSource": true,
+      "mode": "RGB",
+      "generatedOriginalPath": "C:/Users/Jtsgr/.codex/generated_images/01a1b360-6c99-7dc0-a087-70686b56ec5b/exec-9b4cfbfa-d6ac-4cf5-8a0a-3715c0f85e5d.png",
+      "generatedOriginalSha256": "d4583ea3275fdd1b3b29ee30063c124559508df102394e05073d4ff0f37e3e20"
+    },
+    "canonical": "ArtSource\\Owners\\ChibiJessy\\selector-jessy-chibi.card.png",
+    "runtimeSha256": "b2471d98bb0de20aaa297533caed9cc9d0d8a23ae9a486667c19feab0501113f",
+    "rawFitCanonicalRuntimePixelsExact": true,
+    "fullCanonicalRuntimeRGBAExact": true,
+    "sourceBoxExact": [
+      0.2142857142857,
+      0,
+      1340.7857142857142,
+      1173
+    ],
+    "verticalCropPixels": 0,
+    "rootReviewedTopCurlClearancePx": 7
+  },
+  "officeArt": {
+    "raw": {
+      "path": "ArtSource/DayDesk/JessyChibi/desk-jessy-chibi.source.png",
+      "width": 1672,
+      "height": 941,
+      "bytes": 2212051,
+      "sha256": "7a4a5762a2eca86c0295263fa623984622aa3c0928cbb54255403a0e5530ecb9",
+      "unchangedGeneratedSource": true,
+      "mode": "RGB",
+      "generatedOriginalPath": "C:/Users/Jtsgr/.codex/generated_images/01a1b360-6c99-7dc0-a087-70686b56ec5b/exec-3c2680e2-d061-4311-9720-31f3604f309b.png",
+      "generatedOriginalSha256": "7a4a5762a2eca86c0295263fa623984622aa3c0928cbb54255403a0e5530ecb9"
+    },
+    "runtimeSha256": "0083d70441456b0a2544433eca2271efc6abe6beabe6029bf74c9ad5667750df",
+    "wholeSourceNearestResizeExact": true,
+    "sharedGeometryUnchanged": true,
+    "reviewedPropEdgeDeltaPx": {
+      "monitor": 0,
+      "phoneMaximum": 1
+    }
+  },
+  "protectedHashes": {
+    "Tools/WebGLTemplate/FastGame/aftershow.js": "d3ab2f94d119347eaa90163536687957cd221ede7da9e0e8672e2d28737cb2ac",
+    "Tools/WebGLTemplate/FastGame/album-art.js": "b19cffd29ae71fa5a700980bd6a658eb660775235777336f674551f1e5cc6139",
+    "Tools/WebGLTemplate/FastGame/art/album-covers/freewill-electric-shocker.png": "59e7b340e052bd2c575fc2ae731ec693a1368ca426078bf7ab23e68bae967f1c",
+    "Tools/WebGLTemplate/FastGame/art/album-covers/julywantsmore-hey.png": "1826f7082b8625acfdf42701333d9c33b4e858771b7ca01a6f604e62658c9f80",
+    "Tools/WebGLTemplate/FastGame/art/album-covers/julywantsmore-no-matter-how.png": "c42bda9456074bf55e3963ef11ae6773ad34777c5a40c54138c4ee876047013d",
+    "Tools/WebGLTemplate/FastGame/art/album-covers.json": "ab788f688aa021abbc667e1493f759d6632784bdba04ffee461cead71ae5e184",
+    "Tools/WebGLTemplate/FastGame/art/icons/cash.png": "fbf0d1d9835728d3a8245669d0e99e1f3824693e03045241cbe93b65d7776587",
+    "Tools/WebGLTemplate/FastGame/art/icons/events.png": "a24cfa4bdbed079305396cf4a12fa093dcb5bc146c6e4df5c9a0484241818bc3",
+    "Tools/WebGLTemplate/FastGame/art/icons/fans.png": "92ac5ca392f544895984779a4cbc5fc2a4e0982b0b771a8aff921c970a5346c3",
+    "Tools/WebGLTemplate/FastGame/art/icons/guest.png": "74a906e5f71006b2db2111b646d3fefc754cf32763e55e8209d436ef00a45100",
+    "Tools/WebGLTemplate/FastGame/art/icons/guestsati.png": "1df7f3023fa93174b435070e4a993d3b5a3018ddcbc409e80bf3a9b0e5a349a2",
+    "Tools/WebGLTemplate/FastGame/art/icons/perrform.png": "ebe29d8ec62ff3f553da7e7174466263f4e81b1e09c5f6ac633b3559cb144b4b",
+    "Tools/WebGLTemplate/FastGame/art/icons/setup.png": "6aa065afb8c757b3093778bb1d547f9a2fd89bbcd96b95450204841b7de2ce25",
+    "Tools/WebGLTemplate/FastGame/art/icons/staff.png": "18c8896acde2136e8171a3e7d873e7f498fc6919e43dd1725aa368552822799a",
+    "Tools/WebGLTemplate/FastGame/art/icons/time.png": "50debb07620610f76ee4617fd19e27855edd9b279441565e6daab9b05d22b9ac",
+    "Tools/WebGLTemplate/FastGame/art/icons/upgrades.png": "c17003b77f0f690210510bc7a7a17d314b5b24d8baf30768dd31ed85e28ef34f",
+    "Tools/WebGLTemplate/FastGame/art/office/desk-edison.png": "6671c7c62bed8b88b18404f74b7454acb1336ef8ac9bc2d493a5adc79f7eba2c",
+    "Tools/WebGLTemplate/FastGame/art/office/desk-jaiden.png": "1e7e1b196d569c09c9ccaab1c916a2157111782e094bb22129a08ef1c1e97fb9",
+    "Tools/WebGLTemplate/FastGame/art/order-icons.png": "7664b985f8beabae767e4dbb4d3509ac047c5c2dedc5108dd46f668e94fee866",
+    "Tools/WebGLTemplate/FastGame/art/owner-ff.png": "be581e80e16730260d2468d17e3e3fb2897062e35eaec463fdcee72220e2a350",
+    "Tools/WebGLTemplate/FastGame/art/owner-pet.png": "f139dd68c81f915f20c1380eba95482a0524081393f965070b7f04358a57f417",
+    "Tools/WebGLTemplate/FastGame/art/pit.png": "eced09ddbca3715b0fdeae20762268805c13774165e5c6683e4db5d5fee7901b",
+    "Tools/WebGLTemplate/FastGame/art/poses.png": "a8a73bb319b4a92219ccd92673d1cfd4194091ad63e4311bc0b3cff9614c122a",
+    "Tools/WebGLTemplate/FastGame/art/seoul.png": "fe4af846e2c55d91a2878f2a72711410a2fb9e9a7d26d5a7356bed67d5d27531",
+    "Tools/WebGLTemplate/FastGame/art/sprites.json": "ede8350b588943613438235e3e444ee2f01fa8d99ad1f9d64c4bad8b35aea00e",
+    "Tools/WebGLTemplate/FastGame/art/v4-band-bass-performance.png": "afeba33a68015f57ce5ba55c36c2e46166c4107f9da99dca6f2b6b916f2280aa",
+    "Tools/WebGLTemplate/FastGame/art/v4-band-drums-performance.png": "7248eacecb5a95ef8418a9a7d2475fceee66ce9c5074fe783eeefc04ca5ebec2",
+    "Tools/WebGLTemplate/FastGame/art/v4-band-greet-a.png": "f3c93f8c7170a8ac61a4438d95bcef9ae4052fa9d128b64f80bdbe88b6f5f95e",
+    "Tools/WebGLTemplate/FastGame/art/v4-band-greet-b.png": "9299e32df0527961eb9835bbd31731b66c838ac2b6965ce3ce13a2beb5e7e018",
+    "Tools/WebGLTemplate/FastGame/art/v4-band-guitar-performance.png": "96cb1d3ad1602b0234b523eb0e9f1abcee80c3a4c476f8645e193396ea6c7a54",
+    "Tools/WebGLTemplate/FastGame/art/v4-band-jump.png": "4a8555c20d949e9a41a65a76f3011f4542cda7ea98d8075fb5860c33fb6cb8ac",
+    "Tools/WebGLTemplate/FastGame/art/v4-band-singer-performance.png": "d6ff6d83b81ac440528028943b8d90b17c1cfc91a1036edeec8eb16677a6b286",
+    "Tools/WebGLTemplate/FastGame/art/v4-band-walk.png": "9ded44a557b9d7b36693dd8101c7e73df94c225282c99c6b169fd99fabae6c33",
+    "Tools/WebGLTemplate/FastGame/art/v4-guest-social.png": "8522dc0a2ab8a709c5eae78e8434e467ecde82f895aba00d1af4760a9e262556",
+    "Tools/WebGLTemplate/FastGame/art/venue.json": "8a00d37c912043dd886b965a7d38a64acee7e364a169b4b30700abaebbb5d6f5",
+    "Tools/WebGLTemplate/FastGame/art/venue.png": "73f5b778a1f62a96e6711269870d0222a9bcf5afaa64d01b2885197f3194f1a8",
+    "Tools/WebGLTemplate/FastGame/art/walk.png": "774a3bd478f6f876824783f133ab54467f5592f53dc8bc422bbc9b97184d370e",
+    "Tools/WebGLTemplate/FastGame/art/wardrobe.png": "9b20800804a589c795448ba8d25791e248de991e48e9b923f50e858b0765bd4a",
+    "Tools/WebGLTemplate/FastGame/booking.js": "87eab04e34d7112c809579fbff970611b5f710a1d5dcad66f178007df508e98b",
+    "Tools/WebGLTemplate/FastGame/boot.js": "629c2cb56fdac118f7cf875f13817a70789657fe1e2f7a64ba824d84332ca6b2",
+    "Tools/WebGLTemplate/FastGame/catalog.js": "65c26868a2699bbe94099eda7ba5a77dcf982a9ebb87ff92869137792bfce19c",
+    "Tools/WebGLTemplate/FastGame/core.js": "6ec9599f52dda47d05fd7ba09f2de8d2b5d82d9513b1292032d5733f379a35a9",
+    "Tools/WebGLTemplate/FastGame/daily-poster.js": "8452edc02506c8b6aa58e5dfd4604f12086e4d4876e0002fdee01a609ed3ad60",
+    "Tools/WebGLTemplate/FastGame/daydesk.js": "778055627c617829d820fca2a3c6a7719e365b7aaed232f320843ccf0ea30a9b",
+    "Tools/WebGLTemplate/FastGame/floor.js": "b33d3dab89eb2e9c797ed21deb6abe4820c5652e36d3110a8d6d9acbb3616995",
+    "Tools/WebGLTemplate/FastGame/font.woff2": "638e07cfdafdbd3efbe81823052ec690b9f4486fafdf1aeefb3a2f998c83ae29",
+    "Tools/WebGLTemplate/FastGame/game.js": "1536e17c1f9fbb2b9aa97c340b9aade8220dcf5256375a949d9b2d17b95cbc47",
+    "Tools/WebGLTemplate/FastGame/legacy-save.js": "3124c7868035c56e4abf19f156634a74abdbbda03016c435a99d070f701a9610",
+    "Tools/WebGLTemplate/FastGame/music.js": "62e168584358dde3b452c112b2ee2fe2f4cb53aef408e871accee942c656d199",
+    "Tools/WebGLTemplate/FastGame/navigation.js": "4021380657d00befb5222dd083d42cd4f8b5d1ae548abbce46ba483c2d3119a9",
+    "Tools/WebGLTemplate/FastGame/OFL.txt": "6a73f9541c2de74158c0e7cf6b0a58ef774f5a780bf191f2d7ec9cc53efe2bf2",
+    "Tools/WebGLTemplate/FastGame/style.css": "a2912ec188e113092292c321e392f31276a5e669aaaa36eef4f9cefdb846822d",
+    "Tools/WebGLTemplate/FastGame/world.js": "ec235ec06c4ebd1e54a529266925aab8ebf08af6a9185c3f268f05c971c1e26b",
+    "ArtSource/Owners/Supplied/Jessy-owner_p_j.PNG": "a27e380f6743eb2cf3359e2e593cff12f63f5dbc371de112d6e0196924775961",
+    "ArtSource/Owners/Original-owner_p.png": "a030c8958e0a4aa7e881bf1028f145e9b6f6a3a9e03c6c2bf08648c8b476b36c",
+    "ArtSource/DayDesk/desk-jessy.source.png": "ba3f08765705d7191ca8cea0c6e499507ddbb1a3dd2c0b2b409f38b43f40abfd"
+  },
+  "package": {
+    "release": "ef3109e361da0274",
+    "files": 55,
+    "bytes": 3491534
+  },
+  "dayDesk": {
+    "report": "daydesk/browser-qa.json",
+    "passed": true,
+    "cases": 6,
+    "actualLaunches": 6,
+    "computedPhysicalScreenGeometryMatches": true,
+    "naturalNightEnd": {
+      "farewellAcknowledged": true,
+      "cleanupComplete": true,
+      "phase": "results"
+    }
+  },
+  "localServerDiagnostics": {
+    "firstFailure": "initial-server-failure.json",
+    "postHardeningProbe": "qa-server-preflight.json",
+    "finalBrowserCohortErrors": 0,
+    "productionChanged": false
+  },
+  "visualReview": {
+    "selector": "Whole upper curls visible with top clearance; crossed arms at lower edge; badges do not obscure hair or face.",
+    "office": "Complete top curls and compact torso visible; speech bubble clears face; physical monitor and phone overlays remain inside their unchanged props.",
+    "reviewedScreenshots": [
+      "desktop-selector-owner-0.png",
+      "daydesk/desktop-owner-0-speech.png",
+      "daydesk/mobile-owner-0-scene.png"
+    ]
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "Tools/WebGLTemplate/FastGame/art/owner-ff.png": "be581e80e16730260d2468d17e3e3fb2897062e35eaec463fdcee72220e2a350",
+  "Tools/WebGLTemplate/FastGame/art/owner-pet.png": "f139dd68c81f915f20c1380eba95482a0524081393f965070b7f04358a57f417",
+  "Tools/WebGLTemplate/FastGame/art/office/desk-edison.png": "6671c7c62bed8b88b18404f74b7454acb1336ef8ac9bc2d493a5adc79f7eba2c",
+  "Tools/WebGLTemplate/FastGame/art/office/desk-jaiden.png": "1e7e1b196d569c09c9ccaab1c916a2157111782e094bb22129a08ef1c1e97fb9",
+  "Assets/Art/StartupTextures/Owners/OwnerFF.png": "be581e80e16730260d2468d17e3e3fb2897062e35eaec463fdcee72220e2a350",
+  "Assets/Art/StartupTextures/Owners/OwnerPetSounds.png": "f139dd68c81f915f20c1380eba95482a0524081393f965070b7f04358a57f417",
+  "Assets/Resources/SimBarWebTextures/OwnerFF.bytes": "d566bb4abda2da8a13f9ebe24f931620fb60ab02b90c95b81a6ab75fa98c58ba",
+  "Assets/Resources/SimBarWebTextures/OwnerPetSounds.bytes": "1ba398a12fe3592a5556e5e49df4e6d1a97f79c3afd89e30aa01f2989e6a7cef",
+  "Assets/Resources/SimBarOffice/desk-edison.bytes": "6671c7c62bed8b88b18404f74b7454acb1336ef8ac9bc2d493a5adc79f7eba2c",
+  "Assets/Resources/SimBarOffice/desk-jaiden.bytes": "1e7e1b196d569c09c9ccaab1c916a2157111782e094bb22129a08ef1c1e97fb9",
+  "Assets/Art/StartupTextures/Owners/OwnerFemale.png.meta": "b081d06144795550c17ddc5aad95885c37646542132cd220d3ae5a635dbd5675",
+  "Assets/Resources/SimBarWebTextures/OwnerFemale.bytes.meta": "5802ec4b4e27fad8ae6a84570c9eb394b3f0ec11a3e0dc60c03254e6e0651a13",
+  "Assets/Resources/SimBarOffice/desk-jessy.bytes.meta": "ebdf12c618c4a18b78cec19f85ee6bd1238d9db00c66d23f9b1761c71225dbe7"
+}

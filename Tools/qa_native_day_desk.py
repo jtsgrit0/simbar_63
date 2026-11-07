@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 import re
 import threading
+from urllib.request import urlopen
 
 from PIL import Image
 from playwright.sync_api import sync_playwright
@@ -31,16 +32,22 @@ class QuietHandler(SimpleHTTPRequestHandler):
         pass
 
 
+class QuietServer(ThreadingHTTPServer):
+    request_queue_size = 128
+
+
 def sha(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
-def main():
+def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--package', type=Path, default=ROOT / 'Library/DayDeskPreview')
     parser.add_argument('--expected-release', default='46fcd17b9c72c682')
-    args = parser.parse_args()
-    OUT.mkdir(parents=True, exist_ok=True)
+    parser.add_argument('--output-dir', type=Path, default=OUT)
+    args = parser.parse_args(argv)
+    out = args.output_dir
+    out.mkdir(parents=True, exist_ok=True)
     report = {'passed': False, 'checks': [], 'issues': [], 'errors': [], 'httpErrors': [],
               'failedRequests': [], 'screenshots': [], 'cases': []}
     server = thread = None
@@ -60,9 +67,17 @@ def main():
             assert Image.open(path).size == (640, 360)
             assert path.read_bytes() == (ROOT / 'Tools/WebGLTemplate/FastGame/art/office' / filename).read_bytes()
             report['officeAssets'][filename] = {'sha256': sha(path), 'size': [640, 360], 'bytes': path.stat().st_size}
-        server = ThreadingHTTPServer(('127.0.0.1', 0), partial(QuietHandler, directory=str(args.package.resolve())))
+        server = QuietServer(('127.0.0.1', 0), partial(QuietHandler, directory=str(args.package.resolve())))
+        report['serverUrl'] = f'http://127.0.0.1:{server.server_port}/'
         thread = threading.Thread(target=server.serve_forever, daemon=True)
         thread.start()
+        assert thread.is_alive(), 'Owned QA HTTP thread stopped before browser startup'
+        probe_url = report['serverUrl'] + 'FastGame/' + release + '/art/order-icons.png'
+        with urlopen(probe_url, timeout=10) as response:
+            probe_data = response.read()
+            assert response.status == 200 and probe_data == (folder / 'art/order-icons.png').read_bytes()
+        report['serverPreflight'] = {'url': probe_url, 'status': 200, 'bytes': len(probe_data),
+                                     'sha256': hashlib.sha256(probe_data).hexdigest(), 'ownedThreadAlive': thread.is_alive()}
         with sync_playwright() as pw:
             executable = chromium_executable(None)
             browser = pw.chromium.launch(**({'executable_path': executable} if executable else {}))
@@ -88,12 +103,12 @@ def main():
                             def shot(suffix, scene=False):
                                 filename = label + '-' + suffix + '.png'
                                 target = page.locator('.desk-stage') if scene else page
-                                target.screenshot(path=str(OUT / filename))
+                                target.screenshot(path=str(out / filename))
                                 report['screenshots'].append(filename)
                                 case['screenshots'].append(filename)
 
                             def ready():
-                                page.wait_for_function('window.simbarGameReadyAt>0 && document.querySelectorAll(".owner-card").length===3')
+                                page.wait_for_function('(window.simbarGameReadyAt>0 && document.querySelectorAll(".owner-card").length===3) || document.querySelector("#game-shell")?.dataset.playerState==="error"')
                                 assert page.locator('#game-shell').get_attribute('data-player-state') == 'ready'
                                 module = page.locator('script[type="module"][src$="/boot.js"]').get_attribute('src')
                                 assert re.search(r'(?:^|/)FastGame/' + release + r'/boot\.js$', module)
@@ -160,6 +175,11 @@ def main():
                             assert 'freewill' in page.locator('.desk-band-option').inner_text().lower()
                             case['art'] = art
                             case['bounds'] = bounds()
+                            case['screenProps'] = page.evaluate('''() => {
+                              const image=document.querySelector('.desk-scene-image').getBoundingClientRect();
+                              const rect=selector=>{const r=document.querySelector(selector).getBoundingClientRect();return [(r.x-image.x)*640/image.width,(r.y-image.y)*360/image.height,r.width*640/image.width,r.height*360/image.height];};
+                              return {monitor:rect('.desk-monitor-light'),phone:rect('.desk-phone-light'),phoneClip:getComputedStyle(document.querySelector('.desk-phone-light')).clipPath};
+                            }''')
                             assert page.evaluate(STATE)['hour'] == 10
                             shot('speech')
 
@@ -256,7 +276,7 @@ def main():
                                 case['naturalNightEnd'] = {'farewellAcknowledged': True, 'cleanupComplete': True, 'phase': 'results'}
                             assert not report['errors'] and not report['httpErrors'] and not report['failedRequests']
                         except Exception:
-                            page.screenshot(path=str(OUT / (label + '-failure.png')))
+                            page.screenshot(path=str(out / (label + '-failure.png')))
                             raise
                         finally:
                             monitor['active'] = False
@@ -279,10 +299,11 @@ def main():
             server.server_close()
         if thread:
             thread.join()
-        (OUT / 'browser-qa.json').write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n', encoding='utf-8', newline='\n')
+        (out / 'browser-qa.json').write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n', encoding='utf-8', newline='\n')
     print(json.dumps({'passed': report['passed'], 'issues': report['issues'], 'cases': len(report['cases']), 'release': release}, ensure_ascii=False))
     if not report['passed']:
         raise SystemExit(1)
+    return report
 
 
 if __name__ == '__main__':

@@ -1,0 +1,34 @@
+{
+  "selectedOwner": "female",
+  "viewport": {
+    "width": 1280,
+    "height": 800
+  },
+  "allThreeOriginalAspect": true,
+  "identityUvNoCrop": true,
+  "pointFilter": true,
+  "sharedBadges": true,
+  "portraits": [
+    {
+      "name": "Journey Owner Portrait 0",
+      "texture": "OwnerFemale",
+      "width": 400,
+      "height": 350,
+      "uv": "(x:0.000000, y:0.000000, width:1.000000, height:1.000000)"
+    },
+    {
+      "name": "Journey Owner Portrait 1",
+      "texture": "OwnerFF",
+      "width": 400,
+      "height": 350,
+      "uv": "(x:0.000000, y:0.000000, width:1.000000, height:1.000000)"
+    },
+    {
+      "name": "Journey Owner Portrait 2",
+      "texture": "OwnerPetSounds",
+      "width": 400,
+      "height": 350,
+      "uv": "(x:0.000000, y:0.000000, width:1.000000, height:1.000000)"
+    }
+  ]
+}

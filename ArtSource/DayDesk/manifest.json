@@ -152,38 +152,61 @@
       "index": 0,
       "key": "jessy",
       "ownerId": "female",
-      "source": "ArtSource/DayDesk/desk-jessy.source.png",
-      "sourceSha256": "ba3f08765705d7191ca8cea0c6e499507ddbb1a3dd2c0b2b409f38b43f40abfd",
+      "source": "ArtSource/DayDesk/JessyChibi/desk-jessy-chibi.source.png",
+      "sourceSha256": "7a4a5762a2eca86c0295263fa623984622aa3c0928cbb54255403a0e5530ecb9",
       "sourceSize": [
         1672,
         941
       ],
-      "generatedSource": "C:/Users/Jtsgr/.codex/generated_images/01a1b360-6c99-7dc0-a087-70686b56ec5b/exec-0a40a15f-c070-453f-abf7-a39d6c4afdaf.png",
-      "prompt": "ArtSource/DayDesk/desk-jessy.prompt.md",
-      "promptSha256": "361981b7ee70b718454a2134f0606b83591c1747f5b66aa3ec8aa05b8dbcbdc0",
-      "reference": "Tools/WebGLTemplate/FastGame/art/owner-female.png",
-      "referenceSha256": "8d85760c18009360078d98158b03d2eae5cb423dde3cdb8cea13fb1105de3fa0",
-      "editTarget": null,
+      "generatedSource": "C:/Users/Jtsgr/.codex/generated_images/01a1b360-6c99-7dc0-a087-70686b56ec5b/exec-3c2680e2-d061-4311-9720-31f3604f309b.png",
+      "prompt": "ArtSource/DayDesk/JessyChibi/prompt.md",
+      "promptSha256": "f19d67ecceca444ed29a19c69c4520a1b5957c109d19be994e07f5bffcd8a19c",
+      "reference": "ArtSource/Owners/Supplied/Jessy-owner_p_j.PNG",
+      "referenceSha256": "a27e380f6743eb2cf3359e2e593cff12f63f5dbc371de112d6e0196924775961",
+      "editTarget": "ArtSource/DayDesk/desk-jessy.source.png",
       "runtime": "Tools/WebGLTemplate/FastGame/art/office/desk-jessy.png",
       "runtimeSize": [
         640,
         360
       ],
-      "runtimeSha256": "bfe37e2a305d61e7460318491accfc1ecbcfcd26e57deb781b3205ad4c1aa20d",
-      "runtimeBytes": 424056,
-      "processing": "Complete-source nearest-neighbor downsample; no crop, repaint, recolor or palette quantization",
+      "runtimeSha256": "0083d70441456b0a2544433eca2271efc6abe6beabe6029bf74c9ad5667750df",
+      "runtimeBytes": 412009,
+      "processing": "Complete-source nearest-neighbor resize of approved built-in ImageGen chibi-proportion edit; no crop, recolor or palette quantization",
       "pixelsExactToNearestResize": true,
       "faceAnchorApproximate": [
         0.5359375,
-        0.30555556
+        0.47777778
       ],
       "identityReview": [
         "Purple/copper voluminous curls",
         "Gold hoop earrings",
         "Burgundy top and black leather",
-        "Gold jewelry and pink typing nails"
+        "Gold jewelry and pink typing nails",
+        "Rounded chibi face and compact torso matching Edison/Jaiden",
+        "Entire upper curls visible inside the frame"
       ],
-      "singleOwnerOnly": true
+      "singleOwnerOnly": true,
+      "references": [
+        {
+          "path": "Tools/WebGLTemplate/FastGame/art/office/desk-jessy.png",
+          "sha256": "bfe37e2a305d61e7460318491accfc1ecbcfcd26e57deb781b3205ad4c1aa20d"
+        },
+        {
+          "path": "Tools/WebGLTemplate/FastGame/art/office/desk-edison.png",
+          "sha256": "6671c7c62bed8b88b18404f74b7454acb1336ef8ac9bc2d493a5adc79f7eba2c"
+        },
+        {
+          "path": "Tools/WebGLTemplate/FastGame/art/office/desk-jaiden.png",
+          "sha256": "1e7e1b196d569c09c9ccaab1c916a2157111782e094bb22129a08ef1c1e97fb9"
+        },
+        {
+          "path": "ArtSource/Owners/Supplied/Jessy-owner_p_j.PNG",
+          "sha256": "a27e380f6743eb2cf3359e2e593cff12f63f5dbc371de112d6e0196924775961"
+        }
+      ],
+      "referenceRevision": "daff6d005a4b23a45401738d9fdd9a911b0f990c",
+      "editTargetSha256": "ba3f08765705d7191ca8cea0c6e499507ddbb1a3dd2c0b2b409f38b43f40abfd",
+      "chibiProvenance": "ArtSource/DayDesk/JessyChibi/candidate-manifest.json"
     },
     {
       "index": 1,
@@ -260,5 +283,6 @@
       "singleOwnerOnly": true
     }
   ],
-  "runtimeTotalBytes": 1240386
+  "runtimeTotalBytes": 1228339,
+  "currentJessyRevision": "Full-hair chibi edit; prior Jessy source and asset record retained under JessyChibi/previous-jessy-asset.json"
 }

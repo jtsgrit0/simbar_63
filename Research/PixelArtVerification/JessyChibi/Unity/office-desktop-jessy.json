@@ -1,0 +1,13 @@
+{
+  "owner": "female",
+  "resource": "SimBarOffice/desk-jessy",
+  "viewport": {
+    "width": 1280,
+    "height": 800
+  },
+  "whole640x360Image": true,
+  "identityUvNoCrop": true,
+  "pointFilter": true,
+  "captionBelowImage": true,
+  "freewillUiUnchanged": true
+}

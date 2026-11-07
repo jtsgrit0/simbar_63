@@ -1,8 +1,9 @@
 # Owner pose, framing and pixel lighting
 
-Jessy's current presentation uses the later user-supplied complete illustration
-documented in [`../Supplied/README.md`](../Supplied/README.md). Its `cardSource`
-override bypasses the older Jessy pose, rotation, scale, matte and lighting below.
+Jessy's current presentation uses the reviewed chibi edit documented in
+[`../ChibiJessy/README.md`](../ChibiJessy/README.md), based on the retained supplied
+identity reference. Its full-card `cardSource` override bypasses the older Jessy
+pose, rotation, scale, matte and lighting below.
 Those earlier assets remain archived; Edison and Jaiden still use the reviewed
 configuration described here.
 
@@ -48,5 +49,5 @@ lighting coverage. File hashes, transforms and provenance are recorded in
 
 Independent checks and the before/after sheet are in
 [`OwnerRefinements`](../../../Research/PixelArtVerification/OwnerRefinements/).
-The three runtime cards total 619,666B, only 768B more than the previous release.
-Repacking is byte-identical.
+That earlier three-card revision totaled 619,666B. The current source and byte
+counts are recorded in `../crops.json`; repacking preserves unchanged owners.

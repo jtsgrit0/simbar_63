@@ -1,0 +1,12 @@
+{
+  "prefsByteExact": true,
+  "originalPrefsSha256": "c763f84101d0b9eb7f3587e54aa7365de9589371a6b2f841ab8281cb47022f80",
+  "restoredPrefsSha256": "c763f84101d0b9eb7f3587e54aa7365de9589371a6b2f841ab8281cb47022f80",
+  "gameViewRestored": true,
+  "customCount": 0,
+  "scene": "Assets/Scenes/SimBar_Reference.unity",
+  "sceneDirty": false,
+  "playing": false,
+  "runInBackground": false,
+  "compiling": false
+}

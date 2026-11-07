@@ -94,17 +94,17 @@
         350
       ],
       "presentationMode": "supplied-full-card",
-      "cardSource": "ArtSource/Owners/Supplied/Jessy-owner_p_j.PNG",
-      "cardSourceSha256": "a27e380f6743eb2cf3359e2e593cff12f63f5dbc371de112d6e0196924775961",
+      "cardSource": "ArtSource/Owners/ChibiJessy/selector-jessy-chibi.card.png",
+      "cardSourceSha256": "b2471d98bb0de20aaa297533caed9cc9d0d8a23ae9a486667c19feab0501113f",
       "cardSourceSize": [
-        1087,
-        1447
+        400,
+        350
       ],
       "cardSourceRect": [
-        3,
-        280,
-        1083,
-        1225
+        0,
+        0,
+        400,
+        350
       ],
       "cardFit": "cover",
       "cardResampling": "nearest-neighbor",
@@ -123,9 +123,9 @@
         255
       ],
       "sourceIncludesBadge": false,
-      "figureProvenance": "User-supplied Jessy portrait and venue, uniform nearest-neighbor close-up crop with crossed forearms at the lower border",
-      "sha256": "8d85760c18009360078d98158b03d2eae5cb423dde3cdb8cea13fb1105de3fa0",
-      "bytes": 296605
+      "figureProvenance": "Built-in ImageGen edit of the supplied Jessy identity: rounded chibi face, compact torso and complete upper curls; approved full-frame nearest-neighbor card",
+      "sha256": "b2471d98bb0de20aaa297533caed9cc9d0d8a23ae9a486667c19feab0501113f",
+      "bytes": 280650
     },
     {
       "name": "EDISON",

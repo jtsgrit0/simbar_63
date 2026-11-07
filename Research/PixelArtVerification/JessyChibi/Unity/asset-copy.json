@@ -1,0 +1,27 @@
+{
+  "copies": [
+    {
+      "source": "Tools/WebGLTemplate/FastGame/art/owner-female.png",
+      "target": "Assets/Art/StartupTextures/Owners/OwnerFemale.png",
+      "bytes": 280650,
+      "sha256": "b2471d98bb0de20aaa297533caed9cc9d0d8a23ae9a486667c19feab0501113f",
+      "byteIdentical": true
+    },
+    {
+      "source": "Tools/WebGLTemplate/FastGame/art/owner-female.png",
+      "target": "Assets/Resources/SimBarWebTextures/OwnerFemale.bytes",
+      "bytes": 280650,
+      "sha256": "b2471d98bb0de20aaa297533caed9cc9d0d8a23ae9a486667c19feab0501113f",
+      "byteIdentical": true
+    },
+    {
+      "source": "Tools/WebGLTemplate/FastGame/art/office/desk-jessy.png",
+      "target": "Assets/Resources/SimBarOffice/desk-jessy.bytes",
+      "bytes": 412009,
+      "sha256": "0083d70441456b0a2544433eca2271efc6abe6beabe6029bf74c9ad5667750df",
+      "byteIdentical": true
+    }
+  ],
+  "allOtherOwnerImageStreamsUnchanged": true,
+  "allThreeTargetImporterBytesUnchanged": true
+}

@@ -1,0 +1,11 @@
+{
+  "release": "ef3109e361da0274",
+  "beforeBrowserStartup": "Dedicated lightweight server probe; no extra browser cohort started",
+  "ownedThreadAliveBefore": true,
+  "url": "http://127.0.0.1:62649/FastGame/ef3109e361da0274/art/order-icons.png",
+  "status": 200,
+  "bytes": 12428,
+  "sha256": "7664b985f8beabae767e4dbb4d3509ac047c5c2dedc5108dd46f668e94fee866",
+  "ownedThreadAliveAfter": true,
+  "serverClosed": true
+}

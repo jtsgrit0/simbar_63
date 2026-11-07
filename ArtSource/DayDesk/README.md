@@ -34,3 +34,8 @@ Visual review confirmed Jessy's purple/copper curls, gold hoops, leather and
 burgundy outfit and pink nails; Edison's bowl fringe, moustache, headphones and
 denim; Jaiden's shaved undercut, swept hair, smiling eyes and white shirt. The
 root task reviewed and approved all three runtime images before their freeze.
+
+Jessy's current scene uses the later [chibi revision](JessyChibi/README.md), with
+a compact torso and complete upper hair. The original three generated sources
+remain archived; `manifest.json` points to the current Jessy revision while
+retaining the shared screen geometry and unchanged Edison/Jaiden entries.

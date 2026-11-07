@@ -6,14 +6,14 @@
   ],
   "owners": {
     "JESSY": {
-      "cardSource": "ArtSource/Owners/Supplied/Jessy-owner_p_j.PNG",
-      "cardSourceSha256": "a27e380f6743eb2cf3359e2e593cff12f63f5dbc371de112d6e0196924775961",
+      "cardSource": "ArtSource/Owners/ChibiJessy/selector-jessy-chibi.card.png",
+      "cardSourceSha256": "b2471d98bb0de20aaa297533caed9cc9d0d8a23ae9a486667c19feab0501113f",
       "cardFit": "cover",
       "cardSourceRect": [
-        3,
-        280,
-        1083,
-        1225
+        0,
+        0,
+        400,
+        350
       ],
       "cardBackground": [
         23,
@@ -23,7 +23,7 @@
       ],
       "cardResampling": "nearest-neighbor",
       "sourceIncludesBadge": false,
-      "provenance": "User-supplied Jessy portrait and venue, uniform nearest-neighbor close-up crop with crossed forearms at the lower border"
+      "provenance": "Built-in ImageGen edit of the supplied Jessy identity: rounded chibi face, compact torso and complete upper curls; approved full-frame nearest-neighbor card"
     },
     "EDISON": {
       "support": "ArtSource/Owners/Refinements/Edison.dj-box.source.png",

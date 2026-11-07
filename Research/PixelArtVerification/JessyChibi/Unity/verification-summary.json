@@ -1,0 +1,57 @@
+{
+  "assetOnly": true,
+  "productionCSharpUnchanged": true,
+  "focusedVisualChecksPassed": [
+    "selector-desktop-jessy",
+    "selector-desktop-edison",
+    "selector-desktop-jaiden",
+    "selector-mobile-jessy",
+    "selector-mobile-edison",
+    "selector-mobile-jaiden",
+    "office-desktop-jessy",
+    "office-mobile-jessy"
+  ],
+  "wholeApprovedSourceShown": true,
+  "rootApprovedSelectorHairClearancePixels": 7,
+  "noAdditionalUiCrop": true,
+  "copies": {
+    "copies": [
+      {
+        "source": "Tools/WebGLTemplate/FastGame/art/owner-female.png",
+        "target": "Assets/Art/StartupTextures/Owners/OwnerFemale.png",
+        "bytes": 280650,
+        "sha256": "b2471d98bb0de20aaa297533caed9cc9d0d8a23ae9a486667c19feab0501113f",
+        "byteIdentical": true
+      },
+      {
+        "source": "Tools/WebGLTemplate/FastGame/art/owner-female.png",
+        "target": "Assets/Resources/SimBarWebTextures/OwnerFemale.bytes",
+        "bytes": 280650,
+        "sha256": "b2471d98bb0de20aaa297533caed9cc9d0d8a23ae9a486667c19feab0501113f",
+        "byteIdentical": true
+      },
+      {
+        "source": "Tools/WebGLTemplate/FastGame/art/office/desk-jessy.png",
+        "target": "Assets/Resources/SimBarOffice/desk-jessy.bytes",
+        "bytes": 412009,
+        "sha256": "0083d70441456b0a2544433eca2271efc6abe6beabe6029bf74c9ad5667750df",
+        "byteIdentical": true
+      }
+    ],
+    "allOtherOwnerImageStreamsUnchanged": true,
+    "allThreeTargetImporterBytesUnchanged": true
+  },
+  "preservation": {
+    "prefsByteExact": true,
+    "originalPrefsSha256": "c763f84101d0b9eb7f3587e54aa7365de9589371a6b2f841ab8281cb47022f80",
+    "restoredPrefsSha256": "c763f84101d0b9eb7f3587e54aa7365de9589371a6b2f841ab8281cb47022f80",
+    "gameViewRestored": true,
+    "customCount": 0,
+    "scene": "Assets/Scenes/SimBar_Reference.unity",
+    "sceneDirty": false,
+    "playing": false,
+    "runInBackground": false,
+    "compiling": false
+  },
+  "gameplayModelRerun": false
+}

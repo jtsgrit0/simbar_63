@@ -1,0 +1,68 @@
+{
+  "tool": "Built-in image_gen.imagegen",
+  "selectorRaw": {
+    "path": "ArtSource/Owners/ChibiJessy/selector-jessy-chibi.source.png",
+    "width": 1341,
+    "height": 1173,
+    "bytes": 1929222,
+    "sha256": "d4583ea3275fdd1b3b29ee30063c124559508df102394e05073d4ff0f37e3e20",
+    "unchangedGeneratedSource": true,
+    "mode": "RGB",
+    "generatedOriginalPath": "C:/Users/Jtsgr/.codex/generated_images/01a1b360-6c99-7dc0-a087-70686b56ec5b/exec-9b4cfbfa-d6ac-4cf5-8a0a-3715c0f85e5d.png",
+    "generatedOriginalSha256": "d4583ea3275fdd1b3b29ee30063c124559508df102394e05073d4ff0f37e3e20"
+  },
+  "selectorTechnicalFit": {
+    "method": "Pillow ImageOps.fit",
+    "size": [
+      400,
+      350
+    ],
+    "resample": "NEAREST",
+    "centering": [
+      0.5,
+      0.5
+    ],
+    "sourceBoxExact": [
+      0.2142857142857,
+      0,
+      1340.7857142857142,
+      1173
+    ]
+  },
+  "canonicalCard": {
+    "path": "ArtSource/Owners/ChibiJessy/selector-jessy-chibi.card.png",
+    "size": [
+      400,
+      350
+    ],
+    "mode": "RGBA",
+    "sha256": "b2471d98bb0de20aaa297533caed9cc9d0d8a23ae9a486667c19feab0501113f",
+    "bytes": 280650
+  },
+  "selectorRuntime": {
+    "path": "Tools/WebGLTemplate/FastGame/art/owner-female.png",
+    "sha256": "b2471d98bb0de20aaa297533caed9cc9d0d8a23ae9a486667c19feab0501113f",
+    "bytes": 280650
+  },
+  "deskRuntime": {
+    "path": "Tools/WebGLTemplate/FastGame/art/office/desk-jessy.png",
+    "sha256": "0083d70441456b0a2544433eca2271efc6abe6beabe6029bf74c9ad5667750df",
+    "bytes": 412009
+  },
+  "sourcePreserved": true,
+  "rawFitCanonicalRuntimeRGBExact": true,
+  "otherOwnersUnchanged": {
+    "Tools/WebGLTemplate/FastGame/art/owner-ff.png": "be581e80e16730260d2468d17e3e3fb2897062e35eaec463fdcee72220e2a350",
+    "Tools/WebGLTemplate/FastGame/art/owner-pet.png": "f139dd68c81f915f20c1380eba95482a0524081393f965070b7f04358a57f417",
+    "Tools/WebGLTemplate/FastGame/art/office/desk-edison.png": "6671c7c62bed8b88b18404f74b7454acb1336ef8ac9bc2d493a5adc79f7eba2c",
+    "Tools/WebGLTemplate/FastGame/art/office/desk-jaiden.png": "1e7e1b196d569c09c9ccaab1c916a2157111782e094bb22129a08ef1c1e97fb9"
+  },
+  "selectorSourceRect": [
+    0,
+    0,
+    400,
+    350
+  ],
+  "selectorTopCurlClearancePx": 7,
+  "deskSharedGeometryUnchanged": true
+}

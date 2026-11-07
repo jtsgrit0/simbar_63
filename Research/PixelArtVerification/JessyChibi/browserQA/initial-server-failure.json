@@ -1,0 +1,59 @@
+{
+  "release": "ef3109e361da0274",
+  "failure": "Page.wait_for_function: Timeout 30000ms exceeded.",
+  "failedRequests": [
+    {
+      "case": "desktop-owner-0",
+      "url": "http://127.0.0.1:53010/FastGame/ef3109e361da0274/art/order-icons.png",
+      "failure": "net::ERR_CONNECTION_REFUSED"
+    },
+    {
+      "case": "desktop-owner-0",
+      "url": "http://127.0.0.1:53010/FastGame/ef3109e361da0274/art/pit.png",
+      "failure": "net::ERR_CONNECTION_REFUSED"
+    },
+    {
+      "case": "desktop-owner-0",
+      "url": "http://127.0.0.1:53010/FastGame/ef3109e361da0274/art/poses.png",
+      "failure": "net::ERR_CONNECTION_REFUSED"
+    },
+    {
+      "case": "desktop-owner-0",
+      "url": "http://127.0.0.1:53010/FastGame/ef3109e361da0274/art/v4-band-bass-performance.png",
+      "failure": "net::ERR_CONNECTION_REFUSED"
+    },
+    {
+      "case": "desktop-owner-0",
+      "url": "http://127.0.0.1:53010/FastGame/ef3109e361da0274/art/v4-band-drums-performance.png",
+      "failure": "net::ERR_CONNECTION_REFUSED"
+    },
+    {
+      "case": "desktop-owner-0",
+      "url": "http://127.0.0.1:53010/FastGame/ef3109e361da0274/art/v4-band-greet-a.png",
+      "failure": "net::ERR_CONNECTION_REFUSED"
+    },
+    {
+      "case": "desktop-owner-0",
+      "url": "http://127.0.0.1:53010/FastGame/ef3109e361da0274/art/v4-band-greet-b.png",
+      "failure": "net::ERR_CONNECTION_REFUSED"
+    },
+    {
+      "case": "desktop-owner-0",
+      "url": "http://127.0.0.1:53010/FastGame/ef3109e361da0274/art/v4-band-guitar-performance.png",
+      "failure": "net::ERR_CONNECTION_REFUSED"
+    },
+    {
+      "case": "desktop-owner-0",
+      "url": "http://127.0.0.1:53010/FastGame/ef3109e361da0274/art/v4-band-jump.png",
+      "failure": "net::ERR_CONNECTION_REFUSED"
+    },
+    {
+      "case": "desktop-owner-0",
+      "url": "http://127.0.0.1:53010/FastGame/ef3109e361da0274/art/v4-band-singer-performance.png",
+      "failure": "net::ERR_CONNECTION_REFUSED"
+    }
+  ],
+  "productionChanged": false,
+  "selectorAndPixelChecksPassedBeforeFailure": true,
+  "qaHarnessChange": "Increase local HTTP accept backlog from default5 to128 and report server origin; unchanged packaged artifact retried."
+}
