@@ -109,6 +109,12 @@
       "frameWidth": 64,
       "frameHeight": 64,
       "columns": 8
+    },
+    "orders": {
+      "file": "order-icons.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "columns": 6
     }
   },
   "roles": {

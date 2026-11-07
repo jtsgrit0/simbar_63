@@ -263,7 +263,7 @@ public sealed partial class SimBarExperience : MonoBehaviour
 
     private void PlaySelectedMusic()
     {
-        if (musicSource == null || musicWaitingForInput) return;
+        if (musicSource == null || musicWaitingForInput || musicPaused) return;
         AudioClip clip = loadedMusicClips[playlistIndex];
         if (clip == null)
         {
@@ -952,15 +952,25 @@ public sealed partial class SimBarExperience : MonoBehaviour
         }
     }
 
-    private void TryCreateOrder()
+    private void TryCreateOrder(Patron exclude=null)
     {
         if (orderQueue.Count >= 4 + OperationsQueueBonus || patrons.Count == 0)
             return;
         for (int attempt = 0; attempt < patrons.Count; attempt++)
         {
-            Patron candidate = patrons[UnityEngine.Random.Range(0, patrons.Count)];
+            int selected=UnityEngine.Random.Range(0, patrons.Count);
+            Patron candidate = patrons[selected];
             if (candidate.drinkIndex >= 0)
                 continue;
+            if(ReferenceEquals(candidate,exclude))
+            {
+                // Redirect the already-drawn choice without consuming another
+                // random sample or immediately replacing the same head bubble.
+                candidate=null;
+                for(int offset=1;offset<patrons.Count;offset++)
+                {Patron other=patrons[(selected+offset)%patrons.Count];if(!ReferenceEquals(other,exclude)&&other.drinkIndex<0){candidate=other;break;}}
+                if(candidate==null)return;
+            }
             AssignOrder(candidate, UnityEngine.Random.Range(0, DrinkNames.Length));
             ShowToast(SimBarLocalization.Format("{0} raised a hand at the bar.", "{0} 손님이 메뉴를 주문했어요.", candidate.name.ToUpperInvariant()), 2.6f);
             return;
@@ -1028,7 +1038,7 @@ public sealed partial class SimBarExperience : MonoBehaviour
         performance = Mathf.Clamp01(performance + (automatic || quality >= 0.5f ? 0.014f : -0.008f));
         ClearOrder(patron);
         MotionServed(patron, automatic, quality);
-        TryCreateOrder();
+        TryCreateOrder(patron);
         string verdict = automatic ? SimBarLocalization.Text("BARBACK SERVED", "바 보조가 서빙했어요")
             : quality >= 0.9f ? SimBarLocalization.Text("PERFECT SERVICE!", "완벽하게 서빙했어요!")
             : quality >= 0.5f ? SimBarLocalization.Text("GOOD SERVICE!", "잘 서빙했어요!")
@@ -1043,6 +1053,7 @@ public sealed partial class SimBarExperience : MonoBehaviour
     {
         playlistIndex = index;
         musicPaused=false;
+        journey.musicPaused=false;
         performance = Mathf.Min(1f, performance + 0.08f);
         PlaySelectedMusic();
         UpdatePlaylistPlayPauseIcon();
@@ -1050,6 +1061,7 @@ public sealed partial class SimBarExperience : MonoBehaviour
             playlistRows[i].color = i == index ? new Color(0.06f, 0.36f, 0.30f, 0.96f) : new Color(0.10f, 0.12f, 0.19f, 0.88f);
         ShowToast(SimBarLocalization.Text("NOW PLAYING: ", "재생 중: ") + Playlist[index].ToUpperInvariant(), 2.4f);
         RefreshUI();
+        SaveOperations();
     }
 
     private void TogglePlaylistMusic()
@@ -1064,14 +1076,36 @@ public sealed partial class SimBarExperience : MonoBehaviour
         else if(musicPaused)
         {
             musicPaused=false;
-            musicSource.UnPause();
+            if(musicSource.clip==null) PlaySelectedMusic(); else musicSource.UnPause();
         }
         else
         {
             musicPaused=true;
             musicSource.Pause();
         }
+        journey.musicPaused=musicPaused;
         UpdatePlaylistPlayPauseIcon();
+        SaveOperations();
+    }
+
+    private void SyncJourneyMusic()
+    {
+        bool shouldPause=journey!=null&&journey.musicPaused;
+        bool changed=musicPaused!=shouldPause;musicPaused=shouldPause;
+        if(musicSource!=null)
+        {
+            if(shouldPause) musicSource.Pause();
+            else if(changed&&!musicWaitingForInput)
+            {if(musicSource.clip==null) PlaySelectedMusic(); else musicSource.UnPause();}
+        }
+        UpdatePlaylistPlayPauseIcon();
+    }
+
+    private void PauseMusicAfterPerformance()
+    {
+        if(journey.musicPauseSession!=journey.session)
+        {journey.musicPauseSession=journey.session;journey.musicPaused=true;}
+        SyncJourneyMusic();
     }
 
     private void NextPlaylistTrack()
@@ -1088,6 +1122,8 @@ public sealed partial class SimBarExperience : MonoBehaviour
     {
         if(musicPlayPauseIcon!=null)
             musicPlayPauseIcon.text=musicPaused||musicWaitingForInput?"▶":"Ⅱ";
+        foreach(Text label in juiMusicIcons)if(label!=null)label.text=musicPaused||musicWaitingForInput?"▶":"Ⅱ";
+        if(juiClosingMusicLabel!=null)juiClosingMusicLabel.text=musicPaused||musicWaitingForInput?SimBarLocalization.Text("MUSIC / RESUME ▶","음악 / 재생 ▶"):SimBarLocalization.Text("MUSIC / PAUSE Ⅱ","음악 / 일시 정지 Ⅱ");
     }
 
     private void TogglePause()

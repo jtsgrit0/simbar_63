@@ -138,6 +138,8 @@ def main():
     prepare_owners(OUTPUT)
     from prepare_venue_presentation import prepare_venue_presentation
     prepare_venue_presentation(OUTPUT)
+    from prepare_order_icons import register_order_icons
+    register_order_icons(OUTPUT)
 
 if __name__ == '__main__':
     main()

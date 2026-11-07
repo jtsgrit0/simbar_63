@@ -18,7 +18,7 @@ const defaults=()=>({version:1,money:12340,fans:256,satisfaction:.94,performance
 const newJourney=()=>({version:1,day:1,challenge:false,tutorialComplete:false,guideStep:0,guidePending:false,inProgress:false,session:0,settledSession:0,settlementPending:false,secondsLeft:180,
   score:0,combo:0,bestCombo:0,manualPerfects:0,orders:0,mistakes:0,successfulEvents:0,manualStreak:0,feverSeconds:0,feverCharge:0,openingCash:12340,drinkIncome:0,xp:0,bestScore:0,bestStars:0,completedNights:0,
   resultStars:0,resultServed:0,resultXP:0,resultBonus:0,resultProfit:0,resultNewRecord:false,booking:null,bookingCareer:Booking.newCareer(),dayOpeningCash:0,hasDayOpeningCash:false,resultTicketIncome:0,resultAttendance:0,
-  floorMissions:Floor.newState(),floorClosing:false,afterShow:null,resultFloorBonus:0,resultFloorTasks:0});
+  floorMissions:Floor.newState(),floorClosing:false,afterShow:null,musicPauseSession:0,musicPaused:false,resultFloorBonus:0,resultFloorTasks:0});
 const messages={
   scouted:['출연진 발굴 완료. 팀을 선택하고 섭외를 진행하세요.','Lineup discovered. Select an artist and make an offer.'],
   listened:['데모 검토 완료. 제안 수락 확률이 올랐어요.','Demo reviewed. This artist is more likely to accept.'],
@@ -57,6 +57,8 @@ export class SimBarGame{
   get staffReturnPending(){return this.closing&&this.floor.cleanupComplete&&this.crew.some((id,i)=>{const a=this.actors.find(a=>a.id===id);return a?.visible&&a.id!==this.escort?.worker&&distance(a,this._parkGoal(i))>.05;});}
   get floorTasksPending(){return Floor.remaining(this.floor)>0||this.floor.guestActive||!this.guestExitFinished||this.staffReturnPending;}
   get afterShowPending(){return !this.journey.afterShow?.completed;}
+  get farewellPending(){return this.journey.inProgress&&this.journey.floorClosing&&!!this.journey.afterShow?.completed&&!this.journey.afterShow.noticeAcknowledged;}
+  get showFarewell(){return this.farewellPending;}
   goalTargets(){return this.journey.challenge?[20,7,8]:[12,4,5];}
   goals(){return[this.journey.orders,this.journey.manualPerfects,this.journey.bestCombo];}
   bookingChance(band,premium=0){return Booking.chance(this.journey.booking,this.journey.bookingCareer,+band,+premium);}
@@ -119,9 +121,11 @@ export class SimBarGame{
     j.openingCash=finite(j.openingCash,this.state.money,0,1e9);j.resultProfit=finite(j.resultProfit,0,-1e9,1e9);j.floorMissions={...Floor.newState(),...(j.floorMissions||{})};Floor.sanitize(j.floorMissions);
     j.bookingCareer={...Booking.newCareer(),...(j.bookingCareer||{})};if(j.booking)j.booking={...Booking.newPlan(j.day,0),...j.booking};Booking.sanitize(j.booking,j.bookingCareer);if(j.booking?.day!==j.day)j.booking=null;
     if(!j.session||j.settledSession>0&&j.session===j.settledSession){j.inProgress=false;j.settlementPending=false;j.floorClosing=false;}
-    j.afterShow=sanitizeAfterShow(j.afterShow,j.session);
-    if(j.settlementPending&&(Floor.remaining(j.floorMissions)||j.floorMissions.guestActive||j.afterShow&&!j.afterShow.completed)){j.settlementPending=false;j.inProgress=true;j.floorClosing=true;}
+    j.musicPauseSession=int(j.musicPauseSession,0,j.session);j.musicPaused=j.musicPaused===true;
+    j.afterShow=sanitizeAfterShow(j.afterShow,j.session,{settled:j.session>0&&j.session===j.settledSession&&!j.inProgress});
+    if(j.settlementPending&&(Floor.remaining(j.floorMissions)||j.floorMissions.guestActive||j.afterShow&&(!j.afterShow.completed||!j.afterShow.noticeAcknowledged))){j.settlementPending=false;j.inProgress=true;j.floorClosing=true;}
     if(j.floorClosing&&j.inProgress){j.secondsLeft=0;j.guidePending=false;j.settlementPending=false;}else j.floorClosing=false;
+    if(j.floorClosing&&j.inProgress&&j.musicPauseSession!==j.session){j.musicPauseSession=j.session;j.musicPaused=true;}
     j.resultFloorBonus=clamp(j.resultFloorBonus,0,70);j.resultFloorTasks=int(j.resultFloorTasks,0,2);if(j.tutorialComplete)j.guidePending=false;
   }
   act(type,p={}){
@@ -129,6 +133,13 @@ export class SimBarGame{
     switch(type){
       case'owner':if(this.phase!=='lobby'||!Number.isInteger(idx)||idx<0||idx>2)return this._done(false);this.owner=idx;this._put(OWNER_KEY,catalog.owners[idx].id);break;
       case'language':this.language=p.language==='en'?'en':'ko';this._put(LANGUAGE_KEY,this.language);break;
+      case'musicState':if(typeof p.paused!=='boolean')return this._done(false);j.musicPaused=p.paused;break;
+      case'farewellAck':
+        if(!this.closing||!this.farewellPending)return this._done(false);
+        j.afterShow.noticeAcknowledged=true;
+        if(this.pauseReason==='farewell'){this.paused=false;this.pauseReason='';}
+        if(!this.floorTasksPending&&!this.afterShowPending)this._settleNight();
+        break;
       case'start':if(j.inProgress||this._activePlan())return this.act('continue');if(j.settledSession>0&&j.session===j.settledSession)j.day=int(j.day+1,1,9999);this._planning(!!p.challenge);break;
       case'continue':
         if(j.settlementPending)this._settleNight();
@@ -138,8 +149,8 @@ export class SimBarGame{
       case'next':if(this.phase!=='results'||j.inProgress)return this._done(false);j.day=int(j.day+1,1,9999);this._planning(j.challenge);break;
       case'retry':if(this.phase!=='results'||j.inProgress)return this._done(false);this._planning(j.challenge);break;
       case'lobby':this.pour=null;this.phase='lobby';this.paused=true;this.pauseReason='lobby';break;
-      case'pause':if(this.playing||this.closing){this.paused=true;this.pauseReason=p.reason||'pause';}break;
-      case'resume':if(this.playing||this.closing){this.paused=false;this.pauseReason='';}break;
+      case'pause':if(this.playing||this.closing){this.paused=true;this.pauseReason=this.farewellPending?'farewell':p.reason||'pause';}break;
+      case'resume':if(this.playing||this.closing){this.paused=this.farewellPending;this.pauseReason=this.paused?'farewell':'';}break;
       case'guide':if(this.phase!=='guide')return this._done(false);if(j.guideStep<2)j.guideStep++;else{j.tutorialComplete=true;j.guidePending=false;this.phase='playing';this.paused=false;this.pauseReason='';}break;
       case'venue':if(this.phase!=='planning'||j.booking.blocks>0||!Number.isInteger(+p.venue)||+p.venue<0||+p.venue>3)return this._done(false);j.booking.venue=+p.venue;break;
       case'scout':case'listen':case'offer':case'promote':
@@ -161,7 +172,7 @@ export class SimBarGame{
   _activePlan(){const p=this.journey.booking;return!!(p&&!p.locked&&!p.completed&&p.day===this.journey.day);}
   _planning(challenge){const j=this.journey;if(j.inProgress)return;this.pour=null;if(!this._activePlan()){const previousVenue=j.booking?.venue??(this.owner===2?1:0);j.booking=Booking.newPlan(j.day,int(previousVenue,0,3));j.dayOpeningCash=this.state.money;j.hasDayOpeningCash=true;}j.challenge=challenge;this.phase='planning';this.paused=true;this.pauseReason='planning';this.state.clock=10+j.booking.blocks*2;}
   _newNight(){
-    const j=this.journey;j.session=j.session>=1e9?1:j.session+1;if(j.session===1)j.settledSession=0;j.inProgress=true;j.settlementPending=false;j.floorClosing=false;j.afterShow=null;j.secondsLeft=180;
+    const j=this.journey;j.session=j.session>=1e9?1:j.session+1;if(j.session===1)j.settledSession=0;j.inProgress=true;j.settlementPending=false;j.floorClosing=false;j.afterShow=null;j.musicPauseSession=0;j.musicPaused=false;j.secondsLeft=180;
     for(const k of ['score','combo','bestCombo','manualPerfects','orders','mistakes','successfulEvents','manualStreak','feverSeconds','feverCharge','drinkIncome','resultStars','resultServed','resultXP','resultBonus','resultProfit','resultTicketIncome','resultAttendance','resultFloorBonus','resultFloorTasks'])j[k]=0;
     j.resultNewRecord=false;j.openingCash=j.hasDayOpeningCash?j.dayOpeningCash:this.state.money;j.guideStep=0;j.guidePending=!j.tutorialComplete;j.floorMissions=Floor.newState();this._ensureReaction();
     this.state.clock=18;this.state.satisfaction=Math.max(this.state.satisfaction,j.challenge?.85:.94);this.state.performance=Math.max(this.state.performance,.92);
@@ -200,7 +211,7 @@ export class SimBarGame{
     const s=this.state,patience=52+this._random()*16+(this._onDuty(1)?18:0)+s.upgrades[2]*6+(s.activeEvent===0?8:0)+(this.journey.challenge?-12:18);
     this.orders.push({id,name:a.name,item,patience,maxPatience:patience});this._routeOrders();
   }
-  _createOrder(){if(this.orders.length>=4+this.state.upgrades[2])return;const pool=this.actors.filter(a=>a.id.startsWith('patron-')&&!this.orders.some(o=>o.id===a.id));if(!pool.length)return;const a=pool[Math.floor(this._random()*pool.length)];this._assignOrder(a.id,Math.floor(this._random()*5));}
+  _createOrder(excludeId){if(this.orders.length>=4+this.state.upgrades[2])return;const pool=this.actors.filter(a=>a.id.startsWith('patron-')&&a.id!==excludeId&&!this.orders.some(o=>o.id===a.id));if(!pool.length)return;const a=pool[Math.floor(this._random()*pool.length)];this._assignOrder(a.id,Math.floor(this._random()*catalog.drinks.length));}
   _routeOrders(){
     for(const a of this.actors.filter(a=>a.id.startsWith('patron-'))){const i=this.orders.findIndex(o=>o.id===a.id);if(i>=0){const goal=orderSlots[Math.min(i,6)];if(a.action!=='queue'||Math.hypot(a.targetX-goal.x,a.targetZ-goal.z)>.1){a.action='queue';setRoute(a,goal,this.actors);}}
       else if(a.action==='queue'){a.action='return';setRoute(a,point(a.homeX,a.homeZ),this.actors);}}
@@ -220,7 +231,7 @@ export class SimBarGame{
     const tip=round(catalog.drinks[item].price*clamp(o.patience/30,0,1)*.45*tips*(j.feverSeconds>0?1.75:1)*qualityTip),sale=round(catalog.drinks[item].price*revenue),income=tip+sale;
     s.money=clamp(s.money+income,0,1e9);s.fans+=automatic||quality>=.5?1+(!automatic&&quality>=.9?1:0):0;s.pours++;s.satisfaction=clamp(s.satisfaction+(automatic?.012:quality>=.5?.01+quality*.015:-.025),.3,1);s.performance=clamp(s.performance+(automatic||quality>=.5?.014:-.008),0,1);
     j.orders++;j.drinkIncome+=income;if(!automatic){if(quality<.5)this._mistake();else{j.combo++;j.bestCombo=Math.max(j.bestCombo,j.combo);if(quality>=.9)j.manualPerfects++;j.manualStreak++;let multiplier=1+Math.min(20,j.combo-1)*.05;if(j.feverSeconds>0)multiplier*=1.3;j.score+=round((70+130*quality)*multiplier);j.feverCharge=clamp(j.manualStreak/5,0,1);if(!j.feverSeconds&&j.manualStreak>=5&&s.performance>=.72){j.feverSeconds=12;j.manualStreak=0;j.feverCharge=0;}}}
-    this._routeOrders();this._createOrder();this._say((automatic?'바 보조 서빙':quality>=.9?'완벽한 서빙!':quality>=.5?'잘 서빙했어요!':'타이밍을 놓쳤어요 — 팁 없음')+' +'+this.formatMoney(income),(automatic?'Barback served':quality>=.9?'Perfect service!':quality>=.5?'Good service!':'Missed service — no tip')+' +'+this.formatMoney(income));return{success:true,code:automatic?'auto_served':quality>=.9?'perfect':quality>=.5?'good':'miss',quality,income};
+    this._routeOrders();this._createOrder(o.id);this._say((automatic?'바 보조 서빙':quality>=.9?'완벽한 서빙!':quality>=.5?'잘 서빙했어요!':'타이밍을 놓쳤어요 — 팁 없음')+' +'+this.formatMoney(income),(automatic?'Barback served':quality>=.9?'Perfect service!':quality>=.5?'Good service!':'Missed service — no tip')+' +'+this.formatMoney(income));return{success:true,code:automatic?'auto_served':quality>=.9?'perfect':quality>=.5?'good':'miss',quality,income};
   }
   tick(dt){
     if(!Number.isFinite(dt)||dt<=0)return;dt=Math.min(dt,5);let remaining=dt;
@@ -237,7 +248,9 @@ export class SimBarGame{
       if(this.orders[0]?.patience<=0&&!this.pour){this.orders.shift();s.satisfaction=Math.max(.35,s.satisfaction-.07);s.performance=Math.max(.35,s.performance-.04);s.fans=Math.max(0,s.fans-3);this._mistake();this._routeOrders();this._say('손님이 주문을 받지 못하고 떠났어요.','A guest left without their order.');}
       s.performance=clamp(s.performance-dt*(.0015-this.metrics().energyBonus*.006),0,1);
     }
-    this._tickActors(dt);if(this.closing)tickAfterShow(j.afterShow,this.actors,dt);this._floorTick(dt);this._autosave+=dt;if(this._autosave>=3){this._autosave=0;this.save();}
+    this._tickActors(dt);if(this.closing)tickAfterShow(j.afterShow,this.actors,dt);
+    if(this.farewellPending){this.paused=true;this.pauseReason='farewell';this.save();}
+    this._floorTick(dt);this._autosave+=dt;if(this._autosave>=3){this._autosave=0;this.save();}
   }
   _floorTick(dt){
     this._ensureReaction();const r=this.reaction,f=this.floor;
@@ -246,7 +259,7 @@ export class SimBarGame{
     const timeout=Challenges.tick(r,dt,true);if(timeout.timedOut){this.state.satisfaction=Math.max(.3,this.state.satisfaction-.015);this._say('시간을 놓쳤어요. 잠시 뒤 다시 연타로 대응하세요!','Time ran out. A new response window will appear shortly.');}
     if(this.closing){const ready=this.cleanupReadyWorkers,before=f.cleaned,workDt=ready?Math.min(dt,r.cleanupWorkBudget/(ready*3)):0,result=Floor.tick(f,workDt,ready,true);r.cleanupWorkBudget=Math.max(0,r.cleanupWorkBudget-(f.cleaned-before));if(r.cleanupWorkBudget<.001)r.cleanupWorkBudget=0;if(result.cleanupFinished){this.journey.score+=150;this._say('직원 청소 미션 완료!','Staff cleanup mission complete!');}}
     if(!r.activeKind&&r.cooldown<=0){if(f.guestActive)Challenges.start(r,2,f.guestStep);else if(this.closing&&f.cleanupActive&&this.cleanupReadyWorkers>0&&r.cleanupWorkBudget<=0)Challenges.start(r,1,Math.floor(f.cleaned/32));}
-    if(this.closing&&!this.floorTasksPending&&!this.afterShowPending)this._settleNight();
+    if(this.closing&&!this.floorTasksPending&&!this.afterShowPending&&!this.farewellPending)this._settleNight();
   }
   _paper(kind){const result=Floor.throw(this.floor,kind,this.playing);if(!result.success)return;this.state.fans+=result.fanGain;this.state.performance=Math.min(1,this.state.performance+result.energyGain);this.effects.push({kind,serial:++this._eventSerial,time:this.elapsed});this._say(kind===0?'밴드가 깜짝 꽃가루 퍼포먼스를 했어요!':'관객 위로 휴지가 날립니다!',kind===0?'The band unexpectedly throws confetti!':'Tissue streamers fly over the crowd!');}
   _quick(kind){
@@ -260,14 +273,20 @@ export class SimBarGame{
     const j=this.journey;
     if(!j.afterShow||j.afterShow.session!==j.session){j.afterShow=createAfterShow(this.actors,j.session);restoreAfterShow(j.afterShow,this.actors);}
   }
-  _beginClosing(){this.phase='closing';this.paused=false;this.pauseReason='';this.journey.floorClosing=true;this.journey.inProgress=true;this.journey.settlementPending=false;this.journey.guidePending=false;this._beginAfterShow();this.orders=[];this._routeOrders();this._ensureReaction();this._ensureCleanup();this._say('공연이 끝났어요. C 청소·F 손님 안내 미션을 마쳐 주세요.','Show over. Finish C cleanup and F guest assistance.');}
+  _beginClosing(){
+    const j=this.journey;this.phase='closing';j.floorClosing=true;j.inProgress=true;j.settlementPending=false;j.guidePending=false;
+    if(j.musicPauseSession!==j.session){j.musicPauseSession=j.session;j.musicPaused=true;}
+    this._beginAfterShow();this.orders=[];this._routeOrders();this._ensureReaction();this._ensureCleanup();
+    this.paused=this.farewellPending;this.pauseReason=this.paused?'farewell':'';
+    this._say('공연이 끝났어요. C 청소·F 손님 안내 미션을 마쳐 주세요.','Show over. Finish C cleanup and F guest assistance.');
+  }
   _ensureCleanup(){
     const f=this.floor;if(!this.closing||Floor.remaining(f)<=0)return;if(!f.cleanupActive&&!f.cleanupComplete)Floor.startCleanup(f,this.availableWorkers,true);
     if(!this.crew.length){this.crew=this.actors.filter(a=>(a.id==='bartender'||a.id==='server'||a.id.startsWith('hired-')&&this._onDuty(+a.id.slice(-1)))&&a.visible).map(a=>a.id);f.cleanupWorkers=this.crew.length;for(let i=0;i<this.crew.length;i++){const a=this.actors.find(x=>x.id===this.crew[i]);a.action='cleaning';a._ready=false;setRoute(a,this._cleanGoal(i),this.actors,false);}}
   }
   _settleNight(){
     const j=this.journey;if(j.session<=0||j.session===j.settledSession){j.settlementPending=false;j.inProgress=false;j.floorClosing=false;this.phase='results';this.paused=true;this.pauseReason='results';return;}
-    if(this.floorTasksPending||j.inProgress&&this.afterShowPending){this._beginClosing();return;}
+    if(this.floorTasksPending||j.inProgress&&(this.afterShowPending||this.farewellPending)){this._beginClosing();return;}
     this._completeEvent();const targets=this.goalTargets(),values=this.goals(),goals=values.filter((v,i)=>v>=targets[i]).length,stars=goals===3?3:goals>=2?2:1;
     const bonus=(j.challenge?130:75)+goals*(j.challenge?100:65)+stars*40,xp=25+goals*25+stars*15+(j.challenge?35:0);
     j.resultStars=stars;j.resultServed=j.orders;j.resultXP=xp;j.resultBonus=bonus;j.resultNewRecord=j.score>j.bestScore;j.bestScore=Math.max(j.bestScore,j.score);j.bestStars=Math.max(j.bestStars,stars);j.xp+=xp;j.completedNights++;this.state.money+=bonus;

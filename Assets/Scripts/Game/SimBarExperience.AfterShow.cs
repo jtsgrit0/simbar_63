@@ -12,23 +12,37 @@ public sealed partial class SimBarExperience
     }
     [Serializable] private sealed class AfterShowAudience
     {
-        public string id,phase="gather",partner="";public float homeX,homeZ,homeFacing,x,z,targetX,targetZ;
+        public string id,phase="gather",partner="";public float homeX,homeZ,homeFacing,x,y,z,targetX,targetZ;
+        public bool exitOnly,capture,visible=true;
     }
     [Serializable] private sealed class AfterShowData
     {
-        public int version=1,session;public bool started=true,completed;public float elapsed;
-        public string returningFan="";
+        public int version=2,session;public bool started=true,completed,departureStarted,noticeAcknowledged;public float elapsed;
+        public string departingActor="";
         public List<AfterShowMember> members=new List<AfterShowMember>();
         public List<AfterShowAudience> audience=new List<AfterShowAudience>();
     }
     private static readonly string[] AfterShowBand={"singer","guitarist","bassist","drummer"};
+    private string[] afterShowAudienceIds;
+    private string[] AfterShowAudienceIds
+    {
+        get
+        {
+            if(afterShowAudienceIds!=null)return afterShowAudienceIds;
+            var ids=new List<string>{"patron-8","patron-9","patron-10","patron-11","patron-12","patron-13","patron-14","patron-15","patron-0","patron-1","patron-2","patron-3","patron-4","patron-5","patron-6","patron-7","support-0","support-1","support-2","crowd-surfer"};
+            for(int i=16;i<patrons.Count;i++)ids.Add("patron-"+i);
+            afterShowAudienceIds=ids.ToArray();return afterShowAudienceIds;
+        }
+    }
+    private static readonly Vector3 AfterShowExit=new Vector3(8.8f,0f,-5.55f);
     private static readonly Vector2[] AfterShowSpots={new Vector2(3.05f,.25f),new Vector2(2.8f,-1.65f),new Vector2(7.7f,.35f),new Vector2(8f,-1.65f),new Vector2(3.1f,-3.6f),new Vector2(4.05f,-4.65f),new Vector2(7.65f,-3.2f),new Vector2(8.25f,-4.65f)};
     private readonly Dictionary<MotionActor,FloorActorRoute> afterShowRoutes=new Dictionary<MotionActor,FloorActorRoute>();
     private readonly Dictionary<string,Vector3> afterShowApproaches=new Dictionary<string,Vector3>();
     private readonly List<Vector3> afterShowPeople=new List<Vector3>();
     private readonly List<Vector4> afterShowBodies=new List<Vector4>();
     private AfterShowData afterShowRestored;
-    private bool AfterShowPending=>journey.afterShow!=null&&!journey.afterShow.completed;
+    private bool AfterShowPending=>journey.afterShow!=null&&(!journey.afterShow.completed||!journey.afterShow.noticeAcknowledged);
+    private bool AfterShowFarewellPending=>journey.inProgress&&journey.floorClosing&&journey.afterShow!=null&&journey.afterShow.completed&&!journey.afterShow.noticeAcknowledged;
     private bool IsSolidVenueActor(MotionActor actor)=>actor.kind!=MotionKind.Band
         ||AfterShowOwns(actor)&&actor.person.root!=null&&MotionPosition(actor).y<.1f;
 
@@ -36,6 +50,8 @@ public sealed partial class SimBarExperience
     {
         if(id!=null&&id.StartsWith("patron-")&&int.TryParse(id.Substring(7),out int index))
             return index>=0&&index<patrons.Count&&motionLookup.TryGetValue(patrons[index],out MotionActor guest)?guest:null;
+        if(id!=null&&id.StartsWith("support-")&&int.TryParse(id.Substring(8),out int support))return support>=0&&support<3?concertActors[8+support]:null;
+        if(id=="crowd-surfer")return concertActors[11];
         foreach(MotionActor actor in motionActors)if(actor.kind==MotionKind.Band&&actor.person.name.ToLowerInvariant()==id)return actor;
         return null;
     }
@@ -43,8 +59,7 @@ public sealed partial class SimBarExperience
     {
         if(journey.afterShow==null)return false;
         foreach(var member in journey.afterShow.members)if(AfterShowActor(member.id)==actor)return true;
-        // Keep returned fans at their saved places until the next night resets
-        // the sequence; an early fan must not wander before the last one returns.
+        // The departing crowd remains owned through the shared barrier and exit.
         foreach(var audience in journey.afterShow.audience)if(AfterShowActor(audience.id)==actor)return true;
         return false;
     }
@@ -67,30 +82,43 @@ public sealed partial class SimBarExperience
     {
         var state=journey.afterShow;
         if(state==null)return;
-        if(state.version!=1||state.session!=journey.session||state.members==null||state.audience==null||state.members.Count!=4||state.audience.Count!=8)
+        if((state.version!=1&&state.version!=2)||state.session!=journey.session||state.members==null||state.audience==null)
         {journey.afterShow=null;return;}
+        int previousVersion=state.version;bool settled=journey.session==journey.settledSession&&!journey.inProgress;
+        var members=new List<AfterShowMember>();
         for(int i=0;i<4;i++)
         {
-            var member=state.members[i];if(member==null||member.id!=AfterShowBand[i]){journey.afterShow=null;return;}
-            if(Array.IndexOf(new[]{"stage","approach","highfive","hug","exit","gone"},member.phase)<0)member.phase="stage";
+            var member=state.members.Find(m=>m!=null&&m.id==AfterShowBand[i]);if(member==null){journey.afterShow=null;return;}
+            if(settled)member.phase="gone";else if(previousVersion==1&&member.phase=="exit")member.phase="await-exit";
+            if(Array.IndexOf(new[]{"stage","approach","highfive","hug","await-exit","exit","gone"},member.phase)<0)member.phase="stage";
             member.waypoint=Mathf.Clamp(member.waypoint,0,8);member.greeting=Mathf.Clamp(member.greeting,0,2);
+            if(member.phase=="await-exit"||member.phase=="exit"||member.phase=="gone")member.greeting=2;
             member.timer=JourneyClamp(member.timer,0f,0f,2f);member.delay=JourneyClamp(member.delay,0f,0f,3f);
             member.x=JourneyClamp(member.x,5.35f,-20f,20f);member.z=JourneyClamp(member.z,3.5f,-20f,20f);
             member.stageLevel=JourneyClamp(member.stageLevel,1f,0f,1f);member.visible=member.phase!="gone";
             member.blockedTime=0f;member.standAttempt=Mathf.Clamp(member.standAttempt,0,10000);
+            members.Add(member);
         }
-        for(int i=0;i<8;i++)
+        var audience=new List<AfterShowAudience>();
+        for(int i=0;i<AfterShowAudienceIds.Length;i++)
         {
-            var fan=state.audience[i];if(fan==null||fan.id!="patron-"+(8+i)){journey.afterShow=null;return;}
-            if(Array.IndexOf(new[]{"gather","wait","greet","return","done"},fan.phase)<0)fan.phase="gather";
-            fan.x=JourneyClamp(fan.x,AfterShowSpots[i].x,-20f,20f);fan.z=JourneyClamp(fan.z,AfterShowSpots[i].y,-20f,20f);
+            string id=AfterShowAudienceIds[i];var fan=state.audience.Find(a=>a!=null&&a.id==id);bool missing=fan==null,exitOnly=i>=8;
+            if(missing)fan=new AfterShowAudience{id=id,phase=exitOnly?"farewell-wait":"gather",x=i<8?AfterShowSpots[i].x:6f,z=i<8?AfterShowSpots[i].y:-4.25f};
+            if(missing){fan.homeX=fan.x;fan.homeZ=fan.z;}
+            Vector2 target=i<8?AfterShowSpots[i]:new Vector2(JourneyClamp(fan.x,6f,-20f,20f),JourneyClamp(fan.z,-4.25f,-20f,20f));
+            if(settled)fan.phase="gone";else if(fan.phase=="return"||fan.phase=="done")fan.phase="farewell-wait";
+            if(Array.IndexOf(new[]{"gather","wait","greet","farewell-wait","exit","gone"},fan.phase)<0)fan.phase=exitOnly?"farewell-wait":"gather";
+            fan.x=JourneyClamp(fan.x,target.x,-20f,20f);fan.z=JourneyClamp(fan.z,target.y,-20f,20f);fan.y=JourneyClamp(fan.y,0f,0f,3f);
             fan.homeX=JourneyClamp(fan.homeX,fan.x,-20f,20f);fan.homeZ=JourneyClamp(fan.homeZ,fan.z,-20f,20f);
             fan.homeFacing=JourneyClamp(fan.homeFacing,0f,-Mathf.PI,Mathf.PI);
-            fan.targetX=AfterShowSpots[i].x;fan.targetZ=AfterShowSpots[i].y;
+            fan.targetX=target.x;fan.targetZ=target.y;fan.exitOnly=exitOnly;fan.visible=fan.phase!="gone";fan.capture=missing&&!settled||fan.capture;
             if(Array.IndexOf(AfterShowBand,fan.partner)<0)fan.partner="";
+            audience.Add(fan);
         }
-        if(!state.audience.Exists(fan=>fan.id==state.returningFan&&fan.phase=="return"))state.returningFan="";
-        state.elapsed=JourneyClamp(state.elapsed,0f,0f,1000000f);state.completed=state.members.TrueForAll(m=>m.phase=="gone")&&state.audience.TrueForAll(a=>a.phase=="done");
+        state.members=members;state.audience=audience;state.version=2;
+        if(!state.members.Exists(m=>m.id==state.departingActor&&m.phase=="exit")&&!state.audience.Exists(a=>a.id==state.departingActor&&a.phase=="exit"))state.departingActor="";
+        state.departureStarted=settled||state.departureStarted;state.noticeAcknowledged=settled||state.noticeAcknowledged;
+        state.elapsed=JourneyClamp(state.elapsed,0f,0f,1000000f);state.completed=state.members.TrueForAll(m=>m.phase=="gone")&&state.audience.TrueForAll(a=>a.phase=="gone");
     }
     private void EnsureAfterShow()
     {
@@ -99,14 +127,17 @@ public sealed partial class SimBarExperience
         for(int i=0;i<4;i++)
         {
             var actor=AfterShowActor(AfterShowBand[i]);Vector3 p=actor!=null?MotionPosition(actor):new Vector3(5.35f,.62f,3.5f);
-            state.members.Add(new AfterShowMember{id=AfterShowBand[i],x=p.x,z=p.z,delay=i*.7f,stageLevel=p.y>.1f?1f:0f,phase=p.y>.1f?"stage":"approach"});
+            bool visible=actor==null||actor.person.root.gameObject.activeSelf;
+            state.members.Add(new AfterShowMember{id=AfterShowBand[i],x=p.x,z=p.z,delay=i*.7f,stageLevel=p.y>.1f?1f:0f,phase=!visible?"gone":p.y>.1f?"stage":"approach",greeting=visible?0:2,visible=visible});
         }
-        for(int i=0;i<8;i++)
+        for(int i=0;i<AfterShowAudienceIds.Length;i++)
         {
-            string id="patron-"+(8+i);var actor=AfterShowActor(id);Vector3 p=actor!=null?MotionPosition(actor):new Vector3(AfterShowSpots[i].x,0f,AfterShowSpots[i].y);
+            string id=AfterShowAudienceIds[i];var actor=AfterShowActor(id);bool exitOnly=i>=8;Vector2 target=i<8?AfterShowSpots[i]:new Vector2(6f,-4.25f);Vector3 p=actor!=null?MotionPosition(actor):new Vector3(target.x,0f,target.y);
+            if(exitOnly)target=new Vector2(p.x,p.z);bool visible=actor==null||actor.person.root.gameObject.activeSelf;
             float facing=actor!=null?Mathf.DeltaAngle(0f,actor.person.root.localEulerAngles.y)*Mathf.Deg2Rad:0f;
-            state.audience.Add(new AfterShowAudience{id=id,x=p.x,z=p.z,homeX=p.x,homeZ=p.z,homeFacing=facing,targetX=AfterShowSpots[i].x,targetZ=AfterShowSpots[i].y});
+            state.audience.Add(new AfterShowAudience{id=id,x=p.x,y=p.y,z=p.z,homeX=p.x,homeZ=p.z,homeFacing=facing,targetX=target.x,targetZ=target.y,exitOnly=exitOnly,visible=visible,phase=!visible?"gone":exitOnly?"farewell-wait":"gather"});
         }
+        state.completed=state.members.TrueForAll(m=>m.phase=="gone")&&state.audience.TrueForAll(a=>a.phase=="gone");
         journey.afterShow=state;
     }
     private void RestoreAfterShow()
@@ -125,8 +156,9 @@ public sealed partial class SimBarExperience
         foreach(var fan in state.audience)
         {
             var actor=AfterShowActor(fan.id);if(actor==null)continue;
-            actor.person.root.position=worldRoot.TransformPoint(new Vector3(fan.x,0f,fan.z));actor.pitActive=false;actor.moving=false;
-            actor.afterShowAction="aftershow-wait";actor.afterShowProgress=0f;
+            if(fan.capture){Vector3 captured=MotionPosition(actor);fan.x=fan.homeX=captured.x;fan.z=fan.homeZ=captured.z;fan.y=captured.y;fan.capture=false;}
+            actor.person.root.position=worldRoot.TransformPoint(new Vector3(fan.x,fan.y,fan.z));actor.person.root.gameObject.SetActive(fan.phase!="gone");actor.pitActive=false;actor.moving=false;
+            actor.afterShowAction=fan.id=="crowd-surfer"&&fan.y>.1f?"surf":"aftershow-wait";actor.afterShowProgress=0f;
             if(fan.phase=="greet"&&AfterShowActor(fan.partner) is MotionActor partner)
             {actor.afterShowAction=partner.afterShowAction;actor.afterShowProgress=partner.afterShowProgress;AfterShowFace(actor,partner);AfterShowFace(partner,actor);}
         }
@@ -135,7 +167,7 @@ public sealed partial class SimBarExperience
     {
         var state=journey.afterShow;if(state==null||!ReferenceEquals(state,afterShowRestored))return;
         foreach(var member in state.members){var a=AfterShowActor(member.id);if(a==null)continue;Vector3 p=MotionPosition(a);member.x=p.x;member.z=p.z;member.visible=a.person.root.gameObject.activeSelf;}
-        foreach(var fan in state.audience){var a=AfterShowActor(fan.id);if(a==null)continue;Vector3 p=MotionPosition(a);fan.x=p.x;fan.z=p.z;}
+        foreach(var fan in state.audience){var a=AfterShowActor(fan.id);if(a==null)continue;Vector3 p=MotionPosition(a);fan.x=p.x;fan.y=p.y;fan.z=p.z;fan.visible=a.person.root.gameObject.activeSelf;}
     }
     private void AfterShowFace(MotionActor actor,MotionActor target)
     {
@@ -205,45 +237,98 @@ public sealed partial class SimBarExperience
         else if(i==1)result.Add(new Vector3(3.4f,0f,3.05f));else if(i==2)result.Add(new Vector3(7.75f,0f,3.05f));
         result.AddRange(new[]{new Vector3(x,0f,2.55f),new Vector3(x,0f,2.15f),new Vector3(x,0f,1.65f),new Vector3(x,0f,1.15f)});return result;
     }
+
+    private static int AfterShowDepartureCount(AfterShowData state)=>state.members.Count+state.audience.Count;
+    private static string AfterShowDepartureId(AfterShowData state,int index)=>index<state.members.Count?state.members[index].id:state.audience[index-state.members.Count].id;
+    private static string AfterShowDeparturePhase(AfterShowData state,int index)=>index<state.members.Count?state.members[index].phase:state.audience[index-state.members.Count].phase;
+    private static void SetAfterShowDeparturePhase(AfterShowData state,int index,string phase)
+    {
+        if(index<state.members.Count){state.members[index].phase=phase;state.members[index].visible=phase!="gone";}
+        else{state.audience[index-state.members.Count].phase=phase;state.audience[index-state.members.Count].visible=phase!="gone";state.audience[index-state.members.Count].partner="";}
+    }
+    private void BeginAfterShowDepartures(AfterShowData state)
+    {
+        if(state.departureStarted||!state.members.TrueForAll(m=>m.greeting>=2||m.phase=="gone"))return;
+        var surfer=AfterShowActor("crowd-surfer");if(surfer!=null&&MotionPosition(surfer).y>.01f)return;
+        state.departureStarted=true;state.departingActor="";
+        for(int i=0;i<AfterShowDepartureCount(state);i++)
+        {
+            if(AfterShowDeparturePhase(state,i)=="gone")continue;SetAfterShowDeparturePhase(state,i,"exit");
+            var actor=AfterShowActor(AfterShowDepartureId(state,i));if(actor==null)continue;
+            afterShowRoutes.Remove(actor);actor.afterShowAction="aftershow-wait";actor.afterShowProgress=0f;actor.moving=false;
+        }
+    }
+    private void TickAfterShowDepartures(AfterShowData state,float delta)
+    {
+        bool active=false;for(int i=0;i<AfterShowDepartureCount(state);i++)if(AfterShowDepartureId(state,i)==state.departingActor&&AfterShowDeparturePhase(state,i)=="exit")active=true;
+        if(!active)state.departingActor="";
+        if(string.IsNullOrEmpty(state.departingActor))
+        {
+            float nearest=float.MaxValue;string next="";
+            for(int i=0;i<AfterShowDepartureCount(state);i++)
+            {
+                if(AfterShowDeparturePhase(state,i)!="exit")continue;string id=AfterShowDepartureId(state,i);var actor=AfterShowActor(id);
+                if(actor==null||!actor.person.root.gameObject.activeSelf){SetAfterShowDeparturePhase(state,i,"gone");continue;}
+                float distance=FlatDistance(MotionPosition(actor),AfterShowExit);
+                if(distance<nearest||distance==nearest&&string.CompareOrdinal(id,next)<0){nearest=distance;next=id;}
+            }
+            state.departingActor=next;
+        }
+        for(int i=0;i<AfterShowDepartureCount(state);i++)
+        {
+            string id=AfterShowDepartureId(state,i);var actor=AfterShowActor(id);if(actor==null)continue;Vector3 before=MotionPosition(actor);
+            actor.afterShowProgress=0f;actor.afterShowAction="aftershow-wait";actor.moving=false;
+            if(AfterShowDeparturePhase(state,i)=="gone"){actor.person.root.gameObject.SetActive(false);continue;}
+            if(id==state.departingActor)
+            {
+                actor.afterShowAction="walk";
+                if(AfterShowWalk(actor,AfterShowExit,delta,i<state.members.Count?1.65f:1.45f,.18f))
+                {SetAfterShowDeparturePhase(state,i,"gone");actor.person.root.gameObject.SetActive(false);actor.moving=false;actor.path.Clear();actor.pathIndex=0;afterShowRoutes.Remove(actor);state.departingActor="";}
+            }
+            actor.speed=FlatDistance(before,MotionPosition(actor))/delta;
+            if(actor.visual!=null)actor.visual.ApplyOffStagePresentation(state.elapsed,actor.speed,actor.afterShowAction,0f);
+        }
+    }
+    private void CompleteAfterShowFrame(AfterShowData state)
+    {
+        bool completed=state.members.TrueForAll(m=>m.phase=="gone")&&state.audience.TrueForAll(a=>a.phase=="gone"),justCompleted=completed&&!state.completed;
+        state.completed=completed;SyncAfterShow();
+        if(AfterShowFarewellPending)
+        {paused=true;RefreshJourneyHUD();if(justCompleted)SaveOperations();}
+    }
+    private void AcknowledgeAfterShowFarewell()
+    {
+        if(!JourneyIsFloorClosing||!AfterShowFarewellPending)return;
+        journey.afterShow.noticeAcknowledged=true;paused=false;RefreshJourneyHUD();SaveOperations();
+        if(!FloorTasksPending)FinishJourneyNight();
+    }
     private void TickAfterShow(float delta)
     {
         if(!JourneyIsFloorClosing||paused||!JourneyFinite(delta)||delta<=0f)return;
         EnsureAfterShow();RestoreAfterShow();delta=Mathf.Min(.1f,delta);var state=journey.afterShow;state.elapsed+=delta;
-        // A return slot survives saves. One fan finishes the physical walk
-        // before the next leaves, keeping opposing home routes from cycling.
-        if(!state.audience.Exists(fan=>fan.id==state.returningFan&&fan.phase=="return"))
-        {var next=state.audience.Find(fan=>fan.phase=="return");state.returningFan=next?.id??"";}
-        // A waiting returner may stand on the active fan's home. Let that
-        // blocker walk first; the bounded visited set keeps priorities stable.
-        int visited=0;
-        for(int attempt=0;attempt<8;attempt++)
-        {
-            int active=state.audience.FindIndex(fan=>fan.id==state.returningFan&&fan.phase=="return");
-            if(active<0)break;visited|=1<<active;
-            var home=state.audience[active];int blocker=-1;
-            for(int i=0;i<state.audience.Count;i++)
-            {
-                var fan=state.audience[i];if((visited&(1<<i))!=0||fan.phase!="return")continue;
-                var actor=AfterShowActor(fan.id);
-                if(actor!=null&&FlatDistance(MotionPosition(actor),new Vector3(home.homeX,0f,home.homeZ))<.4f){blocker=i;break;}
-            }
-            if(blocker<0)break;state.returningFan=state.audience[blocker].id;
-        }
+        if(state.departureStarted){TickAfterShowDepartures(state,delta);CompleteAfterShowFrame(state);return;}
+        var surfer=AfterShowActor("crowd-surfer");
+        if(surfer!=null&&state.audience.Exists(f=>f.id=="crowd-surfer"&&f.phase!="gone"))
+        {Vector3 p=MotionPosition(surfer);p.y=Mathf.Max(0f,p.y-delta*1.85f);surfer.person.root.position=worldRoot.TransformPoint(p);}
         foreach(var fan in state.audience)
         {
             var actor=AfterShowActor(fan.id);if(actor==null)continue;
             actor.afterShowAction="aftershow-wait";actor.afterShowProgress=0f;actor.moving=false;
-            if(fan.phase=="gather"||fan.phase=="return")
+            if(fan.phase=="gone"){actor.person.root.gameObject.SetActive(false);continue;}
+            if(fan.exitOnly)
             {
-                bool returning=fan.phase=="return";Vector3 goal=new Vector3(returning?fan.homeX:fan.targetX,0f,returning?fan.homeZ:fan.targetZ);
-                if(returning&&fan.id!=state.returningFan)continue;
+                bool raised=surfer!=null&&MotionPosition(surfer).y>.1f;
+                actor.afterShowAction=fan.id=="crowd-surfer"&&raised?"surf":fan.id.StartsWith("support-")&&raised?"support":"aftershow-wait";continue;
+            }
+            if(fan.phase=="gather")
+            {
+                Vector3 goal=new Vector3(fan.targetX,0f,fan.targetZ);
                 actor.afterShowAction="walk";
                 // A greeting guest may wait at the safe edge of a spot already
                 // occupied by an ordinary patron; no actor is moved through a body.
-                if(AfterShowWalk(actor,goal,delta,1.15f,returning?.02f:.3f))
+                if(AfterShowWalk(actor,goal,delta,1.15f,.3f))
                 {
-                    fan.phase=returning?"done":"wait";actor.afterShowAction="aftershow-wait";actor.moving=false;
-                    if(returning){state.returningFan="";actor.wait=30f;actor.path.Clear();actor.pathIndex=0;actor.state=MotionState.Idle;actor.person.root.localRotation=Quaternion.Euler(0f,fan.homeFacing*Mathf.Rad2Deg,0f);}
+                    fan.phase="wait";actor.afterShowAction="aftershow-wait";actor.moving=false;
                 }
             }
             else if(fan.phase=="wait"&&AfterShowActor(fan.partner) is MotionActor partner)AfterShowFace(actor,partner);
@@ -270,15 +355,14 @@ public sealed partial class SimBarExperience
                     if(member.waypoint>=route.Count){member.stageLevel=0f;member.phase="approach";}
                 }
             }
-            else if(member.phase=="exit")
+            else if(member.phase=="await-exit"||member.phase=="exit")
             {
-                actor.afterShowAction="walk";
-                if(AfterShowWalk(actor,new Vector3(8.8f,0f,-5.55f),delta,1.65f)){member.phase="gone";member.visible=false;actor.person.root.gameObject.SetActive(false);actor.moving=false;}
+                member.phase="await-exit";actor.afterShowAction="aftershow-wait";actor.moving=false;
             }
             else
             {
                 var fan=state.audience[i*2+Mathf.Min(1,member.greeting)];var guest=AfterShowActor(fan.id);
-                if(guest==null){member.greeting++;member.phase=member.greeting>=2?"exit":"approach";continue;}
+                if(guest==null||fan.phase=="gone"){member.greeting++;member.phase=member.greeting>=2?"await-exit":"approach";continue;}
                 fan.partner=member.id;
                 if(member.phase=="approach")
                 {
@@ -312,13 +396,13 @@ public sealed partial class SimBarExperience
                     actor.afterShowAction=guest.afterShowAction=member.phase;actor.afterShowProgress=guest.afterShowProgress=progress;actor.moving=guest.moving=false;
                     AfterShowFace(actor,guest);AfterShowFace(guest,actor);
                     if(member.timer>=duration)
-                    {fan.phase="return";fan.partner="";member.greeting++;member.timer=0f;member.phase=member.greeting>=2?"exit":"approach";afterShowApproaches.Remove(member.id);afterShowRoutes.Remove(actor);afterShowRoutes.Remove(guest);}
+                    {fan.phase="farewell-wait";fan.partner="";guest.afterShowAction="aftershow-wait";guest.afterShowProgress=0f;guest.path.Clear();guest.pathIndex=0;member.greeting++;member.timer=0f;member.phase=member.greeting>=2?"await-exit":"approach";afterShowApproaches.Remove(member.id);afterShowRoutes.Remove(actor);afterShowRoutes.Remove(guest);}
                 }
             }
             actor.speed=FlatDistance(before,MotionPosition(actor))/delta;
             if(actor.visual!=null)actor.visual.ApplyOffStagePresentation(state.elapsed,actor.speed,actor.afterShowAction,actor.afterShowProgress);
         }
-        foreach(var fan in state.audience){var actor=AfterShowActor(fan.id);if(actor!=null&&fan.phase!="done"&&actor.visual!=null)actor.visual.ApplyOffStagePresentation(state.elapsed,actor.moving?1.15f:0f,actor.afterShowAction,actor.afterShowProgress);}
-        state.completed=state.members.TrueForAll(m=>m.phase=="gone")&&state.audience.TrueForAll(a=>a.phase=="done");SyncAfterShow();
+        foreach(var fan in state.audience){var actor=AfterShowActor(fan.id);if(actor!=null&&fan.phase!="gone"&&actor.visual!=null)actor.visual.ApplyOffStagePresentation(state.elapsed,actor.moving?1.15f:0f,actor.afterShowAction,actor.afterShowProgress);}
+        BeginAfterShowDepartures(state);CompleteAfterShowFrame(state);
     }
 }

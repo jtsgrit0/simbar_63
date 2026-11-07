@@ -1,0 +1,178 @@
+{
+  "errors": [],
+  "checks": [
+    "Every real pending menu item draws its own atlas cell.",
+    "Neighbouring customer icons remain separately visible and keep their own head pointers.",
+    "Rejected serving leaves the real pending bubble intact.",
+    "Successful serving removes that customer bubble on the next paint.",
+    "Bubble drawing coordinates move with the walking customers.",
+    "Manual prepare keeps its bubble until actual pourStop serving succeeds.",
+    "Paused world and its pending bubbles remain pixel-identical.",
+    "Expired orders remove their customer bubbles.",
+    "Closing clears all pending order bubbles."
+  ],
+  "before": {
+    "orders": [
+      {
+        "id": "patron-1",
+        "item": 0
+      },
+      {
+        "id": "patron-4",
+        "item": 1
+      },
+      {
+        "id": "patron-8",
+        "item": 2
+      },
+      {
+        "id": "patron-12",
+        "item": 3
+      },
+      {
+        "id": "patron-5",
+        "item": 0
+      }
+    ],
+    "draws": [
+      [
+        0,
+        0,
+        32,
+        32,
+        507,
+        270,
+        24,
+        24
+      ],
+      [
+        32,
+        0,
+        32,
+        32,
+        422,
+        275,
+        24,
+        24
+      ],
+      [
+        64,
+        0,
+        32,
+        32,
+        384,
+        285,
+        24,
+        24
+      ],
+      [
+        96,
+        0,
+        32,
+        32,
+        564,
+        271,
+        24,
+        24
+      ],
+      [
+        0,
+        0,
+        32,
+        32,
+        644,
+        335,
+        24,
+        24
+      ]
+    ],
+    "phase": "playing"
+  },
+  "served": {
+    "id": "patron-1",
+    "result": {
+      "success": true,
+      "code": "auto_served",
+      "quality": 0.7,
+      "income": 20
+    },
+    "after": {
+      "orders": [
+        {
+          "id": "patron-4",
+          "item": 1
+        },
+        {
+          "id": "patron-8",
+          "item": 2
+        },
+        {
+          "id": "patron-12",
+          "item": 3
+        },
+        {
+          "id": "patron-5",
+          "item": 0
+        },
+        {
+          "id": "patron-7",
+          "item": 1
+        }
+      ],
+      "draws": [
+        [
+          32,
+          0,
+          32,
+          32,
+          422,
+          275,
+          24,
+          24
+        ],
+        [
+          64,
+          0,
+          32,
+          32,
+          384,
+          285,
+          24,
+          24
+        ],
+        [
+          96,
+          0,
+          32,
+          32,
+          564,
+          271,
+          24,
+          24
+        ],
+        [
+          0,
+          0,
+          32,
+          32,
+          644,
+          335,
+          24,
+          24
+        ],
+        [
+          32,
+          0,
+          32,
+          32,
+          594,
+          316,
+          24,
+          24
+        ]
+      ],
+      "phase": "playing"
+    }
+  },
+  "passed": true
+}

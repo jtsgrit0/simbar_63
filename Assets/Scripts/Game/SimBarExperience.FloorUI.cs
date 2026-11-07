@@ -115,7 +115,7 @@ public sealed partial class SimBarExperience
     private void RefreshFloorMissionUI()
     {
         if(floorMissionCanvas==null) return;
-        bool visible=!JourneyValidationMode && (JourneyIsPlaying || JourneyIsFloorClosing);
+        bool visible=!JourneyValidationMode && !AfterShowFarewellPending && (JourneyIsPlaying || JourneyIsFloorClosing);
         if(!visible) CloseFloorMissionDrawer();
         if(floorMissionCanvas.gameObject.activeSelf!=visible) floorMissionCanvas.gameObject.SetActive(visible);
         if(!visible) { floorMissionUiVisible=false; return; }

@@ -1,0 +1,81 @@
+{
+  "resourceExact": true,
+  "bytes": 12428,
+  "sha256": "7664b985f8beabae767e4dbb4d3509ac047c5c2dedc5108dd46f668e94fee866",
+  "atlas": {
+    "file": "order-icons.png",
+    "frameWidth": 32,
+    "frameHeight": 32,
+    "columns": 6,
+    "id": "orders",
+    "resource": "SimBarPixelArt/order-icons",
+    "directionColumns": []
+  },
+  "existingResources": [
+    {
+      "name": "OwnerFemale",
+      "dimensions": [
+        400,
+        350
+      ],
+      "approvedPngAndResourceRGBAExact": true,
+      "approvedStreamExact": false,
+      "previousResourceRGBAExact": true,
+      "previousBytes": 211546,
+      "currentBytes": 211546,
+      "guidPreserved": true
+    },
+    {
+      "name": "OwnerFF",
+      "dimensions": [
+        400,
+        350
+      ],
+      "approvedPngAndResourceRGBAExact": true,
+      "approvedStreamExact": false,
+      "previousResourceRGBAExact": true,
+      "previousBytes": 216358,
+      "currentBytes": 216358,
+      "guidPreserved": true
+    },
+    {
+      "name": "OwnerPetSounds",
+      "dimensions": [
+        400,
+        350
+      ],
+      "approvedPngAndResourceRGBAExact": true,
+      "approvedStreamExact": false,
+      "previousResourceRGBAExact": true,
+      "previousBytes": 191525,
+      "currentBytes": 191525,
+      "guidPreserved": true
+    },
+    {
+      "name": "SeoulNeonNight",
+      "dimensions": [
+        640,
+        360
+      ],
+      "approvedPngAndResourceRGBAExact": true,
+      "approvedStreamExact": false,
+      "previousResourceRGBAExact": true,
+      "previousBytes": 413030,
+      "currentBytes": 413030,
+      "guidPreserved": true
+    },
+    {
+      "name": "SeoulNightDistricts",
+      "dimensions": [
+        640,
+        360
+      ],
+      "approvedPngAndResourceRGBAExact": true,
+      "approvedStreamExact": false,
+      "previousResourceRGBAExact": true,
+      "previousBytes": 413030,
+      "currentBytes": 413030,
+      "guidPreserved": true
+    }
+  ]
+}

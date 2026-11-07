@@ -1,0 +1,104 @@
+{
+  "frames": 1147,
+  "maxStep": 0.165000245,
+  "hiddenAtDoor": true,
+  "gone": 32,
+  "allActualPatronsGone": 24,
+  "seatedRemain": 11,
+  "census": [
+    {
+      "id": "bartender",
+      "name": "Bartender",
+      "role": "bartender",
+      "physicalVisible": true,
+      "pixelVisible": true
+    },
+    {
+      "id": "server",
+      "name": "Server",
+      "role": "server",
+      "physicalVisible": true,
+      "pixelVisible": true
+    },
+    {
+      "id": "bar-seat-0",
+      "name": "Bar Guest 0",
+      "role": "barseated",
+      "physicalVisible": true,
+      "pixelVisible": true
+    },
+    {
+      "id": "bar-seat-1",
+      "name": "Bar Guest 1",
+      "role": "barseated",
+      "physicalVisible": true,
+      "pixelVisible": true
+    },
+    {
+      "id": "bar-seat-2",
+      "name": "Bar Guest 2",
+      "role": "barseated",
+      "physicalVisible": true,
+      "pixelVisible": true
+    },
+    {
+      "id": "bar-seat-3",
+      "name": "Bar Guest 3",
+      "role": "barseated",
+      "physicalVisible": true,
+      "pixelVisible": true
+    },
+    {
+      "id": "lounge-0",
+      "name": "Lounge Guest 0",
+      "role": "seated",
+      "physicalVisible": true,
+      "pixelVisible": true
+    },
+    {
+      "id": "lounge-1",
+      "name": "Lounge Guest 1",
+      "role": "seated",
+      "physicalVisible": true,
+      "pixelVisible": true
+    },
+    {
+      "id": "lounge-2",
+      "name": "Lounge Guest 2",
+      "role": "seated",
+      "physicalVisible": true,
+      "pixelVisible": true
+    },
+    {
+      "id": "lounge-3",
+      "name": "Lounge Guest 3",
+      "role": "seated",
+      "physicalVisible": true,
+      "pixelVisible": true
+    },
+    {
+      "id": "lounge-4",
+      "name": "Lounge Guest 4",
+      "role": "seated",
+      "physicalVisible": true,
+      "pixelVisible": true
+    },
+    {
+      "id": "lounge-5",
+      "name": "Lounge Guest 5",
+      "role": "seated",
+      "physicalVisible": true,
+      "pixelVisible": true
+    },
+    {
+      "id": "lounge-6",
+      "name": "Lounge Guest 6",
+      "role": "seated",
+      "physicalVisible": true,
+      "pixelVisible": true
+    }
+  ],
+  "message": "오늘의 라이브 밴드 공연은 하얗게 불태웠어요! 내일 또 공연 보러와요!",
+  "pauseProtected": true,
+  "savedPopupRestored": true
+}

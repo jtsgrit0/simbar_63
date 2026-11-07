@@ -40,6 +40,7 @@ assert.equal(actor(loaded).action,actor(g).action);
 // with patrol. Use the public closing transition and respond to actual prompts.
 while(g.phase!=='results'&&g.elapsed<430){
   g.tick(.05);
+  if(g.farewellPending)g.act('farewellAck');
   if(g.reaction.activeKind)g.act('quick',{kind:g.reaction.activeKind});
 }
 assert.equal(g.phase,'results','Bartender patrol blocked cleanup/after-show settlement');

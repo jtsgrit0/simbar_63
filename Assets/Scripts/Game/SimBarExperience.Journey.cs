@@ -22,6 +22,8 @@ public sealed partial class SimBarExperience
         public bool inProgress;
         public int session;
         public int settledSession;
+        public int musicPauseSession;
+        public bool musicPaused;
         public bool settlementPending;
         public float secondsLeft = JourneyNightDuration;
         public int score;
@@ -164,6 +166,8 @@ public sealed partial class SimBarExperience
         if (journeyInitialized) return;
         SanitizeJourney();
         journeyInitialized = true;
+        SyncJourneyMusic();
+        RestoreAfterShow();
         // A saved night never starts running behind the title screen. Recovery
         // only finishes an already-committed closing receipt, then shows lobby.
         if (journey.settlementPending) SettleJourneyNight();
@@ -267,6 +271,7 @@ public sealed partial class SimBarExperience
     private bool TryHandleJourneyPause()
     {
         if (journeyValidationMode) return false;
+        if(JourneyIsFloorClosing&&AfterShowFarewellPending){RefreshJourneyFarewell();return true;}
         if (floorMissionDrawerOpen) { CloseFloorMissionDrawer(); return true; }
         if (JourneyIsPlaying || JourneyIsFloorClosing) return false;
         if (JourneyIsGuide) JourneyReturnToLobby();
@@ -299,6 +304,9 @@ public sealed partial class SimBarExperience
         if (journey.session == 1) journey.settledSession = 0;
         journey.challenge = challenge;
         journey.inProgress = true;
+        journey.musicPauseSession = 0;
+        journey.musicPaused = false;
+        SyncJourneyMusic();
         journey.settlementPending = false;
         journey.secondsLeft = JourneyNightDuration;
         journey.score = journey.combo = journey.bestCombo = journey.manualPerfects = 0;
@@ -501,6 +509,7 @@ public sealed partial class SimBarExperience
             catch (Exception error) { Debug.LogWarning("SimBar kept journey defaults: " + error.Message); }
         }
         SanitizeJourney();
+        SyncJourneyMusic();
     }
 
     private void SanitizeJourney()
@@ -511,6 +520,7 @@ public sealed partial class SimBarExperience
         journey.guideStep = Mathf.Clamp(journey.guideStep, 0, 2);
         journey.session = Mathf.Clamp(journey.session, 0, 1000000000);
         journey.settledSession = Mathf.Clamp(journey.settledSession, 0, journey.session);
+        journey.musicPauseSession = Mathf.Clamp(journey.musicPauseSession, 0, journey.session);
         journey.secondsLeft = JourneyClamp(journey.secondsLeft, JourneyNightDuration, 0f, JourneyNightDuration);
         journey.score = Mathf.Clamp(journey.score, 0, 100000000);
         journey.combo = Mathf.Clamp(journey.combo, 0, 100000);
@@ -564,6 +574,7 @@ public sealed partial class SimBarExperience
             journey.secondsLeft = 0f;
             journey.settlementPending = false;
             journey.guidePending = false;
+            if(journey.musicPauseSession!=journey.session){journey.musicPauseSession=journey.session;journey.musicPaused=true;}
         }
         if (journey.bookingCareer == null) journey.bookingCareer = SimBarBooking.NewCareer();
         SimBarBooking.Sanitize(journey.booking, journey.bookingCareer);

@@ -1,0 +1,99 @@
+{
+  "allActualPatronsGone": 24,
+  "participantsGone": 32,
+  "visibleFloorActors": 0,
+  "seatedRemain": 11,
+  "census": [
+    {
+      "id": "bartender",
+      "name": "Bartender",
+      "role": "bartender",
+      "physicalVisible": true,
+      "pixelVisible": true
+    },
+    {
+      "id": "server",
+      "name": "Server",
+      "role": "server",
+      "physicalVisible": true,
+      "pixelVisible": true
+    },
+    {
+      "id": "bar-seat-0",
+      "name": "Bar Guest 0",
+      "role": "barseated",
+      "physicalVisible": true,
+      "pixelVisible": true
+    },
+    {
+      "id": "bar-seat-1",
+      "name": "Bar Guest 1",
+      "role": "barseated",
+      "physicalVisible": true,
+      "pixelVisible": true
+    },
+    {
+      "id": "bar-seat-2",
+      "name": "Bar Guest 2",
+      "role": "barseated",
+      "physicalVisible": true,
+      "pixelVisible": true
+    },
+    {
+      "id": "bar-seat-3",
+      "name": "Bar Guest 3",
+      "role": "barseated",
+      "physicalVisible": true,
+      "pixelVisible": true
+    },
+    {
+      "id": "lounge-0",
+      "name": "Lounge Guest 0",
+      "role": "seated",
+      "physicalVisible": true,
+      "pixelVisible": true
+    },
+    {
+      "id": "lounge-1",
+      "name": "Lounge Guest 1",
+      "role": "seated",
+      "physicalVisible": true,
+      "pixelVisible": true
+    },
+    {
+      "id": "lounge-2",
+      "name": "Lounge Guest 2",
+      "role": "seated",
+      "physicalVisible": true,
+      "pixelVisible": true
+    },
+    {
+      "id": "lounge-3",
+      "name": "Lounge Guest 3",
+      "role": "seated",
+      "physicalVisible": true,
+      "pixelVisible": true
+    },
+    {
+      "id": "lounge-4",
+      "name": "Lounge Guest 4",
+      "role": "seated",
+      "physicalVisible": true,
+      "pixelVisible": true
+    },
+    {
+      "id": "lounge-5",
+      "name": "Lounge Guest 5",
+      "role": "seated",
+      "physicalVisible": true,
+      "pixelVisible": true
+    },
+    {
+      "id": "lounge-6",
+      "name": "Lounge Guest 6",
+      "role": "seated",
+      "physicalVisible": true,
+      "pixelVisible": true
+    }
+  ]
+}

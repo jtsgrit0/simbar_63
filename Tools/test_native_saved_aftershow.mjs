@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {SimBarGame} from './WebGLTemplate/FastGame/core.js';
-import {createAfterShow,tickAfterShow} from './WebGLTemplate/FastGame/aftershow.js';
+import {createAfterShow,tickAfterShow,EXIT_POINT} from './WebGLTemplate/FastGame/aftershow.js';
 
 // A nearby patron blocks the final 25.5 cm into the gathering mark. The fan
 // should settle here and the drummer must approach this actual position.
@@ -10,7 +10,7 @@ import {createAfterShow,tickAfterShow} from './WebGLTemplate/FastGame/aftershow.
   const g=new SimBarGame({storage,seed:12}),state=createAfterShow(g.actors,1);
   for(const a of g.actors)a.visible=false;
   for(const m of state.members)m.phase='gone';
-  for(const item of state.audience)item.phase='done';
+  for(const item of state.audience)item.phase='gone';
   const fan=g.actors.find(a=>a.id==='patron-15'),drummer=g.actors.find(a=>a.id==='drummer');
   Object.assign(fan,{visible:true,x:8,z:-4.6});Object.assign(drummer,{visible:true,x:7.1,z:-4.1,stageLevel:0});
   g.actors.push({id:'blocking-patron',role:'guest',visible:true,x:8.4,z:-4.6});
@@ -33,7 +33,7 @@ for(const fixture of fixtures){
   g=new SimBarGame({storage});g.act('continue');
   let seconds=0,guestReturned=false;
   const inputs={1:0,2:0};
-  for(;seconds<180&&g.phase!=='results';seconds+=.05){
+  for(;seconds<240&&g.phase!=='results';seconds+=.05){
     const previous=new Map(g.actors.map(a=>[a.id,{x:a.x,z:a.z}]));
     const escort=g.escort;
     g.tick(.05);
@@ -48,6 +48,7 @@ for(const fixture of fixtures){
       assert(Math.hypot(worker.x-goal.x,worker.z-goal.z)<=.22,`${fixture}: escort cleared before worker returned`);
       guestReturned=true;
     }
+    if(g.farewellPending)g.act('farewellAck');
     if(g.reaction.activeKind){const kind=g.reaction.activeKind;g.act('quick',{kind});inputs[kind]++;}
   }
   const outcome={fixture,seconds,phase:g.phase,inputs,guestReturned,escort:g.escort,
@@ -60,8 +61,9 @@ for(const fixture of fixtures){
   assert.equal(g.escort,null,`${fixture}: guest escort remains active`);
   assert.equal(g.floorTasksPending,false);
   assert(g.journey.afterShow.members.every(m=>m.phase==='gone'));
+  assert.equal(g.journey.afterShow.audience.length,20);
+  for(const fan of g.journey.afterShow.audience){const a=g.actors.find(a=>a.id===fan.id);assert.equal(fan.phase,'gone');assert.equal(a.visible,false);assert(Math.hypot(a.x-EXIT_POINT.x,a.z-EXIT_POINT.z)<=.181);assert.equal(a.moving,false);}
   if(fixture.startsWith('aftershow-seed-')){
-    for(const fan of g.journey.afterShow.audience){const a=g.actors.find(a=>a.id===fan.id);assert(Math.hypot(a.x-fan.homeX,a.z-fan.homeZ)<=.201);assert.equal(a.moving,false);}
     for(const id of g.crew){const a=g.actors.find(a=>a.id===id);assert(Math.hypot(a.x-a._cleanupParkGoal.x,a.z-a._cleanupParkGoal.z)<=.05);assert.equal(a.moving,false);}
   }
   if(fixture==='aftershow-floor-missions.json')assert(guestReturned,'Saved guest task never returned its staff worker');

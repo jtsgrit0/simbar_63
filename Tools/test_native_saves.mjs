@@ -38,6 +38,7 @@ const before=live.journey.secondsLeft;live.act('pause');live.tick(2);assert.equa
 let guest=false,paper=false,arrived=false,withoutInput=false;
 for(let i=0;i<6000&&live.phase!=='results';i++){
   live.tick(.1);guest ||= live.floor.guestSpawned;paper ||= live.floor.litter>0;
+  if(live.farewellPending)live.act('farewellAck');
   if(live.closing&&live.cleanupReadyWorkers>0){arrived=true;if(!withoutInput){const cleaned=live.floor.cleaned;live.tick(1);assert.equal(live.floor.cleaned,cleaned);withoutInput=true;}}
   if(live.reaction.activeKind)live.act('quick',{kind:live.reaction.activeKind});
 }

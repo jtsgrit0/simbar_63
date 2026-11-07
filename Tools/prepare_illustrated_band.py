@@ -81,6 +81,8 @@ def main():
     (ROOT/'ArtSource/PixelArt/DirectionalSpriteContract.json').write_text(encoded,encoding='utf-8')
     from prepare_venue_presentation import prepare_venue_presentation
     prepare_venue_presentation(ART)
+    from prepare_order_icons import register_order_icons
+    register_order_icons(ART)
     print('Registered illustrated V4 band:',', '.join(data['atlases']))
 
 if __name__=='__main__':main()

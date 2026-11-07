@@ -1,0 +1,136 @@
+{
+  "source": "ArtSource/OrderIcons/MenuIcons.source.png",
+  "sourceSha256": "f405ab785ca5f6ccc66948275cf332cdf074c59717b00a11056045f0b913f84d",
+  "runtime": "Tools/WebGLTemplate/FastGame/art/order-icons.png",
+  "sha256": "7664b985f8beabae767e4dbb4d3509ac047c5c2dedc5108dd46f668e94fee866",
+  "bytes": 12428,
+  "cellSize": 32,
+  "columns": 6,
+  "sourceGrid": [
+    3,
+    2
+  ],
+  "method": "Technical alpha crop and nearest-neighbor packing; no redraw or recolor",
+  "entries": [
+    {
+      "item": "faust",
+      "column": 0,
+      "sourceCell": [
+        0,
+        0,
+        512,
+        512
+      ],
+      "visibleBounds": [
+        121,
+        98,
+        427,
+        438
+      ],
+      "packedSize": [
+        25,
+        28
+      ]
+    },
+    {
+      "item": "adios-motherfucker",
+      "column": 1,
+      "sourceCell": [
+        512,
+        0,
+        1024,
+        512
+      ],
+      "visibleBounds": [
+        154,
+        43,
+        407,
+        461
+      ],
+      "packedSize": [
+        17,
+        28
+      ]
+    },
+    {
+      "item": "pepperoni-half-pizza",
+      "column": 2,
+      "sourceCell": [
+        1024,
+        0,
+        1536,
+        512
+      ],
+      "visibleBounds": [
+        74,
+        67,
+        464,
+        466
+      ],
+      "packedSize": [
+        27,
+        28
+      ]
+    },
+    {
+      "item": "chili-cheese-fries",
+      "column": 3,
+      "sourceCell": [
+        0,
+        512,
+        512,
+        1024
+      ],
+      "visibleBounds": [
+        45,
+        81,
+        460,
+        449
+      ],
+      "packedSize": [
+        28,
+        25
+      ]
+    },
+    {
+      "item": "chili-cheese-chips",
+      "column": 4,
+      "sourceCell": [
+        512,
+        512,
+        1024,
+        1024
+      ],
+      "visibleBounds": [
+        31,
+        75,
+        472,
+        462
+      ],
+      "packedSize": [
+        28,
+        25
+      ]
+    },
+    {
+      "item": "fried-chicken",
+      "column": 5,
+      "sourceCell": [
+        1024,
+        512,
+        1536,
+        1024
+      ],
+      "visibleBounds": [
+        57,
+        72,
+        466,
+        462
+      ],
+      "packedSize": [
+        28,
+        27
+      ]
+    }
+  ]
+}

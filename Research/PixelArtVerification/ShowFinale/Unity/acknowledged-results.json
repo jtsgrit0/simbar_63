@@ -1,0 +1,7 @@
+{
+  "phase": "Results",
+  "idempotent": true,
+  "musicChoicePreserved": true,
+  "actualAudioPaused": true,
+  "actualAudioResumed": true
+}

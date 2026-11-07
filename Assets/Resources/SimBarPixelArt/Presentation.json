@@ -3415,6 +3415,15 @@
       "id": "bandGreetB",
       "resource": "SimBarPixelArt/v4-band-greet-b",
       "directionColumns": []
+    },
+    {
+      "file": "order-icons.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "columns": 6,
+      "id": "orders",
+      "resource": "SimBarPixelArt/order-icons",
+      "directionColumns": []
     }
   ]
 }

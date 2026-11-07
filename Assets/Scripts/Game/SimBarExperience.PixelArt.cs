@@ -39,6 +39,8 @@ public sealed partial class SimBarExperience
     private sealed class PixelActorView
     {
         public MotionActor actor;public RectTransform root;public RawImage image;public Image marker,broom,bristles;public SimBarPixelPolygonGraphic shadow;public string id,role;public PixelLayer layer;
+        public RectTransform orderBubble;public RawImage orderIcon;
+        public Vector2 orderBase;public SimBarPixelPolygonGraphic orderTail,orderTailFill;
         public uint variantSeed;public PixelSeat seat;
     }
     private sealed class PixelLayer{public Transform root;public float depth;public List<Transform> after;}
@@ -59,6 +61,9 @@ public sealed partial class SimBarExperience
     private readonly List<Vector2> pixelPaperPositions=new List<Vector2>(42);
     private readonly List<PixelParticle> pixelParticles=new List<PixelParticle>(64);
     private RectTransform pixelAirborne;
+    private RectTransform pixelOrderBubbles;
+    private readonly List<Rect> pixelOrderCards=new List<Rect>();
+    private static readonly Vector2[] PixelOrderDodge={Vector2.zero,new Vector2(-36f,0f),new Vector2(36f,0f),new Vector2(-72f,0f),new Vector2(72f,0f),new Vector2(0f,-34f),new Vector2(-36f,-34f),new Vector2(36f,-34f),new Vector2(0f,-68f)};
     private readonly Dictionary<string,PixelRole> pixelRoles=new Dictionary<string,PixelRole>();
     private readonly Dictionary<string,PixelAtlas> pixelAtlases=new Dictionary<string,PixelAtlas>();
     private readonly Dictionary<string,Texture2D> pixelAtlasTextures=new Dictionary<string,Texture2D>();
@@ -114,6 +119,8 @@ public sealed partial class SimBarExperience
         }
         pixelAirborne=new GameObject("Actual Performance Paper in Flight",typeof(RectTransform)).GetComponent<RectTransform>();
         pixelAirborne.SetParent(pixelRoom,false);PixelRect(pixelAirborne,Vector2.zero,new Vector2(960f,558f));
+        pixelOrderBubbles=new GameObject("Actual Pending Order Bubbles",typeof(RectTransform)).GetComponent<RectTransform>();
+        pixelOrderBubbles.SetParent(pixelRoom,false);PixelRect(pixelOrderBubbles,Vector2.zero,new Vector2(960f,558f));
         for(int i=0;i<64;i++){var particle=new PixelParticle{image=PixelSolid("Airborne Paper "+i,pixelAirborne)};particle.image.gameObject.SetActive(false);pixelParticles.Add(particle);}
         foreach(PixelOccluder layer in pixelManifest.occluders??Array.Empty<PixelOccluder>())
         {
@@ -217,6 +224,7 @@ public sealed partial class SimBarExperience
         string modelKey=actor.visual!=null?actor.visual.ModelKey:actor.person.root.name;
         uint variantSeed=PixelHash(id+"|"+modelKey);
         var view=new PixelActorView{actor=actor,root=root,image=image,shadow=shadow,marker=marker,broom=broom,bristles=bristles,id=id,role=role,variantSeed=variantSeed,layer=new PixelLayer{root=root}};
+        CreatePixelOrderBubble(view);
         foreach(PixelSeat seat in pixelManifest.seatedActors??Array.Empty<PixelSeat>())if(seat.id==id){view.seat=seat;break;}
         foreach(PixelOccluder layer in pixelManifest.occluders??Array.Empty<PixelOccluder>())
         {
@@ -226,6 +234,50 @@ public sealed partial class SimBarExperience
             if(view.layer.after==null)view.layer.after=new List<Transform>();view.layer.after.Add(mask.transform);
         }
         return view;
+    }
+
+    private void CreatePixelOrderBubble(PixelActorView view)
+    {
+        var bubble=new GameObject("Order Bubble / "+view.id,typeof(RectTransform)).GetComponent<RectTransform>();bubble.SetParent(pixelOrderBubbles,false);PixelRect(bubble,Vector2.zero,new Vector2(32f,32f));view.orderBubble=bubble;
+        Color border=new Color32(24,35,51,255),fill=new Color32(255,245,216,255);
+        foreach(var rect in new[]{new Vector4(2,0,28,28),new Vector4(0,2,32,24)}){var image=PixelSolid("Bubble Border",bubble);image.color=border;PixelRect(image.rectTransform,new Vector2(rect.x,rect.y),new Vector2(rect.z,rect.w));}
+        var tail=new GameObject("Bubble Tail Border",typeof(RectTransform),typeof(CanvasRenderer),typeof(SimBarPixelPolygonGraphic)).GetComponent<SimBarPixelPolygonGraphic>();tail.transform.SetParent(bubble,false);tail.Initialize(null,new[]{new Vector2(12f,27f),new Vector2(20f,27f),new Vector2(16f,32f)});tail.color=border;
+        view.orderTail=tail;
+        foreach(var rect in new[]{new Vector4(2,1,28,26),new Vector4(1,2,30,24)}){var image=PixelSolid("Bubble Fill",bubble);image.color=fill;PixelRect(image.rectTransform,new Vector2(rect.x,rect.y),new Vector2(rect.z,rect.w));}
+        var inset=new GameObject("Bubble Tail Fill",typeof(RectTransform),typeof(CanvasRenderer),typeof(SimBarPixelPolygonGraphic)).GetComponent<SimBarPixelPolygonGraphic>();inset.transform.SetParent(bubble,false);inset.Initialize(null,new[]{new Vector2(14f,27f),new Vector2(18f,27f),new Vector2(16f,30f)});inset.color=fill;
+        view.orderTailFill=inset;
+        view.orderIcon=PixelImage("Requested Menu Item",bubble,null);PixelRect(view.orderIcon.rectTransform,new Vector2(4f,2f),new Vector2(24f,24f));bubble.gameObject.SetActive(false);
+    }
+
+    private void UpdatePixelOrderBubble(PixelActorView view,Vector2 point,float footY,float height,float crop)
+    {
+        int item=view.actor.person.drinkIndex;bool visible=JourneyIsPlaying&&item>=0&&item<DrinkNames.Length&&orderQueue.Contains(view.actor.person)
+            &&pixelAtlases.TryGetValue("orders",out PixelAtlas atlas)&&item<atlas.columns&&pixelAtlasTextures.ContainsKey("orders");
+        view.orderBubble.gameObject.SetActive(visible);if(!visible)return;
+        Texture2D texture=pixelAtlasTextures["orders"];atlas=pixelAtlases["orders"];float width=atlas.frameWidth>0?atlas.frameWidth:32,heightPixels=atlas.frameHeight>0?atlas.frameHeight:32;
+        float headOffset=Mathf.Round(footY*height/Mathf.Max(1f,crop))-4f;
+        view.orderBase=new Vector2(Mathf.Round(point.x-16f),Mathf.Round(point.y-headOffset-3f-4f-28f));
+        view.orderIcon.texture=texture;view.orderIcon.uvRect=new Rect(item*width/texture.width,1f-heightPixels/texture.height,width/texture.width,heightPixels/texture.height);
+    }
+    private void PlacePixelOrderBubbles()
+    {
+        pixelOrderCards.Clear();
+        foreach(Patron patron in orderQueue)
+        {
+            if(!motionLookup.TryGetValue(patron,out MotionActor actor)||!pixelActorViews.TryGetValue(actor,out PixelActorView view)||!view.orderBubble.gameObject.activeSelf)continue;
+            Vector2 point=view.orderBase;
+            foreach(Vector2 offset in PixelOrderDodge)
+            {
+                Vector2 candidate=view.orderBase+offset;bool free=candidate.x>=2f&&candidate.x+32f<=958f&&candidate.y>=2f;
+                foreach(Rect placed in pixelOrderCards)if(candidate.x<placed.x+34f&&candidate.x+34f>placed.x&&candidate.y<placed.y+30f&&candidate.y+30f>placed.y){free=false;break;}
+                if(free){point=candidate;break;}
+            }
+            pixelOrderCards.Add(new Rect(point,new Vector2(32f,28f)));PixelRect(view.orderBubble,point,new Vector2(32f,32f));
+            view.orderBubble.SetAsLastSibling();
+            Vector2 tip=view.orderBase+new Vector2(16f,32f)-point;float neck=Mathf.Clamp(tip.x,5f,27f);
+            view.orderTail.Initialize(null,new[]{new Vector2(neck-4f,27f),new Vector2(neck+4f,27f),tip});
+            view.orderTailFill.Initialize(null,new[]{new Vector2(neck-2f,27f),new Vector2(neck+2f,27f),tip+new Vector2(0f,-2f)});
+        }
     }
     private static uint PixelHash(string value)
     {
@@ -363,9 +415,9 @@ public sealed partial class SimBarExperience
         var shadowPoints=new Vector2[12];for(int i=0;i<shadowPoints.Length;i++){float angle=i*Mathf.PI/6f;shadowPoints[i]=new Vector2(Mathf.Cos(angle)*4f*shadowScale,1f+Mathf.Sin(angle));}
         view.shadow.Initialize(null,shadowPoints);view.shadow.color=new Color32(22,24,35,(byte)(jumpFrame>=0?72:96));
         bool assisted=actor==floorMissionGuestActor&&FloorState!=null&&FloorState.guestActive;
-        bool order=actor.person.orderMarker!=null&&actor.person.orderMarker.activeSelf;
-        view.marker.gameObject.SetActive(assisted||order);
-        if(assisted||order){view.marker.color=assisted?new Color32(244,200,110,255):new Color32(225,186,115,255);PixelRect(view.marker.rectTransform,new Vector2(-2f,-49f),new Vector2(4f,assisted?7f:4f));}
+        view.marker.gameObject.SetActive(assisted);
+        if(assisted){view.marker.color=new Color32(244,200,110,255);PixelRect(view.marker.rectTransform,new Vector2(-2f,-49f),new Vector2(4f,7f));}
+        UpdatePixelOrderBubble(view,p,footY,height,crop);
         bool cleaning=action=="clean";view.broom.gameObject.SetActive(cleaning);
         if(cleaning)
         {
@@ -469,6 +521,7 @@ public sealed partial class SimBarExperience
         foreach(var actor in pixelRemovedActors)
         {
             var view=pixelActorViews[actor];Destroy(view.root.gameObject);
+            if(view.orderBubble!=null)Destroy(view.orderBubble.gameObject);
             if(view.layer.after!=null)foreach(Transform mask in view.layer.after)Destroy(mask.gameObject);
             pixelActorViews.Remove(actor);
         }
@@ -477,7 +530,7 @@ public sealed partial class SimBarExperience
             if(actor.person.root==null)continue;
             if(!pixelActorViews.TryGetValue(actor,out PixelActorView view)){view=CreatePixelActor(actor);pixelActorViews.Add(actor,view);}
             bool active=actor.person.root.gameObject.activeInHierarchy;view.root.gameObject.SetActive(active);
-            if(active)UpdatePixelActor(view);else if(view.layer.after!=null)foreach(Transform mask in view.layer.after)mask.gameObject.SetActive(false);
+            if(active)UpdatePixelActor(view);else{if(view.orderBubble!=null)view.orderBubble.gameObject.SetActive(false);if(view.layer.after!=null)foreach(Transform mask in view.layer.after)mask.gameObject.SetActive(false);}
         }
         UpdatePixelPaper();pixelDrawLayers.Sort((a,b)=>a.depth.CompareTo(b.depth));
         foreach(PixelLayer layer in pixelDrawLayers)
@@ -485,6 +538,6 @@ public sealed partial class SimBarExperience
             layer.root.SetAsLastSibling();
             if(layer.after!=null)foreach(Transform mask in layer.after)mask.SetAsLastSibling();
         }
-        UpdateAirbornePixelPaper(delta);pixelAirborne.SetAsLastSibling();
+        UpdateAirbornePixelPaper(delta);pixelAirborne.SetAsLastSibling();PlacePixelOrderBubbles();pixelOrderBubbles.SetAsLastSibling();
     }
 }

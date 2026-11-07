@@ -1,0 +1,10 @@
+{
+  "wrongServicePreserved": true,
+  "servedHidden": true,
+  "expiredHidden": true,
+  "followed": true,
+  "pauseFrozen": true,
+  "forcedReplacementSeed": 10,
+  "samePatronExcluded": true,
+  "rngPreserved": true
+}

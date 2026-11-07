@@ -204,6 +204,7 @@ public sealed partial class SimBarExperience
     private bool TryBeginFloorClosing()
     {
         if(journeyValidationMode) return false;
+        PauseMusicAfterPerformance();
         EnsureAfterShow();
         if(!FloorTasksPending && !AfterShowPending) return false;
         bool entering=!JourneyIsFloorClosing;
