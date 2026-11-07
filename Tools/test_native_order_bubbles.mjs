@@ -1,10 +1,11 @@
+import {launchPreparedDesk} from './native_test_workflow.mjs';
 import assert from 'node:assert/strict';
 import {SimBarGame,catalog} from './WebGLTemplate/FastGame/core.js';
 import {createWorld,pixelPendingOrders,pixelOrderBubbleLayout,pixelOrderBubblePlacements} from './WebGLTemplate/FastGame/world.js';
 
 const storage=()=>({getItem(){return null;},setItem(){},removeItem(){}});
 const game=new SimBarGame({storage:storage(),seed:1});
-game.act('start');game.act('launch');while(game.phase==='guide')game.act('guide');
+game.act('start');launchPreparedDesk(game);while(game.phase==='guide')game.act('guide');
 const state=()=>({phase:game.phase,paused:game.paused,actors:game.actors,orders:game.orders});
 assert.equal(pixelPendingOrders(state()).length,3);
 assert.deepEqual(pixelPendingOrders(state()).map(o=>o.item),game.orders.map(o=>o.item));

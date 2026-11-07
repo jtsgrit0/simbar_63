@@ -34,29 +34,40 @@ public sealed partial class SimBarExperience
     private void BeginDayPlanning(bool challenge)
     {
         if (journeyValidationMode || journey.inProgress) return;
+        if (DayPlan != null && DayPlan.locked && !DayPlan.completed) return;
         CancelPourGame(false);
         if (serviceMenuOpen) CloseServiceMenu();
         if (opMenuOpen) CloseOperations();
+        if (journey.bookingCareer == null) journey.bookingCareer = SimBarBooking.NewCareer();
+        SimBarBooking.Sanitize(DayPlan, BookingCareer);
+        bool migrate=JourneyHasActivePlan&&!SimBarBooking.IsDesk(DayPlan);
+        if (migrate)
+        {
+            int previousVenue=DayPlan.venue;
+            bool trusted=journey.hasDayOpeningCash&&JourneyFinite(journey.dayOpeningCash)&&journey.dayOpeningCash>=0f&&journey.dayOpeningCash<=1000000000f&&journey.dayOpeningCash>=cash;
+            journey.legacyDeskPlanJson=JsonUtility.ToJson(DayPlan);
+            journey.deskMigrationCredit=trusted?journey.dayOpeningCash-cash:0f;
+            journey.deskMigrationDay=journey.day;
+            journey.deskMigrationTrustedOpening=trusted;
+            if(trusted)cash=journey.dayOpeningCash;
+            journey.booking=SimBarBooking.NewDeskPlan(journey.day,previousVenue);
+            journey.dayOpeningCash=cash;journey.hasDayOpeningCash=true;
+        }
         bool freshPlan=!JourneyHasActivePlan;
         if (freshPlan)
         {
             int previousVenue = journey.booking != null
                 ? Mathf.Clamp(journey.booking.venue, 0, SimBarBooking.Venues4.Length - 1)
                 : (selectedOwner == 2 ? 1 : 0);
-            journey.booking = SimBarBooking.NewPlan(journey.day, previousVenue);
+            journey.booking = SimBarBooking.NewDeskPlan(journey.day, previousVenue);
             journey.dayOpeningCash = cash;
             journey.hasDayOpeningCash = true;
         }
-        if (journey.bookingCareer == null) journey.bookingCareer = SimBarBooking.NewCareer();
         SimBarBooking.Sanitize(DayPlan, BookingCareer);
         journey.challenge = challenge;
         journeyPhase = JourneyPhase.Planning;
-        if(freshPlan)
-        {
-            bookingShowingPosters=true;
-            bookingShowingArchive=false;
-            SelectLatestPosterForVenue(DayPlan.venue);
-        }
+        bookingShowingPosters=false;
+        bookingShowingArchive=false;
         paused = true;
         gameClock = SimBarBooking.Hour(DayPlan);
         bookingFeedback = "";
@@ -68,19 +79,19 @@ public sealed partial class SimBarExperience
 
     private void BookingListen(int band)
     {
-        if (!JourneyIsPlanning) return;
+        if (!JourneyIsPlanning || SimBarBooking.IsDesk(DayPlan)) return;
         BookingApply(SimBarBooking.Listen(DayPlan, BookingCareer, band));
     }
 
     private void BookingOffer(int band, int package)
     {
-        if (!JourneyIsPlanning) return;
+        if (!JourneyIsPlanning || SimBarBooking.IsDesk(DayPlan)) return;
         BookingApply(SimBarBooking.Offer(DayPlan, BookingCareer, band, package, cash));
     }
 
     private void BookingPromote()
     {
-        if (!JourneyIsPlanning) return;
+        if (!JourneyIsPlanning || SimBarBooking.IsDesk(DayPlan)) return;
         BookingApply(SimBarBooking.Promote(DayPlan, BookingCareer, cash));
     }
 
@@ -97,6 +108,10 @@ public sealed partial class SimBarExperience
             case "accepted": bookingFeedback = SimBarLocalization.Text("Booking confirmed! The artist fee has been paid.", "섭외 확정! 출연료를 지급했습니다."); break;
             case "rejected": bookingFeedback = SimBarLocalization.Text("The band declined today. Try another newcomer.", "오늘의 제안은 거절됐어요. 다른 신인에게 제안해 보세요."); break;
             case "promoted": bookingFeedback = SimBarLocalization.Text("Promotion complete. More guests are expected tonight.", "홍보 완료. 오늘 밤 예상 관객이 늘었어요."); break;
+            case "desk_selected": bookingFeedback=SimBarLocalization.Text("Freewill is selected. Prepare the show on the computer.","프리윌을 선택했어요. 컴퓨터로 공연 계획을 준비해요."); break;
+            case "desk_cleared": bookingFeedback=SimBarLocalization.Text("Choose Freewill to begin today's preparation.","프리윌을 체크하고 오늘 준비를 시작해요."); break;
+            case "desk_planned": bookingFeedback=SimBarLocalization.Text("The plan is saved. Confirm the show by phone.","공연 계획을 저장했어요. 전화로 출연을 확인해요."); break;
+            case "desk_confirmed": bookingFeedback=SimBarLocalization.Text("Freewill is confirmed. Tonight is ready to open!","프리윌 출연 확인 완료! 오늘 밤 공연을 열어요!"); break;
             case "insufficient_cash": bookingFeedback = SimBarLocalization.Text("There is not enough cash for this action.", "보유금이 부족합니다."); break;
             case "no_time": bookingFeedback = SimBarLocalization.Text("Planning is over. Open tonight's show.", "기획 시간이 끝났어요. 오늘의 밤을 열어 주세요."); break;
             default: bookingFeedback = SimBarLocalization.Text("This action is already finished or unavailable today.", "오늘 이미 완료했거나 진행할 수 없는 행동입니다."); break;
@@ -110,7 +125,7 @@ public sealed partial class SimBarExperience
 
     private void BookingSelectVenue(int index)
     {
-        if (!JourneyIsPlanning || index < 0 || index >= SimBarBooking.Venues4.Length) return;
+        if (!JourneyIsPlanning || SimBarBooking.IsDesk(DayPlan) || index < 0 || index >= SimBarBooking.Venues4.Length) return;
         if (bookingShowingArchive)
         {
             bookingHistoryVenue = index;
@@ -131,7 +146,7 @@ public sealed partial class SimBarExperience
 
     private void BookingSetTicket(int tier)
     {
-        if (!JourneyIsPlanning) return;
+        if (!JourneyIsPlanning || SimBarBooking.IsDesk(DayPlan)) return;
         SimBarBooking.SetTicket(DayPlan, tier);
         SaveOperations();
         RefreshBookingUI();
@@ -140,8 +155,26 @@ public sealed partial class SimBarExperience
     private void BookingLaunchNight()
     {
         if (!JourneyIsPlanning || !JourneyHasActivePlan) return;
-        SimBarBooking.Lock(DayPlan);
+        if(SimBarBooking.IsDesk(DayPlan))
+        {
+            var result=SimBarBooking.LockDesk(DayPlan,BookingCareer);
+            if(!result.success){bookingFeedback=SimBarLocalization.Text("Select Freewill, save the computer plan, then confirm by phone.","프리윌 선택, 컴퓨터 공연 계획, 전화 확인을 차례로 마쳐요.");RefreshBookingUI();return;}
+        }
+        else SimBarBooking.Lock(DayPlan);
         StartFreshJourneyNight(journey.challenge);
+    }
+
+    private void BookingDeskSelect(bool selected)
+    {
+        if(!JourneyIsPlanning||!SimBarBooking.IsDesk(DayPlan))return;
+        var result=SimBarBooking.DeskSelect(DayPlan,selected);BookingApply(result);
+        if(result.success)SetDeskChannel(1);
+    }
+    private void BookingDeskWork(int task)
+    {
+        if(!JourneyIsPlanning||!SimBarBooking.IsDesk(DayPlan))return;
+        var result=SimBarBooking.DeskWork(DayPlan,task);BookingApply(result);
+        if(result.success)SetDeskChannel(task==0?2:0);
     }
 
     private void BookingBackToLobby() { if (JourneyIsPlanning) JourneyReturnToLobby(); }

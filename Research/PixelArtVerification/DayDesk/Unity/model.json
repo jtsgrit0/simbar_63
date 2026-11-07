@@ -1,0 +1,14 @@
+{
+  "desk": {
+    "passed": 17,
+    "failures": [],
+    "measurements": []
+  },
+  "legacy": {
+    "passed": 37,
+    "failures": [],
+    "measurements": [
+      "Deterministic System-only booking; every discovered artist/venue pair; poster discovery; legacy roster migration; four blocks; upfront fees; frozen evening; idempotent save/reload settlement."
+    ]
+  }
+}

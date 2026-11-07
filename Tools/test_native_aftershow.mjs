@@ -1,9 +1,10 @@
+import {launchPreparedDesk} from './native_test_workflow.mjs';
 import assert from 'node:assert/strict';
 import {SimBarGame,SAVE_KEY} from './WebGLTemplate/FastGame/core.js';
 import {BAND_MEMBERS,AFTER_SHOW_AUDIENCE,GREETING_SECONDS,EXIT_POINT,SURFER_LOWER_SPEED} from './WebGLTemplate/FastGame/aftershow.js';
 
 function storage(){const map=new Map();return{getItem:k=>map.get(k)??null,setItem:(k,v)=>map.set(k,String(v))};}
-function openNight(seed=12){const g=new SimBarGame({storage:storage(),seed});g.act('start');g.act('launch');for(let i=0;i<3;i++)g.act('guide');return g;}
+function openNight(seed=12){const g=new SimBarGame({storage:storage(),seed});g.act('start');launchPreparedDesk(g);for(let i=0;i<3;i++)g.act('guide');return g;}
 function endPerformance(g){g.journey.secondsLeft=.05;g.tick(.05);assert.equal(g.phase,'closing');assert(g.afterShowPending);}
 function finish(g,max=240){for(let t=0;t<max&&g.phase!=='results';t+=.05){g.tick(.05);if(g.farewellPending)g.act('farewellAck');if(g.reaction.activeKind)g.act('quick',{kind:g.reaction.activeKind});}return g;}
 
@@ -117,6 +118,6 @@ assert.equal(historicalGame.journey.afterShow.audience.length,20);assert(histori
 const legacy=openNight();endPerformance(legacy);const old=JSON.parse(legacy.exportSave());
 const journey=JSON.parse(old.journeyJson);delete journey.afterShow;old.journeyJson=JSON.stringify(journey);legacy.storage.setItem(SAVE_KEY,JSON.stringify(old));
 const upgraded=new SimBarGame({storage:legacy.storage});upgraded.act('continue');assert(upgraded.journey.afterShow?.started);assert.equal(upgraded.phase,'closing');finish(upgraded);assert.equal(upgraded.phase,'results');
-upgraded.act('next');upgraded.act('launch');assert.equal(upgraded.journey.musicPauseSession,0);assert.equal(upgraded.journey.musicPaused,false);
+upgraded.act('next');launchPreparedDesk(upgraded);assert.equal(upgraded.journey.musicPauseSession,0);assert.equal(upgraded.journey.musicPaused,false);
 assert(AFTER_SHOW_AUDIENCE.every(id=>upgraded.actors.find(a=>a.id===id).visible),'A new night did not restore the audience');
 console.log('PASS: all greetings precede 24 physical exits, surfer lowering, retained bar/lounge guests, acknowledged popup, persisted manual music resume, pause/save migration, concurrent cleanup, once-only settlement');

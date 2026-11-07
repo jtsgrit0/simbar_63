@@ -26,6 +26,10 @@ class NativeDeliveryTests(unittest.TestCase):
         (self.source / "art").mkdir()
         for name in native.ESSENTIAL_IMAGES:
             (self.source / "art" / name).write_bytes(b"image fixture")
+        for name in native.DEFERRED_IMAGES:
+            target = self.source / "art" / name
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(b"desk scene fixture")
         (self.source / "art/sprites.png").write_bytes(b"legacy sprite fixture")
         for name in native.ESSENTIAL_METADATA:
             (self.source / "art" / name).write_text("{}")
@@ -98,6 +102,20 @@ class NativeDeliveryTests(unittest.TestCase):
     def test_missing_sprite_art_is_rejected_before_release(self):
         (self.source / "art/sprites.png").unlink()
         with self.assertRaisesRegex(FileNotFoundError, "sprites.png"):
+            self.package()
+        self.assertFalse((self.output / "index.html").exists())
+
+    def test_owner_desk_scenes_are_packaged_without_startup_preloads(self):
+        manifest = self.package()
+        files = {entry["path"] for entry in manifest["files"]}
+        index = (self.output / "index.html").read_text()
+        for name in native.DEFERRED_IMAGES:
+            self.assertIn("art/" + name, files)
+            self.assertNotIn(name, index)
+
+    def test_missing_selected_owner_desk_scene_prevents_release(self):
+        (self.source / "art" / native.DEFERRED_IMAGES[1]).unlink()
+        with self.assertRaisesRegex(FileNotFoundError, "office/desk-edison.png"):
             self.package()
         self.assertFalse((self.output / "index.html").exists())
 

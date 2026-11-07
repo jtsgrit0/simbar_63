@@ -1,10 +1,11 @@
+import {launchPreparedDesk} from './native_test_workflow.mjs';
 import assert from 'node:assert/strict';
 import {SimBarGame} from './WebGLTemplate/FastGame/core.js';
 import {walkable} from './WebGLTemplate/FastGame/navigation.js';
 
 const night=seed=>{
   const mem=new Map(),storage={getItem:k=>mem.get(k)||null,setItem:(k,v)=>mem.set(k,String(v))};
-  const g=new SimBarGame({storage,seed});g.act('start');g.act('launch');while(g.phase==='guide')g.act('guide');return g;
+  const g=new SimBarGame({storage,seed});g.act('start');launchPreparedDesk(g);while(g.phase==='guide')g.act('guide');return g;
 };
 const actor=g=>g.actors.find(a=>a.id==='bartender');
 const g=night(17),baseline=night(17);

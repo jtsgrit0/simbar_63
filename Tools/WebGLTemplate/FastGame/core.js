@@ -18,13 +18,22 @@ const defaults=()=>({version:1,money:12340,fans:256,satisfaction:.94,performance
 const newJourney=()=>({version:1,day:1,challenge:false,tutorialComplete:false,guideStep:0,guidePending:false,inProgress:false,session:0,settledSession:0,settlementPending:false,secondsLeft:180,
   score:0,combo:0,bestCombo:0,manualPerfects:0,orders:0,mistakes:0,successfulEvents:0,manualStreak:0,feverSeconds:0,feverCharge:0,openingCash:12340,drinkIncome:0,xp:0,bestScore:0,bestStars:0,completedNights:0,
   resultStars:0,resultServed:0,resultXP:0,resultBonus:0,resultProfit:0,resultNewRecord:false,booking:null,bookingCareer:Booking.newCareer(),dayOpeningCash:0,hasDayOpeningCash:false,resultTicketIncome:0,resultAttendance:0,
-  floorMissions:Floor.newState(),floorClosing:false,afterShow:null,musicPauseSession:0,musicPaused:false,resultFloorBonus:0,resultFloorTasks:0});
+  floorMissions:Floor.newState(),floorClosing:false,afterShow:null,musicPauseSession:0,musicPaused:false,resultFloorBonus:0,resultFloorTasks:0,
+  legacyDeskPlanJson:'',deskMigrationCredit:0,deskMigrationDay:0,deskMigrationTrustedOpening:false});
 const messages={
   scouted:['출연진 발굴 완료. 팀을 선택하고 섭외를 진행하세요.','Lineup discovered. Select an artist and make an offer.'],
   listened:['데모 검토 완료. 제안 수락 확률이 올랐어요.','Demo reviewed. This artist is more likely to accept.'],
   accepted:['섭외 확정! 출연료를 지급했습니다.','Booking confirmed. The artist fee is paid.'],rejected:['오늘의 제안은 거절됐어요. 다른 팀에게 제안해 보세요.','The artist declined today. Try another newcomer.'],
   promoted:['홍보 완료. 예상 관객이 늘었어요.','Promotion complete. More guests are expected.'],insufficient_cash:['보유금이 부족합니다.','Not enough cash.'],no_time:['기획 시간이 끝났어요. 오늘의 밤을 열어 주세요.','Planning is over. Open tonight’s show.'],
   not_discovered:['먼저 포스터를 조사해 이 팀을 발굴해 주세요.','Research the artist’s poster first.'],already_discovered:['이미 발굴한 출연진입니다. 섭외 탭에서 제안할 수 있어요.','This lineup is already discovered. Make an offer in booking.'],
+  desk_selected:['프리윌을 선택했어요. 컴퓨터에서 공연을 기획하세요.','Freewill selected. Plan the show at the computer.'],
+  desk_cleared:['출연 선택과 준비 확인을 해제했어요.','Artist selection and desk checks cleared.'],
+  desk_planned:['공연 기획 완료. 전화로 최종 확인하세요.','Show planned. Confirm by phone.'],
+  desk_confirmed:['전화 확인 완료. 공연을 시작할 수 있어요.','Phone confirmation complete. The show is ready.'],
+  band_required:['프리윌을 먼저 선택하세요.','Select Freewill first.'],
+  plan_required:['컴퓨터에서 공연을 먼저 기획하세요.','Plan the show at the computer first.'],
+  desk_incomplete:['컴퓨터 기획과 전화 확인을 마쳐 주세요.','Finish computer planning and phone confirmation.'],
+  already_done:['이미 완료한 준비입니다.','This preparation is already complete.'],
   unavailable:['지금은 이 행동을 진행할 수 없어요.','This action is unavailable right now.'],
 };
 
@@ -61,14 +70,17 @@ export class SimBarGame{
   get showFarewell(){return this.farewellPending;}
   goalTargets(){return this.journey.challenge?[20,7,8]:[12,4,5];}
   goals(){return[this.journey.orders,this.journey.manualPerfects,this.journey.bestCombo];}
-  bookingChance(band,premium=0){return Booking.chance(this.journey.booking,this.journey.bookingCareer,+band,+premium);}
-  bookingFee(band,premium=0){return Booking.fee(+band,+premium);}
+  bookingChance(band,premium=0){return Booking.isDesk(this.journey.booking)?0:Booking.chance(this.journey.booking,this.journey.bookingCareer,+band,+premium);}
+  bookingFee(band,premium=0){return Booking.isDesk(this.journey.booking)?0:Booking.fee(+band,+premium);}
   isDiscovered(band){return Booking.discovered(this.journey.bookingCareer,+band);}
   currentPoster(poster=DAILY_POSTER_INDEX){return+poster===DAILY_POSTER_INDEX?createDailyPoster(this.journey.day,this.journey.booking?.venue||0):catalog.posters[+poster];}
   isPosterDiscovered(poster){return+poster===DAILY_POSTER_INDEX?Booking.dailyPosterDiscovered(this.journey.bookingCareer,this.journey.day,this.journey.booking?.venue||0):Booking.posterDiscovered(this.journey.bookingCareer,+poster);}
   metrics(){
     const p=this.journey.booking,m=Booking.forecast(p);
-    return{...m,hour:10+2*(p?.blocks||0),blocks:p?.blocks||0,remainingBlocks:4-(p?.blocks||0),lineup:catalog.bands.filter(b=>p&&(p.bookedMask&(1<<b.index))),
+    if(Booking.isDesk(p))return{...m,deskVersion:1,freewillSelected:p.freewillSelected,deskDoneMask:p.deskDoneMask,
+      canLaunch:!p.locked&&!p.completed&&p.freewillSelected&&p.deskDoneMask===3,hour:Booking.hour(p),
+      lineup:p.freewillSelected?catalog.availableBandIndices.map(i=>catalog.bands[i]):[],ticketTier:p.ticketTier,venue:catalog.venues[p.venue]};
+    return{...m,hour:Booking.hour(p),blocks:p?.blocks||0,remainingBlocks:4-(p?.blocks||0),lineup:catalog.bands.filter(b=>p&&(p.bookedMask&(1<<b.index))),
       ticketTier:p?.ticketTier??1,venue:catalog.venues[p?.venue||0]};
   }
   text(ko,en){return this.language==='en'?en:ko;}
@@ -126,6 +138,11 @@ export class SimBarGame{
     if(j.settlementPending&&(Floor.remaining(j.floorMissions)||j.floorMissions.guestActive||j.afterShow&&(!j.afterShow.completed||!j.afterShow.noticeAcknowledged))){j.settlementPending=false;j.inProgress=true;j.floorClosing=true;}
     if(j.floorClosing&&j.inProgress){j.secondsLeft=0;j.guidePending=false;j.settlementPending=false;}else j.floorClosing=false;
     if(j.floorClosing&&j.inProgress&&j.musicPauseSession!==j.session){j.musicPauseSession=j.session;j.musicPaused=true;}
+    // Some old active-night saves predate the explicit booking lock. Recover it
+    // without migrating the contract or changing its already-paid wallet.
+    if(j.inProgress&&j.booking&&!Booking.isDesk(j.booking)&&!j.booking.locked&&!j.booking.completed)Booking.lock(j.booking);
+    j.legacyDeskPlanJson=typeof j.legacyDeskPlanJson==='string'&&j.legacyDeskPlanJson.length<=8000?j.legacyDeskPlanJson:'';
+    j.deskMigrationCredit=finite(j.deskMigrationCredit,0,0,1e9);j.deskMigrationDay=int(j.deskMigrationDay,0,9999);j.deskMigrationTrustedOpening=j.deskMigrationTrustedOpening===true;
     j.resultFloorBonus=clamp(j.resultFloorBonus,0,70);j.resultFloorTasks=int(j.resultFloorTasks,0,2);if(j.tutorialComplete)j.guidePending=false;
   }
   act(type,p={}){
@@ -143,7 +160,7 @@ export class SimBarGame{
       case'start':if(j.inProgress||this._activePlan())return this.act('continue');if(j.settledSession>0&&j.session===j.settledSession)j.day=int(j.day+1,1,9999);this._planning(!!p.challenge);break;
       case'continue':
         if(j.settlementPending)this._settleNight();
-        if(this._activePlan()){this._planning(j.challenge);break;}
+        if(!j.inProgress&&this._activePlan()){this._planning(j.challenge);break;}
         if(j.inProgress){this._ensureReaction();this.phase=j.floorClosing||j.secondsLeft<=0?'closing':j.guidePending?'guide':'playing';this.paused=this.phase==='guide';this.pauseReason=this.paused?'guide':'';if(this.closing)this._beginClosing();}
         else if(j.settledSession){this.phase='results';this.paused=true;this.pauseReason='results';}else this._planning(j.challenge);break;
       case'next':if(this.phase!=='results'||j.inProgress)return this._done(false);j.day=int(j.day+1,1,9999);this._planning(j.challenge);break;
@@ -152,12 +169,19 @@ export class SimBarGame{
       case'pause':if(this.playing||this.closing){this.paused=true;this.pauseReason=this.farewellPending?'farewell':p.reason||'pause';}break;
       case'resume':if(this.playing||this.closing){this.paused=this.farewellPending;this.pauseReason=this.paused?'farewell':'';}break;
       case'guide':if(this.phase!=='guide')return this._done(false);if(j.guideStep<2)j.guideStep++;else{j.tutorialComplete=true;j.guidePending=false;this.phase='playing';this.paused=false;this.pauseReason='';}break;
-      case'venue':if(this.phase!=='planning'||j.booking.blocks>0||!Number.isInteger(+p.venue)||+p.venue<0||+p.venue>3)return this._done(false);j.booking.venue=+p.venue;break;
+      case'deskSelect':case'deskWork':
+        if(this.phase!=='planning')return this._done(false);
+        r=type==='deskSelect'?Booking.deskSelect(j.booking,p.selected):Booking.deskWork(j.booking,p.task);
+        this.state.clock=Booking.hour(j.booking);this._say(...(messages[r.code]||messages.unavailable));break;
+      case'venue':if(this.phase!=='planning'||Booking.isDesk(j.booking)||j.booking.blocks>0||!Number.isInteger(+p.venue)||+p.venue<0||+p.venue>3)return this._done(false);j.booking.venue=+p.venue;break;
       case'scout':case'listen':case'offer':case'promote':
-        if(this.phase!=='planning')return this._done(false);r=type==='scout'?(+p.poster===DAILY_POSTER_INDEX?Booking.scoutDaily(j.booking,j.bookingCareer):Booking.scout(j.booking,j.bookingCareer,+p.poster)):type==='listen'?Booking.listen(j.booking,j.bookingCareer,+p.band):type==='offer'?Booking.offer(j.booking,j.bookingCareer,+p.band,+p.premium||0,s.money):Booking.promote(j.booking,j.bookingCareer,s.money);
+        if(this.phase!=='planning'||Booking.isDesk(j.booking))return this._done(false);r=type==='scout'?(+p.poster===DAILY_POSTER_INDEX?Booking.scoutDaily(j.booking,j.bookingCareer):Booking.scout(j.booking,j.bookingCareer,+p.poster)):type==='listen'?Booking.listen(j.booking,j.bookingCareer,+p.band):type==='offer'?Booking.offer(j.booking,j.bookingCareer,+p.band,+p.premium||0,s.money):Booking.promote(j.booking,j.bookingCareer,s.money);
         if(r.success)s.money=clamp(s.money+r.cashDelta,0,1e9);this._say(...(messages[r.code]||messages.unavailable));s.clock=10+j.booking.blocks*2;break;
-      case'ticket':if(this.phase!=='planning')return this._done(false);Booking.setTicket(j.booking,+p.tier);break;
-      case'launch':if(this.phase!=='planning'||!this._activePlan())return this._done(false);Booking.lock(j.booking);this._newNight();break;
+      case'ticket':if(this.phase!=='planning'||Booking.isDesk(j.booking))return this._done(false);Booking.setTicket(j.booking,+p.tier);break;
+      case'launch':
+        if(this.phase!=='planning'||!this._activePlan())return this._done(false);
+        if(Booking.isDesk(j.booking)){r=Booking.lockDesk(j.booking,j.bookingCareer);if(!r.success)return this._done(false,r.code);}else Booking.lock(j.booking);
+        this._newNight();break;
       case'menuItem':this.selectedItem=int(p.item,0,catalog.drinks.length-1);if(this.pauseReason==='menu'){this.paused=false;this.pauseReason='';}r=this._startPour(this.selectedItem);break;
       case'prepare':r=this._startPour(this.orders[0]?.item??this.selectedItem);break;
       case'pourStop':r=this._stopPour();break;
@@ -170,7 +194,21 @@ export class SimBarGame{
   }
   _done(success,code='unavailable'){const r={success,code};this.lastResult=r;if(!success)this._say(...(messages[code]||messages.unavailable));this._notify();return r;}
   _activePlan(){const p=this.journey.booking;return!!(p&&!p.locked&&!p.completed&&p.day===this.journey.day);}
-  _planning(challenge){const j=this.journey;if(j.inProgress)return;this.pour=null;if(!this._activePlan()){const previousVenue=j.booking?.venue??(this.owner===2?1:0);j.booking=Booking.newPlan(j.day,int(previousVenue,0,3));j.dayOpeningCash=this.state.money;j.hasDayOpeningCash=true;}j.challenge=challenge;this.phase='planning';this.paused=true;this.pauseReason='planning';this.state.clock=10+j.booking.blocks*2;}
+  _planning(challenge){
+    const j=this.journey;if(j.inProgress||j.booking?.locked&&!j.booking.completed)return;this.pour=null;
+    if(this._activePlan()&&!Booking.isDesk(j.booking)){
+      const previous=j.booking,opening=j.dayOpeningCash;
+      const trusted=j.hasDayOpeningCash===true&&Number.isFinite(opening)&&opening>=this.state.money&&opening>=0&&opening<=1e9;
+      j.legacyDeskPlanJson=JSON.stringify(previous);j.deskMigrationCredit=trusted?opening-this.state.money:0;
+      j.deskMigrationDay=j.day;j.deskMigrationTrustedOpening=trusted;
+      if(trusted)this.state.money=opening;
+      j.booking=Booking.newDeskPlan(j.day,previous.venue);j.dayOpeningCash=this.state.money;j.hasDayOpeningCash=true;
+    }else if(!this._activePlan()){
+      const previousVenue=j.booking?.venue??(this.owner===2?1:0);j.booking=Booking.newDeskPlan(j.day,int(previousVenue,0,3));
+      j.dayOpeningCash=this.state.money;j.hasDayOpeningCash=true;
+    }
+    j.challenge=challenge;this.phase='planning';this.paused=true;this.pauseReason='planning';this.state.clock=Booking.hour(j.booking);
+  }
   _newNight(){
     const j=this.journey;j.session=j.session>=1e9?1:j.session+1;if(j.session===1)j.settledSession=0;j.inProgress=true;j.settlementPending=false;j.floorClosing=false;j.afterShow=null;j.musicPauseSession=0;j.musicPaused=false;j.secondsLeft=180;
     for(const k of ['score','combo','bestCombo','manualPerfects','orders','mistakes','successfulEvents','manualStreak','feverSeconds','feverCharge','drinkIncome','resultStars','resultServed','resultXP','resultBonus','resultProfit','resultTicketIncome','resultAttendance','resultFloorBonus','resultFloorTasks'])j[k]=0;

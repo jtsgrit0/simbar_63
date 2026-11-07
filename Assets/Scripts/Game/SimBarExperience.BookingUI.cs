@@ -47,6 +47,7 @@ public sealed partial class SimBarExperience
     private void BuildBookingUI()
     {
         if (bookingCanvas != null) return;
+        if (UseDayDesk) { BuildDayDeskUI(); return; }
         var host = new GameObject("Daytime Booking Desk", typeof(RectTransform), typeof(Canvas), typeof(GraphicRaycaster));
         host.transform.SetParent(transform, false);
         bookingCanvas = host.GetComponent<Canvas>();
@@ -205,6 +206,7 @@ public sealed partial class SimBarExperience
 
     private void RefreshBookingUI()
     {
+        if (UseDayDesk) { RefreshDayDeskUI(); return; }
         if (bookingCanvas == null) return;
         bool planning = JourneyIsPlanning && !JourneyValidationMode;
         if (bookingCanvas.gameObject.activeSelf != planning) bookingCanvas.gameObject.SetActive(planning);
@@ -324,6 +326,7 @@ public sealed partial class SimBarExperience
 
     private void BookingShowArchive(bool show)
     {
+        if (SimBarBooking.IsDesk(DayPlan)) return;
         bookingShowingPosters=false;
         bookingShowingArchive = show;
         bookingVenueMenuOpen = false;
@@ -369,6 +372,7 @@ public sealed partial class SimBarExperience
 
     private void LayoutBookingUI(Vector2 size)
     {
+        if (UseDayDesk) { LayoutDayDeskUI(size); return; }
         if (bookingHeader == null || size.x <= 0f) return;
         bookingUiSize = size;
         bool wide = size.x >= 900f;

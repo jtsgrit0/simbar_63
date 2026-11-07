@@ -1,0 +1,51 @@
+[
+  {
+    "index": 0,
+    "name": "Free Aspect",
+    "width": 0,
+    "height": 0,
+    "type": "AspectRatio"
+  },
+  {
+    "index": 1,
+    "name": "16:9 Aspect",
+    "width": 16,
+    "height": 9,
+    "type": "AspectRatio"
+  },
+  {
+    "index": 2,
+    "name": "16:10 Aspect",
+    "width": 16,
+    "height": 10,
+    "type": "AspectRatio"
+  },
+  {
+    "index": 3,
+    "name": "Full HD (1920x1080)",
+    "width": 1920,
+    "height": 1080,
+    "type": "FixedResolution"
+  },
+  {
+    "index": 4,
+    "name": "WXGA (1366x768)",
+    "width": 1366,
+    "height": 768,
+    "type": "FixedResolution"
+  },
+  {
+    "index": 5,
+    "name": "QHD (2560x1440)",
+    "width": 2560,
+    "height": 1440,
+    "type": "FixedResolution"
+  },
+  {
+    "index": 6,
+    "name": "4K UHD (3840x2160)",
+    "width": 3840,
+    "height": 2160,
+    "type": "FixedResolution"
+  }
+]

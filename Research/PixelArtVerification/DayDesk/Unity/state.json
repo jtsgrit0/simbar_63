@@ -1,0 +1,23 @@
+{
+  "actualCheckbox": true,
+  "actualComputerButton": true,
+  "actualPhoneButton": true,
+  "partialSaveContinue": true,
+  "reversible": true,
+  "noFee": true,
+  "oldHandlersBlocked": true,
+  "autoResumed": true,
+  "stationaryArt": true,
+  "normalNightStarted": true,
+  "bookedMask": 16777216,
+  "metrics": {
+    "attendance": 26,
+    "ticketPrice": 15.0,
+    "ticketIncome": 390.0,
+    "energyBonus": 0.025,
+    "fanBonus": 2,
+    "orderIntervalMultiplier": 0.949,
+    "bookedCount": 1,
+    "venueCapacity": 110
+  }
+}

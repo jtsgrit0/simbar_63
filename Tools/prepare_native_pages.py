@@ -19,9 +19,10 @@ PROJECT = Path(__file__).resolve().parent.parent
 TEMPLATE = PROJECT / "Tools/WebGLTemplate"
 SOURCE = TEMPLATE / "FastGame"
 MODULES = ("boot.js", "game.js", "core.js", "world.js", "booking.js", "floor.js",
-           "navigation.js", "catalog.js", "legacy-save.js", "daily-poster.js", "music.js", "aftershow.js", "album-art.js")
+           "navigation.js", "catalog.js", "legacy-save.js", "daily-poster.js", "music.js", "aftershow.js", "album-art.js", "daydesk.js")
 ESSENTIAL_IMAGES = ("owner-female.png", "owner-ff.png", "owner-pet.png", "seoul.png", "venue.png")
 ESSENTIAL_METADATA = ("venue.json", "sprites.json")
+DEFERRED_IMAGES = ("office/desk-jessy.png", "office/desk-edison.png", "office/desk-jaiden.png")
 ICONS = ("setup", "cash", "fans", "time", "staff", "guestsati", "perrform", "upgrades", "guest", "events")
 EXCLUDED = {"index.html", "runtime-manifest.json", "package.json", "package-lock.json",
             "golden-fixtures.json", "world-pixel.js"}
@@ -73,6 +74,7 @@ def runtime_files(source):
         files.append(path)
     required = set(MODULES) | {"style.css", "font.woff2", "OFL.txt"}
     required.update("art/" + name for name in essential_images(source) + ESSENTIAL_METADATA)
+    required.update("art/" + name for name in DEFERRED_IMAGES)
     required.update("art/icons/" + name + ".png" for name in ICONS)
     missing = required - {path.relative_to(source).as_posix() for path in files}
     if missing:

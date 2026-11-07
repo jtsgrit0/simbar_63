@@ -1,3 +1,4 @@
+import {launchPreparedDesk} from './native_test_workflow.mjs';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {createWorld,pixelDirection,pixelFacing,pixelStyle,pixelBandJump} from './WebGLTemplate/FastGame/world.js';
@@ -79,7 +80,7 @@ const contract=JSON.parse(readFileSync(new URL('../ArtSource/PixelArt/Directiona
 const contractAtlases=Object.fromEntries(Object.entries(contract.atlases).map(([key,definition])=>{const png=readFileSync(new URL('./WebGLTemplate/FastGame/art/'+definition.file,import.meta.url));return[key,{id:key,width:png.readUInt32BE(16),height:png.readUInt32BE(20)}];}));
 const realCanvas=canvas(),realWorld=createWorld(realCanvas,{assets:{venue:assets.venue,atlases:contractAtlases,spriteMeta:contract,venueMeta:{occluders:[]}}});
 const game=new SimBarGame({storage:{getItem(){return null;},setItem(){},removeItem(){}}});
-game.act('start');game.act('launch');game.act('guide');game.act('guide');game.act('guide');
+game.act('start');launchPreparedDesk(game);game.act('guide');game.act('guide');game.act('guide');
 realWorld.render(0,{phase:game.phase,actors:game.actors});
 for(const actor of game.actors.filter(a=>a.slot>=0&&a.slot<8)){actor.action=actor.slot<6?'mosh':'slam';actor.moving=true;}
 const surfer=game.actors.find(a=>a.id==='crowd-surfer');surfer.action='surf';surfer.y=1.85;

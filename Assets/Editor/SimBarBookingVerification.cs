@@ -19,7 +19,7 @@ public static partial class SimBarRuntimeVerification
             var plan = SimBarBooking.NewPlan(1, 0);
             var genres = new HashSet<string>();
             for (int i = 0; i < SimBarBooking.LegacyBandCount; i++) genres.Add(SimBarBooking.Bands12[i].genre);
-            report.Check(SimBarBooking.Venues4.Length == 4 && SimBarBooking.BandCount == SimBarBooking.LegacyBandCount + SimBarPosterCatalog.Artists.Length && genres.Count == 12,
+            report.Check(SimBarBooking.Venues4.Length == 4 && SimBarBooking.BandCount == SimBarBooking.LegacyBandCount + SimBarPosterCatalog.Artists.Length + 1 && genres.Count == 12,
                 "Four venues and twelve distinct fictional newcomer genres exist.");
             bool safeDefinitions = true;
             foreach (var venue in SimBarBooking.Venues4) safeDefinitions &= venue.capacity >= 60 && venue.capacity <= 120;

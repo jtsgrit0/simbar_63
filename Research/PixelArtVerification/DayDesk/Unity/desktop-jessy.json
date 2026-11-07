@@ -1,0 +1,31 @@
+{
+  "owner": "female",
+  "resource": "SimBarOffice/desk-jessy",
+  "officeKeys": [
+    "SimBarOffice/desk-jessy"
+  ],
+  "viewport": {
+    "width": 1280,
+    "height": 800
+  },
+  "identityPreserved": true,
+  "fullImage": true,
+  "point": true,
+  "captionBelowImage": true,
+  "oldWorkflowAbsent": true,
+  "onlyCheckbox": "Freewill Checkbox Roster",
+  "missingGlyphs": "",
+  "buttons": [
+    "Day Desk Save Lobby",
+    "Day Desk Language",
+    "Open Prepared Freewill Night",
+    "Office Computer Hotspot",
+    "Office Phone Hotspot",
+    "Day Desk Channel AUTO",
+    "Day Desk Channel DIALOGUE",
+    "Day Desk Channel COMPUTER",
+    "Day Desk Channel PHONE",
+    "Save Freewill Computer Plan",
+    "Confirm Freewill By Phone"
+  ]
+}

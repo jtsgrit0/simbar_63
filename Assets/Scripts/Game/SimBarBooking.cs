@@ -12,6 +12,8 @@ public static class SimBarBooking
     public const int ActionLimit = 4;
     public const int BookingLimit = 3;
     public const int LegacyBandCount = 12;
+    public const int FreewillIndex = 24;
+    public static readonly int[] AvailableBandIndices = { FreewillIndex };
     public const float PromotionCost = 60f;
     private const int LegacyBandMask = (1 << LegacyBandCount) - 1;
     private static int BandMask { get { return (1 << BandCount) - 1; } }
@@ -99,18 +101,21 @@ public static class SimBarBooking
     {
         var artists = SimBarPosterCatalog.Artists;
         int extra = artists == null ? 0 : artists.Length;
-        if (LegacyBandCount + extra >= 31)
+        if (LegacyBandCount + extra + 1 >= 31)
             throw new InvalidOperationException("Booking supports at most 30 stable artist indices; preserve the first twelve.");
-        var result = new Band[LegacyBandCount + extra];
+        var result = new Band[LegacyBandCount + extra + 1];
         Array.Copy(LegacyBands, result, LegacyBandCount);
+        result[FreewillIndex] = new Band("freewill", "프리윌", "Freewill", -1, 120, 16, true, "https://music.bugs.co.kr/album/20850049");
         for (int i = 0; i < extra; i++)
         {
             var artist = artists[i];
             if (artist == null || string.IsNullOrWhiteSpace(artist.id) || string.IsNullOrWhiteSpace(artist.name))
                 throw new InvalidOperationException("Poster artist definitions need a stable id and a verified display name.");
-            for (int previous = 0; previous < LegacyBandCount + i; previous++)
-                if (result[previous].id == artist.id) throw new InvalidOperationException("Duplicate booking artist id: " + artist.id);
-            result[LegacyBandCount + i] = new Band(artist.id, artist.name,
+            for (int previous = 0; previous < result.Length; previous++)
+                if (result[previous] != null && result[previous].id == artist.id) throw new InvalidOperationException("Duplicate booking artist id: " + artist.id);
+            int index = LegacyBandCount + i;
+            if (index >= FreewillIndex) index++;
+            result[index] = new Band(artist.id, artist.name,
                 string.IsNullOrWhiteSpace(artist.nameEnglish) ? artist.name : artist.nameEnglish,
                 artist.genreIndex, Clamp(artist.gameFee, 20, 500), Clamp(artist.gameDraw, 1, 50), true, artist.sourceUrl);
         }
@@ -121,6 +126,9 @@ public static class SimBarBooking
     public sealed class Plan
     {
         public int day = 1;
+        public int deskVersion;
+        public bool freewillSelected;
+        public int deskDoneMask;
         public int venue;
         public int blocks;
         public int listenedMask;
@@ -175,6 +183,47 @@ public static class SimBarBooking
     }
 
     public static Career NewCareer() { return new Career(); }
+    public static bool IsDesk(Plan plan) { return plan != null && plan.deskVersion == 1; }
+    public static Plan NewDeskPlan(int day, int venueIndex)
+    {
+        var plan = NewPlan(Clamp(day, 1, 9999), venueIndex);
+        plan.deskVersion = 1;
+        return plan;
+    }
+    public static bool CanLaunchDesk(Plan plan)
+    {
+        return IsDesk(plan) && ValidDeskPlan(plan) && !plan.locked && !plan.completed && plan.freewillSelected && plan.deskDoneMask == 3;
+    }
+    public static Result DeskSelect(Plan plan, bool selected)
+    {
+        string error = DeskError(plan); if (error != null) return Fail(error);
+        plan.freewillSelected = selected;
+        if (!selected) plan.deskDoneMask = 0;
+        return Ok(selected ? "desk_selected" : "desk_cleared");
+    }
+    public static Result DeskWork(Plan plan, int task)
+    {
+        string error = DeskError(plan); if (error != null) return Fail(error);
+        if (task != 0 && task != 1) return Fail("invalid_task");
+        if (!plan.freewillSelected) return Fail("band_required");
+        if (task == 1 && (plan.deskDoneMask & 1) == 0) return Fail("plan_required");
+        int bit = 1 << task;
+        if ((plan.deskDoneMask & bit) != 0) return Fail("already_done");
+        plan.deskDoneMask |= bit;
+        return Ok(task == 0 ? "desk_planned" : "desk_confirmed");
+    }
+    public static Result LockDesk(Plan plan, Career career)
+    {
+        string error = DeskError(plan); if (error != null) return Fail(error);
+        if (career == null) return Fail("invalid_career");
+        if (!plan.freewillSelected) return Fail("band_required");
+        if (plan.deskDoneMask != 3) return Fail("desk_incomplete");
+        plan.bookedMask = plan.attemptedMask = 1 << FreewillIndex; plan.attempts = 1;
+        plan.bookedGrowth = new int[BandCount];
+        plan.bookedGrowth[FreewillIndex] = CareerValue(career.growth, FreewillIndex);
+        plan.lockedMetrics = Calculate(plan); plan.hasLockedMetrics = true; plan.locked = true;
+        return Ok("desk_locked", FreewillIndex);
+    }
 
     /// <summary>Repair loaded state only. Action methods never repair or spend on invalid input.</summary>
     public static void Sanitize(Plan plan, Career career)
@@ -190,6 +239,29 @@ public static class SimBarBooking
         plan.day = Math.Max(1, plan.day);
         plan.venue = Clamp(plan.venue, 0, Venues4.Length - 1);
         plan.ticketTier = Clamp(plan.ticketTier, 0, 2);
+        if (IsDesk(plan))
+        {
+            plan.day = Clamp(plan.day, 1, 9999);
+            plan.deskDoneMask = Clamp(plan.deskDoneMask, 0, 3);
+            if (!plan.freewillSelected || (plan.deskDoneMask & 1) == 0) plan.deskDoneMask = 0;
+            plan.blocks = plan.promotions = plan.listenedMask = plan.scoutedPosterMask = 0; plan.ticketTier = 1;
+            plan.bookedGrowth = RepairArray(plan.bookedGrowth);
+            if (plan.completed) plan.locked = true;
+            if (plan.locked)
+            {
+                plan.freewillSelected = true; plan.deskDoneMask = 3;
+                plan.bookedMask = plan.attemptedMask = 1 << FreewillIndex; plan.attempts = 1;
+                for (int i = 0; i < BandCount; i++) if (i != FreewillIndex) plan.bookedGrowth[i] = 0;
+                plan.lockedMetrics = plan.hasLockedMetrics ? RepairMetrics(plan.lockedMetrics, plan.venue) : Calculate(plan);
+                plan.hasLockedMetrics = true;
+            }
+            else
+            {
+                plan.bookedMask = plan.attemptedMask = plan.attempts = 0; plan.bookedGrowth = new int[BandCount];
+                plan.hasLockedMetrics = false; plan.lockedMetrics = new Metrics();
+            }
+            return;
+        }
         plan.bookedMask = FirstBits(plan.bookedMask & BandMask, BookingLimit);
         int attempted = (plan.attemptedMask & BandMask) | plan.bookedMask;
         plan.attemptedMask = plan.bookedMask | FirstBits(attempted & ~plan.bookedMask, ActionLimit - Count(plan.bookedMask));
@@ -225,10 +297,10 @@ public static class SimBarBooking
         else plan.hasLockedMetrics = false;
     }
 
-    public static int Hour(Plan plan) { return 10 + 2 * (plan == null ? 0 : Clamp(plan.blocks, 0, ActionLimit)); }
+    public static int Hour(Plan plan) { return IsDesk(plan) ? !plan.freewillSelected ? 10 : plan.deskDoneMask == 3 ? 18 : (plan.deskDoneMask & 1) != 0 ? 16 : 13 : 10 + 2 * (plan == null ? 0 : Clamp(plan.blocks, 0, ActionLimit)); }
     public static bool CanAct(Plan plan)
     {
-        return plan != null && !plan.locked && !plan.completed && plan.blocks >= 0 && plan.blocks < ActionLimit;
+        return plan != null && !IsDesk(plan) && !plan.locked && !plan.completed && plan.blocks >= 0 && plan.blocks < ActionLimit;
     }
 
     public static int Chance(Plan plan, Career career, int band, int package)
@@ -353,7 +425,7 @@ public static class SimBarBooking
 
     public static void SetTicket(Plan plan, int tier)
     {
-        if (ValidPlan(plan) && !plan.locked && !plan.completed && tier >= 0 && tier <= 2) plan.ticketTier = tier;
+        if (!IsDesk(plan) && ValidPlan(plan) && !plan.locked && !plan.completed && tier >= 0 && tier <= 2) plan.ticketTier = tier;
     }
 
     public static Metrics Forecast(Plan plan, Career career)
@@ -364,7 +436,7 @@ public static class SimBarBooking
 
     public static void Lock(Plan plan)
     {
-        if (!ValidPlan(plan) || (plan.locked && plan.hasLockedMetrics)) return;
+        if (IsDesk(plan) || !ValidPlan(plan) || (plan.locked && plan.hasLockedMetrics)) return;
         plan.lockedMetrics = Calculate(plan);
         plan.hasLockedMetrics = true;
         plan.locked = true;
@@ -381,7 +453,11 @@ public static class SimBarBooking
         if (plan.completed) return Fail("already_completed");
         if (!ValidPlan(plan)) return Fail("invalid_plan");
         if (career == null) return Fail("invalid_career");
-        Lock(plan);
+        if (IsDesk(plan) && !plan.locked)
+        {
+            var locked = LockDesk(plan, career); if (!locked.success) return locked;
+        }
+        else Lock(plan);
         Metrics metrics = Forecast(plan, career);
         stars = Clamp(stars, 0, 3);
         career.relationships = RepairArray(career.relationships);
@@ -402,13 +478,14 @@ public static class SimBarBooking
 
     private static Metrics Calculate(Plan plan)
     {
-        int count = Count(plan.bookedMask);
+        int bookedMask = IsDesk(plan) ? plan.freewillSelected ? 1 << FreewillIndex : 0 : plan.bookedMask;
+        int count = Count(bookedMask);
         int capacity = Venues4[plan.venue].capacity;
         int draw = count == 0 ? 12 : 10;
         int fit = 0;
         for (int i = 0; i < BandCount; i++)
         {
-            if ((plan.bookedMask & (1 << i)) == 0) continue;
+            if ((bookedMask & (1 << i)) == 0) continue;
             int affinity = VenueFit(plan.venue, i);
             fit += affinity;
             draw += Bands12[i].draw + affinity / 2 + CareerValue(plan.bookedGrowth, i) / 20;
@@ -453,11 +530,28 @@ public static class SimBarBooking
         if (!ValidPlan(plan)) return "invalid_plan";
         if (plan.completed) return "already_completed";
         if (plan.locked) return "locked";
+        if (IsDesk(plan)) return "desk_only";
         return CanAct(plan) ? null : "no_time";
+    }
+
+    private static string DeskError(Plan plan)
+    {
+        return !IsDesk(plan) || !ValidDeskPlan(plan) ? "invalid_plan" : plan.completed ? "already_completed" : plan.locked ? "locked" : null;
+    }
+    private static bool ValidDeskPlan(Plan plan)
+    {
+        int mask = 1 << FreewillIndex;
+        return plan != null && plan.day >= 1 && plan.venue >= 0 && plan.venue < Venues4.Length && plan.ticketTier == 1
+            && (plan.deskDoneMask == 0 || plan.deskDoneMask == 1 || plan.deskDoneMask == 3)
+            && (plan.freewillSelected || plan.deskDoneMask == 0) && plan.blocks == 0 && plan.promotions == 0 && plan.listenedMask == 0 && plan.scoutedPosterMask == 0
+            && (!plan.completed || plan.locked)
+            && (plan.locked ? plan.freewillSelected && plan.deskDoneMask == 3 && plan.bookedMask == mask && plan.attemptedMask == mask && plan.attempts == 1
+                : plan.bookedMask == 0 && plan.attemptedMask == 0 && plan.attempts == 0);
     }
 
     private static bool ValidPlan(Plan plan)
     {
+        if (IsDesk(plan)) return ValidDeskPlan(plan);
         return plan != null && plan.day >= 1 && plan.venue >= 0 && plan.venue < Venues4.Length
             && plan.blocks >= 0 && plan.blocks <= ActionLimit && plan.promotions >= 0 && plan.promotions <= ActionLimit
             && plan.ticketTier >= 0 && plan.ticketTier <= 2 && (plan.listenedMask & ~BandMask) == 0

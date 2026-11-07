@@ -22,7 +22,9 @@ assert.equal(Booking.scoutDaily(Booking.newPlan(),Booking.newCareer()).code,'alr
 
 const data=new Map(),storage={getItem:k=>data.get(k)??null,setItem:(k,v)=>data.set(k,v)};
 const game=new SimBarGame({storage,seed:123});game.act('owner',{index:2});game.act('start');assert.equal(game.journey.booking.venue,1);
-game.act('venue',{venue:3});game.journey.booking.completed=true;game.journey.booking.locked=true;game.journey.day=2;game._planning(false);
+assert.equal(game.act('venue',{venue:3}).success,false);
+// A completed historical contract retains its venue for the next desk.
+game.journey.booking=Booking.newPlan(1,3);game.journey.booking.completed=true;game.journey.booking.locked=true;game.journey.day=2;game._planning(false);
 assert.equal(game.journey.booking.venue,3);game.save();const loaded=new SimBarGame({storage});loaded.act('continue');assert.equal(loaded.journey.booking.venue,3);
 assert.equal(game.act('playlist',{index:4}).success,true);assert.equal(game.act('playlist',{index:5}).success,false);
 assert.equal(catalog.playlists.length,5);assert.equal(catalog.playlists[4].filename,'Electric Shocker - Korean Version.mp3');

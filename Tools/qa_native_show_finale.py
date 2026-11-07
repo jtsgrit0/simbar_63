@@ -138,7 +138,7 @@ def main():
               const {SimBarGame}=await import('/Tools/WebGLTemplate/FastGame/core.js');
               for(let seed=1;seed<200;seed++){
                 const mem=new Map(),storage={getItem:k=>mem.get(k)||null,setItem:(k,v)=>mem.set(k,String(v)),removeItem:k=>mem.delete(k)};
-                const g=new SimBarGame({seed,storage});g.act('start');g.act('launch');while(g.phase==='guide')g.act('guide');
+                const g=new SimBarGame({seed,storage});g.act('start');g.act('deskSelect',{selected:true});g.act('deskWork',{task:0});g.act('deskWork',{task:1});g.act('launch');while(g.phase==='guide')g.act('guide');
                 if(g.reaction.paperCount&&g.reaction.guestScheduled){simbarGame.importSave(g.exportSave());return seed;}
               }throw new Error('No seeded night with both real random floor events');
             }''')

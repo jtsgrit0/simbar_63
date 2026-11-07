@@ -1,0 +1,264 @@
+{
+  "version": 1,
+  "tool": "Built-in image_gen.imagegen",
+  "workflow": "Jessy from approved owner portrait, then two identity-preserving edits of the same office with the respective approved owner portrait as the second input",
+  "lazyLoadContract": "Load only selected owner scene after Start; never add these files to initial owner-selection preload",
+  "geometry": {
+    "referenceSize": [
+      640,
+      360
+    ],
+    "monitorScreenQuadPixels": [
+      [
+        21,
+        173
+      ],
+      [
+        204,
+        173
+      ],
+      [
+        209,
+        278
+      ],
+      [
+        28,
+        278
+      ]
+    ],
+    "monitorScreenQuad": [
+      [
+        0.0328125,
+        0.48055556
+      ],
+      [
+        0.31875,
+        0.48055556
+      ],
+      [
+        0.3265625,
+        0.77222222
+      ],
+      [
+        0.04375,
+        0.77222222
+      ]
+    ],
+    "monitorSafeQuad": [
+      [
+        0.0359375,
+        0.48611111
+      ],
+      [
+        0.315625,
+        0.48611111
+      ],
+      [
+        0.3234375,
+        0.76666667
+      ],
+      [
+        0.046875,
+        0.76666667
+      ]
+    ],
+    "monitorScreenRect": [
+      0.0328125,
+      0.48055556,
+      0.29375,
+      0.29166667
+    ],
+    "monitorSafeRect": [
+      0.046875,
+      0.48888889,
+      0.265625,
+      0.275
+    ],
+    "phoneScreenQuadPixels": [
+      [
+        490,
+        291
+      ],
+      [
+        535,
+        291
+      ],
+      [
+        559,
+        328
+      ],
+      [
+        508,
+        328
+      ]
+    ],
+    "phoneScreenQuad": [
+      [
+        0.765625,
+        0.80833333
+      ],
+      [
+        0.8359375,
+        0.80833333
+      ],
+      [
+        0.8734375,
+        0.91111111
+      ],
+      [
+        0.79375,
+        0.91111111
+      ]
+    ],
+    "phoneSafeQuad": [
+      [
+        0.7703125,
+        0.81388889
+      ],
+      [
+        0.83125,
+        0.81388889
+      ],
+      [
+        0.8671875,
+        0.90555556
+      ],
+      [
+        0.7984375,
+        0.90555556
+      ]
+    ],
+    "phoneHotspotRect": [
+      0.7578125,
+      0.79166667,
+      0.1265625,
+      0.16388889
+    ],
+    "keyboardRect": [
+      0.35625,
+      0.80555556,
+      0.3296875,
+      0.09722222
+    ],
+    "speechArea": {
+      "left": 0.03,
+      "top": 0.04,
+      "maxWidth": 0.31
+    },
+    "notes": "Screen polygons measured inside bezels. Phone hotspot includes chassis. Same monitor edge positions across all three; phone edge variation at most one runtime pixel."
+  },
+  "assets": [
+    {
+      "index": 0,
+      "key": "jessy",
+      "ownerId": "female",
+      "source": "ArtSource/DayDesk/desk-jessy.source.png",
+      "sourceSha256": "ba3f08765705d7191ca8cea0c6e499507ddbb1a3dd2c0b2b409f38b43f40abfd",
+      "sourceSize": [
+        1672,
+        941
+      ],
+      "generatedSource": "C:/Users/Jtsgr/.codex/generated_images/01a1b360-6c99-7dc0-a087-70686b56ec5b/exec-0a40a15f-c070-453f-abf7-a39d6c4afdaf.png",
+      "prompt": "ArtSource/DayDesk/desk-jessy.prompt.md",
+      "promptSha256": "361981b7ee70b718454a2134f0606b83591c1747f5b66aa3ec8aa05b8dbcbdc0",
+      "reference": "Tools/WebGLTemplate/FastGame/art/owner-female.png",
+      "referenceSha256": "8d85760c18009360078d98158b03d2eae5cb423dde3cdb8cea13fb1105de3fa0",
+      "editTarget": null,
+      "runtime": "Tools/WebGLTemplate/FastGame/art/office/desk-jessy.png",
+      "runtimeSize": [
+        640,
+        360
+      ],
+      "runtimeSha256": "bfe37e2a305d61e7460318491accfc1ecbcfcd26e57deb781b3205ad4c1aa20d",
+      "runtimeBytes": 424056,
+      "processing": "Complete-source nearest-neighbor downsample; no crop, repaint, recolor or palette quantization",
+      "pixelsExactToNearestResize": true,
+      "faceAnchorApproximate": [
+        0.5359375,
+        0.30555556
+      ],
+      "identityReview": [
+        "Purple/copper voluminous curls",
+        "Gold hoop earrings",
+        "Burgundy top and black leather",
+        "Gold jewelry and pink typing nails"
+      ],
+      "singleOwnerOnly": true
+    },
+    {
+      "index": 1,
+      "key": "edison",
+      "ownerId": "ff",
+      "source": "ArtSource/DayDesk/desk-edison.source.png",
+      "sourceSha256": "79ef1ed204d5e9e44c1745081e7c8b72f70e1a67adeaa5de4f35922b5af029a1",
+      "sourceSize": [
+        1672,
+        941
+      ],
+      "generatedSource": "C:/Users/Jtsgr/.codex/generated_images/01a1b360-6c99-7dc0-a087-70686b56ec5b/exec-f3db023c-c23e-4585-99d5-ef07a05d5d54.png",
+      "prompt": "ArtSource/DayDesk/desk-edison.prompt.md",
+      "promptSha256": "a203b4ca65e5a55e71b9ef10b6e3e8e00d629c35fbaefa9d46ce676c6e980e96",
+      "reference": "Tools/WebGLTemplate/FastGame/art/owner-ff.png",
+      "referenceSha256": "be581e80e16730260d2468d17e3e3fb2897062e35eaec463fdcee72220e2a350",
+      "editTarget": "ArtSource/DayDesk/desk-jessy.source.png",
+      "runtime": "Tools/WebGLTemplate/FastGame/art/office/desk-edison.png",
+      "runtimeSize": [
+        640,
+        360
+      ],
+      "runtimeSha256": "6671c7c62bed8b88b18404f74b7454acb1336ef8ac9bc2d493a5adc79f7eba2c",
+      "runtimeBytes": 416394,
+      "processing": "Complete-source nearest-neighbor downsample; no crop, repaint, recolor or palette quantization",
+      "pixelsExactToNearestResize": true,
+      "faceAnchorApproximate": [
+        0.5328125,
+        0.375
+      ],
+      "identityReview": [
+        "Warm-brown bowl fringe",
+        "Small serious eyes and moustache",
+        "Cream headphones",
+        "Blue denim jacket"
+      ],
+      "singleOwnerOnly": true
+    },
+    {
+      "index": 2,
+      "key": "jaiden",
+      "ownerId": "pet-sounds",
+      "source": "ArtSource/DayDesk/desk-jaiden.source.png",
+      "sourceSha256": "0cc2cd19475585ff874c40a9eefa6f384295ab4121f27aa6171ae4d394028418",
+      "sourceSize": [
+        1672,
+        941
+      ],
+      "generatedSource": "C:/Users/Jtsgr/.codex/generated_images/01a1b360-6c99-7dc0-a087-70686b56ec5b/exec-d6e8b3d4-3384-4300-bf02-af2bfbf6c0c1.png",
+      "prompt": "ArtSource/DayDesk/desk-jaiden.prompt.md",
+      "promptSha256": "32a2cb8fb1c3af25c463277ff441ba0da712d1403f8a4c988e7b8a2a93ba7c73",
+      "reference": "Tools/WebGLTemplate/FastGame/art/owner-pet.png",
+      "referenceSha256": "f139dd68c81f915f20c1380eba95482a0524081393f965070b7f04358a57f417",
+      "editTarget": "ArtSource/DayDesk/desk-jessy.source.png",
+      "runtime": "Tools/WebGLTemplate/FastGame/art/office/desk-jaiden.png",
+      "runtimeSize": [
+        640,
+        360
+      ],
+      "runtimeSha256": "1e7e1b196d569c09c9ccaab1c916a2157111782e094bb22129a08ef1c1e97fb9",
+      "runtimeBytes": 399936,
+      "processing": "Complete-source nearest-neighbor downsample; no crop, repaint, recolor or palette quantization",
+      "pixelsExactToNearestResize": true,
+      "faceAnchorApproximate": [
+        0.5625,
+        0.34166667
+      ],
+      "identityReview": [
+        "Shaved dotted undercut",
+        "Swept-up copper/brown hair",
+        "Curved smiling eyes and friendly smile",
+        "White shirt"
+      ],
+      "singleOwnerOnly": true
+    }
+  ],
+  "runtimeTotalBytes": 1240386
+}

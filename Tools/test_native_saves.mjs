@@ -1,3 +1,4 @@
+import {launchPreparedDesk} from './native_test_workflow.mjs';
 import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
 import {parseUnityPrefs,md5,unityPreferencePath,migrateLegacySave} from './WebGLTemplate/FastGame/legacy-save.js';
@@ -32,7 +33,7 @@ const newProgress=storage(),late=await migrateLegacySave({storage:newProgress,in
 assert.equal(late.reason,'pending');newProgress.setItem(SAVE_KEY,'new progress');await late.pending;assert.equal(newProgress.getItem(SAVE_KEY),'new progress');
 
 // A real seeded night generates its own paper and guest events; no event-spawn action.
-const live=new SimBarGame({storage:storage(),seed:1});live.act('start');live.act('launch');for(let i=0;i<3;i++)live.act('guide');
+const live=new SimBarGame({storage:storage(),seed:1});live.act('start');launchPreparedDesk(live);for(let i=0;i<3;i++)live.act('guide');
 assert.equal(live.phase,'playing');assert.equal(live.act('throwConfetti').success,false);
 const before=live.journey.secondsLeft;live.act('pause');live.tick(2);assert.equal(live.journey.secondsLeft,before);live.act('resume');
 let guest=false,paper=false,arrived=false,withoutInput=false;

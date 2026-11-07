@@ -1,8 +1,9 @@
+import {launchPreparedDesk} from './native_test_workflow.mjs';
 import assert from 'node:assert/strict';
 import {SimBarGame,Floor} from './WebGLTemplate/FastGame/core.js';
 
 function memory(){const map=new Map();return{getItem:k=>map.get(k)??null,setItem:(k,v)=>map.set(k,String(v))};}
-function night(seed=2){const g=new SimBarGame({storage:memory(),seed});g.act('start');g.act('launch');while(g.phase==='guide')g.act('guide');return g;}
+function night(seed=2){const g=new SimBarGame({storage:memory(),seed});g.act('start');launchPreparedDesk(g);while(g.phase==='guide')g.act('guide');return g;}
 function end(g){g.journey.secondsLeft=.05;g.tick(.05);assert.equal(g.phase,'closing');}
 function restore(raw){const g=new SimBarGame({storage:memory()});assert(g.importSave(raw));g.act('continue');return g;}
 function finish(g){for(let i=0;i<6000&&g.phase!=='results';i++){g.tick(.05);if(g.farewellPending)g.act('farewellAck');if(g.reaction.activeKind)g.act('quick',{kind:g.reaction.activeKind});}assert.equal(g.phase,'results');}

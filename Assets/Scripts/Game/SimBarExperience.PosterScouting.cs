@@ -82,6 +82,7 @@ public sealed partial class SimBarExperience
 
     private void BookingShowPosters(bool show)
     {
+        if(SimBarBooking.IsDesk(DayPlan))return;
         bookingShowingPosters=show;
         if (show) bookingShowingArchive=false;
         bookingVenueMenuOpen=false;
@@ -93,6 +94,7 @@ public sealed partial class SimBarExperience
 
     private void SelectScoutingVenue(int venue)
     {
+        if(SimBarBooking.IsDesk(DayPlan))return;
         if (venue < 0 || venue >= SimBarBooking.Venues4.Length) return;
         if (JourneyIsPlanning && !bookingShowingArchive)
             BookingSelectVenue(venue);
@@ -110,6 +112,7 @@ public sealed partial class SimBarExperience
 
     private void SelectScoutingPoster(int index)
     {
+        if(SimBarBooking.IsDesk(DayPlan))return;
         scoutingPosterIndex=SimBarPosterCatalog.DailyPosterIndex;
         if(scoutingRequest!=null) scoutingRequest.Abort();
         scoutingRequestedImage=null;
@@ -120,7 +123,7 @@ public sealed partial class SimBarExperience
 
     private void BookingScoutPoster()
     {
-        if(!JourneyIsPlanning) return;
+        if(!JourneyIsPlanning||SimBarBooking.IsDesk(DayPlan)) return;
         if (scoutingPosterIndex == SimBarPosterCatalog.DailyPosterIndex)
             BookingApply(SimBarBooking.ScoutDaily(DayPlan,BookingCareer));
         else
@@ -130,6 +133,7 @@ public sealed partial class SimBarExperience
 
     private void BookingPrimaryAction()
     {
+        if(SimBarBooking.IsDesk(DayPlan)){BookingLaunchNight();return;}
         if(!bookingShowingPosters) { BookingLaunchNight(); return; }
         var dailyEntry = SimBarPosterCatalog.CreateDailyPoster(DayPlan.day, DayPlan.venue);
         if(!SimBarBooking.IsDailyPosterDiscovered(BookingCareer,DayPlan.day,DayPlan.venue)) { BookingScoutPoster(); return; }

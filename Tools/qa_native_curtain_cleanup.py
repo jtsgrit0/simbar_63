@@ -81,7 +81,7 @@ def main():
             page.goto(f'http://127.0.0.1:{server.server_port}/Library/CurtainCleanupQA/index.html');ready()
             report['seed'] = page.evaluate('''() => {const Game=simbarGame.constructor;for(let seed=1;seed<500;seed++){
               const mem=new Map(),g=new Game({seed,storage:{getItem:k=>mem.get(k)||null,setItem:(k,v)=>mem.set(k,String(v)),removeItem:k=>mem.delete(k)}});
-              g.act('start');g.act('launch');while(g.phase==='guide')g.act('guide');
+              g.act('start');g.act('deskSelect',{selected:true});g.act('deskWork',{task:0});g.act('deskWork',{task:1});g.act('launch');while(g.phase==='guide')g.act('guide');
               if(!g.reaction.paperCount&&!g.reaction.guestScheduled){simbarGame.importSave(g.exportSave());return seed;}
             }throw new Error('No normal seeded quiet night');}''')
             page.reload();ready();page.locator('button[data-action="continue"]').click();paint();page.evaluate(OBSERVE)

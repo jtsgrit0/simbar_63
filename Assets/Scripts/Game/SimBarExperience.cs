@@ -845,6 +845,7 @@ public sealed partial class SimBarExperience : MonoBehaviour
     private void Update()
     {
         StartMusicOnInput();
+        TickDayDeskPresentation(Time.unscaledDeltaTime);
         if (Keyboard.current != null)
         {
             if (Keyboard.current.digit1Key.wasPressedThisFrame) SelectServiceItem(0);

@@ -1,0 +1,31 @@
+{
+  "cases": [
+    {
+      "mode": 0,
+      "credit": 160,
+      "wallet": 1000.0,
+      "oneTime": true
+    },
+    {
+      "mode": 1,
+      "credit": 0,
+      "wallet": 840.0,
+      "oneTime": true
+    },
+    {
+      "mode": 2,
+      "credit": 0,
+      "wallet": 840.0,
+      "oneTime": true
+    },
+    {
+      "mode": 3,
+      "credit": 0,
+      "wallet": 840.0,
+      "oneTime": true
+    }
+  ],
+  "oldLockedActivePreserved": true,
+  "oldActiveUnlockedRecovered": true,
+  "legacyPureModelReceiptSuitePassed": true
+}

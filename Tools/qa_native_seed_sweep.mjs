@@ -1,3 +1,4 @@
+import {launchPreparedDesk} from './native_test_workflow.mjs';
 // Exercise normal complete nights with deterministic random crowd states.
 import assert from 'node:assert/strict';
 import {writeFileSync,mkdirSync} from 'node:fs';
@@ -7,7 +8,7 @@ const outcomes=[];
 const seeds=process.argv.length>2?process.argv.slice(2).map(Number):Array.from({length:20},(_,i)=>i+1);
 for(const seed of seeds){
   const mem=new Map(),storage={getItem:k=>mem.get(k)||null,setItem:(k,v)=>mem.set(k,String(v))};
-  const g=new SimBarGame({storage,seed});g.act('start');g.act('launch');while(g.phase==='guide')g.act('guide');
+  const g=new SimBarGame({storage,seed});g.act('start');launchPreparedDesk(g);while(g.phase==='guide')g.act('guide');
   let ticks=0,maxStep=0;
   while(g.phase!=='results'&&ticks<8400){
     const before=new Map(g.actors.map(a=>[a.id,{x:a.x,z:a.z}]));

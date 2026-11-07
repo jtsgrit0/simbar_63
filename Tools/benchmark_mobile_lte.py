@@ -107,8 +107,15 @@ def run_benchmark(args):
                        "requests": list(requests.values()), "errors": list(errors), "failedRequests": list(failures),
                        "playerState": page.locator("#game-shell").get_attribute("data-player-state"),
                        "screenshot": str(shot)}
+                deferred = re.compile(r"/art/(?:office/|album-covers(?:/|\.json))|/StreamingAssets/Music/", re.I)
+                run["preReadyDeferredRequests"] = {
+                    "cdp": [entry["url"] for entry in run["requests"] if deferred.search(entry["url"])],
+                    "resourceTiming": [entry["name"] for entry in run["resources"] if deferred.search(entry["name"])],
+                }
                 run["meetsTarget"] = (run["gameReadyMs"] <= args.target_ms and run["enginePresent"]
-                                      and run["playerState"] == "ready" and not run["errors"] and not run["failedRequests"])
+                                      and run["playerState"] == "ready" and not run["errors"] and not run["failedRequests"]
+                                      and not any(entry.get("status", 0) >= 400 for entry in run["requests"])
+                                      and not any(run["preReadyDeferredRequests"].values()))
                 sample["runs"].append(run)
                 args.output.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
                 print(json.dumps({"sample": number, **{key: run[key] for key in (
@@ -120,6 +127,27 @@ def run_benchmark(args):
                 start_button.click()
                 page.wait_for_function("window.simbarGame?.phase === 'planning'")
                 sample["interactionProof"] = {"clicked": "start", "phase": "planning"}
+                # This selected-owner office probe happens only after both load
+                # samples; its image download cannot prefetch or affect a warm run.
+                if page.locator(".daydesk").count():
+                    page.wait_for_function("(() => {const i=document.querySelector('.desk-scene-image');return i?.complete&&i.naturalWidth>0;})()")
+                    planning = page.evaluate("""() => {const image=document.querySelector('.desk-scene-image');return {
+                        ownerIndex:simbarGame.owner,imageSrc:image.src,naturalWidth:image.naturalWidth,naturalHeight:image.naturalHeight,
+                        resources:performance.getEntriesByType('resource').map(entry=>entry.toJSON())};}""")
+                    planning.update(requests=list(requests.values()), errors=list(errors), failedRequests=list(failures))
+                    expected = ["desk-jessy.png", "desk-edison.png", "desk-jaiden.png"][planning["ownerIndex"]]
+                    planning["officeRequests"] = {
+                        "cdp": [entry["url"] for entry in planning["requests"] if "/art/office/" in entry["url"]],
+                        "resourceTiming": [entry["name"] for entry in planning["resources"] if "/art/office/" in entry["name"]],
+                    }
+                    planning["meetsDeferredContract"] = (
+                        planning["imageSrc"].endswith("/art/office/" + expected)
+                        and [planning["naturalWidth"], planning["naturalHeight"]] == [640, 360]
+                        and all(urls and all(url.endswith("/art/office/" + expected) for url in urls)
+                                for urls in planning["officeRequests"].values())
+                        and not planning["errors"] and not planning["failedRequests"]
+                        and not any(entry.get("status", 0) >= 400 for entry in planning["requests"]))
+                    sample["planningAssets"] = planning
                 page.screenshot(path=str(args.output.parent / f"{args.label}-{number}-interactive.png"))
                 args.output.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
             context.close()
@@ -146,7 +174,8 @@ def main():
     if args.expected_release and not re.fullmatch(r"[0-9a-f]{16}", args.expected_release):
         parser.error("Expected release must be a sixteen-character lowercase hexadecimal content hash.")
     result = run_benchmark(args)
-    if any(not run["meetsTarget"] for sample in result["samples"] for run in sample["runs"]):
+    if (any(not run["meetsTarget"] for sample in result["samples"] for run in sample["runs"])
+            or any(sample.get("planningAssets", {}).get("meetsDeferredContract") is False for sample in result["samples"])):
         raise SystemExit(1)
 
 

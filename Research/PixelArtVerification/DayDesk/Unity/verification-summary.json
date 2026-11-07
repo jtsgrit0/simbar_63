@@ -1,0 +1,110 @@
+{
+  "compiledErrors": 0,
+  "deskModelPassed": 17,
+  "legacyModelPassed": 37,
+  "ownerViewports": [
+    "desktop-jessy",
+    "desktop-edison",
+    "desktop-jaiden",
+    "mobile-jessy",
+    "mobile-edison",
+    "mobile-jaiden",
+    "landscape-jessy"
+  ],
+  "state": {
+    "actualCheckbox": true,
+    "actualComputerButton": true,
+    "actualPhoneButton": true,
+    "partialSaveContinue": true,
+    "reversible": true,
+    "noFee": true,
+    "oldHandlersBlocked": true,
+    "autoResumed": true,
+    "stationaryArt": true,
+    "normalNightStarted": true,
+    "bookedMask": 16777216,
+    "metrics": {
+      "attendance": 26,
+      "ticketPrice": 15.0,
+      "ticketIncome": 390.0,
+      "energyBonus": 0.025,
+      "fanBonus": 2,
+      "orderIntervalMultiplier": 0.949,
+      "bookedCount": 1,
+      "venueCapacity": 110
+    }
+  },
+  "migration": {
+    "cases": [
+      {
+        "mode": 0,
+        "credit": 160,
+        "wallet": 1000.0,
+        "oneTime": true
+      },
+      {
+        "mode": 1,
+        "credit": 0,
+        "wallet": 840.0,
+        "oneTime": true
+      },
+      {
+        "mode": 2,
+        "credit": 0,
+        "wallet": 840.0,
+        "oneTime": true
+      },
+      {
+        "mode": 3,
+        "credit": 0,
+        "wallet": 840.0,
+        "oneTime": true
+      }
+    ],
+    "oldLockedActivePreserved": true,
+    "oldActiveUnlockedRecovered": true,
+    "legacyPureModelReceiptSuitePassed": true
+  },
+  "startupOfficeTextures": 0,
+  "physicalChannelIndicatorsExclusive": true,
+  "officeArtStationary": true,
+  "resources": [
+    {
+      "ownerId": "female",
+      "resource": "Assets\\Resources\\SimBarOffice\\desk-jessy.bytes",
+      "bytes": 424056,
+      "sha256": "bfe37e2a305d61e7460318491accfc1ecbcfcd26e57deb781b3205ad4c1aa20d",
+      "byteIdentical": true
+    },
+    {
+      "ownerId": "ff",
+      "resource": "Assets\\Resources\\SimBarOffice\\desk-edison.bytes",
+      "bytes": 416394,
+      "sha256": "6671c7c62bed8b88b18404f74b7454acb1336ef8ac9bc2d493a5adc79f7eba2c",
+      "byteIdentical": true
+    },
+    {
+      "ownerId": "pet-sounds",
+      "resource": "Assets\\Resources\\SimBarOffice\\desk-jaiden.bytes",
+      "bytes": 399936,
+      "sha256": "1e7e1b196d569c09c9ccaab1c916a2157111782e094bb22129a08ef1c1e97fb9",
+      "byteIdentical": true
+    }
+  ],
+  "preservation": {
+    "prefsRestored": true,
+    "gameViewRestored": true,
+    "viewportShapesRestored": true,
+    "customCount": 0,
+    "scene": "Assets/Scenes/SimBar_Reference.unity",
+    "sceneDirty": false,
+    "playing": false,
+    "runInBackground": false,
+    "compiling": false
+  },
+  "preferenceHashes": {
+    "originalSha256": "c763f84101d0b9eb7f3587e54aa7365de9589371a6b2f841ab8281cb47022f80",
+    "restoredSha256": "c763f84101d0b9eb7f3587e54aa7365de9589371a6b2f841ab8281cb47022f80",
+    "byteExact": true
+  }
+}

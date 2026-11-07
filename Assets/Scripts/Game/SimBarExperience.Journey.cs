@@ -50,6 +50,10 @@ public sealed partial class SimBarExperience
         public bool resultNewRecord;
         public SimBarBooking.Plan booking;
         public SimBarBooking.Career bookingCareer = SimBarBooking.NewCareer();
+        public string legacyDeskPlanJson = "";
+        public float deskMigrationCredit;
+        public int deskMigrationDay;
+        public bool deskMigrationTrustedOpening;
         public float dayOpeningCash;
         public bool hasDayOpeningCash;
         public float resultTicketIncome;
@@ -499,7 +503,7 @@ public sealed partial class SimBarExperience
     {
         PrepareFloorStateImport();
         journey = new JourneyData();
-        if (!string.IsNullOrWhiteSpace(json) && json.Length <= 16000)
+        if (!string.IsNullOrWhiteSpace(json) && json.Length <= 32000)
         {
             try
             {
@@ -578,12 +582,22 @@ public sealed partial class SimBarExperience
         }
         if (journey.bookingCareer == null) journey.bookingCareer = SimBarBooking.NewCareer();
         SimBarBooking.Sanitize(journey.booking, journey.bookingCareer);
+        journey.legacyDeskPlanJson = journey.legacyDeskPlanJson ?? "";
+        if (journey.legacyDeskPlanJson.Length > 8000) journey.legacyDeskPlanJson = journey.legacyDeskPlanJson.Substring(0, 8000);
+        journey.deskMigrationCredit = JourneyClamp(journey.deskMigrationCredit, 0f, 0f, 1000000000f);
+        journey.deskMigrationDay = Mathf.Clamp(journey.deskMigrationDay, 0, 9999);
+        // An invalid historic opening balance cannot authorize a migration credit.
+        if (!JourneyFinite(journey.dayOpeningCash) || journey.dayOpeningCash < 0f || journey.dayOpeningCash > 1000000000f) journey.hasDayOpeningCash = false;
         journey.dayOpeningCash = JourneyClamp(journey.dayOpeningCash, cash, 0f, 1000000000f);
         journey.resultTicketIncome = JourneyClamp(journey.resultTicketIncome, 0f, 0f, 1000000f);
         journey.resultAttendance = Mathf.Clamp(journey.resultAttendance, 0, 120);
         if (journey.booking != null && journey.booking.day != journey.day) journey.booking = null;
         // Older night saves have no booking plan and continue without fabricated fees or receipts.
-        if (journey.inProgress && JourneyHasActivePlan) SimBarBooking.Lock(journey.booking);
+        if (journey.inProgress && JourneyHasActivePlan)
+        {
+            if (SimBarBooking.IsDesk(journey.booking)) SimBarBooking.LockDesk(journey.booking, journey.bookingCareer);
+            else SimBarBooking.Lock(journey.booking);
+        }
         if (journey.tutorialComplete) journey.guidePending = false;
     }
 

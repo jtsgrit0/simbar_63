@@ -1,0 +1,8 @@
+{
+  "scope": "QA-only temporary GameView preset cleanup",
+  "initialFailure": "The first Restore helper passed a custom-relative index to RemoveCustomSize, which expects a combined index. Removal failed and the unbounded while loop repeatedly logged the error; the Editor was stopped.",
+  "recovery": "Reopened saved clean Reference; restored the untouched original preference backup and all seven original preset names, types, dimensions and index 0.",
+  "finalHelper": "One bounded descending traversal skips built-ins and all original custom indices, removes only the owned temporary name/type/dimension combinations, verifies each decrement, and restores background settings in finally.",
+  "productionImpact": "No production state or scene changes. This was not an established audio deadlock.",
+  "finalPreservationPassed": true
+}

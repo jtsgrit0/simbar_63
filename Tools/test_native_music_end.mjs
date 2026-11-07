@@ -1,10 +1,11 @@
+import {launchPreparedDesk} from './native_test_workflow.mjs';
 import assert from 'node:assert/strict';
 import {SimBarGame,catalog} from './WebGLTemplate/FastGame/core.js';
 import {MusicPlayer} from './WebGLTemplate/FastGame/music.js';
 
 function memory(){const map=new Map();return{getItem:k=>map.get(k)??null,setItem:(k,v)=>map.set(k,String(v))};}
 function night(storage=memory()){
-  const game=new SimBarGame({storage,seed:12});game.act('start');game.act('launch');while(game.phase==='guide')game.act('guide');return game;
+  const game=new SimBarGame({storage,seed:12});game.act('start');launchPreparedDesk(game);while(game.phase==='guide')game.act('guide');return game;
 }
 function audioHarness(game){
   const audios=[],pauseChanges=[];
