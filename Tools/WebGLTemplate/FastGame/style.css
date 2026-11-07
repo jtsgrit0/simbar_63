@@ -27,3 +27,5 @@
 
 .fast-game.show-closing .reaction-card,.fast-game.show-closing .floor-status{left:12px;right:auto}
 .fast-game.show-closing .floor-hud{left:12px;right:auto}
+
+.fast-game .owner-card:first-child .badge{display:none}.fast-game .owner-card:first-child.selected .badge{display:block;left:13px;top:24px;width:60px;min-width:0;height:24px;padding:4px 2px;font-size:11px;line-height:16px;text-align:center;white-space:nowrap}

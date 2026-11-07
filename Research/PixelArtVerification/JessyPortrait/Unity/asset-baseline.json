@@ -1,0 +1,14 @@
+{
+  "Assets/Art/StartupTextures/Owners/OwnerFemale.png.meta": "b081d06144795550c17ddc5aad95885c37646542132cd220d3ae5a635dbd5675",
+  "Assets/Art/StartupTextures/Owners/OwnerFF.png.meta": "5d1c57acdd46f257f14c9436b8a615ee7b040776a71a76d28ff258134085112c",
+  "Assets/Art/StartupTextures/Owners/OwnerPetSounds.png.meta": "2bd662160ae3e50a726ce16a75622d79a03b2b5f517dcbe4120ef675b849afae",
+  "Assets/Resources/SimBarWebTextures/OwnerFemale.bytes.meta": "5802ec4b4e27fad8ae6a84570c9eb394b3f0ec11a3e0dc60c03254e6e0651a13",
+  "Assets/Resources/SimBarWebTextures/OwnerFF.bytes.meta": "8a1c22b8ec4d11a0ae35e7a51f18ff9f7ed9c715381f6e9579de1d18f7f3f6af",
+  "Assets/Resources/SimBarWebTextures/OwnerPetSounds.bytes.meta": "7b82db341952ca250fda8c084a49f7ff68eac9a81e3961c4f1138c95846d1568",
+  "Assets/Art/StartupTextures/Owners/OwnerFF.png": "be581e80e16730260d2468d17e3e3fb2897062e35eaec463fdcee72220e2a350",
+  "Assets/Art/StartupTextures/Owners/OwnerPetSounds.png": "f139dd68c81f915f20c1380eba95482a0524081393f965070b7f04358a57f417",
+  "Assets/Resources/SimBarWebTextures/OwnerFF.bytes": "d566bb4abda2da8a13f9ebe24f931620fb60ab02b90c95b81a6ab75fa98c58ba",
+  "Assets/Resources/SimBarWebTextures/OwnerPetSounds.bytes": "1ba398a12fe3592a5556e5e49df4e6d1a97f79c3afd89e30aa01f2989e6a7cef",
+  "Tools/WebGLTemplate/FastGame/art/owner-ff.png": "be581e80e16730260d2468d17e3e3fb2897062e35eaec463fdcee72220e2a350",
+  "Tools/WebGLTemplate/FastGame/art/owner-pet.png": "f139dd68c81f915f20c1380eba95482a0524081393f965070b7f04358a57f417"
+}

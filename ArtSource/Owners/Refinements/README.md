@@ -1,5 +1,11 @@
 # Owner pose, framing and pixel lighting
 
+Jessy's current presentation uses the later user-supplied complete illustration
+documented in [`../Supplied/README.md`](../Supplied/README.md). Its `cardSource`
+override bypasses the older Jessy pose, rotation, scale, matte and lighting below.
+Those earlier assets remain archived; Edison and Jaiden still use the reviewed
+configuration described here.
+
 The original supplied sheet and the three approved full-size paper crops are
 unchanged. This follow-up changes the presentation requested for each owner;
 it does not replace the restored live-house backgrounds.

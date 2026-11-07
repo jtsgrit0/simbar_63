@@ -1,4 +1,4 @@
-"""Pack reviewed owner figures over their restored live-house backdrops.
+"""Pack supplied full-card overrides or reviewed figures over live-house backdrops.
 
 The supplied sheet and full-size paper crops remain unchanged. Foreground
 matting is deterministic: flood only border-connected ivory paper, plus the
@@ -6,6 +6,8 @@ two enclosed paper openings in Jessy's original hair. Edison and Jaiden retain
 original figure RGB. Jessy's requested hand-pose edit is a separately reviewed
 source. Presentation transforms use nearest-neighbor sampling and a separate
 50-percent exterior pixel-light layer. Original source files stay unchanged.
+A supplied full-card source bypasses all legacy character matting, pose edits,
+rotation, rim light and room composition.
 """
 from collections import deque
 from pathlib import Path
@@ -282,6 +284,32 @@ def composite_refined_owner(portrait, matte, backdrop, name, config):
     return room, metadata
 
 
+def supplied_card(config, runtime_size):
+    """Fit the complete supplied illustration; bypass old figure edits/mattes."""
+    path = (ROOT / config['cardSource']).resolve()
+    if not path.is_relative_to(ROOT) or file_hash(path) != config['cardSourceSha256']:
+        raise ValueError('Supplied owner card source/hash must match the retained original.')
+    if config.get('cardFit') != 'contain' or config.get('cardResampling') != 'nearest-neighbor':
+        raise ValueError('Supplied pixel portrait requires uniform nearest-neighbor contain.')
+    image = Image.open(path).convert('RGBA')
+    fitted = ImageOps.contain(image, runtime_size, Image.Resampling.NEAREST)
+    offset = ((runtime_size[0] - fitted.width) // 2,
+              (runtime_size[1] - fitted.height) // 2)
+    background = tuple(config['cardBackground'])
+    card = Image.new('RGBA', runtime_size, background)
+    card.alpha_composite(fitted, offset)
+    return card, {
+        'presentationMode': 'supplied-full-card',
+        'cardSource': relative(path), 'cardSourceSha256': file_hash(path),
+        'cardSourceSize': list(image.size), 'cardSourceRect': [0, 0, *image.size],
+        'cardFit': 'contain', 'cardResampling': 'nearest-neighbor',
+        'cardRenderedSize': list(fitted.size), 'cardPlacement': list(offset),
+        'cardBackground': list(background),
+        'sourceIncludesBadge': bool(config.get('sourceIncludesBadge')),
+        'figureProvenance': config['provenance'],
+    }
+
+
 def prepare_owners(output=OUTPUT, runtime_size=RUNTIME_SIZE):
     if not SOURCE.is_file():
         raise FileNotFoundError('The supplied original owner sheet is required: ' + str(SOURCE))
@@ -305,7 +333,7 @@ def prepare_owners(output=OUTPUT, runtime_size=RUNTIME_SIZE):
         raise ValueError('Owner refinements require the restored room backdrops.')
     manifest = {'source': SOURCE.relative_to(ROOT).as_posix(),
                 'sha256': hashlib.sha256(SOURCE.read_bytes()).hexdigest(),
-                'method': ('Reviewed figure refinements, nearest-neighbor transforms and exterior pixel rim over restored rooms'
+                'method': ('Per-owner supplied full-card overrides or reviewed figure refinements over restored rooms'
                            if refinements else
                            'Original-RGB figure matte over separately restored room backdrops; nearest-neighbor only'
                            if use_backdrops else
@@ -321,7 +349,10 @@ def prepare_owners(output=OUTPUT, runtime_size=RUNTIME_SIZE):
             image.save(full_target, optimize=True)
         runtime = image.resize(runtime_size, Image.Resampling.NEAREST)
         extra = {}
-        if use_backdrops:
+        config = refinements['owners'][owner['name']] if refinements else {}
+        if config.get('cardSource'):
+            runtime, extra = supplied_card(config, runtime_size)
+        elif use_backdrops:
             matte = foreground_mask(runtime, owner['name'])
             matte_path = FOREGROUND_MASKS / (owner['name'].title() + '.png')
             matte.save(matte_path, optimize=True)
@@ -344,14 +375,21 @@ def prepare_owners(output=OUTPUT, runtime_size=RUNTIME_SIZE):
                 extra['retainedCharacterRGBExact'] = owner['name'] in ('EDISON', 'JAIDEN')
                 extra['retainedCharacterPositionsExact'] = owner['name'] == 'EDISON'
         target = output / owner['file']
-        runtime.save(target, optimize=True)
+        # Preserve the existing encoded stream when its decoded pixels are equal.
+        # A replacement for one owner must not repack the two unchanged owners.
+        existing = Image.open(target).convert('RGBA') if target.is_file() else None
+        if existing is None or existing.size != runtime.size or existing.tobytes() != runtime.tobytes():
+            runtime.save(target, optimize=True)
         manifest['owners'].append({**owner, 'bounds': bounds, 'offset': offset,
                                    'originalCrop': full_target.relative_to(ROOT).as_posix(),
                                    'runtimeSize': runtime_size,
                                    **extra,
                                    'sha256': hashlib.sha256(target.read_bytes()).hexdigest(),
                                    'bytes': target.stat().st_size})
-        print(f"original {owner['name']}: {image.width}x{image.height}; runtime {runtime_size[0]}x{runtime_size[1]}, {target.stat().st_size:,} bytes")
+        origin = ('supplied full card ' + str(extra['cardSourceSize'])
+                  if extra.get('presentationMode') == 'supplied-full-card'
+                  else f'original {image.width}x{image.height}')
+        print(f"{owner['name']}: {origin}; runtime {runtime_size[0]}x{runtime_size[1]}, {target.stat().st_size:,} bytes")
     (ROOT / 'ArtSource/Owners/crops.json').write_text(
         json.dumps(manifest, indent=2) + '\n', encoding='utf-8', newline='\n')
     return manifest

@@ -1,0 +1,53 @@
+{
+  "protectedOtherOwnerFilesAndMetas": 12,
+  "allProtectedFilesUnchanged": true,
+  "supplied": {
+    "path": "ArtSource\\Owners\\Supplied\\Jessy-owner_p_j.PNG",
+    "sha256": "a27e380f6743eb2cf3359e2e593cff12f63f5dbc371de112d6e0196924775961",
+    "width": 1087,
+    "height": 1447
+  },
+  "framing": {
+    "resampling": "NEAREST",
+    "fullSource": true,
+    "drawSize": [
+      263,
+      350
+    ],
+    "position": [
+      68,
+      0
+    ],
+    "sidebarsRGBA": [
+      23,
+      10,
+      23,
+      255
+    ],
+    "exactRGBA": true
+  },
+  "native": {
+    "path": "Tools\\WebGLTemplate\\FastGame\\art\\owner-female.png",
+    "width": 400,
+    "height": 350,
+    "sha256": "b66b0ca7275dc4de5595cc9146e80eaf2099d790bf4d1b213099135c4a8775e3"
+  },
+  "unityCopies": [
+    {
+      "path": "Assets\\Art\\StartupTextures\\Owners\\OwnerFemale.png",
+      "width": 400,
+      "height": 350,
+      "rgbaIdentical": true,
+      "byteIdentical": true,
+      "sha256": "b66b0ca7275dc4de5595cc9146e80eaf2099d790bf4d1b213099135c4a8775e3"
+    },
+    {
+      "path": "Assets\\Resources\\SimBarWebTextures\\OwnerFemale.bytes",
+      "width": 400,
+      "height": 350,
+      "rgbaIdentical": true,
+      "byteIdentical": false,
+      "sha256": "b8dda8828326bef08b18a065cde240019547e5be0ca9cf03b3886d71539359a7"
+    }
+  ]
+}

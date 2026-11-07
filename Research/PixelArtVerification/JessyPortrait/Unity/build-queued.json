@@ -1,0 +1,26 @@
+{
+  "success": true,
+  "command": "command",
+  "data": {
+    "command": "build",
+    "parameters": {
+      "target": "WebGL",
+      "outputPath": "Builds/Pages/SimBarPlayerWebGL",
+      "options": "[\"DetailedBuildReport\"]",
+      "scenes": "[\"Assets/Scenes/SimBar_Reference.unity\"]",
+      "confirm": "true",
+      "dry_run": "false"
+    },
+    "result": {
+      "status": "queued",
+      "buildId": "build_20b5631927a7"
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "E:\\simbar_63"
+    }
+  },
+  "errors": [],
+  "warnings": []
+}

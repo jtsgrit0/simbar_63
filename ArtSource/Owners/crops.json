@@ -1,7 +1,7 @@
 {
   "source": "ArtSource/Owners/Original-owner_p.png",
   "sha256": "a030c8958e0a4aa7e881bf1028f145e9b6f6a3a9e03c6c2bf08648c8b476b36c",
-  "method": "Reviewed figure refinements, nearest-neighbor transforms and exterior pixel rim over restored rooms",
+  "method": "Per-owner supplied full-card overrides or reviewed figure refinements over restored rooms",
   "owners": [
     {
       "name": "JESSY",
@@ -93,73 +93,39 @@
         400,
         350
       ],
-      "backdrop": "ArtSource/Owners/Backdrops/Jessy.png",
-      "backdropSha256": "33be0059cebee975645c0392e1213394aff7a1b8a60d1cecf0e9eeab7a37f94d",
-      "backgroundPixelSize": [
-        200,
-        175
+      "presentationMode": "supplied-full-card",
+      "cardSource": "ArtSource/Owners/Supplied/Jessy-owner_p_j.PNG",
+      "cardSourceSha256": "a27e380f6743eb2cf3359e2e593cff12f63f5dbc371de112d6e0196924775961",
+      "cardSourceSize": [
+        1087,
+        1447
       ],
-      "foregroundMask": "ArtSource/Owners/ForegroundMasks/Jessy.png",
-      "foregroundMaskSha256": "92d4ecbd9da8fbaeb7f741d55a3667b618ad527f31f917baca771e556a995893",
-      "paperOpeningSeeds": [
-        [
-          184,
-          47
-        ],
-        [
-          260,
-          36
-        ]
+      "cardSourceRect": [
+        0,
+        0,
+        1087,
+        1447
       ],
-      "retainedCharacterPixels": 61909,
-      "retainedCharacterRGBExact": false,
-      "originalForegroundMask": "ArtSource/Owners/ForegroundMasks/Jessy.png",
-      "figureSource": "ArtSource/Owners/Refinements/Jessy.left-wrist.source.png",
-      "figureSourceSha256": "bc8c70beb29e54c5197277fa6b4206ab74cd4572c3c321a02f699da8898cf09d",
-      "presentationVersion": 1,
-      "figureProvenance": "Built-in ImageGen left-wrist and pink-nail pose edit, then nearest-neighbor geometry",
-      "displayCharacter": "ArtSource/Owners/Refinements/DisplayFigures/Jessy-character.png",
-      "displayCharacterSha256": "a7d16d91aa38b04bc2711a6b24f6109c24b89068392bfbb5f7499a5e2e9362cc",
-      "displayFigure": "ArtSource/Owners/Refinements/DisplayFigures/Jessy.png",
-      "displayFigureSha256": "a7d16d91aa38b04bc2711a6b24f6109c24b89068392bfbb5f7499a5e2e9362cc",
-      "displayForegroundMask": "ArtSource/Owners/Refinements/DisplayMasks/Jessy.png",
-      "displayForegroundMaskSha256": "4b13b71f57c05bdb7b6cff28e2603ae9bbba043eebf19aa40f63b8afdab9de9c",
-      "lightMask": "ArtSource/Owners/Refinements/LightMasks/Jessy.png",
-      "lightMaskSha256": "bbdb77fd4c762496869cf292ce6b291ddab29f8c18a217cffdd090419def79be",
-      "transform": {
-        "rotationDegreesCCW": 8.0,
-        "scale": 1.15,
-        "placement": [
-          26,
-          2
-        ],
-        "unclippedSize": [
-          348,
-          392
-        ],
-        "displayBounds": [
-          26,
-          2,
-          374,
-          350
-        ],
-        "resampling": "nearest-neighbor",
-        "autoFit": false
-      },
-      "rim": {
-        "color": [
-          255,
-          62,
-          154
-        ],
-        "opacity": 0.5,
-        "width": 2,
-        "maxAlpha": 128
-      },
-      "transparencyNoiseFloor": 8,
-      "retainedCharacterPositionsExact": false,
-      "sha256": "b3ccc4bb00f0ea11f847f324ae3831601e410a3583c301796fd9f6a76b8a4f20",
-      "bytes": 212034
+      "cardFit": "contain",
+      "cardResampling": "nearest-neighbor",
+      "cardRenderedSize": [
+        263,
+        350
+      ],
+      "cardPlacement": [
+        68,
+        0
+      ],
+      "cardBackground": [
+        23,
+        10,
+        23,
+        255
+      ],
+      "sourceIncludesBadge": true,
+      "figureProvenance": "Unchanged user-supplied complete Jessy portrait and venue, uniform contain only",
+      "sha256": "b66b0ca7275dc4de5595cc9146e80eaf2099d790bf4d1b213099135c4a8775e3",
+      "bytes": 206393
     },
     {
       "name": "EDISON",

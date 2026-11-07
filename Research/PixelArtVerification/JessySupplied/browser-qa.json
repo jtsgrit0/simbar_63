@@ -1,0 +1,226 @@
+{
+  "passed": true,
+  "checks": [
+    "The complete supplied image is archived unchanged and packed pixel-exactly with nearest-neighbor contain.",
+    "All three desktop owner selections work; names and requested taglines remain exact.",
+    "Edison/Jaiden image bytes and album/light/music source hashes remain unchanged.",
+    "390×844 portrait and844×390 landscape retain all three visible, working owner cards.",
+    "The displayed card image preserves its native aspect and nearest-neighbor CSS sampling.",
+    "Jessy selection survives reload and starts the real planning flow.",
+    "Owner selection triggers no album requests and no browser/HTTP errors."
+  ],
+  "errors": [],
+  "httpErrors": [],
+  "screenshots": [
+    "01-desktop-owner-selection.png",
+    "02-jessy-card-detail.png",
+    "03-mobile-portrait-selection.png",
+    "03-mobile-landscape-selection.png"
+  ],
+  "userSource": "C:\\Users\\Jtsgr\\OneDrive\\Desktop\\owner_p_j.PNG",
+  "userSourceSha256": "a27e380f6743eb2cf3359e2e593cff12f63f5dbc371de112d6e0196924775961",
+  "archiveSha256": "a27e380f6743eb2cf3359e2e593cff12f63f5dbc371de112d6e0196924775961",
+  "unchangedHashes": {
+    "Tools/WebGLTemplate/FastGame/art/owner-ff.png": "be581e80e16730260d2468d17e3e3fb2897062e35eaec463fdcee72220e2a350",
+    "Tools/WebGLTemplate/FastGame/art/owner-pet.png": "f139dd68c81f915f20c1380eba95482a0524081393f965070b7f04358a57f417",
+    "Tools/WebGLTemplate/FastGame/world.js": "fa5dadb22bf2dd5ef3c5b1879b9117c8b0b9ad29790a4f0d328581d7bb24a4dd",
+    "Tools/WebGLTemplate/FastGame/game.js": "e86686530f10493b870c6085831d52904387d1b9c80908b4f53be330781fc5b9",
+    "Tools/WebGLTemplate/FastGame/music.js": "62e168584358dde3b452c112b2ee2fe2f4cb53aef408e871accee942c656d199",
+    "Tools/WebGLTemplate/FastGame/album-art.js": "b19cffd29ae71fa5a700980bd6a658eb660775235777336f674551f1e5cc6139"
+  },
+  "runtimeSha256": "b66b0ca7275dc4de5595cc9146e80eaf2099d790bf4d1b213099135c4a8775e3",
+  "fullSourceContain": {
+    "sourceSize": [
+      1087,
+      1447
+    ],
+    "runtimeSize": [
+      400,
+      350
+    ],
+    "sourcePlacement": [
+      68,
+      0,
+      263,
+      350
+    ],
+    "pixelsExact": true
+  },
+  "desktop": [
+    {
+      "name": "제시",
+      "tagline": "자기야 오늘밤 라이브 하러와",
+      "src": "http://127.0.0.1:52610/Tools/WebGLTemplate/FastGame/art/owner-female.png",
+      "naturalWidth": 400,
+      "naturalHeight": 350,
+      "rendering": "pixelated",
+      "objectFit": "cover",
+      "imageBox": {
+        "width": 281.09136962890625,
+        "height": 245.95494079589844
+      },
+      "card": {
+        "x": 177.60362243652344,
+        "y": 209.55580139160156,
+        "right": 471.8162078857422,
+        "bottom": 535.6217803955078
+      }
+    },
+    {
+      "name": "에디슨",
+      "tagline": "평생 Rock&Roll",
+      "src": "http://127.0.0.1:52610/Tools/WebGLTemplate/FastGame/art/owner-ff.png",
+      "naturalWidth": 400,
+      "naturalHeight": 350,
+      "rendering": "pixelated",
+      "objectFit": "cover",
+      "imageBox": {
+        "width": 281.09136962890625,
+        "height": 245.95494079589844
+      },
+      "card": {
+        "x": 492.8980712890625,
+        "y": 209.55580139160156,
+        "right": 787.0997314453125,
+        "bottom": 535.6217803955078
+      }
+    },
+    {
+      "name": "제이든",
+      "tagline": "오늘밤은 무슨 음악을 들을까?",
+      "src": "http://127.0.0.1:52610/Tools/WebGLTemplate/FastGame/art/owner-pet.png",
+      "naturalWidth": 400,
+      "naturalHeight": 350,
+      "rendering": "pixelated",
+      "objectFit": "cover",
+      "imageBox": {
+        "width": 281.09136962890625,
+        "height": 245.95494079589844
+      },
+      "card": {
+        "x": 808.1815795898438,
+        "y": 209.55580139160156,
+        "right": 1102.3941650390625,
+        "bottom": 535.6217803955078
+      }
+    }
+  ],
+  "mobile-portrait": [
+    {
+      "name": "제시",
+      "tagline": "자기야 오늘밤 라이브 하러와",
+      "src": "http://127.0.0.1:52610/Tools/WebGLTemplate/FastGame/art/owner-female.png",
+      "naturalWidth": 400,
+      "naturalHeight": 350,
+      "rendering": "pixelated",
+      "objectFit": "cover",
+      "imageBox": {
+        "width": 100.23670959472656,
+        "height": 87.7071533203125
+      },
+      "card": {
+        "x": 30.106021881103516,
+        "y": 354.08477783203125,
+        "right": 135.0217628479004,
+        "bottom": 470.359375
+      }
+    },
+    {
+      "name": "에디슨",
+      "tagline": "평생 Rock&Roll",
+      "src": "http://127.0.0.1:52610/Tools/WebGLTemplate/FastGame/art/owner-ff.png",
+      "naturalWidth": 400,
+      "naturalHeight": 350,
+      "rendering": "pixelated",
+      "objectFit": "cover",
+      "imageBox": {
+        "width": 100.23672485351562,
+        "height": 87.7071533203125
+      },
+      "card": {
+        "x": 142.5395050048828,
+        "y": 354.08477783203125,
+        "right": 247.45130920410156,
+        "bottom": 470.359375
+      }
+    },
+    {
+      "name": "제이든",
+      "tagline": "오늘밤은 무슨 음악을 들을까?",
+      "src": "http://127.0.0.1:52610/Tools/WebGLTemplate/FastGame/art/owner-pet.png",
+      "naturalWidth": 400,
+      "naturalHeight": 350,
+      "rendering": "pixelated",
+      "objectFit": "cover",
+      "imageBox": {
+        "width": 100.23675537109375,
+        "height": 87.70712280273438
+      },
+      "card": {
+        "x": 254.96910095214844,
+        "y": 354.08477783203125,
+        "right": 359.8847961425781,
+        "bottom": 470.359375
+      }
+    }
+  ],
+  "mobile-landscape": [
+    {
+      "name": "제시",
+      "tagline": "자기야 오늘밤 라이브 하러와",
+      "src": "http://127.0.0.1:52610/Tools/WebGLTemplate/FastGame/art/owner-female.png",
+      "naturalWidth": 400,
+      "naturalHeight": 350,
+      "rendering": "pixelated",
+      "objectFit": "cover",
+      "imageBox": {
+        "width": 159.36795043945312,
+        "height": 139.4469757080078
+      },
+      "card": {
+        "x": 159.83486938476562,
+        "y": 87.02362823486328,
+        "right": 326.64208984375,
+        "bottom": 271.8904800415039
+      }
+    },
+    {
+      "name": "에디슨",
+      "tagline": "평생 Rock&Roll",
+      "src": "http://127.0.0.1:52610/Tools/WebGLTemplate/FastGame/art/owner-ff.png",
+      "naturalWidth": 400,
+      "naturalHeight": 350,
+      "rendering": "pixelated",
+      "objectFit": "cover",
+      "imageBox": {
+        "width": 159.36798095703125,
+        "height": 139.44696044921875
+      },
+      "card": {
+        "x": 338.59466552734375,
+        "y": 87.02362823486328,
+        "right": 505.3956604003906,
+        "bottom": 271.8904800415039
+      }
+    },
+    {
+      "name": "제이든",
+      "tagline": "오늘밤은 무슨 음악을 들을까?",
+      "src": "http://127.0.0.1:52610/Tools/WebGLTemplate/FastGame/art/owner-pet.png",
+      "naturalWidth": 400,
+      "naturalHeight": 350,
+      "rendering": "pixelated",
+      "objectFit": "cover",
+      "imageBox": {
+        "width": 159.36798095703125,
+        "height": 139.44696044921875
+      },
+      "card": {
+        "x": 517.3482666015625,
+        "y": 87.02362823486328,
+        "right": 684.1554565429688,
+        "bottom": 271.8904800415039
+      }
+    }
+  ]
+}

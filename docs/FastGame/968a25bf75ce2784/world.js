@@ -17,6 +17,28 @@ const polygon=(c,points,color)=>{c.fillStyle=color;c.beginPath();points.forEach(
 function ellipse(c,x,y,rx,ry,color){c.fillStyle=color;for(let row=-ry;row<=ry;row++){const w=Math.round(rx*Math.sqrt(Math.max(0,1-row*row/(ry*ry||1))));c.fillRect(Math.round(x-w),Math.round(y+row),w*2+1,1);}}
 function hull(points){const p=points.slice().sort((a,b)=>a.x-b.x||a.y-b.y),turn=(a,b,c)=>(b.x-a.x)*(c.y-a.y)-(b.y-a.y)*(c.x-a.x);let low=[],high=[];for(const a of p){while(low.length>1&&turn(low.at(-2),low.at(-1),a)<=0)low.pop();low.push(a);}for(const a of p.reverse()){while(high.length>1&&turn(high.at(-2),high.at(-1),a)<=0)high.pop();high.push(a);}return low.slice(0,-1).concat(high.slice(0,-1));}
 
+// Measured inside the cyan LED frame, leaving the authored truss and lamps intact.
+export const PIXEL_LED_QUAD=Object.freeze([[665,117],[842,163],[842,230],[665,184]].map(Object.freeze));
+export const PIXEL_LED_LAMPS=Object.freeze([[683,128],[735,140],[782,151],[822,162]].map(Object.freeze));
+export const PIXEL_STAGE_LAMPS=Object.freeze([[643,121],...PIXEL_LED_LAMPS].map(Object.freeze));
+export const PIXEL_STAGE_DECK=Object.freeze([[556,299],[612,242],[639,209],[854,266],[867,311],[789,373]].map(Object.freeze));
+export function pixelLedCoverFit(imageWidth,imageHeight){
+  if(!(imageWidth>0&&imageHeight>0&&Number.isFinite(imageWidth)&&Number.isFinite(imageHeight)))return null;
+  const [tl,tr,,bl]=PIXEL_LED_QUAD,dx=tr[0]-tl[0],dy=tr[1]-tl[1],vx=bl[0]-tl[0],vy=bl[1]-tl[1];
+  const planeWidth=Math.hypot(dx,dy),planeHeight=Math.hypot(vx,vy),scale=Math.min(planeWidth/imageWidth,planeHeight/imageHeight);
+  const width=imageWidth*scale,height=imageHeight*scale;
+  return{planeWidth,planeHeight,x:(planeWidth-width)/2,y:(planeHeight-height)/2,width,height,
+    transform:[dx/planeWidth,dy/planeWidth,vx/planeHeight,vy/planeHeight,tl[0],tl[1]]};
+}
+export function pixelStageLightingActive(state={}){
+  const journey=state.journey;
+  return state.phase==='playing'&&!journey?.floorClosing&&!journey?.afterShow?.started&&!(Number.isFinite(journey?.secondsLeft)&&journey.secondsLeft<=0);
+}
+export function pixelStageLightingEnded(state={}){
+  const journey=state.journey;
+  return ['closing','results'].includes(state.phase)||!!journey?.floorClosing||!!journey?.afterShow?.started||journey?.session>0&&Number.isFinite(journey?.secondsLeft)&&journey.secondsLeft<=0;
+}
+
 // The four views are actual drawings. Mirroring a front view cannot create a back.
 export function pixelDirection(dx,dz){
   const right=RIGHT[0]*dx+RIGHT[2]*dz,back=UP[0]*dx+UP[2]*dz;
@@ -144,7 +166,7 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
     const bar=Array.from({length:8},(_,i)=>{const x0=-9.95+i*1.09,x1=x0+1.1;return{points:boxMask(x0,x1,-2.35,-.88,1.48),worldX:(x0+x1)/2,worldZ:-2.35};});
     const boxes=(assets.venueMeta?.occluderBoxes||[]).map(({x0,x1,z0,z1,height,worldX=(x0+x1)/2,worldZ=z0})=>({points:boxMask(x0,x1,z0,z1,height),worldX,worldZ}));
     const layers=[...(supplied||bar),...boxes];
-    for(const layer of layers){if(!layer.points?.length)continue;const p=layer.points.map(p=>Array.isArray(p)?{x:p[0],y:p[1]}:p),xs=p.map(v=>v.x),ys=p.map(v=>v.y),left=Math.floor(Math.min(...xs)),top=Math.floor(Math.min(...ys)),w=Math.ceil(Math.max(...xs))-left+1,h=Math.ceil(Math.max(...ys))-top+1;if(w<=0||h<=0)continue;const mask=surface(w,h),c=mask.getContext('2d');c.imageSmoothingEnabled=false;c.translate(-left,-top);c.beginPath();p.forEach((v,i)=>i?c.lineTo(Math.round(v.x),Math.round(v.y)):c.moveTo(Math.round(v.x),Math.round(v.y)));c.closePath();c.clip();c.drawImage(plate,0,0,REF_W,REF_H);occluders.push({image:mask,x:left,y:top,actors:layer.actors||null,depth:Number.isFinite(layer.depth)?layer.depth:project(layer.worldX||0,layer.worldZ||0).y});}
+    for(const layer of layers){if(!layer.points?.length)continue;const p=layer.points.map(p=>Array.isArray(p)?{x:p[0],y:p[1]}:p),xs=p.map(v=>v.x),ys=p.map(v=>v.y),left=Math.floor(Math.min(...xs)),top=Math.floor(Math.min(...ys)),w=Math.ceil(Math.max(...xs))-left+1,h=Math.ceil(Math.max(...ys))-top+1;if(w<=0||h<=0)continue;const mask=surface(w,h),c=mask.getContext('2d');c.imageSmoothingEnabled=false;c.translate(-left,-top);c.beginPath();p.forEach((v,i)=>i?c.lineTo(Math.round(v.x),Math.round(v.y)):c.moveTo(Math.round(v.x),Math.round(v.y)));c.closePath();c.clip();c.drawImage(plate,0,0,REF_W,REF_H);occluders.push({image:mask,x:left,y:top,points:p,stage:left+w>556&&left<867&&top+h>209&&top<373,actors:layer.actors||null,depth:Number.isFinite(layer.depth)?layer.depth:project(layer.worldX||0,layer.worldZ||0).y});}
   }
   function atlasFrame(actor,role,action,frame,state,frameOverride=null){
     const meta=assets.spriteMeta||{};
@@ -223,7 +245,7 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
     return()=>{for(let i=particles.length-1;i>=0;i--){const a=particles[i];a.age+=dt;a.vy-=dt*3.2;a.x+=a.vx*dt;a.z+=a.vz*dt;a.y+=a.vy*dt;if(a.y<.03||a.age>7){particles.splice(i,1);continue;}const p=project(a.x,a.z,a.y);ctx.fillStyle=a.color;ctx.fillRect(Math.round(p.x),Math.round(p.y),a.kind?4:2,1);if(a.kind)ctx.fillRect(Math.round(p.x+2),Math.round(p.y+1),3,1);}};
   }
   function stageLights(state){
-    if(!['playing','closing'].includes(state.phase))return;
+    if(!pixelStageLightingActive(state))return;
     // Match the illustrated truss; targets and alternating 120 BPM banks follow
     // SimBarReferenceLighting. The gameplay clock freezes these lights on pause.
     const rig=[
@@ -262,11 +284,47 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
     }
     ctx.restore();
   }
+  function albumCover(target,state){
+    const image=assets.albumCovers?.[state.playlist];if(!ready(image))return;
+    const iw=image.naturalWidth||image.width,ih=image.naturalHeight||image.height,fit=pixelLedCoverFit(iw,ih);if(!fit)return;
+    target.save();target.beginPath();PIXEL_LED_QUAD.forEach(([x,y],i)=>i?target.lineTo(x,y):target.moveTo(x,y));target.closePath();target.clip();
+    target.transform(...fit.transform);target.fillStyle='#080b13';target.fillRect(0,0,fit.planeWidth,fit.planeHeight);
+    target.imageSmoothingEnabled=true;
+    target.drawImage(image,0,0,iw,ih,fit.x,fit.y,fit.width,fit.height);target.restore();
+    // The screen sits behind the hanging lamp housings. Restore only those
+    // original foreground silhouettes, rather than painting over the fixtures.
+    target.save();target.beginPath();
+    for(const [x,y]of PIXEL_LED_LAMPS){
+      const shape=[[-5,-12],[4,-11],[10,-4],[10,4],[4,10],[-5,9],[-11,3],[-10,-5]];
+      shape.forEach(([dx,dy],i)=>i?target.lineTo(x+dx,y+dy):target.moveTo(x+dx,y+dy));target.closePath();
+    }
+    target.clip();target.drawImage(assets.venue,0,0,REF_W,REF_H);target.restore();
+  }
+  function dimStageDeck(target){
+    polygon(target,PIXEL_STAGE_DECK.map(([x,y])=>({x,y})),'rgba(5,9,18,0.72)');
+  }
+  function endedStage(target,state){
+    if(!pixelStageLightingEnded(state))return;
+    dimStageDeck(target);
+    // Suppress the glow and bright glass baked into the authored lamp pixels.
+    // Their housings remain visible; the separate LED and cyan rim stay lit.
+    for(const [x,y]of PIXEL_STAGE_LAMPS){
+      ellipse(target,x,y,12,11,'rgba(7,11,19,0.45)');
+      ellipse(target,x,y,10,9,'rgba(7,11,19,0.70)');
+      ellipse(target,x,y,7,6,'#17202c');ellipse(target,x,y,4,3,'#0b111a');
+      target.fillStyle='#3c4652';target.fillRect(x-2,y-2,2,1);
+    }
+  }
+  function drawLayer(layer,state){
+    ctx.drawImage(layer.image,layer.x,layer.y);
+    if(!layer.stage||!pixelStageLightingEnded(state))return;
+    ctx.save();ctx.beginPath();layer.points.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.closePath();ctx.clip();dimStageDeck(ctx);ctx.restore();
+  }
   function render(timestamp,state=getState()){
     if(destroyed)return;state=state||{};const now=finite(timestamp,performance.now()),dt=last==null?0:clamp((now-last)/1000,0,.1);last=now;const running=['playing','closing'].includes(state.phase)&&!state.paused;if(running)seconds+=dt;
-    background();roomLayers();ctx.save();ctx.translate(Math.round(offsetX),0);ctx.imageSmoothingEnabled=false;ctx.drawImage(assets.venue,0,0,REF_W,REF_H);stageLights(state);const airborne=paper(state,running?dt:0);
-    const drawables=occluders.filter(layer=>!layer.actors?.length).map(layer=>({depth:layer.depth,draw:()=>ctx.drawImage(layer.image,layer.x,layer.y)}));
-    for(const actor of state.actors||[]){if(actor.visible===false)continue;const seat=seatFor(actor);let depth=seat?.depth??actorPoint(actor).y+(actor.action==='surf'?2:0);if(actor.id==='drummer'&&actor.action==='perform'&&assets.venueMeta?.drumForegroundDepth>0)depth=Math.min(depth,assets.venueMeta.drumForegroundDepth-1);drawables.push({depth,draw:()=>{drawActor(actor,state);for(const layer of occluders)if(seat&&layer.actors?.includes(actor.id))ctx.drawImage(layer.image,layer.x,layer.y);}});}
+    background();roomLayers();ctx.save();ctx.translate(Math.round(offsetX),0);ctx.imageSmoothingEnabled=false;ctx.drawImage(assets.venue,0,0,REF_W,REF_H);albumCover(ctx,state);endedStage(ctx,state);stageLights(state);const airborne=paper(state,running?dt:0);
+    const drawables=occluders.filter(layer=>!layer.actors?.length).map(layer=>({depth:layer.depth,draw:()=>drawLayer(layer,state)}));
+    for(const actor of state.actors||[]){if(actor.visible===false)continue;const seat=seatFor(actor);let depth=seat?.depth??actorPoint(actor).y+(actor.action==='surf'?2:0);if(actor.id==='drummer'&&actor.action==='perform'&&assets.venueMeta?.drumForegroundDepth>0)depth=Math.min(depth,assets.venueMeta.drumForegroundDepth-1);drawables.push({depth,draw:()=>{drawActor(actor,state);for(const layer of occluders)if(seat&&layer.actors?.includes(actor.id))drawLayer(layer,state);}});}
     drawables.sort((a,b)=>a.depth-b.depth);for(const item of drawables)item.draw();airborne();orderBubbles(state);ctx.restore();
   }
   function worldToScreen(x,z,y=0){const p=project(x,z,y);return{x:(p.x+offsetX)*cssW/width,y:p.y*cssH/height};}
@@ -274,6 +332,7 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
     const w=target.canvas.width,h=target.canvas.height,scale=Math.min((w-8)/REF_W,(h-8)/REF_H),left=(w-REF_W*scale)/2,top=(h-REF_H*scale)/2;
     target.imageSmoothingEnabled=false;target.fillStyle='#1e2632';target.fillRect(0,0,w,h);
     target.drawImage(assets.venue,Math.round(left),Math.round(top),Math.round(REF_W*scale),Math.round(REF_H*scale));
+    target.save();target.translate(left,top);target.scale(scale,scale);albumCover(target,state);endedStage(target,state);target.restore();
     for(const actor of state.actors||[]){
       if(actor.visible===false)continue;
       const p=actorPoint(actor,finite(actor.y)),employee=['bartender','server'].includes(actor.role)||actor.id?.startsWith('hired-'),size=employee?4:3;
