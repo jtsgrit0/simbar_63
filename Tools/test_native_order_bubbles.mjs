@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {SimBarGame} from './WebGLTemplate/FastGame/core.js';
+import {SimBarGame,catalog} from './WebGLTemplate/FastGame/core.js';
 import {createWorld,pixelPendingOrders,pixelOrderBubbleLayout,pixelOrderBubblePlacements} from './WebGLTemplate/FastGame/world.js';
 
 const storage=()=>({getItem(){return null;},setItem(){},removeItem(){}});
@@ -9,7 +9,7 @@ const state=()=>({phase:game.phase,paused:game.paused,actors:game.actors,orders:
 assert.equal(pixelPendingOrders(state()).length,3);
 assert.deepEqual(pixelPendingOrders(state()).map(o=>o.item),game.orders.map(o=>o.item));
 const first=game.orders[0];
-assert.equal(game._serve((first.item+1)%5,false,1).success,false);
+assert.equal(game._serve((first.item+1)%catalog.drinks.length,false,1).success,false);
 assert(pixelPendingOrders(state()).some(o=>o.actor.id===first.id),'A rejected serve must keep the actual order.');
 assert.equal(game._serve(first.item,true,.7).success,true);
 assert.deepEqual(pixelPendingOrders(state()).map(o=>[o.actor.id,o.item]),game.orders.map(o=>[o.id,o.item]),'Automatic serving must use the live queue without cached bubbles.');

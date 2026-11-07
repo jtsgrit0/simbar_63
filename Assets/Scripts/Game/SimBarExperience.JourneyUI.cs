@@ -63,13 +63,13 @@ public sealed partial class SimBarExperience
     };
     private static readonly string[] JuiGuideBodies =
     {
-        "The first guest's order appears in BAR SERVICE.\nPress M or click MENU to choose an item, or use keys 1–5.\nPress E or PREPARE ORDER to match the oldest order.",
+        "The first guest's order appears in BAR SERVICE.\nPress M or click MENU to choose an item, or use keys 1–6.\nPress E or PREPARE ORDER to match the oldest order.",
         "Choosing a menu item starts the timing bar.\nPour cocktails or plate food on the beat: press SPACE or STOP at the target.\nAccurate service earns tips and builds your combo.\nBuild a clean streak to ignite FEVER for bonus tips.",
         "Complete tonight's three goals before last call.\nHire staff, upgrade your venue and book events for useful bonuses.\nManagement menus pause the timers. Earn stars and XP, then open the next night."
     };
     private static readonly string[] JuiGuideExamples =
     {
-        "CHECK THE ORDER     >     MENU / 1–5     >     CHOOSE AN ITEM\n\nUse E / PREPARE ORDER to prepare the oldest guest's requested item.",
+        "CHECK THE ORDER     >     MENU / 1–6     >     CHOOSE AN ITEM\n\nUse E / PREPARE ORDER to prepare the oldest guest's requested item.",
         "CHOOSE AN ITEM     >     WATCH THE MARKER     >     SPACE / STOP\n\nGood service keeps the crowd happy. Perfect service keeps the combo alive.",
         "SERVE YOUR GUESTS     +     HIT YOUR GOALS     +     GROW YOUR VENUE\n\nYour cash, hired staff and facility upgrades carry into the next night."
     };
@@ -81,13 +81,13 @@ public sealed partial class SimBarExperience
     };
     private static readonly string[] JuiGuideBodiesKorean =
     {
-        "첫 손님의 주문이 바 서비스에 표시됩니다.\nM 키나 메뉴 버튼을 눌러 메뉴를 고르거나 1–5 키를 누르세요.\nE 키나 주문 메뉴 준비 버튼으로 가장 오래된 주문을 준비하세요.",
+        "첫 손님의 주문이 바 서비스에 표시됩니다.\nM 키나 메뉴 버튼을 눌러 메뉴를 고르거나 1–6 키를 누르세요.\nE 키나 주문 메뉴 준비 버튼으로 가장 오래된 주문을 준비하세요.",
         "메뉴를 고르면 타이밍 바가 시작됩니다.\n음료 따르기와 푸드 플레이팅 모두 목표 구간에서 SPACE 키나 멈춤 버튼을 누르세요.\n정확하게 서빙하면 팁과 콤보를 얻습니다.\n실수 없이 연속으로 성공하면 피버가 발동해 팁이 늘어납니다.",
         "영업이 끝나기 전에 오늘의 목표 세 가지를 달성하세요.\n직원 고용, 매장 업그레이드, 이벤트 예약으로 보너스를 얻을 수 있습니다.\n관리 메뉴에서는 시간이 멈춥니다. 별과 경험치를 모아 다음 날에도 영업하세요."
     };
     private static readonly string[] JuiGuideExamplesKorean =
     {
-        "주문 확인     >     메뉴 / 1–5     >     메뉴 선택\n\nE 키나 주문 메뉴 준비 버튼으로 가장 오래된 손님의 주문을 준비하세요.",
+        "주문 확인     >     메뉴 / 1–6     >     메뉴 선택\n\nE 키나 주문 메뉴 준비 버튼으로 가장 오래된 손님의 주문을 준비하세요.",
         "메뉴 선택     >     표시 확인     >     SPACE / 멈춤\n\n잘 서빙하면 손님이 만족하고, 완벽하게 서빙하면 콤보가 이어집니다.",
         "손님 응대     +     목표 달성     +     매장 성장\n\n보유 현금, 고용한 직원, 시설 업그레이드는 다음 날에도 유지됩니다."
     };

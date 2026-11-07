@@ -1,0 +1,24 @@
+{
+  "success": true,
+  "command": "command",
+  "data": {
+    "command": "simulate_key",
+    "parameters": {
+      "key": "Digit6",
+      "action": "press"
+    },
+    "result": {
+      "Success": true,
+      "Command": "simulate_key",
+      "Detail": "key=Digit6 action=press",
+      "Error": null
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "E:\\simbar_63"
+    }
+  },
+  "errors": [],
+  "warnings": []
+}

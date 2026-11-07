@@ -1,13 +1,13 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-/// <summary>The five-item service catalog from mobile_menu_mockup.html.</summary>
+/// <summary>The service catalog and its scrollable food and cocktail sections.</summary>
 public sealed partial class SimBarExperience
 {
     private static readonly string[] ServiceDescriptionsEn =
-        { "Recommended solo drink", "An easy drink", "A quick snack", "Bar snack favorite", "A light bite" };
+        { "Recommended solo drink", "An easy drink", "A quick snack", "Bar snack favorite", "A light bite", "Crispy fried chicken" };
     private static readonly string[] ServiceDescriptionsKo =
-        { "혼술 추천", "가벼운 한잔", "간단한 안주", "바 안주 베스트", "가볍게 먹기 좋음" };
+        { "혼술 추천", "가벼운 한잔", "간단한 안주", "바 안주 베스트", "가볍게 먹기 좋음", "바삭한 후라이드 치킨" };
     private GameObject serviceMenuRoot;
     private bool serviceMenuOpen;
     private bool serviceWasPaused;
@@ -62,7 +62,8 @@ public sealed partial class SimBarExperience
         content.transform.SetParent(viewport.transform, false);
         RectTransform contentRect = (RectTransform)content.transform;
         contentRect.anchorMin = new Vector2(0f, 1f); contentRect.anchorMax = new Vector2(1f, 1f);
-        contentRect.pivot = new Vector2(0.5f, 1f); contentRect.sizeDelta = new Vector2(0f, 536f);
+        int foodCount=DrinkPrices.Length-2;float foodHeight=54f+82f*foodCount;
+        contentRect.pivot = new Vector2(0.5f, 1f); contentRect.sizeDelta = new Vector2(0f, 236f+foodHeight);
         var scroll = viewport.AddComponent<ScrollRect>();
         scroll.viewport = viewportRect; scroll.content = contentRect;
         scroll.horizontal = false; scroll.vertical = true;
@@ -70,10 +71,10 @@ public sealed partial class SimBarExperience
         scroll.verticalNormalizedPosition = 1f;
 
         CreateServiceSection(contentRect, 0f, 220f, "COCKTAILS / SOLO", "칵테일 / 혼술", 0, 2);
-        CreateServiceSection(contentRect, -236f, 300f, "FOOD", "푸드", 2, 3);
+        CreateServiceSection(contentRect, -236f, foodHeight, "FOOD", "푸드", 2, foodCount);
         Text help = CreateText("Service Menu Hint", drawer.transform, string.Empty, 13, TextAnchor.MiddleCenter, new Color(0.73f, 0.68f, 0.76f));
         SetRect(help.rectTransform, new Vector2(0.5f, 0f), new Vector2(0f, 31f), new Vector2(350f, 42f));
-        SimBarLocalization.Bind(help, "1–5 select  ·  M / P close\nChoose an item, then serve on the beat.", "1–5 메뉴 선택  ·  M / P 닫기\n메뉴를 선택하고 타이밍에 맞춰 서빙하세요.");
+        SimBarLocalization.Bind(help, "1–6 select  ·  M / P close\nChoose an item, then serve on the beat.", "1–6 메뉴 선택  ·  M / P 닫기\n메뉴를 선택하고 타이밍에 맞춰 서빙하세요.");
         help.horizontalOverflow = HorizontalWrapMode.Wrap;
         SimBarServiceMenuLayout.Attach(menuCanvas, (RectTransform)drawer.transform);
         RefreshServiceMenuLabels();

@@ -26,8 +26,8 @@ const [venue,seoul]=await Promise.all([load('venue.png'),load('seoul.png')]);
 const store=new Map(),g=new SimBarGame({seed:1,storage:{getItem:k=>store.get(k)||null,setItem:(k,v)=>store.set(k,String(v)),removeItem:k=>store.delete(k)}});
 g.act('start');g.act('launch');while(g.phase==='guide')g.act('guide');
 g.state.upgrades[2]=2;
-g._assignOrder('patron-12',3);g._assignOrder('patron-18',4);
-if(catalog.drinks.length>5)g._assignOrder('patron-20',5);
+g._assignOrder('patron-12',3);g._assignOrder('patron-13',4);
+if(catalog.drinks.length>5)g._assignOrder('patron-14',5);
 const canvas=document.querySelector('canvas');
 const world=createWorld(canvas,{assets:{venue,seoul,spriteMeta,venueMeta,atlases},getState:()=>({phase:g.phase,paused:g.paused,actors:g.actors,orders:g.orders,journey:g.journey,floor:g.floor})});
 const context=canvas.getContext('2d'),original=context.drawImage.bind(context);
@@ -61,7 +61,7 @@ def main():
             page.wait_for_function('window.ready===true')
             page.evaluate('for(let i=0;i<80;i++)qa.g.tick(.05)')
             first = page.evaluate('qa.render()')
-            assert len(first['orders']) >= 5
+            assert {order['item'] for order in first['orders']} == set(range(page.evaluate('qa.catalog.drinks.length')))
             assert len(first['draws']) == len(first['orders'])
             assert [draw[0] // 32 for draw in first['draws']] == [o['item'] for o in first['orders']]
             for i, draw in enumerate(first['draws']):

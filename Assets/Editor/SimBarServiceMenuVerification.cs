@@ -14,16 +14,16 @@ public static class SimBarServiceMenuVerification
     private const BindingFlags InstanceFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
     private const BindingFlags StaticFlags = BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
     private static readonly Type HostType = typeof(SimBarExperience);
-    private static readonly int[] Prices = { 14, 12, 9, 14, 14 };
-    private static readonly int[] PerfectTips = { 9, 8, 6, 9, 9 };
-    private static readonly int[] AutomaticTips = { 6, 5, 4, 6, 6 };
+    private static readonly int[] Prices = { 14, 12, 9, 14, 14, 18 };
+    private static readonly int[] PerfectTips = { 9, 8, 6, 9, 9, 11 };
+    private static readonly int[] AutomaticTips = { 6, 5, 4, 6, 6, 8 };
     private static readonly string[] Names =
     {
-        "FAUST", "ADIOS MOTHERFUCKER", "PEPPERONI HALF PIZZA", "CHILI CHEESE FRIES", "CHILI CHEESE CHIPS"
+        "FAUST", "ADIOS MOTHERFUCKER", "PEPPERONI HALF PIZZA", "CHILI CHEESE FRIES", "CHILI CHEESE CHIPS", "FRIED CHICKEN"
     };
     private static readonly string[] KoreanNames =
     {
-        "파우스트", "아디오스 마더퍼커", "페퍼로니 피자 하프", "칠리 치즈 프라이", "칠리 치즈 칩스"
+        "파우스트", "아디오스 마더퍼커", "페퍼로니 피자 하프", "칠리 치즈 프라이", "칠리 치즈 칩스", "후라이드 치킨"
     };
 
     [MenuItem("SimBar/Validation/Check Service Menu Without Play Mode")]
@@ -67,24 +67,25 @@ public static class SimBarServiceMenuVerification
             int[] actualPrices = (int[])HostType.GetField("DrinkPrices", StaticFlags).GetValue(null);
             string[] actualNames = (string[])HostType.GetField("EnglishDrinkNames", StaticFlags).GetValue(null);
             string[] actualKoreanNames = (string[])HostType.GetField("KoreanDrinkNames", StaticFlags).GetValue(null);
-            Check(actualPrices.Length == 5 && actualNames.Length == 5 && actualKoreanNames.Length == 5,
-                "The service catalog must contain exactly five items.");
-            Check(((Array)HostType.GetField("DrinkColors", StaticFlags).GetValue(null)).Length == 5
-                && Read<Array>(host, "orderMarkerMaterials").Length == 5
-                && Read<Array>(host, "drinkButtonLabels").Length == 5,
-                "Colors, order markers, and labels must cover all five catalog items.");
+            Check(actualPrices.Length == Prices.Length && actualNames.Length == Prices.Length && actualKoreanNames.Length == Prices.Length,
+                "The service catalog must contain all six items.");
+            Check(((Array)HostType.GetField("DrinkColors", StaticFlags).GetValue(null)).Length == Prices.Length
+                && Read<Array>(host, "orderMarkerMaterials").Length == Prices.Length
+                && Read<Array>(host, "drinkButtonLabels").Length == Prices.Length,
+                "Colors, order markers, and labels must cover all six catalog items.");
             for (int i = 0; i < Prices.Length; i++)
             {
                 Check(actualPrices[i] == Prices[i] && actualNames[i] == Names[i]
                     && actualKoreanNames[i] == KoreanNames[i], "Catalog mismatch at item " + i + ".");
                 Check(SimBarMoney.Format(Prices[i]) == "₩" + (Prices[i] * 1000).ToString("N0", System.Globalization.CultureInfo.InvariantCulture),
                     "Menu price must display credits as Korean won for item " + i + ".");
+                Check((bool)HostType.GetMethod("IsFood",StaticFlags).Invoke(null,new object[]{i}) == (i>=2), "Food classification mismatch at item " + i + ".");
                 CheckService(host, i, false, PerfectTips[i]);
                 CheckService(host, i, true, AutomaticTips[i]);
                 CheckWrongItem(host, i);
             }
             Check(SimBarMoney.Format(12340f) == "₩12,340,000", "Saved wallet units must retain their won display scale.");
-            return "{\"passed\":true,\"catalogItems\":5,\"manualPerfectCases\":5,\"automaticCases\":5,\"wrongItemCases\":5,\"preferencesUnchanged\":true,\"playModeUsed\":false}";
+            return "{\"passed\":true,\"catalogItems\":6,\"manualPerfectCases\":6,\"automaticCases\":6,\"wrongItemCases\":6,\"preferencesUnchanged\":true,\"playModeUsed\":false}";
         }
         finally
         {

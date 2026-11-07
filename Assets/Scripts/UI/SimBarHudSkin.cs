@@ -231,7 +231,7 @@ public sealed class SimBarHudSkin : MonoBehaviour
         TextStyle(help, 11, TextAnchor.MiddleCenter, new Color(0.66f, 0.70f, 0.77f));
         if (help != null)
         {
-            SimBarLocalization.Bind(help, "1–5 SELECT     M MENU     E PREPARE ORDER     P PAUSE", "1–5 메뉴 선택     M 메뉴     E 주문 준비     P 일시 정지");
+            SimBarLocalization.Bind(help, "1–6 SELECT     M MENU     E PREPARE ORDER     P PAUSE", "1–6 메뉴 선택     M 메뉴     E 주문 준비     P 일시 정지");
             Rect(help.rectTransform, new Vector2(0.5f, 0f), new Vector2(0f, 7f), new Vector2(790f, 18f));
         }
     }

@@ -1,0 +1,8 @@
+{
+  "key6Implemented": true,
+  "matchesExistingKey1Through5Branch": true,
+  "simulateKeyCommandAcknowledged": true,
+  "key6ObservedByGame": false,
+  "actualMenuButtonPlatingVerified": true,
+  "limitation": "The Unity CLI returned success for Digit6 press, but the focused, unpaused Playing game did not start plating. The menu button started item 5 food plating and its manual/automatic transactions passed. No production behavior was changed for input injection."
+}

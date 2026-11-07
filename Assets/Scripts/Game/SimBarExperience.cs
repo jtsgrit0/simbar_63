@@ -16,18 +16,19 @@ using UnityEngine.UI;
 public sealed partial class SimBarExperience : MonoBehaviour
 {
     private const float StartingCash = 12340f;
-    private static readonly string[] EnglishDrinkNames = { "FAUST", "ADIOS MOTHERFUCKER", "PEPPERONI HALF PIZZA", "CHILI CHEESE FRIES", "CHILI CHEESE CHIPS" };
-    private static readonly string[] KoreanDrinkNames = { "파우스트", "아디오스 마더퍼커", "페퍼로니 피자 하프", "칠리 치즈 프라이", "칠리 치즈 칩스" };
+    private static readonly string[] EnglishDrinkNames = { "FAUST", "ADIOS MOTHERFUCKER", "PEPPERONI HALF PIZZA", "CHILI CHEESE FRIES", "CHILI CHEESE CHIPS", "FRIED CHICKEN" };
+    private static readonly string[] KoreanDrinkNames = { "파우스트", "아디오스 마더퍼커", "페퍼로니 피자 하프", "칠리 치즈 프라이", "칠리 치즈 칩스", "후라이드 치킨" };
     private static string[] DrinkNames => SimBarLocalization.IsKorean ? KoreanDrinkNames : EnglishDrinkNames;
     // Keep saved wallet units intact; SimBarMoney displays each unit as ₩1,000.
-    private static readonly int[] DrinkPrices = { 14, 12, 9, 14, 14 };
+    private static readonly int[] DrinkPrices = { 14, 12, 9, 14, 14, 18 };
     private static readonly Color[] DrinkColors =
     {
         new Color(1f, 0.60f, 0.14f),
         new Color(0.10f, 0.92f, 0.86f),
         new Color(0.95f, 0.33f, 0.48f),
         new Color(1f, 0.78f, 0.25f),
-        new Color(0.55f, 0.86f, 0.35f)
+        new Color(0.55f, 0.86f, 0.35f),
+        new Color(1f, 0.42f, 0.10f)
     };
     private static readonly string[] Playlist =
     {
@@ -774,15 +775,15 @@ public sealed partial class SimBarExperience : MonoBehaviour
         queueText = CreateText("Queue", panel.transform, "", 13, TextAnchor.MiddleCenter, new Color(0.65f, 0.78f, 0.94f));
         SetRect(queueText.rectTransform, new Vector2(0.5f, 1f), new Vector2(0f, -82f), new Vector2(670f, 22f));
 
-        Button menu = CreateButton("MENU  /  5 ITEMS", panel.transform, new Vector2(0.5f, 0f), new Vector2(-170f, 37f), new Vector2(320f, 48f), new Color(0.42f, 0.20f, 0.32f), 18);
+        Button menu = CreateButton("MENU  /  6 ITEMS", panel.transform, new Vector2(0.5f, 0f), new Vector2(-170f, 37f), new Vector2(320f, 48f), new Color(0.42f, 0.20f, 0.32f), 18);
         menu.name = "Service Menu Open Button";
-        SimBarLocalization.Bind(menu.GetComponentInChildren<Text>(), "MENU  /  5 ITEMS", "메뉴  /  5종");
+        SimBarLocalization.Bind(menu.GetComponentInChildren<Text>(), "MENU  /  6 ITEMS", "메뉴  /  6종");
         menu.onClick.AddListener(OpenServiceMenu);
         Button requested = CreateButton("PREPARE ORDER  /  E", panel.transform, new Vector2(0.5f, 0f), new Vector2(170f, 37f), new Vector2(320f, 48f), new Color(0.10f, 0.38f, 0.32f), 18);
         requested.name = "Service Requested Item Button";
         SimBarLocalization.Bind(requested.GetComponentInChildren<Text>(), "PREPARE ORDER  /  E", "주문 메뉴 준비  /  E");
         requested.onClick.AddListener(PrepareRequestedService);
-        Text help = CreateText("Service Help", panel.transform, "1–5 SELECT  /  M MENU  /  E ORDER  /  P PAUSE", 12, TextAnchor.MiddleCenter, new Color(0.70f, 0.76f, 0.88f));
+        Text help = CreateText("Service Help", panel.transform, "1–6 SELECT  /  M MENU  /  E ORDER  /  P PAUSE", 12, TextAnchor.MiddleCenter, new Color(0.70f, 0.76f, 0.88f));
         SetRect(help.rectTransform, new Vector2(0.5f, 0f), new Vector2(0f, 8f), new Vector2(680f, 20f));
     }
 
@@ -851,6 +852,7 @@ public sealed partial class SimBarExperience : MonoBehaviour
             if (Keyboard.current.digit3Key.wasPressedThisFrame) SelectServiceItem(2);
             if (Keyboard.current.digit4Key.wasPressedThisFrame) SelectServiceItem(3);
             if (Keyboard.current.digit5Key.wasPressedThisFrame) SelectServiceItem(4);
+            if (Keyboard.current.digit6Key.wasPressedThisFrame) SelectServiceItem(5);
             if (Keyboard.current.mKey.wasPressedThisFrame) { if (serviceMenuOpen) CloseServiceMenu(); else OpenServiceMenu(); }
             if (Keyboard.current.hKey.wasPressedThisFrame) ToggleFloorMissionDrawer();
             if (Keyboard.current.cKey.wasPressedThisFrame) FloorQuickPress(SimBarFloorChallenges.Cleanup);

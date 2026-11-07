@@ -35,7 +35,7 @@ with sync_playwright() as p:
     click('ui:musicPrevious');assert page.evaluate('simbarGame.state.playlist')==4
     click('ui:musicToggle');assert page.locator('button[data-action="ui:musicToggle"]').inner_text()=='▶'
     click('ui:musicToggle');assert page.locator('button[data-action="ui:musicToggle"]').inner_text()=='Ⅱ'
-    click('ui:service');shot('05-menu');assert page.locator('.service-item').count()==5,page.evaluate('({phase:simbarGame.phase,paused:simbarGame.paused,reason:simbarGame.pauseReason})')
+    click('ui:service');shot('05-menu');assert page.locator('.service-item').count()==6,page.evaluate('({phase:simbarGame.phase,paused:simbarGame.paused,reason:simbarGame.pauseReason})')
     item=page.evaluate('simbarGame.orders[0].item');page.locator('.service-item').nth(item).click()
     page.wait_for_timeout(200);assert page.evaluate('!!simbarGame.pour');shot('06-pour')
     deadline=time.monotonic()+3

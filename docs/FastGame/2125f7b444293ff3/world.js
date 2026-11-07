@@ -67,6 +67,44 @@ export function pixelBandJump(role,action,seconds,active=true){
   return{frame:Math.min(7,Math.floor(progress*8)),lift:Math.round(air*7),shadow:1-air*.32};
 }
 
+// Orders are the source of truth: serving, expiration or closing removes the
+// bubble on the next painted frame, without a separate presentation timer.
+export function pixelPendingOrders(state={},columns=6){
+  if(state.phase!=='playing')return[];
+  const actors=new Map((state.actors||[]).filter(a=>a.visible!==false).map(a=>[a.id,a])),seen=new Set();
+  return(state.orders||[]).flatMap(order=>{
+    const actor=actors.get(order.id),item=Number(order.item);
+    if(!actor||seen.has(order.id)||!Number.isInteger(item)||item<0||item>=columns)return[];
+    seen.add(order.id);return[{actor,item}];
+  });
+}
+
+export function pixelOrderBubbleLayout(actor,point,meta={}){
+  const role=actor.id?.startsWith('bar-seat-')?'barseated':actor.role;
+  const entry=meta.roles?.[role]||meta.roles?.guest||{},action=entry.actions?.[actor.moving?'walk':actor.action]||{};
+  const height=action.drawHeight||entry.drawHeight||meta.drawHeight||40;
+  const frameHeight=action.cropHeight||entry.cropHeight||action.frameHeight||entry.frameHeight||meta.frameHeight||64;
+  const footY=action.footY??entry.footY??meta.footY??frameHeight;
+  const headOffset=Math.round(footY*height/frameHeight)-4;
+  const width=32,bodyHeight=28,tail=4;
+  return{x:Math.round(point.x-width/2),y:Math.round(point.y-headOffset-3-tail-bodyHeight),width,height:bodyHeight,tail};
+}
+
+// Neighbouring customers can share a queue lane. Move only their cards sideways
+// when needed; the tail remains attached to each customer's own head anchor.
+export function pixelOrderBubblePlacements(state,pointFor,meta={},columns=6){
+  const placed=[],steps=[[0,0],[-36,0],[36,0],[-72,0],[72,0],[0,-34],[-36,-34],[36,-34],[0,-68]];
+  for(const order of pixelPendingOrders(state,columns)){
+    const base=pixelOrderBubbleLayout(order.actor,pointFor(order.actor),meta);
+    const free=b=>!placed.some(p=>b.x<p.x+p.width+2&&b.x+b.width+2>p.x&&b.y<p.y+p.height+2&&b.y+b.height+2>p.y);
+    const candidates=steps.map(([dx,dy])=>({...base,x:base.x+dx,y:base.y+dy}));
+    const b=candidates.find(b=>b.x>=2&&b.x+b.width<=REF_W-2&&b.y>=2&&free(b))||base;
+    const tipX=base.x+base.width/2,tipY=base.y+base.height+base.tail;
+    placed.push({...order,...b,tipX,tipY,neckX:clamp(tipX,b.x+5,b.x+b.width-5)});
+  }
+  return placed;
+}
+
 export function createWorld(canvas,{assets={},getState=()=>({})}={}){
   const ctx=canvas.getContext('2d',{alpha:false});if(!ctx)throw new Error('A 2D game canvas is required.');
   if(!ready(assets.venue))throw new Error('The detailed room artwork must finish loading before the game starts.');
@@ -159,7 +197,22 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
     ctx.restore();
     if(action==='clean'){const swing=Math.sin(seconds*7+hash(a.id)%5)*2;polygon(ctx,[{x:p.x+4,y:p.y-16},{x:p.x+5,y:p.y-16},{x:p.x+10+swing,y:p.y+2},{x:p.x+9+swing,y:p.y+2}],'#b69061');ctx.fillStyle='#c7b27e';ctx.fillRect(Math.round(p.x+6+swing),Math.round(p.y+2),7,2);ctx.fillStyle='#857150';for(let i=0;i<3;i++)ctx.fillRect(Math.round(p.x+6+swing+i*2),Math.round(p.y+4),1,2);}
     if((a.id==='assisted-guest'||role==='assisted')&&state.floor?.guestActive){ctx.fillStyle='#f4c86e';ctx.fillRect(Math.round(p.x),Math.round(p.y-48),2,5);ctx.fillRect(Math.round(p.x),Math.round(p.y-41),2,2);}
-    if(action==='queue'){ctx.fillStyle='#e1ba73';ctx.fillRect(Math.round(p.x-2),Math.round(p.y-46),5,4);ctx.fillStyle='#34414e';ctx.fillRect(Math.round(p.x-1),Math.round(p.y-45),3,2);}
+  }
+  function orderBubbles(state){
+    const definition=assets.spriteMeta?.atlases?.orders,columns=definition?.columns||6;
+    const orders=pixelOrderBubblePlacements(state,a=>actorPoint(a,finite(a.y)),assets.spriteMeta,columns);if(!orders.length)return;
+    const sheet=assets.atlases?.orders;
+    if(!ready(sheet))throw new Error('The order icon atlas must finish loading before orders are shown.');
+    const fw=definition?.frameWidth||32,fh=definition?.frameHeight||32;
+    for(const b of orders){
+      if(b.x+offsetX+b.width<0||b.x+offsetX>width||b.y+b.height+b.tail<0||b.y>height)continue;
+      const x=b.x,y=b.y,w=b.width,h=b.height,cx=b.neckX;
+      ctx.fillStyle='#182333';ctx.fillRect(x+2,y,w-4,h);ctx.fillRect(x,y+2,w,h-4);
+      polygon(ctx,[{x:cx-4,y:y+h-1},{x:cx+4,y:y+h-1},{x:b.tipX,y:b.tipY}],'#182333');
+      ctx.fillStyle='#fff5d8';ctx.fillRect(x+2,y+1,w-4,h-2);ctx.fillRect(x+1,y+2,w-2,h-4);
+      polygon(ctx,[{x:cx-2,y:y+h-1},{x:cx+2,y:y+h-1},{x:b.tipX,y:b.tipY-2}],'#fff5d8');
+      ctx.drawImage(sheet,b.item*fw,0,fw,fh,x+4,y+2,24,24);
+    }
   }
   function paper(state,dt){
     const f=state.floor||{},session=state.journey?.session||0;
@@ -214,7 +267,7 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
     background();roomLayers();ctx.save();ctx.translate(Math.round(offsetX),0);ctx.imageSmoothingEnabled=false;ctx.drawImage(assets.venue,0,0,REF_W,REF_H);stageLights(state);const airborne=paper(state,running?dt:0);
     const drawables=occluders.filter(layer=>!layer.actors?.length).map(layer=>({depth:layer.depth,draw:()=>ctx.drawImage(layer.image,layer.x,layer.y)}));
     for(const actor of state.actors||[]){if(actor.visible===false)continue;const seat=seatFor(actor);let depth=seat?.depth??actorPoint(actor).y+(actor.action==='surf'?2:0);if(actor.id==='drummer'&&actor.action==='perform'&&assets.venueMeta?.drumForegroundDepth>0)depth=Math.min(depth,assets.venueMeta.drumForegroundDepth-1);drawables.push({depth,draw:()=>{drawActor(actor,state);for(const layer of occluders)if(seat&&layer.actors?.includes(actor.id))ctx.drawImage(layer.image,layer.x,layer.y);}});}
-    drawables.sort((a,b)=>a.depth-b.depth);for(const item of drawables)item.draw();airborne();ctx.restore();
+    drawables.sort((a,b)=>a.depth-b.depth);for(const item of drawables)item.draw();airborne();orderBubbles(state);ctx.restore();
   }
   function worldToScreen(x,z,y=0){const p=project(x,z,y);return{x:(p.x+offsetX)*cssW/width,y:p.y*cssH/height};}
   function renderOverview(target,state=getState()){

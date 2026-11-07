@@ -1,0 +1,237 @@
+{
+  "passed": true,
+  "checks": [
+    "Normal replacement-order RNG produces chicken and Canvas draws atlas column5.",
+    "390×844 menu scroll exposes four food choices including chicken at ₩18,000; help shows1–6.",
+    "Selecting a wrong cocktail leaves the chicken order and its icon pending.",
+    "Keyboard6 selects chicken and opens food plating with the correct name.",
+    "Reload keeps selected/pending chicken, safely resets transient prep, and menu click prepares it again.",
+    "Actual manual serving removes that customer bubble on the next paint.",
+    "Hired barback automatically serves the real chicken order and removes its bubble.",
+    "Natural closing clears every pending chicken order and bubble.",
+    "An unchanged five-item-era native pending-order save still loads correctly."
+  ],
+  "errors": [],
+  "httpErrors": [],
+  "screenshots": [
+    "01-real-random-chicken-order.png",
+    "02-mobile-sixth-menu-item.png",
+    "03-key6-chicken-plating.png",
+    "04-manual-serving-clears-chicken.png",
+    "05-real-staff-auto-serves-chicken.png"
+  ],
+  "sourceSha256": {
+    "catalog.js": "ec4b05facba98191ae4da2907072b7a6cd1e58e9dc0eb4640e733a1d064e3a24",
+    "core.js": "45eeccf4df2e2e2568ffe866c200b967ef35ce7d301e6651850445a6b50517d8",
+    "game.js": "5d108e8d8d1ab7ec73ae7da0867b41c722d580b5d4af23a07bb0305deef60562",
+    "world.js": "225c64a856c85b4edbd1c8d0500b40977ad429c883d0f7ee496d476ee05268a1"
+  },
+  "randomFixture": {
+    "trace": [
+      0,
+      1,
+      2,
+      2,
+      0,
+      2,
+      1,
+      1,
+      1,
+      1,
+      3,
+      4,
+      2,
+      3,
+      5
+    ],
+    "orders": [
+      {
+        "id": "patron-15",
+        "item": 5
+      },
+      {
+        "id": "patron-14",
+        "item": 5
+      },
+      {
+        "id": "patron-4",
+        "item": 4
+      }
+    ]
+  },
+  "pending": {
+    "phase": "playing",
+    "paused": false,
+    "selected": 0,
+    "pour": null,
+    "orders": [
+      {
+        "id": "patron-15",
+        "item": 5
+      },
+      {
+        "id": "patron-14",
+        "item": 5
+      },
+      {
+        "id": "patron-4",
+        "item": 4
+      }
+    ],
+    "draws": [
+      {
+        "sourceX": 160,
+        "sourceY": 0,
+        "x": 643,
+        "y": 390
+      },
+      {
+        "sourceX": 160,
+        "sourceY": 0,
+        "x": 672,
+        "y": 357
+      },
+      {
+        "sourceX": 128,
+        "sourceY": 0,
+        "x": 564,
+        "y": 325
+      }
+    ],
+    "served": 14,
+    "staff": [
+      0,
+      0,
+      0
+    ]
+  },
+  "manualServed": {
+    "phase": "playing",
+    "paused": false,
+    "selected": 5,
+    "pour": null,
+    "orders": [
+      {
+        "id": "patron-14",
+        "item": 5
+      },
+      {
+        "id": "patron-4",
+        "item": 4
+      },
+      {
+        "id": "patron-3",
+        "item": 4
+      }
+    ],
+    "draws": [
+      {
+        "sourceX": 160,
+        "sourceY": 0,
+        "x": 632,
+        "y": 355
+      },
+      {
+        "sourceX": 128,
+        "sourceY": 0,
+        "x": 518,
+        "y": 295
+      },
+      {
+        "sourceX": 128,
+        "sourceY": 0,
+        "x": 567,
+        "y": 307
+      }
+    ],
+    "served": 15,
+    "staff": [
+      0,
+      0,
+      0
+    ]
+  },
+  "autoFixture": {
+    "trace": [
+      0,
+      1,
+      2,
+      0,
+      3,
+      0,
+      2,
+      2,
+      5
+    ],
+    "orders": [
+      {
+        "id": "patron-6",
+        "item": 5
+      },
+      {
+        "id": "patron-11",
+        "item": 2
+      },
+      {
+        "id": "patron-2",
+        "item": 1
+      }
+    ]
+  },
+  "automaticServed": {
+    "phase": "playing",
+    "paused": false,
+    "selected": 0,
+    "pour": null,
+    "orders": [
+      {
+        "id": "patron-11",
+        "item": 2
+      },
+      {
+        "id": "patron-2",
+        "item": 1
+      },
+      {
+        "id": "patron-8",
+        "item": 4
+      },
+      {
+        "id": "patron-10",
+        "item": 0
+      }
+    ],
+    "draws": [
+      {
+        "sourceX": 64,
+        "sourceY": 0,
+        "x": 395,
+        "y": 257
+      },
+      {
+        "sourceX": 32,
+        "sourceY": 0,
+        "x": 442,
+        "y": 272
+      },
+      {
+        "sourceX": 128,
+        "sourceY": 0,
+        "x": 348,
+        "y": 285
+      },
+      {
+        "sourceX": 0,
+        "sourceY": 0,
+        "x": 516,
+        "y": 345
+      }
+    ],
+    "served": 9,
+    "staff": [
+      1,
+      0,
+      0
+    ]
+  }
+}

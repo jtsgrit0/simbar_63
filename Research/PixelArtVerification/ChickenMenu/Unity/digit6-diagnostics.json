@@ -1,0 +1,13 @@
+{
+  "paused": true,
+  "phase": "Playing",
+  "enabled": true,
+  "keyboard": "Keyboard",
+  "focused": "Hierarchy",
+  "inputMode": "ProcessEventsInDynamicUpdate",
+  "front": 0,
+  "actionFrame": -1,
+  "frame": 786,
+  "guard": 0.0,
+  "now": 4.85417366
+}

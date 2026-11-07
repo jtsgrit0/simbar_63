@@ -14,8 +14,9 @@ uv run --with pillow python Tools/prepare_order_icons.py
 
 The single runtime atlas is `Tools/WebGLTemplate/FastGame/art/order-icons.png`,
 192×32 pixels. Columns are Faust, AMF, pepperoni pizza, chili cheese fries, chili
-cheese chips, and fried chicken. The first five match the existing real menu.
-Chicken is an available sixth drawing, not a relabeling of either side dish.
+cheese chips, and fried chicken. All six are live menu items. Fried chicken is
+item 5 (keyboard shortcut 6), costs ₩18,000, and uses food plating rather than
+drink pouring. The original five menu IDs and prices are unchanged.
 
 The renderer reads actual pending orders, shows an icon only while that customer
 has an unserved order, and follows the customer's current position. Balloon

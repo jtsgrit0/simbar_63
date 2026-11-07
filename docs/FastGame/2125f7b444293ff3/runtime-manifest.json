@@ -1,11 +1,11 @@
 {
-  "version": "52288ceea581f302",
+  "version": "2125f7b444293ff3",
   "algorithm": "sha256",
   "files": [
     {
       "path": "aftershow.js",
-      "bytes": 12076,
-      "sha256": "717a04bdd78c8b947b42f10afd2035fa2c820065a30381cc13569e0b9a24b872"
+      "bytes": 15471,
+      "sha256": "d3ab2f94d119347eaa90163536687957cd221ede7da9e0e8672e2d28737cb2ac"
     },
     {
       "path": "art/icons/cash.png",
@@ -58,6 +58,11 @@
       "sha256": "c17003b77f0f690210510bc7a7a17d314b5b24d8baf30768dd31ed85e28ef34f"
     },
     {
+      "path": "art/order-icons.png",
+      "bytes": 12428,
+      "sha256": "7664b985f8beabae767e4dbb4d3509ac047c5c2dedc5108dd46f668e94fee866"
+    },
+    {
       "path": "art/owner-female.png",
       "bytes": 212034,
       "sha256": "b3ccc4bb00f0ea11f847f324ae3831601e410a3583c301796fd9f6a76b8a4f20"
@@ -89,8 +94,8 @@
     },
     {
       "path": "art/sprites.json",
-      "bytes": 20768,
-      "sha256": "e1e17ee105635c442c74f372a7e2e17e21a2378d94f05d90e5fb5fa5042ff02c"
+      "bytes": 20892,
+      "sha256": "ede8350b588943613438235e3e444ee2f01fa8d99ad1f9d64c4bad8b35aea00e"
     },
     {
       "path": "art/v4-band-bass-performance.png",
@@ -169,13 +174,13 @@
     },
     {
       "path": "catalog.js",
-      "bytes": 19753,
-      "sha256": "f78943760c5f8c35941dce129ec3ffb3d3d183dfae21c5cdf10c1f9023d65e1e"
+      "bytes": 19897,
+      "sha256": "ec4b05facba98191ae4da2907072b7a6cd1e58e9dc0eb4640e733a1d064e3a24"
     },
     {
       "path": "core.js",
-      "bytes": 49054,
-      "sha256": "52d36500d5feeccbb78c394094053945611896e9c99ee1a9b7d288d7afff15eb"
+      "bytes": 50556,
+      "sha256": "45eeccf4df2e2e2568ffe866c200b967ef35ce7d301e6651850445a6b50517d8"
     },
     {
       "path": "daily-poster.js",
@@ -189,13 +194,13 @@
     },
     {
       "path": "font.woff2",
-      "bytes": 58360,
-      "sha256": "3e45c73a8f9d641f955b0d55f741ba4b559aae7b2b6e833d8d1ddc4ea6602868"
+      "bytes": 58860,
+      "sha256": "1f90715d0849ff24bf0b79c7a62bfd771f480302e76ca26d0566b5356541f072"
     },
     {
       "path": "game.js",
-      "bytes": 52846,
-      "sha256": "ff2cf26753ab81cf235bf3c78bf648398d640d2224c074ecdf87584159683b69"
+      "bytes": 55469,
+      "sha256": "5d108e8d8d1ab7ec73ae7da0867b41c722d580b5d4af23a07bb0305deef60562"
     },
     {
       "path": "legacy-save.js",
@@ -204,8 +209,8 @@
     },
     {
       "path": "music.js",
-      "bytes": 1658,
-      "sha256": "5b5a95c4662bbe446b4c6bdc6ffe6dd09bfdc811e5fa5e46e30f8a340b98fa47"
+      "bytes": 2569,
+      "sha256": "62e168584358dde3b452c112b2ee2fe2f4cb53aef408e871accee942c656d199"
     },
     {
       "path": "navigation.js",
@@ -219,13 +224,13 @@
     },
     {
       "path": "style.css",
-      "bytes": 33190,
-      "sha256": "d60f42c53c0dcbd702c31bdc4afe1a0a73a21005c6b202a21e39c0ba15e79444"
+      "bytes": 34535,
+      "sha256": "5f42dd6165998d9300a7b7202a00baa5ec4eabb3635df96c3614153b6d5d798c"
     },
     {
       "path": "world.js",
-      "bytes": 22639,
-      "sha256": "054120386934d978a52b843b8e2a17fb17d17a481b78afd651f8e12df1dce229"
+      "bytes": 25803,
+      "sha256": "225c64a856c85b4edbd1c8d0500b40977ad429c883d0f7ee496d476ee05268a1"
     }
   ]
 }

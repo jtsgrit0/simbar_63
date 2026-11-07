@@ -103,10 +103,10 @@ export class SimBarGame{
         const allowed=new Set(this.actors.map(a=>a.id));allowed.add('assisted-guest');
         const restored=n.actors.filter(a=>allowed.has(a.id)&&Number.isFinite(a.x)&&Number.isFinite(a.z)&&Math.abs(a.x)<20&&Math.abs(a.z)<20).map(a=>({...a,_path:Array.isArray(a._path)?a._path.filter(p=>Number.isFinite(p.x)&&Number.isFinite(p.z)).slice(0,300):[],_pathAt:int(a._pathAt,0,300)}));
         if(restored.length>=this.actors.length-3){const byId=new Map(restored.map(a=>[a.id,a]));this.actors=this.actors.map(a=>byId.get(a.id)||a);if(byId.has('assisted-guest'))this.actors.push(byId.get('assisted-guest'));}
-        this.orders=Array.isArray(n.orders)?n.orders.filter(o=>this.actors.some(a=>a.id===o.id)&&int(o.item,0,4)===o.item).slice(0,7).map(o=>({...o,patience:clamp(o.patience,0,200),maxPatience:clamp(o.maxPatience,1,200)})):[];
+        this.orders=Array.isArray(n.orders)?n.orders.filter(o=>this.actors.some(a=>a.id===o.id)&&int(o.item,0,catalog.drinks.length-1)===o.item).slice(0,7).map(o=>({...o,patience:clamp(o.patience,0,200),maxPatience:clamp(o.maxPatience,1,200)})):[];
         this.crew=Array.isArray(n.crew)?n.crew.filter(id=>this.actors.some(a=>a.id===id)).slice(0,5):[];
         this.escort=n.escort&&this.actors.some(a=>a.id===n.escort.worker)?n.escort:null;
-        this._seed=(n.seed>>>0)||this._seed;this.elapsed=clamp(n.elapsed,0,1e8);this._requestTimer=finite(n.requestTimer,3,0,10);this.selectedItem=int(n.selectedItem,0,4);this._eventSerial=int(n.eventSerial);
+        this._seed=(n.seed>>>0)||this._seed;this.elapsed=clamp(n.elapsed,0,1e8);this._requestTimer=finite(n.requestTimer,3,0,10);this.selectedItem=int(n.selectedItem,0,catalog.drinks.length-1);this._eventSerial=int(n.eventSerial);
       }
       restoreAfterShow(this.journey.afterShow,this.actors);
       if(!this.orders.length&&this.journey.inProgress&&!this.journey.floorClosing)this._seedOrders();
@@ -158,7 +158,7 @@ export class SimBarGame{
         if(r.success)s.money=clamp(s.money+r.cashDelta,0,1e9);this._say(...(messages[r.code]||messages.unavailable));s.clock=10+j.booking.blocks*2;break;
       case'ticket':if(this.phase!=='planning')return this._done(false);Booking.setTicket(j.booking,+p.tier);break;
       case'launch':if(this.phase!=='planning'||!this._activePlan())return this._done(false);Booking.lock(j.booking);this._newNight();break;
-      case'menuItem':this.selectedItem=int(p.item,0,4);if(this.pauseReason==='menu'){this.paused=false;this.pauseReason='';}r=this._startPour(this.selectedItem);break;
+      case'menuItem':this.selectedItem=int(p.item,0,catalog.drinks.length-1);if(this.pauseReason==='menu'){this.paused=false;this.pauseReason='';}r=this._startPour(this.selectedItem);break;
       case'prepare':r=this._startPour(this.orders[0]?.item??this.selectedItem);break;
       case'pourStop':r=this._stopPour();break;
       case'hire':case'upgrade':case'event':case'payDebt':r=this._manage(type,idx);break;
