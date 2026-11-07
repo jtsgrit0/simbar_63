@@ -1,0 +1,18 @@
+{
+    "quiet":  true,
+    "buildId":  "build_b169c23f9b8d",
+    "compilerLinkerOrWasmOptProcesses":  0,
+    "generatedPerformanceFilesRemain":  0,
+    "profileUnchanged":  true,
+    "protectedOtherOwnerFilesAndMetasUnchanged":  12,
+    "approvedJessyRGBAExact":  true,
+    "sharedOwnerBadges":  true,
+    "originalPrefsRestored":  true,
+    "originalGameViewRestored":  true,
+    "savedReferenceSceneClean":  true,
+    "playStopped":  true,
+    "runInBackground":  false,
+    "furtherPlayAfterBuild":  false,
+    "privatePrefsBackupIgnored":  true,
+    "editorPortraitPresetAvailable":  false
+}

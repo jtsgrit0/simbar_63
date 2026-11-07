@@ -101,19 +101,19 @@
         1447
       ],
       "cardSourceRect": [
-        0,
-        0,
-        1087,
-        1447
+        3,
+        280,
+        1083,
+        1225
       ],
-      "cardFit": "contain",
+      "cardFit": "cover",
       "cardResampling": "nearest-neighbor",
       "cardRenderedSize": [
-        263,
+        400,
         350
       ],
       "cardPlacement": [
-        68,
+        0,
         0
       ],
       "cardBackground": [
@@ -122,10 +122,10 @@
         23,
         255
       ],
-      "sourceIncludesBadge": true,
-      "figureProvenance": "Unchanged user-supplied complete Jessy portrait and venue, uniform contain only",
-      "sha256": "b66b0ca7275dc4de5595cc9146e80eaf2099d790bf4d1b213099135c4a8775e3",
-      "bytes": 206393
+      "sourceIncludesBadge": false,
+      "figureProvenance": "User-supplied Jessy portrait and venue, uniform nearest-neighbor close-up crop with crossed forearms at the lower border",
+      "sha256": "8d85760c18009360078d98158b03d2eae5cb423dde3cdb8cea13fb1105de3fa0",
+      "bytes": 296605
     },
     {
       "name": "EDISON",

@@ -1,0 +1,51 @@
+{
+  "protectedOtherOwnerFilesAndMetas": 12,
+  "allProtectedFilesUnchanged": true,
+  "supplied": {
+    "path": "ArtSource\\Owners\\Supplied\\Jessy-owner_p_j.PNG",
+    "sha256": "a27e380f6743eb2cf3359e2e593cff12f63f5dbc371de112d6e0196924775961",
+    "size": [
+      1087,
+      1447
+    ]
+  },
+  "framing": {
+    "crop": [
+      3,
+      280,
+      1083,
+      1225
+    ],
+    "cropSize": [
+      1080,
+      945
+    ],
+    "uniformAspect": "8:7",
+    "resampling": "NEAREST",
+    "outputSize": [
+      400,
+      350
+    ],
+    "exactRGBA": true,
+    "letterboxing": false
+  },
+  "nativeSHA256": "8d85760c18009360078d98158b03d2eae5cb423dde3cdb8cea13fb1105de3fa0",
+  "unityCopies": [
+    {
+      "path": "Assets/Art/StartupTextures/Owners/OwnerFemale.png",
+      "width": 400,
+      "height": 350,
+      "rgbaIdentical": true,
+      "byteIdentical": true,
+      "sha256": "8d85760c18009360078d98158b03d2eae5cb423dde3cdb8cea13fb1105de3fa0"
+    },
+    {
+      "path": "Assets/Resources/SimBarWebTextures/OwnerFemale.bytes",
+      "width": 400,
+      "height": 350,
+      "rgbaIdentical": true,
+      "byteIdentical": false,
+      "sha256": "53029a55494686a04c63982a8856f1bda7a901bc1e1bfea19ddf8829fb73c17c"
+    }
+  ]
+}

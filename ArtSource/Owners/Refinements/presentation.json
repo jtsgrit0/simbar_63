@@ -8,7 +8,13 @@
     "JESSY": {
       "cardSource": "ArtSource/Owners/Supplied/Jessy-owner_p_j.PNG",
       "cardSourceSha256": "a27e380f6743eb2cf3359e2e593cff12f63f5dbc371de112d6e0196924775961",
-      "cardFit": "contain",
+      "cardFit": "cover",
+      "cardSourceRect": [
+        3,
+        280,
+        1083,
+        1225
+      ],
       "cardBackground": [
         23,
         10,
@@ -16,8 +22,8 @@
         255
       ],
       "cardResampling": "nearest-neighbor",
-      "sourceIncludesBadge": true,
-      "provenance": "Unchanged user-supplied complete Jessy portrait and venue, uniform contain only"
+      "sourceIncludesBadge": false,
+      "provenance": "User-supplied Jessy portrait and venue, uniform nearest-neighbor close-up crop with crossed forearms at the lower border"
     },
     "EDISON": {
       "support": "ArtSource/Owners/Refinements/Edison.dj-box.source.png",

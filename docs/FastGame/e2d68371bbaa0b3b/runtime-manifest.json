@@ -1,5 +1,5 @@
 {
-  "version": "968a25bf75ce2784",
+  "version": "e2d68371bbaa0b3b",
   "algorithm": "sha256",
   "files": [
     {
@@ -89,8 +89,8 @@
     },
     {
       "path": "art/owner-female.png",
-      "bytes": 206393,
-      "sha256": "b66b0ca7275dc4de5595cc9146e80eaf2099d790bf4d1b213099135c4a8775e3"
+      "bytes": 296605,
+      "sha256": "8d85760c18009360078d98158b03d2eae5cb423dde3cdb8cea13fb1105de3fa0"
     },
     {
       "path": "art/owner-ff.png",
@@ -204,8 +204,8 @@
     },
     {
       "path": "core.js",
-      "bytes": 50556,
-      "sha256": "45eeccf4df2e2e2568ffe866c200b967ef35ce7d301e6651850445a6b50517d8"
+      "bytes": 50898,
+      "sha256": "a071e044437489fbefc16dd4b186b856f9094f076277b657f83c59bf3d816a9e"
     },
     {
       "path": "daily-poster.js",
@@ -214,8 +214,8 @@
     },
     {
       "path": "floor.js",
-      "bytes": 8285,
-      "sha256": "c19ff1915866e14a7992be6de9b7cbce96f01e20661c036951a391e5b1ea7b0e"
+      "bytes": 9094,
+      "sha256": "b33d3dab89eb2e9c797ed21deb6abe4820c5652e36d3110a8d6d9acbb3616995"
     },
     {
       "path": "font.woff2",
@@ -224,8 +224,8 @@
     },
     {
       "path": "game.js",
-      "bytes": 55875,
-      "sha256": "e86686530f10493b870c6085831d52904387d1b9c80908b4f53be330781fc5b9"
+      "bytes": 55614,
+      "sha256": "3d1876800cb65eabdc8ea6b37d1506087a11072763407a74769a3f5c74862b6d"
     },
     {
       "path": "legacy-save.js",
@@ -249,13 +249,13 @@
     },
     {
       "path": "style.css",
-      "bytes": 34701,
-      "sha256": "6180e9d2dea3adf34cfd8aa267a41da85ae5de1e0c53c8eba3a69485f48ddb0b"
+      "bytes": 34352,
+      "sha256": "2eab45e8a47b923b2eafffd6e69df7ea8baef2adc4b5ecf0330dbee53990ddb4"
     },
     {
       "path": "world.js",
-      "bytes": 29801,
-      "sha256": "fa5dadb22bf2dd5ef3c5b1879b9117c8b0b9ad29790a4f0d328581d7bb24a4dd"
+      "bytes": 31049,
+      "sha256": "ec235ec06c4ebd1e54a529266925aab8ebf08af6a9185c3f268f05c971c1e26b"
     }
   ]
 }

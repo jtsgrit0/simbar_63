@@ -147,12 +147,9 @@ public sealed partial class SimBarExperience
             GameObject rule = CreatePanel("Journey Owner Accent " + i, card.transform, Vector2.one * 0.5f, new Vector2(0f, 226f), new Vector2(400f, 5f), OwnerAccents[i]);
             ownerTopLines[i] = rule.GetComponent<Image>();
             ownerTopLines[i].raycastTarget = false;
-            GameObject badge = CreatePanel("Journey Owner Badge " + i, card.transform, Vector2.one * 0.5f,
-                i == 0 ? new Vector2(-167f, 196f) : new Vector2(-139f, 193f),
-                i == 0 ? new Vector2(60f, 24f) : new Vector2(104f, 30f), new Color(0.02f, 0.025f, 0.04f, 0.92f));
+            GameObject badge = CreatePanel("Journey Owner Badge " + i, card.transform, Vector2.one * 0.5f, new Vector2(-139f, 193f), new Vector2(104f, 30f), new Color(0.02f, 0.025f, 0.04f, 0.92f));
             badge.GetComponent<Image>().raycastTarget = false;
-            ownerBadges[i] = OpText("Journey Owner Badge Label " + i, badge.transform, string.Empty, i == 0 ? 11 : 15, Vector2.zero,
-                i == 0 ? new Vector2(56f, 20f) : new Vector2(98f, 28f), OwnerAccents[i], TextAnchor.MiddleCenter);
+            ownerBadges[i] = OpText("Journey Owner Badge Label " + i, badge.transform, string.Empty, 15, Vector2.zero, new Vector2(98f, 28f), OwnerAccents[i], TextAnchor.MiddleCenter);
             ownerNames[i] = OpText("Journey Owner Name " + i, card.transform, string.Empty, 30, new Vector2(0f, -158f), new Vector2(394f, 44f), Color.white, TextAnchor.MiddleCenter);
             ownerNames[i].fontStyle = FontStyle.Bold;
             ownerNames[i].resizeTextForBestFit = true;
@@ -177,7 +174,6 @@ public sealed partial class SimBarExperience
             ownerDescriptions[i].text = OwnerDescription(i);
             ownerBadges[i].text = selected ? SimBarLocalization.Text("SELECTED", "선택됨") : "0" + (i + 1);
             ownerBadges[i].color = selected ? OwnerAccents[i] : JuiMuted;
-            if (i == 0) ownerBadges[i].transform.parent.gameObject.SetActive(selected);
         }
         if (ownerSelectionLabel != null)
             ownerSelectionLabel.text = SimBarLocalization.Format("YOUR OWNER  /  {0}", "선택한 사장  /  {0}", SelectedOwnerName);

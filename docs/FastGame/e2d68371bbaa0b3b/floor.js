@@ -49,12 +49,15 @@ export const Challenges={None:0,Cleanup:1,Guest:2,GuestPresses:8,GuestSeconds:6,
 const fail=code=>({success:false,code,fanGain:0,cashDelta:0,energyGain:0});
 const ok=(code,more={})=>({success:true,code,fanGain:0,cashDelta:0,energyGain:0,...more});
 export const Floor={
-  newState:()=>({version:1,confettiThrows:0,tissueThrows:0,litter:0,cleaned:0,cleanupStarted:false,cleanupActive:false,cleanupComplete:false,cleanupWorkers:0,cleanupRewardClaimed:false,
+  newState:()=>({version:1,confettiThrows:0,tissueThrows:0,litter:0,cleaned:0,finaleEnsured:false,cleanupStarted:false,cleanupActive:false,cleanupComplete:false,cleanupWorkers:0,cleanupRewardClaimed:false,
     guestSpawned:false,guestActive:false,guestComplete:false,guestStep:0,guestIndex:-1,guestSetbacks:0,reaction:null}),
   remaining:s=>s?int(Math.ceil(s.litter-s.cleaned),0,112):0,
   progress:s=>s?.litter>0?clamp(s.cleaned/s.litter,0,1):0,
   sanitize(s){
     if(!s)return;s.version=1;if(s.reaction)Challenges.sanitize(s.reaction);
+    // Historical closing saves must not acquire more paper after any cleanup
+    // has begun, including a completed zero-litter record normalized below.
+    s.finaleEnsured=s.finaleEnsured===true||s.cleanupStarted===true||s.cleanupComplete===true||s.cleanupRewardClaimed===true||(Number.isFinite(+s.cleaned)&&+s.cleaned>0);
     s.confettiThrows=int(s.confettiThrows,0,2);s.tissueThrows=int(s.tissueThrows,0,2);s.litter=s.confettiThrows*24+s.tissueThrows*32;s.cleanupWorkers=int(s.cleanupWorkers,0,5);s.cleaned=clamp(s.cleaned,0,s.litter);
     if(s.cleanupRewardClaimed&&s.litter>0){s.cleanupStarted=true;s.cleaned=s.litter;}
     if(!s.cleanupStarted||s.litter===0){s.cleanupStarted=false;s.cleaned=0;s.cleanupComplete=false;s.cleanupActive=false;s.cleanupWorkers=0;}
@@ -67,6 +70,18 @@ export const Floor={
   throw(s,kind,playing){
     if(!playing)return fail('not_performing');if(kind!==0&&kind!==1)return fail('invalid_effect');if(s.cleanupStarted||s.cleanupComplete||s.cleanupRewardClaimed)return fail('cleanup_started');
     const key=kind===0?'confettiThrows':'tissueThrows';if(s[key]>=2)return fail('effect_limit');s[key]++;const litterAdded=kind===0?24:32;s.litter+=litterAdded;return ok(kind===0?'confetti':'tissue',{fanGain:2,energyGain:.04,litterAdded});
+  },
+  ensureFinale(s,eligible=true){
+    if(!s||s.finaleEnsured===true)return[];
+    s.finaleEnsured=true;
+    if(!eligible||s.cleanupStarted||s.cleanupComplete||s.cleanupRewardClaimed||s.cleaned>0)return[];
+    const bursts=[];
+    for(const kind of [0,1]){
+      const key=kind===0?'confettiThrows':'tissueThrows';
+      if(s[key]>0)continue;
+      const result=this.throw(s,kind,true);if(result.success)bursts.push({kind,...result});
+    }
+    return bursts;
   },
   startCleanup(s,workers,over){if(!over)return fail('performance_running');if(s.cleanupRewardClaimed||s.cleanupComplete)return fail('already_clean');if(!s.litter)return fail('no_litter');if(workers<1||workers>5)return fail('no_workers');if(s.cleanupActive)return fail('already_cleaning');s.cleanupStarted=true;s.cleanupActive=true;s.cleanupWorkers=workers;return ok('cleanup_started');},
   tick(s,dt,ready,running=true){

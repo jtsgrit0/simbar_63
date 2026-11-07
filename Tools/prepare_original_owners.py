@@ -7,7 +7,8 @@ original figure RGB. Jessy's requested hand-pose edit is a separately reviewed
 source. Presentation transforms use nearest-neighbor sampling and a separate
 50-percent exterior pixel-light layer. Original source files stay unchanged.
 A supplied full-card source bypasses all legacy character matting, pose edits,
-rotation, rim light and room composition.
+rotation, rim light and room composition. Reviewed source crops use the same
+aspect ratio as the runtime card and nearest-neighbor sampling.
 """
 from collections import deque
 from pathlib import Path
@@ -285,14 +286,26 @@ def composite_refined_owner(portrait, matte, backdrop, name, config):
 
 
 def supplied_card(config, runtime_size):
-    """Fit the complete supplied illustration; bypass old figure edits/mattes."""
+    """Frame the supplied illustration; bypass old figure edits/mattes."""
     path = (ROOT / config['cardSource']).resolve()
     if not path.is_relative_to(ROOT) or file_hash(path) != config['cardSourceSha256']:
         raise ValueError('Supplied owner card source/hash must match the retained original.')
-    if config.get('cardFit') != 'contain' or config.get('cardResampling') != 'nearest-neighbor':
-        raise ValueError('Supplied pixel portrait requires uniform nearest-neighbor contain.')
+    fit = config.get('cardFit')
+    if fit not in ('contain', 'cover') or config.get('cardResampling') != 'nearest-neighbor':
+        raise ValueError('Supplied pixel portrait requires nearest-neighbor contain or reviewed cover crop.')
     image = Image.open(path).convert('RGBA')
-    fitted = ImageOps.contain(image, runtime_size, Image.Resampling.NEAREST)
+    rect = config.get('cardSourceRect', [0, 0, *image.size])
+    if (len(rect) != 4 or any(type(value) is not int for value in rect)
+            or not 0 <= rect[0] < rect[2] <= image.width
+            or not 0 <= rect[1] < rect[3] <= image.height):
+        raise ValueError('Reviewed owner source crop must stay inside the supplied original.')
+    viewport = image.crop(rect)
+    if fit == 'cover':
+        if viewport.width * runtime_size[1] != viewport.height * runtime_size[0]:
+            raise ValueError('Reviewed cover crop must preserve the exact runtime aspect ratio.')
+        fitted = viewport.resize(runtime_size, Image.Resampling.NEAREST)
+    else:
+        fitted = ImageOps.contain(viewport, runtime_size, Image.Resampling.NEAREST)
     offset = ((runtime_size[0] - fitted.width) // 2,
               (runtime_size[1] - fitted.height) // 2)
     background = tuple(config['cardBackground'])
@@ -301,8 +314,8 @@ def supplied_card(config, runtime_size):
     return card, {
         'presentationMode': 'supplied-full-card',
         'cardSource': relative(path), 'cardSourceSha256': file_hash(path),
-        'cardSourceSize': list(image.size), 'cardSourceRect': [0, 0, *image.size],
-        'cardFit': 'contain', 'cardResampling': 'nearest-neighbor',
+        'cardSourceSize': list(image.size), 'cardSourceRect': rect,
+        'cardFit': fit, 'cardResampling': 'nearest-neighbor',
         'cardRenderedSize': list(fitted.size), 'cardPlacement': list(offset),
         'cardBackground': list(background),
         'sourceIncludesBadge': bool(config.get('sourceIncludesBadge')),
