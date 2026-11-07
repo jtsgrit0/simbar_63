@@ -1,0 +1,48 @@
+{
+  "elapsed": 16.2,
+  "cleaned": 0.3,
+  "litter": 56,
+  "remaining": 56,
+  "readyWorkers": 1,
+  "cleanupCPromptSeen": true,
+  "currentPrompt": 0,
+  "groundMarks": 40,
+  "airborneMarks": 0,
+  "members": [
+    {
+      "id": "singer",
+      "phase": "await-exit",
+      "greeting": 2
+    },
+    {
+      "id": "guitarist",
+      "phase": "await-exit",
+      "greeting": 2
+    },
+    {
+      "id": "bassist",
+      "phase": "hug",
+      "greeting": 1
+    },
+    {
+      "id": "drummer",
+      "phase": "approach",
+      "greeting": 0
+    }
+  ],
+  "crew": [
+    {
+      "name": "Bartender",
+      "position": "(1.916, 0.000, -3.530)",
+      "ready": true,
+      "action": "clean"
+    },
+    {
+      "name": "Server",
+      "position": "(7.200, 0.000, -3.400)",
+      "ready": false,
+      "action": "idle"
+    }
+  ],
+  "guestStillActive": true
+}

@@ -1,0 +1,41 @@
+{
+  "elapsed": 15.2,
+  "actualCPrompt": true,
+  "readyWorkers": 1,
+  "members": [
+    {
+      "id": "singer",
+      "phase": "await-exit",
+      "greeting": 2
+    },
+    {
+      "id": "guitarist",
+      "phase": "await-exit",
+      "greeting": 2
+    },
+    {
+      "id": "bassist",
+      "phase": "approach",
+      "greeting": 1
+    },
+    {
+      "id": "drummer",
+      "phase": "approach",
+      "greeting": 0
+    }
+  ],
+  "crew": [
+    {
+      "name": "Bartender",
+      "position": "(1.916, 0.000, -3.530)",
+      "ready": true,
+      "action": "serve"
+    },
+    {
+      "name": "Server",
+      "position": "(7.200, 0.000, -3.400)",
+      "ready": false,
+      "action": "walk"
+    }
+  ]
+}

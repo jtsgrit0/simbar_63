@@ -11,7 +11,7 @@ from playwright.sync_api import sync_playwright
 from benchmark_web_loading import chromium_executable
 
 ROOT = Path(__file__).resolve().parent.parent
-OUT = ROOT / 'Research/PixelArtVerification/AlbumStageScreen/DOM'
+OUT = ROOT / 'Research/PixelArtVerification/CurtainCleanup/DOM'
 VIEW = ROOT / 'Library/ShowFinaleQA/index.html'
 FAREWELL = '오늘의 라이브 밴드 공연은 하얗게 불태웠어요! 내일 또 공연 보러와요!'
 HTML = '''<!doctype html><html lang="ko"><meta charset="utf-8">
@@ -237,14 +237,11 @@ def main():
             page.wait_for_timeout(80)
             shot('03-mobile-farewell')
 
-            click('.farewell-card button[data-action="ui:musicToggle"]')
-            page.wait_for_function('simbarGame.journey.musicPaused && qaAudioElements.at(-1)?.paused===true')
-            click('.farewell-card button[data-action="ui:musicToggle"]')
-            page.wait_for_function('!simbarGame.journey.musicPaused && qaAudioElements.at(-1)?.paused===false')
+            assert page.locator('.farewell-card [data-action^="ui:music"]').count() == 0
             before = page.evaluate(SNAPSHOT)
             page.wait_for_timeout(150)
             assert page.evaluate(SNAPSHOT)['elapsed'] == before['elapsed']
-            report['checks'].append('Farewell music control is unobstructed and toggles real audio while the modal freezes the game.')
+            report['checks'].append('Farewell has no duplicate music controls and freezes the game until acknowledged.')
             page.evaluate('simbarGame.save()')
             page.reload();ready()
             assert page.evaluate('simbarGame.phase') == 'lobby'
@@ -287,22 +284,17 @@ def main():
             report['reactionButtonPresses'] = pressed
             report['result'] = result
             results_bounds('desktop-1280x800')
-            shot('05-results-music-control')
+            shot('05-results-without-popup-music')
             report['checks'].append('Real reaction buttons complete remaining floor missions and award exactly one final receipt.')
-            click('.result-music button[data-action="ui:musicToggle"]')
-            page.wait_for_function('simbarGame.journey.musicPaused && qaAudioElements.at(-1)?.paused===true')
-            click('.result-music button[data-action="ui:musicToggle"]')
-            page.wait_for_function('!simbarGame.journey.musicPaused && qaAudioElements.at(-1)?.paused===false')
-            report['checks'].append('Results music control is visible, clickable and resumes actual audio.')
+            assert page.locator('.results-ref [data-action^="ui:music"]').count() == 0
+            assert page.locator('.playlist [data-action="ui:musicToggle"]').count() == 1
+            report['checks'].append('Results has no duplicate music controls; the original playlist remains.')
             page.set_viewport_size({'width': 390, 'height': 844})
             page.wait_for_timeout(80)
             results_bounds('mobile-390x844')
-            shot('05-mobile-results-music')
-            click('.result-music button[data-action="ui:musicToggle"]')
-            page.wait_for_function('simbarGame.journey.musicPaused && qaAudioElements.at(-1)?.paused===true')
-            click('.result-music button[data-action="ui:musicToggle"]')
-            page.wait_for_function('!simbarGame.journey.musicPaused && qaAudioElements.at(-1)?.paused===false')
-            report['checks'].append('The results music control remains fully visible and clickable on 390×844.')
+            shot('05-mobile-results-without-popup-music')
+            assert page.locator('.results-ref [data-action^="ui:music"]').count() == 0
+            report['checks'].append('390×844 results remains within the viewport without popup music controls.')
 
             final = page.evaluate(SNAPSHOT)
             page.evaluate('simbarGame.save()')

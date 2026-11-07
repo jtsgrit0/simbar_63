@@ -14,8 +14,6 @@ public sealed partial class SimBarExperience
     private GameObject juiResults;
     private GameObject juiFarewell;
     private Text juiFarewellMessage;
-    private readonly System.Collections.Generic.List<Text> juiMusicIcons = new System.Collections.Generic.List<Text>();
-    private readonly System.Collections.Generic.List<Text> juiMusicTracks = new System.Collections.Generic.List<Text>();
     private Text juiDay;
     private Text juiNightTitle;
     private Text juiClock;
@@ -232,17 +230,7 @@ public sealed partial class SimBarExperience
         Button lobby = OpButton("BACK TO LOBBY", panel, Vector2.one * 0.5f, new Vector2(322f, -257f), new Vector2(304f, 60f), 20);
         lobby.name = "Journey Back To Lobby Button";
         lobby.onClick.AddListener(JourneyReturnToLobby);
-        BuildJourneyMusicControls(panel,new Vector2(0f,-310f),"Results");
         OpText("Journey Results Saved", panel, "PROGRESS SAVED  /  YOUR VENUE CARRIES INTO THE NEXT NIGHT", 15, new Vector2(0f, -358f), new Vector2(1000f, 32f), JuiMuted, TextAnchor.MiddleCenter);
-    }
-
-    private void BuildJourneyMusicControls(Transform parent,Vector2 point,string context)
-    {
-        GameObject row=OpPanel(context+" Music Controls",parent,Vector2.one*.5f,point,new Vector2(820f,38f),new Color(.07f,.09f,.14f),false);
-        Text track=OpText(context+" Music Track",row.transform,string.Empty,15,new Vector2(-92f,0f),new Vector2(590f,34f),JuiMuted,TextAnchor.MiddleLeft);juiMusicTracks.Add(track);
-        Button previous=OpButton("◀",row.transform,Vector2.one*.5f,new Vector2(284f,0f),new Vector2(46f,32f),17);previous.name=context+" Music Previous";previous.onClick.AddListener(PreviousPlaylistTrack);
-        Button toggle=OpButton("▶",row.transform,Vector2.one*.5f,new Vector2(337f,0f),new Vector2(46f,32f),17);toggle.name=context+" Music Play Pause";toggle.onClick.AddListener(TogglePlaylistMusic);juiMusicIcons.Add(toggle.GetComponentInChildren<Text>());
-        Button next=OpButton("▶",row.transform,Vector2.one*.5f,new Vector2(390f,0f),new Vector2(46f,32f),17);next.name=context+" Music Next";next.onClick.AddListener(NextPlaylistTrack);
     }
 
     private void BuildJourneyFarewell()
@@ -251,7 +239,6 @@ public sealed partial class SimBarExperience
         OpText("Journey Farewell Heading",panel,SimBarLocalization.Text("THANK YOU FOR TONIGHT!","오늘의 공연을 함께해 주셔서 고마워요!"),29,new Vector2(0f,135f),new Vector2(870f,48f),JuiGold,TextAnchor.MiddleCenter);
         juiFarewellMessage=OpText("Journey Farewell Message",panel,string.Empty,29,new Vector2(0f,47f),new Vector2(850f,112f),Color.white,TextAnchor.MiddleCenter);
         juiFarewellMessage.horizontalOverflow=HorizontalWrapMode.Wrap;
-        BuildJourneyMusicControls(panel,new Vector2(0f,-57f),"Farewell");
         Button acknowledge=OpButton(SimBarLocalization.Text("SEE YOU TOMORROW!","내일 또 만나요!"),panel,Vector2.one*.5f,new Vector2(0f,-133f),new Vector2(510f,58f),23);acknowledge.name="Journey Farewell Acknowledge";acknowledge.onClick.AddListener(AcknowledgeAfterShowFarewell);
     }
 
@@ -262,7 +249,6 @@ public sealed partial class SimBarExperience
         if(show)paused=true;
         JourneySetOverlay(juiFarewell,show);
         juiFarewellMessage.text=SimBarLocalization.Text("Tonight's live band gave it everything! Come back for another show tomorrow!","오늘의 라이브 밴드 공연은 하얗게 불태웠어요! 내일 또 공연 보러와요!");
-        foreach(Text label in juiMusicTracks)if(label!=null)label.text=SimBarLocalization.Text("MUSIC / ","음악 / ")+Playlist[playlistIndex];
         UpdatePlaylistPlayPauseIcon();
     }
 

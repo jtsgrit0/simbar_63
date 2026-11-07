@@ -1,0 +1,22 @@
+{
+  "cleaned": 28.5000076,
+  "litter": 56,
+  "initialGroundMarks": 40,
+  "currentGroundMarks": 20,
+  "expected": 20,
+  "airborneMarks": 0,
+  "crew": [
+    {
+      "name": "Bartender",
+      "position": "(8.800, 0.000, 1.000)",
+      "ready": true,
+      "action": "clean"
+    },
+    {
+      "name": "Server",
+      "position": "(7.914, 0.000, -4.329)",
+      "ready": true,
+      "action": "clean"
+    }
+  ]
+}

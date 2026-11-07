@@ -70,11 +70,26 @@ public sealed partial class SimBarExperience
         EnsureFloorPerformance();
         int serial=effect==SimBarFloorMissions.Confetti?FloorState.confettiThrows:FloorState.tissueThrows;
         if(floorPerformance!=null) floorPerformance.Burst(effect,serial);
+        NotifyPixelPaperBurst(effect,serial);
         ApplyFloorRewards(result);
         floorMissionFeedback=effect==SimBarFloorMissions.Confetti
             ?SimBarLocalization.Text("The band unexpectedly throws confetti! Staff will need to clean after the show.","밴드가 깜짝 꽃가루 퍼포먼스를 했어요! 공연 후 청소가 필요합니다.")
             :SimBarLocalization.Text("Tissue streamers fly across the crowd! A cleanup mission will follow the show.","관객 위로 휴지가 날립니다! 공연 후 청소 미션이 생겼어요.");
         ShowToast(floorMissionFeedback,4f);
+    }
+
+    private void EnsureFloorFinale()
+    {
+        bool eligible=journey.afterShow!=null&&!journey.afterShow.completed&&journey.session!=journey.settledSession;
+        foreach(var burst in SimBarFloorMissions.EnsureFinale(FloorState,eligible))
+        {
+            int effect=burst.code=="tissue"?SimBarFloorMissions.Tissue:SimBarFloorMissions.Confetti;
+            EnsureFloorPerformance();
+            int serial=effect==SimBarFloorMissions.Confetti?FloorState.confettiThrows:FloorState.tissueThrows;
+            if(floorPerformance!=null)floorPerformance.Burst(effect,serial);
+            NotifyPixelPaperBurst(effect,serial);
+            ApplyFloorRewards(burst);
+        }
     }
 
     private void EnsureFloorCleanupAssigned()
@@ -135,10 +150,10 @@ public sealed partial class SimBarExperience
     {
         var reaction=FloorState.reaction;
         bool started=false;
-        if(FloorState.guestActive)
-            started=SimBarFloorChallenges.Start(reaction,SimBarFloorChallenges.Guest,FloorState.guestStep);
-        else if(JourneyIsFloorClosing && FloorState.cleanupActive && CleanupReadyWorkers>0 && reaction.cleanupWorkBudget<=.001f)
+        if(JourneyIsFloorClosing && FloorState.cleanupActive && CleanupReadyWorkers>0 && reaction.cleanupWorkBudget<=.001f)
             started=SimBarFloorChallenges.Start(reaction,SimBarFloorChallenges.Cleanup,0);
+        else if(FloorState.guestActive)
+            started=SimBarFloorChallenges.Start(reaction,SimBarFloorChallenges.Guest,FloorState.guestStep);
         if(started) { floorMissionFeedback=""; SaveOperations(); }
     }
 
@@ -223,6 +238,7 @@ public sealed partial class SimBarExperience
             orderQueue.Clear(); floorClosingSaveTimer=0f; CloseFloorMissionDrawer();
             floorMissionFeedback=SimBarLocalization.Text("Show over! Watch for C cleanup and F guest-assistance prompts before settlement.","공연이 끝났어요! C 청소·F 손님 안내가 뜨면 빠르게 연타하고 마감하세요.");
         }
+        EnsureFloorFinale();
         EnsureFloorCleanupAssigned();
         SyncFloorWorld(); UpdateFloorGuestVisual();
         if(FloorState.cleanupActive) BeginFloorWorkerCleanup();

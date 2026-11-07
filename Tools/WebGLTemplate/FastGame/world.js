@@ -38,6 +38,25 @@ export function pixelStageLightingEnded(state={}){
   const journey=state.journey;
   return ['closing','results'].includes(state.phase)||!!journey?.floorClosing||!!journey?.afterShow?.started||journey?.session>0&&Number.isFinite(journey?.secondsLeft)&&journey.secondsLeft<=0;
 }
+export const PIXEL_PAPER_COLORS=Object.freeze(['#ff6fa9','#62e2ed','#ffe17c','#b9a0ff']);
+export function pixelGroundPaper(floor={}){
+  const remaining=floor.litter>0?clamp(1-finite(floor.cleaned)/floor.litter,0,1):0;
+  const counts=[Math.ceil(Math.min(64,Math.max(0,finite(floor.confettiThrows))*24)*remaining),Math.ceil(Math.min(40,Math.max(0,finite(floor.tissueThrows))*16)*remaining)];
+  if(!counts[0]&&!counts[1])return[];
+  const random=rng(44091),marks=[];
+  for(let i=0;i<104;i++){
+    const kind=i<64?0:1,index=kind?i-64:i,x=2.1+random()*7,z=-4.6+random()*5.4;
+    if(index<counts[kind])marks.push({kind,index,x,z,color:kind?'#e8e2d5':PIXEL_PAPER_COLORS[index%4]});
+  }
+  return marks;
+}
+export function pixelPaperBurst(event={}){
+  const kind=event.kind===1?1:0,random=rng((3917+finite(event.serial)*97+(kind?7001:0))>>>0),out=[];
+  for(let i=0;i<(kind?28:56);i++)out.push({kind,index:i,x:3+random()*5,z:2.75+random()*.65,y:2.6+random()*1.6,
+    vx:(random()-.5)*1.4,vz:-.65-random()*1.15,vy:(kind?.5:1)+random()*(kind?.8:1.2),phase:random()*Math.PI*2,age:0,
+    color:kind?'#fff7e8':PIXEL_PAPER_COLORS[i%4]});
+  return out;
+}
 
 // The four views are actual drawings. Mirroring a front view cannot create a back.
 export function pixelDirection(dx,dz){
@@ -134,7 +153,7 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
   if(!assets.spriteMeta.atlases&&!ready(assets.sprites))throw new Error('The pixel character artwork must finish loading before the game starts.');
   for(const key of Object.keys(assets.spriteMeta.atlases||{}))if(!ready(assets.atlases?.[key]))throw new Error('The '+key+' character atlas must finish loading before the game starts.');
   const particles=[],seenEffects=new Set();
-  let width=960,height=558,offsetX=0,cssW=960,cssH=558,last=null,seconds=0,night=null,city=null,occluders=[],plate=null,destroyed=false;
+  let width=960,height=558,offsetX=0,cssW=960,cssH=558,last=null,seconds=0,night=null,observedFloor,city=null,occluders=[],plate=null,destroyed=false;
   const project=(x,z,y=0)=>{
     const calibration=assets.venueMeta?.projection;
     if(calibration){const {origin,xAxis,zAxis,yAxis}=calibration;return{x:origin[0]+x*xAxis[0]+z*zAxis[0]+y*yAxis[0],y:origin[1]+x*xAxis[1]+z*zAxis[1]+y*yAxis[1]};}
@@ -238,11 +257,27 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
   }
   function paper(state,dt){
     const f=state.floor||{},session=state.journey?.session||0;
-    if(night!==session){night=session;seenEffects.clear();particles.length=0;}
-    for(const event of state.effects||[]){const id=[event.serial,event.kind,event.time].join(':');if(seenEffects.has(id))continue;seenEffects.add(id);if(finite(state.elapsed)-finite(event.time)>1.2)continue;const random=rng(hash(id));for(let i=0;i<(event.kind?22:32);i++){if(particles.length>=90)particles.shift();particles.push({x:3+random()*5,z:2.8+random()*.5,y:2.4+random()*1.6,vx:(random()-.5)*2.5,vz:-1.5-random()*2.5,vy:.5+random()*1.8,age:0,kind:event.kind,color:event.kind?'#f1ede1':['#ec719c','#61d6d8','#eed16e','#a99be0'][i%4]});}}
-    const throws=finite(f.confettiThrows)+finite(f.tissueThrows),remaining=f.litter?clamp(1-f.cleaned/f.litter,0,1):0,count=Math.ceil(Math.min(42,throws*13)*remaining),random=rng(44091);
-    for(let i=0;i<42;i++){const x=2+random()*7.2,z=-4.1+random()*5.2,p=project(x,z,.025);if(i>=count)continue;const tissue=i%Math.max(1,throws)<finite(f.tissueThrows);ctx.fillStyle=tissue?'#e9e5d9':['#d37da0','#62bdc6','#d4b25c','#9281b4'][i%4];ctx.fillRect(Math.round(p.x),Math.round(p.y),tissue?4:2,1);if(tissue)ctx.fillRect(Math.round(p.x+2),Math.round(p.y+1),3,1);}
-    return()=>{for(let i=particles.length-1;i>=0;i--){const a=particles[i];a.age+=dt;a.vy-=dt*3.2;a.x+=a.vx*dt;a.z+=a.vz*dt;a.y+=a.vy*dt;if(a.y<.03||a.age>7){particles.splice(i,1);continue;}const p=project(a.x,a.z,a.y);ctx.fillStyle=a.color;ctx.fillRect(Math.round(p.x),Math.round(p.y),a.kind?4:2,1);if(a.kind)ctx.fillRect(Math.round(p.x+2),Math.round(p.y+1),3,1);}};
+    if(night!==session||observedFloor!==state.floor){night=session;observedFloor=state.floor;seenEffects.clear();particles.length=0;}
+    for(const event of state.effects||[]){const id=[event.serial,event.kind,event.time].join(':');if(seenEffects.has(id))continue;seenEffects.add(id);if(finite(state.elapsed)-finite(event.time)>1.2)continue;particles.push(...pixelPaperBurst(event));if(particles.length>160)particles.splice(0,particles.length-160);}
+    for(const mark of pixelGroundPaper(f)){
+      const p=project(mark.x,mark.z,.03),x=Math.round(p.x),y=Math.round(p.y);
+      ctx.fillStyle='#10172399';ctx.fillRect(x-1,y+2,mark.kind?11:6,1);ctx.fillStyle=mark.color;
+      if(mark.kind){ctx.fillRect(x,y,4,2);ctx.fillRect(x+3,y+1,4,2);ctx.fillRect(x+6,y,3,2);ctx.fillStyle='#fff7e8';ctx.fillRect(x+1,y,3,1);}
+      else ctx.fillRect(x,y,mark.index%3===1?2:4,mark.index%3===1?4:2);
+    }
+    return()=>{for(let i=particles.length-1;i>=0;i--){
+      const a=particles[i];a.age+=dt;a.vy-=dt*(a.kind?.8:1.3);a.x+=a.vx*dt;a.z+=a.vz*dt;a.y+=a.vy*dt;
+      if(a.y<.03||a.age>8||a.x>10.3||a.z<-7){particles.splice(i,1);continue;}
+      const p=project(a.x,a.z,a.y),x=Math.round(p.x+Math.sin(a.phase+a.age*6)*1.5),y=Math.round(p.y);
+      if(a.kind){
+        for(let segment=0;segment<5+a.index%4;segment++){
+          const sx=Math.round(x+Math.sin(a.phase+a.age*5+segment*.85)*2.5);
+          ctx.fillStyle=segment%3===2?'#d6cee0':a.color;ctx.fillRect(sx,y+segment*2,3,2);
+        }
+      }else{
+        const turn=Math.floor(a.age*8+a.phase)%3;ctx.fillStyle=a.color;ctx.fillRect(x,y,turn===1?2:turn===2?4:3,turn===1?4:turn===2?2:3);
+      }
+    }};
   }
   function stageLights(state){
     if(!pixelStageLightingActive(state))return;

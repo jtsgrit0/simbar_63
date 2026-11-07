@@ -1127,7 +1127,6 @@ public sealed partial class SimBarExperience : MonoBehaviour
     {
         if(musicPlayPauseIcon!=null)
             musicPlayPauseIcon.text=musicPaused||musicWaitingForInput?"▶":"Ⅱ";
-        foreach(Text label in juiMusicIcons)if(label!=null)label.text=musicPaused||musicWaitingForInput?"▶":"Ⅱ";
     }
 
     private void TogglePause()

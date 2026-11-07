@@ -44,7 +44,13 @@ public sealed partial class SimBarExperience
         public uint variantSeed;public PixelSeat seat;
     }
     private sealed class PixelLayer{public Transform root;public float depth;public List<Transform> after;}
-    private sealed class PixelParticle{public Vector3 position,velocity;public float age;public bool tissue;public Color color;public Image image;}
+    private sealed class PixelParticle{public Vector3 position,velocity;public float age,phase;public bool tissue;public int index,sequence;public SimBarPixelPaperGraphic image;}
+    private struct PixelPaperRandom
+    {
+        private uint value;
+        public PixelPaperRandom(uint seed){value=seed;}
+        public float Next(){unchecked{value=value*1664525u+1013904223u;}return (float)(value/4294967296d);}
+    }
     private Canvas pixelWorldCanvas;
     private RectTransform pixelRoom;
     private RawImage pixelCity;
@@ -57,9 +63,10 @@ public sealed partial class SimBarExperience
     private readonly List<PixelLayer> pixelStaticLayers=new List<PixelLayer>();
     private readonly List<PixelLayer> pixelDrawLayers=new List<PixelLayer>(64);
     private readonly List<MotionActor> pixelRemovedActors=new List<MotionActor>();
-    private readonly List<Image> pixelPaper=new List<Image>(42);
-    private readonly List<Vector2> pixelPaperPositions=new List<Vector2>(42);
-    private readonly List<PixelParticle> pixelParticles=new List<PixelParticle>(64);
+    private readonly List<SimBarPixelPaperGraphic> pixelPaper=new List<SimBarPixelPaperGraphic>(104);
+    private readonly List<Vector2> pixelPaperPositions=new List<Vector2>(104);
+    private readonly List<PixelParticle> pixelParticles=new List<PixelParticle>(160);
+    private int pixelPaperSequence;
     private RectTransform pixelAirborne;
     private RectTransform pixelOrderBubbles;
     private readonly List<Rect> pixelOrderCards=new List<Rect>();
@@ -72,7 +79,7 @@ public sealed partial class SimBarExperience
     private int pixelConfettiSeen,pixelTissueSeen,pixelSession=-1;
     private SimBarFloorMissions.State pixelObservedFloorState;
     private float pixelAnimationSeconds;
-    private static readonly Color32[] PixelPaperColors={new Color32(211,125,160,255),new Color32(98,189,198,255),new Color32(212,178,92,255),new Color32(146,129,180,255)};
+    private static readonly Color32[] PixelPaperColors={new Color32(255,111,169,255),new Color32(98,226,237,255),new Color32(255,225,124,255),new Color32(185,160,255,255)};
     private static readonly int[] PixelIdleFrame={0};
     private static readonly Vector3 PixelEye=new Vector3(13f,21f,-25f),PixelLook=new Vector3(0f,1.45f,.15f);
     private static readonly Vector3 PixelForward=(PixelLook-PixelEye).normalized;
@@ -113,17 +120,17 @@ public sealed partial class SimBarExperience
         InitializePixelLights();
         var paperRoot=new GameObject("Mission Paper from Saved State",typeof(RectTransform)).GetComponent<RectTransform>();
         paperRoot.SetParent(pixelRoom,false);PixelRect(paperRoot,Vector2.zero,new Vector2(960f,558f));
-        var paperRandom=new System.Random(44091);
-        for(int i=0;i<42;i++)
+        var paperRandom=new PixelPaperRandom(44091);
+        for(int i=0;i<104;i++)
         {
-            Image fleck=PixelSolid("Saved Paper "+i,paperRoot);pixelPaper.Add(fleck);
-            pixelPaperPositions.Add(PixelProject(new Vector3(2f+(float)paperRandom.NextDouble()*7.2f,.025f,-4.1f+(float)paperRandom.NextDouble()*5.2f)));
+            var fleck=PixelPaperGraphic("Saved Paper "+i,paperRoot);pixelPaper.Add(fleck);
+            pixelPaperPositions.Add(PixelProject(new Vector3(2.1f+paperRandom.Next()*7f,.03f,-4.6f+paperRandom.Next()*5.4f)));
         }
         pixelAirborne=new GameObject("Actual Performance Paper in Flight",typeof(RectTransform)).GetComponent<RectTransform>();
         pixelAirborne.SetParent(pixelRoom,false);PixelRect(pixelAirborne,Vector2.zero,new Vector2(960f,558f));
         pixelOrderBubbles=new GameObject("Actual Pending Order Bubbles",typeof(RectTransform)).GetComponent<RectTransform>();
         pixelOrderBubbles.SetParent(pixelRoom,false);PixelRect(pixelOrderBubbles,Vector2.zero,new Vector2(960f,558f));
-        for(int i=0;i<64;i++){var particle=new PixelParticle{image=PixelSolid("Airborne Paper "+i,pixelAirborne)};particle.image.gameObject.SetActive(false);pixelParticles.Add(particle);}
+        for(int i=0;i<160;i++){var particle=new PixelParticle{image=PixelPaperGraphic("Airborne Paper "+i,pixelAirborne)};particle.image.gameObject.SetActive(false);pixelParticles.Add(particle);}
         foreach(PixelOccluder layer in pixelManifest.occluders??Array.Empty<PixelOccluder>())
         {
             if(layer.actors!=null&&layer.actors.Length>0)continue;
@@ -188,6 +195,11 @@ public sealed partial class SimBarExperience
     private static Image PixelSolid(string name,Transform parent)
     {
         var result=new GameObject(name,typeof(RectTransform),typeof(CanvasRenderer),typeof(Image)).GetComponent<Image>();
+        result.transform.SetParent(parent,false);result.raycastTarget=false;return result;
+    }
+    private static SimBarPixelPaperGraphic PixelPaperGraphic(string name,Transform parent)
+    {
+        var result=new GameObject(name,typeof(RectTransform),typeof(CanvasRenderer),typeof(SimBarPixelPaperGraphic)).GetComponent<SimBarPixelPaperGraphic>();
         result.transform.SetParent(parent,false);result.raycastTarget=false;return result;
     }
     private static void PixelRect(RectTransform rect,Vector2 point,Vector2 size)
@@ -465,50 +477,71 @@ public sealed partial class SimBarExperience
     }
     private void UpdatePixelPaper()
     {
-        var state=FloorState;int throws=state==null?0:state.confettiThrows+state.tissueThrows;
+        var state=FloorState;
         float remaining=state==null||state.litter<=0?0f:Mathf.Clamp01(1f-state.cleaned/state.litter);
-        int count=Mathf.CeilToInt(Mathf.Min(42,throws*13)*remaining);
+        int confetti=state==null?0:Mathf.CeilToInt(Mathf.Min(64,state.confettiThrows*24)*remaining);
+        int tissueCount=state==null?0:Mathf.CeilToInt(Mathf.Min(40,state.tissueThrows*16)*remaining);
         for(int i=0;i<pixelPaper.Count;i++)
         {
-            var image=pixelPaper[i];image.gameObject.SetActive(i<count);
-            Vector2 p=pixelPaperPositions[i];
-            if(i>=count)continue;bool tissue=state.tissueThrows>0&&i%Mathf.Max(1,throws)<state.tissueThrows;
-            image.color=tissue?new Color32(233,229,217,255):PixelPaperColors[i%4];PixelRect(image.rectTransform,p,new Vector2(tissue?4f:2f,1f));
+            bool tissue=i>=64;int index=tissue?i-64:i;bool visible=index<(tissue?tissueCount:confetti);
+            var image=pixelPaper[i];image.gameObject.SetActive(visible);if(!visible)continue;
+            image.color=tissue?new Color32(232,226,213,255):PixelPaperColors[index%4];image.SetPaper(tissue,false,index);
+            PixelRect(image.rectTransform,new Vector2(Mathf.Floor(pixelPaperPositions[i].x+.5f),Mathf.Floor(pixelPaperPositions[i].y+.5f)),new Vector2(16f,20f));
         }
     }
     private void BurstPixelPaper(bool tissue,int serial)
     {
-        var random=new System.Random(3917+serial*97+(tissue?7001:0));int remaining=tissue?22:32;
-        foreach(var particle in pixelParticles)
+        var random=new PixelPaperRandom((uint)(3917+serial*97+(tissue?7001:0)));
+        for(int i=0;i<(tissue?28:56);i++)
         {
-            if(particle.image.gameObject.activeSelf)continue;
-            particle.tissue=tissue;particle.age=0f;
-            particle.position=new Vector3(3f+(float)random.NextDouble()*5f,2.4f+(float)random.NextDouble()*1.6f,2.8f+(float)random.NextDouble()*.5f);
-            particle.velocity=new Vector3(((float)random.NextDouble()-.5f)*2.5f,.5f+(float)random.NextDouble()*1.8f,-1.5f-(float)random.NextDouble()*2.5f);
-            particle.color=tissue?new Color32(241,237,225,255):PixelPaperColors[remaining%4];particle.image.color=particle.color;
-            particle.image.gameObject.SetActive(true);if(--remaining<=0)break;
+            PixelParticle particle=null;
+            foreach(var candidate in pixelParticles)
+                if(!candidate.image.gameObject.activeSelf){particle=candidate;break;}
+                else if(particle==null||candidate.sequence<particle.sequence)particle=candidate;
+            if(particle==null)return;
+            particle.tissue=tissue;particle.age=0f;particle.index=i;particle.sequence=++pixelPaperSequence;
+            float x=3f+random.Next()*5f,z=2.75f+random.Next()*.65f,y=2.6f+random.Next()*1.6f;
+            float vx=(random.Next()-.5f)*1.4f,vz=-.65f-random.Next()*1.15f,vy=(tissue?.5f:1f)+random.Next()*(tissue?.8f:1.2f);
+            particle.position=new Vector3(x,y,z);particle.velocity=new Vector3(vx,vy,vz);particle.phase=random.Next()*Mathf.PI*2f;
+            particle.image.color=tissue?new Color32(255,247,232,255):PixelPaperColors[i%4];particle.image.SetPaper(tissue,true,i,0f,particle.phase);
+            particle.image.gameObject.SetActive(true);
         }
     }
     private void UpdateAirbornePixelPaper(float delta)
     {
         if(FloorState==null)return;
+        ObservePixelPaperState();
+        // A saved old throw stays on the floor. Only new performances burst.
+        while(pixelConfettiSeen<FloorState.confettiThrows)BurstPixelPaper(false,++pixelConfettiSeen);
+        while(pixelTissueSeen<FloorState.tissueThrows)BurstPixelPaper(true,++pixelTissueSeen);
+        foreach(var particle in pixelParticles)
+        {
+            if(!particle.image.gameObject.activeSelf)continue;particle.age+=delta;
+            particle.velocity.y-=delta*(particle.tissue?.8f:1.3f);particle.position+=particle.velocity*delta;
+            if(particle.position.y<.03f||particle.age>8f||particle.position.x>10.3f||particle.position.z< -7f){particle.image.gameObject.SetActive(false);continue;}
+            Vector2 p=PixelProject(particle.position);p.x+=Mathf.Sin(particle.phase+particle.age*6f)*1.5f;
+            PixelRect(particle.image.rectTransform,new Vector2(Mathf.Floor(p.x+.5f),Mathf.Floor(p.y+.5f)),new Vector2(16f,20f));
+            particle.image.SetPaper(particle.tissue,true,particle.index,particle.age,particle.phase);
+        }
+    }
+    private void NotifyPixelPaperBurst(int effect,int serial)
+    {
+        if(pixelAirborne==null)return;
+        ObservePixelPaperState();
+        bool tissue=effect==SimBarFloorMissions.Tissue;
+        BurstPixelPaper(tissue,serial);
+        if(tissue)pixelTissueSeen=serial;else pixelConfettiSeen=serial;
+    }
+    private void ObservePixelPaperState()
+    {
         int session=journey==null?0:journey.session;
         if(pixelSession!=session||!ReferenceEquals(pixelObservedFloorState,FloorState)
             ||pixelConfettiSeen>FloorState.confettiThrows||pixelTissueSeen>FloorState.tissueThrows)
         {
             pixelSession=session;pixelObservedFloorState=FloorState;
             pixelConfettiSeen=FloorState.confettiThrows;pixelTissueSeen=FloorState.tissueThrows;
+            pixelPaperSequence=0;
             foreach(var particle in pixelParticles)particle.image.gameObject.SetActive(false);
-        }
-        // A saved old throw stays on the floor. Only new scheduled performances burst.
-        while(pixelConfettiSeen<FloorState.confettiThrows)BurstPixelPaper(false,++pixelConfettiSeen);
-        while(pixelTissueSeen<FloorState.tissueThrows)BurstPixelPaper(true,++pixelTissueSeen);
-        foreach(var particle in pixelParticles)
-        {
-            if(!particle.image.gameObject.activeSelf)continue;particle.age+=delta;
-            particle.velocity.y-=delta*3.2f;particle.position+=particle.velocity*delta;
-            if(particle.position.y<.03f||particle.age>7f){particle.image.gameObject.SetActive(false);continue;}
-            PixelRect(particle.image.rectTransform,PixelProject(particle.position),new Vector2(particle.tissue?4f:2f,1f));
         }
     }
     private void LateUpdate()

@@ -9,8 +9,8 @@ using UnityEngine.Rendering;
 /// </summary>
 public sealed class SimBarFloorPerformance : MonoBehaviour
 {
-    public const int ParticleLimit = 80;
-    public const int LitterLimit = 40;
+    public const int ParticleLimit = 160;
+    public const int LitterLimit = 104;
     public const float PaperFloorHeight = 0.086f;
     private const int PaletteCount = 5;
 
@@ -118,7 +118,7 @@ public sealed class SimBarFloorPerformance : MonoBehaviour
         if (kind < 0 || kind > 1 || serial <= lastBurstSerial[kind]) return;
         Initialize();
         lastBurstSerial[kind] = serial;
-        int count = kind == 0 ? 56 : 24;
+        int count = kind == 0 ? 56 : 28;
         for (int i = 0; i < count; i++)
         {
             int index = nextParticle++ % ParticleLimit;
@@ -145,9 +145,10 @@ public sealed class SimBarFloorPerformance : MonoBehaviour
         normalized = Finite(normalized) ? Mathf.Clamp01(normalized) : 0f;
         confettiCount = Mathf.Clamp(confettiCount, 0, 1000);
         tissueCount = Mathf.Clamp(tissueCount, 0, 1000);
-        int total = confettiCount + tissueCount;
-        int count = Mathf.CeilToInt(Mathf.Min(LitterLimit, total * 10) * normalized);
-        int whiteShare = total > 0 ? Mathf.RoundToInt(1000f * tissueCount / total) : 0;
+        int colored = Mathf.CeilToInt(Mathf.Min(64, confettiCount * 24) * normalized);
+        int white = Mathf.CeilToInt(Mathf.Min(40, tissueCount * 16) * normalized);
+        int count = colored + white;
+        int whiteShare = count > 0 ? Mathf.RoundToInt(1000f * white / count) : 0;
         if (count == visibleLitter && whiteShare == tissueShare) return;
         visibleLitter = count; tissueShare = whiteShare; dirty = true;
         Rebuild();

@@ -3,7 +3,7 @@
   "outcomes": [
     {
       "seed": 1,
-      "seconds": 286.5,
+      "seconds": 286.2,
       "phase": "results",
       "maxStep": 0.1460417957711475,
       "fans": [
@@ -31,7 +31,7 @@
         {
           "id": "patron-11",
           "phase": "gone",
-          "distance": 0.16680512350259147,
+          "distance": 0.1150000000000011,
           "moving": false,
           "visible": false
         },
@@ -52,14 +52,14 @@
         {
           "id": "patron-14",
           "phase": "gone",
-          "distance": 0.12137084989847668,
+          "distance": 0.16354981622170175,
           "moving": false,
           "visible": false
         },
         {
           "id": "patron-15",
           "phase": "gone",
-          "distance": 0.1281854249492369,
+          "distance": 0.15461646096066298,
           "moving": false,
           "visible": false
         },
@@ -122,21 +122,21 @@
         {
           "id": "support-0",
           "phase": "gone",
-          "distance": 0.16720028496377054,
+          "distance": 0.15338710753225687,
           "moving": false,
           "visible": false
         },
         {
           "id": "support-1",
           "phase": "gone",
-          "distance": 0.15338710753225687,
+          "distance": 0.15461646096066298,
           "moving": false,
           "visible": false
         },
         {
           "id": "support-2",
           "phase": "gone",
-          "distance": 0.17658857104289413,
+          "distance": 0.167705098312485,
           "moving": false,
           "visible": false
         },
@@ -174,8 +174,8 @@
           "greeting": 2,
           "timer": 0,
           "delay": 0,
-          "x": 8.794212030511497,
-          "z": -5.394212030511497,
+          "x": 8.8,
+          "z": -5.391814575050755,
           "stageLevel": 0,
           "visible": false,
           "approachX": null,
@@ -253,8 +253,8 @@
           "id": "guitarist",
           "name": "RUX Guitarist",
           "role": "band",
-          "x": 8.794212030511497,
-          "z": -5.394212030511497,
+          "x": 8.8,
+          "z": -5.391814575050755,
           "y": 0,
           "homeX": 3.8,
           "homeZ": 4.25,
@@ -263,7 +263,7 @@
           "moving": false,
           "action": "walk",
           "visible": false,
-          "facing": 2.356194490192345,
+          "facing": 3.141592653589793,
           "_path": [],
           "_pathAt": 0,
           "_wait": 2,
@@ -331,9 +331,10 @@
       "floor": {
         "version": 1,
         "confettiThrows": 1,
-        "tissueThrows": 0,
-        "litter": 24,
-        "cleaned": 24,
+        "tissueThrows": 1,
+        "litter": 56,
+        "cleaned": 56,
+        "finaleEnsured": true,
         "cleanupStarted": true,
         "cleanupActive": false,
         "cleanupComplete": true,
@@ -364,10 +365,10 @@
           "presses": 0,
           "secondsLeft": 0,
           "cooldown": 0,
-          "cleanupWorkBudget": 8.000000000000117,
+          "cleanupWorkBudget": 8.000000000000043,
           "pressAge": 0.05,
           "timeouts": 0,
-          "completedRounds": 4
+          "completedRounds": 5
         }
       },
       "escort": null,
@@ -376,8 +377,8 @@
           "id": "bartender",
           "name": "Jessy Bartender",
           "role": "bartender",
-          "x": -7.2789340721591085,
-          "z": -0.5723730747443119,
+          "x": -7.3,
+          "z": -0.565,
           "y": 0,
           "homeX": -7.3,
           "homeZ": -0.565,
@@ -386,7 +387,7 @@
           "moving": false,
           "action": "idle",
           "visible": true,
-          "facing": -1.2341215074081742,
+          "facing": -1.234121507408173,
           "_path": [],
           "_pathAt": 0,
           "_wait": 2,
@@ -462,10 +463,10 @@
         "presses": 0,
         "secondsLeft": 0,
         "cooldown": 0,
-        "cleanupWorkBudget": 8.000000000000117,
+        "cleanupWorkBudget": 8.000000000000043,
         "pressAge": 0.05,
         "timeouts": 0,
-        "completedRounds": 4
+        "completedRounds": 5
       },
       "unfinished": [],
       "nearbyBodies": [
@@ -481,7 +482,7 @@
     },
     {
       "seed": 2,
-      "seconds": 280.1,
+      "seconds": 282.2,
       "phase": "results",
       "maxStep": 0.14500000000000313,
       "fans": [
@@ -509,14 +510,14 @@
         {
           "id": "patron-11",
           "phase": "gone",
-          "distance": 0.16720028496377054,
+          "distance": 0.17431457505077308,
           "moving": false,
           "visible": false
         },
         {
           "id": "patron-12",
           "phase": "gone",
-          "distance": 0.15461646096066298,
+          "distance": 0.16181075613589377,
           "moving": false,
           "visible": false
         },
@@ -537,7 +538,7 @@
         {
           "id": "patron-15",
           "phase": "gone",
-          "distance": 0.13568542494923808,
+          "distance": 0.1602416997969538,
           "moving": false,
           "visible": false
         },
@@ -600,14 +601,14 @@
         {
           "id": "support-0",
           "phase": "gone",
-          "distance": 0.15392899704523155,
+          "distance": 0.15461646096066298,
           "moving": false,
           "visible": false
         },
         {
           "id": "support-1",
           "phase": "gone",
-          "distance": 0.15338710753225687,
+          "distance": 0.1721726055280059,
           "moving": false,
           "visible": false
         },
@@ -670,7 +671,7 @@
           "greeting": 2,
           "timer": 0,
           "delay": 0,
-          "x": 8.75431457505076,
+          "x": 8.707943725152282,
           "z": -5.3999999999999995,
           "stageLevel": 0,
           "visible": false,
@@ -757,7 +758,7 @@
           "id": "bassist",
           "name": "FW Bassist / freewill",
           "role": "band",
-          "x": 8.75431457505076,
+          "x": 8.707943725152282,
           "z": -5.3999999999999995,
           "y": 0,
           "homeX": 7.7,
@@ -808,15 +809,16 @@
       ],
       "floor": {
         "version": 1,
-        "confettiThrows": 0,
-        "tissueThrows": 0,
-        "litter": 0,
-        "cleaned": 0,
-        "cleanupStarted": false,
+        "confettiThrows": 1,
+        "tissueThrows": 1,
+        "litter": 56,
+        "cleaned": 56,
+        "finaleEnsured": true,
+        "cleanupStarted": true,
         "cleanupActive": false,
-        "cleanupComplete": false,
-        "cleanupWorkers": 0,
-        "cleanupRewardClaimed": false,
+        "cleanupComplete": true,
+        "cleanupWorkers": 2,
+        "cleanupRewardClaimed": true,
         "guestSpawned": true,
         "guestActive": false,
         "guestComplete": true,
@@ -842,14 +844,85 @@
           "presses": 0,
           "secondsLeft": 0,
           "cooldown": 0,
-          "cleanupWorkBudget": 0,
+          "cleanupWorkBudget": 8.0000000000001,
           "pressAge": 0.05,
           "timeouts": 0,
-          "completedRounds": 3
+          "completedRounds": 5
         }
       },
       "escort": null,
-      "staff": [],
+      "staff": [
+        {
+          "id": "bartender",
+          "name": "Jessy Bartender",
+          "role": "bartender",
+          "x": -7.3,
+          "z": -0.565,
+          "y": 0,
+          "homeX": -7.3,
+          "homeZ": -0.565,
+          "targetX": -7.3,
+          "targetZ": -0.565,
+          "moving": false,
+          "action": "idle",
+          "visible": true,
+          "facing": -1.234121507408173,
+          "_path": [],
+          "_pathAt": 0,
+          "_wait": 2,
+          "_floorRoute": false,
+          "_blocked": 0,
+          "_ready": false,
+          "_cleanupGoal": {
+            "x": 8.218198051533946,
+            "z": -4.481801948466053
+          },
+          "_cleanupGoalSegment": 5,
+          "_floorRetry": 0,
+          "_cleanupParkGoal": {
+            "x": -7.3,
+            "z": -0.565
+          },
+          "_cleanupParkSession": 1,
+          "_parkRetry": 0
+        },
+        {
+          "id": "server",
+          "name": "Server",
+          "role": "server",
+          "x": -4.224481927621913,
+          "z": -0.5692843373338348,
+          "y": 0,
+          "homeX": -4.2,
+          "homeZ": -0.565,
+          "targetX": -4.2,
+          "targetZ": -0.565,
+          "moving": false,
+          "action": "idle",
+          "visible": true,
+          "facing": 1.3975506603425336,
+          "_path": [],
+          "_pathAt": 0,
+          "_wait": 2,
+          "_partner": null,
+          "_floorRoute": false,
+          "_blocked": 0,
+          "_escortRetry": 0,
+          "_ready": false,
+          "_cleanupGoal": {
+            "x": 8.45,
+            "z": 1.2
+          },
+          "_cleanupGoalSegment": 5,
+          "_floorRetry": 0,
+          "_cleanupParkGoal": {
+            "x": -4.2,
+            "z": -0.565
+          },
+          "_cleanupParkSession": 1,
+          "_parkRetry": 0
+        }
+      ],
       "reaction": {
         "version": 1,
         "seed": 508616636,
@@ -869,19 +942,28 @@
         "presses": 0,
         "secondsLeft": 0,
         "cooldown": 0,
-        "cleanupWorkBudget": 0,
+        "cleanupWorkBudget": 8.0000000000001,
         "pressAge": 0.05,
         "timeouts": 0,
-        "completedRounds": 3
+        "completedRounds": 5
       },
       "unfinished": [],
-      "nearbyBodies": []
+      "nearbyBodies": [
+        {
+          "id": "bartender",
+          "bodies": []
+        },
+        {
+          "id": "server",
+          "bodies": []
+        }
+      ]
     },
     {
       "seed": 3,
-      "seconds": 281.65000000000003,
+      "seconds": 282.05,
       "phase": "results",
-      "maxStep": 0.09055687890137365,
+      "maxStep": 0.09137084989848354,
       "fans": [
         {
           "id": "patron-8",
@@ -928,14 +1010,14 @@
         {
           "id": "patron-14",
           "phase": "gone",
-          "distance": 0.16738719725651857,
+          "distance": 0.15887084989847722,
           "moving": false,
           "visible": false
         },
         {
           "id": "patron-15",
           "phase": "gone",
-          "distance": 0.13568542494923808,
+          "distance": 0.16448784149596046,
           "moving": false,
           "visible": false
         },
@@ -949,7 +1031,7 @@
         {
           "id": "patron-1",
           "phase": "gone",
-          "distance": 0.15250000000000252,
+          "distance": 0.15824480322820833,
           "moving": false,
           "visible": false
         },
@@ -1005,7 +1087,7 @@
         {
           "id": "support-1",
           "phase": "gone",
-          "distance": 0.15338710753225687,
+          "distance": 0.12387084989847885,
           "moving": false,
           "visible": false
         },
@@ -1050,8 +1132,8 @@
           "greeting": 2,
           "timer": 0,
           "delay": 0,
-          "x": 8.785373195746665,
-          "z": -5.385373195746665,
+          "x": 8.8,
+          "z": -5.3793145750507545,
           "stageLevel": 0,
           "visible": false,
           "approachX": null,
@@ -1068,7 +1150,7 @@
           "greeting": 2,
           "timer": 0,
           "delay": 0,
-          "x": 8.766129150101522,
+          "x": 8.767499999999993,
           "z": -5.3999999999999995,
           "stageLevel": 0,
           "visible": false,
@@ -1129,8 +1211,8 @@
           "id": "guitarist",
           "name": "RUX Guitarist",
           "role": "band",
-          "x": 8.785373195746665,
-          "z": -5.385373195746665,
+          "x": 8.8,
+          "z": -5.3793145750507545,
           "y": 0,
           "homeX": 3.8,
           "homeZ": 4.25,
@@ -1139,7 +1221,7 @@
           "moving": false,
           "action": "walk",
           "visible": false,
-          "facing": 2.356194490192345,
+          "facing": 3.141592653589793,
           "_path": [],
           "_pathAt": 0,
           "_wait": 2,
@@ -1155,7 +1237,7 @@
           "id": "bassist",
           "name": "FW Bassist / freewill",
           "role": "band",
-          "x": 8.766129150101522,
+          "x": 8.767499999999993,
           "z": -5.3999999999999995,
           "y": 0,
           "homeX": 7.7,
@@ -1206,10 +1288,11 @@
       ],
       "floor": {
         "version": 1,
-        "confettiThrows": 0,
+        "confettiThrows": 1,
         "tissueThrows": 2,
-        "litter": 64,
-        "cleaned": 64,
+        "litter": 88,
+        "cleaned": 88,
+        "finaleEnsured": true,
         "cleanupStarted": true,
         "cleanupActive": false,
         "cleanupComplete": true,
@@ -1240,10 +1323,10 @@
           "presses": 0,
           "secondsLeft": 0,
           "cooldown": 0,
-          "cleanupWorkBudget": 0,
+          "cleanupWorkBudget": 7.999999999999979,
           "pressAge": 0.05,
           "timeouts": 0,
-          "completedRounds": 2
+          "completedRounds": 3
         }
       },
       "escort": null,
@@ -1336,10 +1419,10 @@
         "presses": 0,
         "secondsLeft": 0,
         "cooldown": 0,
-        "cleanupWorkBudget": 0,
+        "cleanupWorkBudget": 7.999999999999979,
         "pressAge": 0.05,
         "timeouts": 0,
-        "completedRounds": 2
+        "completedRounds": 3
       },
       "unfinished": [],
       "nearbyBodies": [
@@ -1355,7 +1438,7 @@
     },
     {
       "seed": 4,
-      "seconds": 287.5,
+      "seconds": 285.95,
       "phase": "results",
       "maxStep": 0.1593145750507654,
       "fans": [
@@ -1383,7 +1466,7 @@
         {
           "id": "patron-11",
           "phase": "gone",
-          "distance": 0.13568542494923808,
+          "distance": 0.17568542494924433,
           "moving": false,
           "visible": false
         },
@@ -1404,14 +1487,14 @@
         {
           "id": "patron-14",
           "phase": "gone",
-          "distance": 0.17318542494924127,
+          "distance": 0.1721726055280059,
           "moving": false,
           "visible": false
         },
         {
           "id": "patron-15",
           "phase": "gone",
-          "distance": 0.17504560587032955,
+          "distance": 0.17318542494924127,
           "moving": false,
           "visible": false
         },
@@ -1682,15 +1765,16 @@
       ],
       "floor": {
         "version": 1,
-        "confettiThrows": 0,
-        "tissueThrows": 0,
-        "litter": 0,
-        "cleaned": 0,
-        "cleanupStarted": false,
+        "confettiThrows": 1,
+        "tissueThrows": 1,
+        "litter": 56,
+        "cleaned": 56,
+        "finaleEnsured": true,
+        "cleanupStarted": true,
         "cleanupActive": false,
-        "cleanupComplete": false,
-        "cleanupWorkers": 0,
-        "cleanupRewardClaimed": false,
+        "cleanupComplete": true,
+        "cleanupWorkers": 2,
+        "cleanupRewardClaimed": true,
         "guestSpawned": true,
         "guestActive": false,
         "guestComplete": true,
@@ -1716,14 +1800,85 @@
           "presses": 0,
           "secondsLeft": 0,
           "cooldown": 0,
-          "cleanupWorkBudget": 0,
+          "cleanupWorkBudget": 8.00000000000012,
           "pressAge": 0.05,
           "timeouts": 0,
-          "completedRounds": 3
+          "completedRounds": 5
         }
       },
       "escort": null,
-      "staff": [],
+      "staff": [
+        {
+          "id": "bartender",
+          "name": "Jessy Bartender",
+          "role": "bartender",
+          "x": -7.2789340721591085,
+          "z": -0.5723730747443119,
+          "y": 0,
+          "homeX": -7.3,
+          "homeZ": -0.565,
+          "targetX": -7.3,
+          "targetZ": -0.565,
+          "moving": false,
+          "action": "idle",
+          "visible": true,
+          "facing": -1.2341215074081742,
+          "_path": [],
+          "_pathAt": 0,
+          "_wait": 2,
+          "_floorRoute": false,
+          "_blocked": 0,
+          "_ready": false,
+          "_cleanupGoal": {
+            "x": 8.218198051533946,
+            "z": -4.481801948466053
+          },
+          "_cleanupGoalSegment": 5,
+          "_floorRetry": 0,
+          "_cleanupParkGoal": {
+            "x": -7.3,
+            "z": -0.565
+          },
+          "_cleanupParkSession": 1,
+          "_parkRetry": 0
+        },
+        {
+          "id": "server",
+          "name": "Server",
+          "role": "server",
+          "x": -4.2,
+          "z": -0.565,
+          "y": 0,
+          "homeX": -4.2,
+          "homeZ": -0.565,
+          "targetX": -4.2,
+          "targetZ": -0.565,
+          "moving": false,
+          "action": "idle",
+          "visible": true,
+          "facing": 1.3975506603425325,
+          "_path": [],
+          "_pathAt": 0,
+          "_wait": 2,
+          "_partner": null,
+          "_floorRoute": false,
+          "_blocked": 0,
+          "_escortRetry": 0,
+          "_ready": false,
+          "_cleanupGoal": {
+            "x": 8.45,
+            "z": 0.75
+          },
+          "_cleanupGoalSegment": 5,
+          "_floorRetry": 0,
+          "_cleanupParkGoal": {
+            "x": -4.2,
+            "z": -0.565
+          },
+          "_cleanupParkSession": 1,
+          "_parkRetry": 0
+        }
+      ],
       "reaction": {
         "version": 1,
         "seed": 510281161,
@@ -1743,13 +1898,22 @@
         "presses": 0,
         "secondsLeft": 0,
         "cooldown": 0,
-        "cleanupWorkBudget": 0,
+        "cleanupWorkBudget": 8.00000000000012,
         "pressAge": 0.05,
         "timeouts": 0,
-        "completedRounds": 3
+        "completedRounds": 5
       },
       "unfinished": [],
-      "nearbyBodies": []
+      "nearbyBodies": [
+        {
+          "id": "bartender",
+          "bodies": []
+        },
+        {
+          "id": "server",
+          "bodies": []
+        }
+      ]
     },
     {
       "seed": 5,
@@ -2084,6 +2248,7 @@
         "tissueThrows": 1,
         "litter": 80,
         "cleaned": 80,
+        "finaleEnsured": true,
         "cleanupStarted": true,
         "cleanupActive": false,
         "cleanupComplete": true,
@@ -2229,9 +2394,9 @@
     },
     {
       "seed": 6,
-      "seconds": 290.2,
+      "seconds": 289.40000000000003,
       "phase": "results",
-      "maxStep": 0.09274169979695636,
+      "maxStep": 0.09310913040639494,
       "fans": [
         {
           "id": "patron-8",
@@ -2278,7 +2443,7 @@
         {
           "id": "patron-14",
           "phase": "gone",
-          "distance": 0.16720028496377054,
+          "distance": 0.10955627484771568,
           "moving": false,
           "visible": false
         },
@@ -2299,7 +2464,7 @@
         {
           "id": "patron-1",
           "phase": "gone",
-          "distance": 0.13568542494923808,
+          "distance": 0.1150000000000011,
           "moving": false,
           "visible": false
         },
@@ -2348,21 +2513,21 @@
         {
           "id": "support-0",
           "phase": "gone",
-          "distance": 0.15392899704523155,
+          "distance": 0.15338710753225687,
           "moving": false,
           "visible": false
         },
         {
           "id": "support-1",
           "phase": "gone",
-          "distance": 0.15338710753225687,
+          "distance": 0.1721726055280059,
           "moving": false,
           "visible": false
         },
         {
           "id": "support-2",
           "phase": "gone",
-          "distance": 0.167705098312485,
+          "distance": 0.12387084989847708,
           "moving": false,
           "visible": false
         },
@@ -2382,8 +2547,8 @@
           "greeting": 2,
           "timer": 0,
           "delay": 0,
-          "x": 8.783919189857865,
-          "z": -5.383919189857865,
+          "x": 8.775565023722633,
+          "z": -5.375565023722633,
           "stageLevel": 0,
           "visible": false,
           "approachX": null,
@@ -2400,8 +2565,8 @@
           "greeting": 2,
           "timer": 0,
           "delay": 0,
-          "x": 8.784888527117067,
-          "z": -5.384888527117066,
+          "x": 8.784403858487467,
+          "z": -5.384403858487466,
           "stageLevel": 0,
           "visible": false,
           "approachX": null,
@@ -2418,7 +2583,7 @@
           "greeting": 2,
           "timer": 0,
           "delay": 0,
-          "x": 8.707943725152282,
+          "x": 8.77999999999999,
           "z": -5.3999999999999995,
           "stageLevel": 0,
           "visible": false,
@@ -2453,8 +2618,8 @@
           "id": "singer",
           "name": "DP Singer / Dragon Pony",
           "role": "band",
-          "x": 8.783919189857865,
-          "z": -5.383919189857865,
+          "x": 8.775565023722633,
+          "z": -5.375565023722633,
           "y": 0,
           "homeX": 5.7,
           "homeZ": 3.5,
@@ -2479,8 +2644,8 @@
           "id": "guitarist",
           "name": "RUX Guitarist",
           "role": "band",
-          "x": 8.784888527117067,
-          "z": -5.384888527117066,
+          "x": 8.784403858487467,
+          "z": -5.384403858487466,
           "y": 0,
           "homeX": 3.8,
           "homeZ": 4.25,
@@ -2505,7 +2670,7 @@
           "id": "bassist",
           "name": "FW Bassist / freewill",
           "role": "band",
-          "x": 8.707943725152282,
+          "x": 8.77999999999999,
           "z": -5.3999999999999995,
           "y": 0,
           "homeX": 7.7,
@@ -2556,15 +2721,16 @@
       ],
       "floor": {
         "version": 1,
-        "confettiThrows": 0,
-        "tissueThrows": 0,
-        "litter": 0,
-        "cleaned": 0,
-        "cleanupStarted": false,
+        "confettiThrows": 1,
+        "tissueThrows": 1,
+        "litter": 56,
+        "cleaned": 56,
+        "finaleEnsured": true,
+        "cleanupStarted": true,
         "cleanupActive": false,
-        "cleanupComplete": false,
-        "cleanupWorkers": 0,
-        "cleanupRewardClaimed": false,
+        "cleanupComplete": true,
+        "cleanupWorkers": 2,
+        "cleanupRewardClaimed": true,
         "guestSpawned": false,
         "guestActive": false,
         "guestComplete": false,
@@ -2590,14 +2756,83 @@
           "presses": 0,
           "secondsLeft": 0,
           "cooldown": 0,
-          "cleanupWorkBudget": 0,
+          "cleanupWorkBudget": 8.000000000000057,
           "pressAge": 0.05,
           "timeouts": 0,
-          "completedRounds": 0
+          "completedRounds": 2
         }
       },
       "escort": null,
-      "staff": [],
+      "staff": [
+        {
+          "id": "bartender",
+          "name": "Jessy Bartender",
+          "role": "bartender",
+          "x": -7.3,
+          "z": -0.565,
+          "y": 0,
+          "homeX": -7.3,
+          "homeZ": -0.565,
+          "targetX": -7.3,
+          "targetZ": -0.565,
+          "moving": false,
+          "action": "idle",
+          "visible": true,
+          "facing": -1.234121507408173,
+          "_path": [],
+          "_pathAt": 0,
+          "_wait": 2,
+          "_floorRoute": false,
+          "_blocked": 0,
+          "_ready": false,
+          "_cleanupGoal": {
+            "x": 7.9,
+            "z": -4.35
+          },
+          "_cleanupGoalSegment": 5,
+          "_floorRetry": 0,
+          "_cleanupParkGoal": {
+            "x": -7.3,
+            "z": -0.565
+          },
+          "_cleanupParkSession": 1,
+          "_parkRetry": 0
+        },
+        {
+          "id": "server",
+          "name": "Server",
+          "role": "server",
+          "x": -4.209314575050761,
+          "z": -0.5999999999999996,
+          "y": 0,
+          "homeX": -4.2,
+          "homeZ": -0.565,
+          "targetX": -4.2,
+          "targetZ": -0.565,
+          "moving": false,
+          "action": "idle",
+          "visible": true,
+          "facing": -1.5707963267948966,
+          "_path": [],
+          "_pathAt": 0,
+          "_wait": 2,
+          "_ready": false,
+          "_cleanupGoal": {
+            "x": 8.45,
+            "z": 0.75
+          },
+          "_cleanupGoalSegment": 5,
+          "_floorRoute": false,
+          "_blocked": 0,
+          "_floorRetry": 0,
+          "_cleanupParkGoal": {
+            "x": -4.2,
+            "z": -0.565
+          },
+          "_cleanupParkSession": 1,
+          "_parkRetry": 0
+        }
+      ],
       "reaction": {
         "version": 1,
         "seed": 511945686,
@@ -2617,17 +2852,26 @@
         "presses": 0,
         "secondsLeft": 0,
         "cooldown": 0,
-        "cleanupWorkBudget": 0,
+        "cleanupWorkBudget": 8.000000000000057,
         "pressAge": 0.05,
         "timeouts": 0,
-        "completedRounds": 0
+        "completedRounds": 2
       },
       "unfinished": [],
-      "nearbyBodies": []
+      "nearbyBodies": [
+        {
+          "id": "bartender",
+          "bodies": []
+        },
+        {
+          "id": "server",
+          "bodies": []
+        }
+      ]
     },
     {
       "seed": 7,
-      "seconds": 284.3,
+      "seconds": 290.5,
       "phase": "results",
       "maxStep": 0.15637084989848393,
       "fans": [
@@ -2676,14 +2920,14 @@
         {
           "id": "patron-14",
           "phase": "gone",
-          "distance": 0.15250000000000252,
+          "distance": 0.15887084989847722,
           "moving": false,
           "visible": false
         },
         {
           "id": "patron-15",
           "phase": "gone",
-          "distance": 0.17318542494924127,
+          "distance": 0.1589604603756275,
           "moving": false,
           "visible": false
         },
@@ -2697,7 +2941,7 @@
         {
           "id": "patron-1",
           "phase": "gone",
-          "distance": 0.16113833249003667,
+          "distance": 0.14068542494924152,
           "moving": false,
           "visible": false
         },
@@ -2746,7 +2990,7 @@
         {
           "id": "support-0",
           "phase": "gone",
-          "distance": 0.1792773763542474,
+          "distance": 0.16720028496377054,
           "moving": false,
           "visible": false
         },
@@ -2760,7 +3004,7 @@
         {
           "id": "support-2",
           "phase": "gone",
-          "distance": 0.167705098312485,
+          "distance": 0.16181075613589377,
           "moving": false,
           "visible": false
         },
@@ -2799,7 +3043,7 @@
           "timer": 0,
           "delay": 0,
           "x": 8.8,
-          "z": -5.449314575050755,
+          "z": -5.449314575050757,
           "stageLevel": 0,
           "visible": false,
           "approachX": null,
@@ -2878,7 +3122,7 @@
           "name": "RUX Guitarist",
           "role": "band",
           "x": 8.8,
-          "z": -5.449314575050755,
+          "z": -5.449314575050757,
           "y": 0,
           "homeX": 3.8,
           "homeZ": 4.25,
@@ -2954,10 +3198,11 @@
       ],
       "floor": {
         "version": 1,
-        "confettiThrows": 0,
+        "confettiThrows": 1,
         "tissueThrows": 2,
-        "litter": 64,
-        "cleaned": 64,
+        "litter": 88,
+        "cleaned": 88,
+        "finaleEnsured": true,
         "cleanupStarted": true,
         "cleanupActive": false,
         "cleanupComplete": true,
@@ -2988,10 +3233,10 @@
           "presses": 0,
           "secondsLeft": 0,
           "cooldown": 0,
-          "cleanupWorkBudget": 0,
+          "cleanupWorkBudget": 8.000000000000057,
           "pressAge": 0.05,
           "timeouts": 0,
-          "completedRounds": 5
+          "completedRounds": 6
         }
       },
       "escort": null,
@@ -3086,10 +3331,10 @@
         "presses": 0,
         "secondsLeft": 0,
         "cooldown": 0,
-        "cleanupWorkBudget": 0,
+        "cleanupWorkBudget": 8.000000000000057,
         "pressAge": 0.05,
         "timeouts": 0,
-        "completedRounds": 5
+        "completedRounds": 6
       },
       "unfinished": [],
       "nearbyBodies": [
@@ -3105,7 +3350,7 @@
     },
     {
       "seed": 8,
-      "seconds": 284.5,
+      "seconds": 287.2,
       "phase": "results",
       "maxStep": 0.15156265398957963,
       "fans": [
@@ -3154,14 +3399,14 @@
         {
           "id": "patron-14",
           "phase": "gone",
-          "distance": 0.16720028496377054,
+          "distance": 0.1270562748477131,
           "moving": false,
           "visible": false
         },
         {
           "id": "patron-15",
           "phase": "gone",
-          "distance": 0.12137084989847668,
+          "distance": 0.17138373595147116,
           "moving": false,
           "visible": false
         },
@@ -3224,14 +3469,14 @@
         {
           "id": "support-0",
           "phase": "gone",
-          "distance": 0.1721726055280059,
+          "distance": 0.15392899704523155,
           "moving": false,
           "visible": false
         },
         {
           "id": "support-1",
           "phase": "gone",
-          "distance": 0.15338710753225687,
+          "distance": 0.16181075613589377,
           "moving": false,
           "visible": false
         },
@@ -3277,7 +3522,7 @@
           "timer": 0,
           "delay": 0,
           "x": 8.8,
-          "z": -5.449314575050756,
+          "z": -5.449314575050757,
           "stageLevel": 0,
           "visible": false,
           "approachX": null,
@@ -3356,7 +3601,7 @@
           "name": "RUX Guitarist",
           "role": "band",
           "x": 8.8,
-          "z": -5.449314575050756,
+          "z": -5.449314575050757,
           "y": 0,
           "homeX": 3.8,
           "homeZ": 4.25,
@@ -3433,9 +3678,10 @@
       "floor": {
         "version": 1,
         "confettiThrows": 1,
-        "tissueThrows": 0,
-        "litter": 24,
-        "cleaned": 24,
+        "tissueThrows": 1,
+        "litter": 56,
+        "cleaned": 56,
+        "finaleEnsured": true,
         "cleanupStarted": true,
         "cleanupActive": false,
         "cleanupComplete": true,
@@ -3466,10 +3712,10 @@
           "presses": 0,
           "secondsLeft": 0,
           "cooldown": 0,
-          "cleanupWorkBudget": 8.000000000000131,
+          "cleanupWorkBudget": 8.000000000000135,
           "pressAge": 0.05,
           "timeouts": 0,
-          "completedRounds": 4
+          "completedRounds": 5
         }
       },
       "escort": null,
@@ -3564,10 +3810,10 @@
         "presses": 0,
         "secondsLeft": 0,
         "cooldown": 0,
-        "cleanupWorkBudget": 8.000000000000131,
+        "cleanupWorkBudget": 8.000000000000135,
         "pressAge": 0.05,
         "timeouts": 0,
-        "completedRounds": 4
+        "completedRounds": 5
       },
       "unfinished": [],
       "nearbyBodies": [
@@ -3914,6 +4160,7 @@
         "tissueThrows": 1,
         "litter": 80,
         "cleaned": 80,
+        "finaleEnsured": true,
         "cleanupStarted": true,
         "cleanupActive": false,
         "cleanupComplete": true,
@@ -4390,6 +4637,7 @@
         "tissueThrows": 2,
         "litter": 88,
         "cleaned": 88,
+        "finaleEnsured": true,
         "cleanupStarted": true,
         "cleanupActive": false,
         "cleanupComplete": true,
@@ -4537,7 +4785,7 @@
     },
     {
       "seed": 11,
-      "seconds": 286.1,
+      "seconds": 285.5,
       "phase": "results",
       "maxStep": 0.09748800433593807,
       "fans": [
@@ -4565,7 +4813,7 @@
         {
           "id": "patron-11",
           "phase": "gone",
-          "distance": 0.16181075613589377,
+          "distance": 0.13568542494923808,
           "moving": false,
           "visible": false
         },
@@ -4586,14 +4834,14 @@
         {
           "id": "patron-14",
           "phase": "gone",
-          "distance": 0.1721726055280059,
+          "distance": 0.15250000000000252,
           "moving": false,
           "visible": false
         },
         {
           "id": "patron-15",
           "phase": "gone",
-          "distance": 0.16155494421403563,
+          "distance": 0.13568542494923808,
           "moving": false,
           "visible": false
         },
@@ -4635,7 +4883,7 @@
         {
           "id": "patron-5",
           "phase": "gone",
-          "distance": 0.15639847637797552,
+          "distance": 0.15250000000000252,
           "moving": false,
           "visible": false
         },
@@ -4656,21 +4904,21 @@
         {
           "id": "support-0",
           "phase": "gone",
-          "distance": 0.15392899704523155,
+          "distance": 0.15461646096066298,
           "moving": false,
           "visible": false
         },
         {
           "id": "support-1",
           "phase": "gone",
-          "distance": 0.15639847637797188,
+          "distance": 0.15461646096066298,
           "moving": false,
           "visible": false
         },
         {
           "id": "support-2",
           "phase": "gone",
-          "distance": 0.17138373595147116,
+          "distance": 0.167705098312485,
           "moving": false,
           "visible": false
         },
@@ -4864,10 +5112,11 @@
       ],
       "floor": {
         "version": 1,
-        "confettiThrows": 0,
+        "confettiThrows": 1,
         "tissueThrows": 1,
-        "litter": 32,
-        "cleaned": 32,
+        "litter": 56,
+        "cleaned": 56,
+        "finaleEnsured": true,
         "cleanupStarted": true,
         "cleanupActive": false,
         "cleanupComplete": true,
@@ -4898,10 +5147,10 @@
           "presses": 0,
           "secondsLeft": 0,
           "cooldown": 0,
-          "cleanupWorkBudget": 0,
+          "cleanupWorkBudget": 8.000000000000014,
           "pressAge": 0.05,
           "timeouts": 0,
-          "completedRounds": 1
+          "completedRounds": 2
         }
       },
       "escort": null,
@@ -4994,10 +5243,10 @@
         "presses": 0,
         "secondsLeft": 0,
         "cooldown": 0,
-        "cleanupWorkBudget": 0,
+        "cleanupWorkBudget": 8.000000000000014,
         "pressAge": 0.05,
         "timeouts": 0,
-        "completedRounds": 1
+        "completedRounds": 2
       },
       "unfinished": [],
       "nearbyBodies": [
@@ -5013,9 +5262,9 @@
     },
     {
       "seed": 12,
-      "seconds": 291.1,
+      "seconds": 289.8,
       "phase": "results",
-      "maxStep": 0.0950000000000002,
+      "maxStep": 0.09612915010152401,
       "fans": [
         {
           "id": "patron-8",
@@ -5034,14 +5283,14 @@
         {
           "id": "patron-10",
           "phase": "gone",
-          "distance": 0.12637084989848102,
+          "distance": 0.16720028496377054,
           "moving": false,
           "visible": false
         },
         {
           "id": "patron-11",
           "phase": "gone",
-          "distance": 0.16720028496377054,
+          "distance": 0.1550698325050622,
           "moving": false,
           "visible": false
         },
@@ -5062,14 +5311,14 @@
         {
           "id": "patron-14",
           "phase": "gone",
-          "distance": 0.16038470243731548,
+          "distance": 0.17318542494924127,
           "moving": false,
           "visible": false
         },
         {
           "id": "patron-15",
           "phase": "gone",
-          "distance": 0.1150000000000011,
+          "distance": 0.12137084989847668,
           "moving": false,
           "visible": false
         },
@@ -5132,14 +5381,14 @@
         {
           "id": "support-0",
           "phase": "gone",
-          "distance": 0.15392899704523155,
+          "distance": 0.1150000000000011,
           "moving": false,
           "visible": false
         },
         {
           "id": "support-1",
           "phase": "gone",
-          "distance": 0.15338710753225687,
+          "distance": 0.15461646096066298,
           "moving": false,
           "visible": false
         },
@@ -5184,8 +5433,8 @@
           "greeting": 2,
           "timer": 0,
           "delay": 0,
-          "x": 8.776534360981833,
-          "z": -5.376534360981832,
+          "x": 8.742499999999998,
+          "z": -5.3999999999999995,
           "stageLevel": 0,
           "visible": false,
           "approachX": null,
@@ -5220,8 +5469,8 @@
           "greeting": 2,
           "timer": 0,
           "delay": 0,
-          "x": 8.792444263558533,
-          "z": -5.392444263558532,
+          "x": 8.8,
+          "z": -5.38931457505076,
           "stageLevel": 0,
           "visible": false,
           "approachX": null,
@@ -5263,8 +5512,8 @@
           "id": "guitarist",
           "name": "RUX Guitarist",
           "role": "band",
-          "x": 8.776534360981833,
-          "z": -5.376534360981832,
+          "x": 8.742499999999998,
+          "z": -5.3999999999999995,
           "y": 0,
           "homeX": 3.8,
           "homeZ": 4.25,
@@ -5273,7 +5522,7 @@
           "moving": false,
           "action": "walk",
           "visible": false,
-          "facing": 2.356194490192345,
+          "facing": 1.5707963267948966,
           "_path": [],
           "_pathAt": 0,
           "_wait": 2,
@@ -5315,8 +5564,8 @@
           "id": "drummer",
           "name": "JW Drummer / Julywantsmore",
           "role": "band",
-          "x": 8.792444263558533,
-          "z": -5.392444263558532,
+          "x": 8.8,
+          "z": -5.38931457505076,
           "y": 0,
           "homeX": 5.75,
           "homeZ": 5.55,
@@ -5325,7 +5574,7 @@
           "moving": false,
           "action": "walk",
           "visible": false,
-          "facing": 2.356194490192345,
+          "facing": 3.141592653589793,
           "_path": [],
           "_pathAt": 0,
           "_wait": 2,
@@ -5341,9 +5590,10 @@
       "floor": {
         "version": 1,
         "confettiThrows": 1,
-        "tissueThrows": 0,
-        "litter": 24,
-        "cleaned": 24,
+        "tissueThrows": 1,
+        "litter": 56,
+        "cleaned": 56,
+        "finaleEnsured": true,
         "cleanupStarted": true,
         "cleanupActive": false,
         "cleanupComplete": true,
@@ -5374,10 +5624,10 @@
           "presses": 0,
           "secondsLeft": 0,
           "cooldown": 0,
-          "cleanupWorkBudget": 8.000000000000163,
+          "cleanupWorkBudget": 8.000000000000128,
           "pressAge": 0.05,
           "timeouts": 0,
-          "completedRounds": 1
+          "completedRounds": 2
         }
       },
       "escort": null,
@@ -5386,8 +5636,8 @@
           "id": "bartender",
           "name": "Jessy Bartender",
           "role": "bartender",
-          "x": -7.2789340721591085,
-          "z": -0.5723730747443119,
+          "x": -7.3,
+          "z": -0.565,
           "y": 0,
           "homeX": -7.3,
           "homeZ": -0.565,
@@ -5396,7 +5646,7 @@
           "moving": false,
           "action": "idle",
           "visible": true,
-          "facing": -1.2341215074081742,
+          "facing": -1.234121507408173,
           "_path": [],
           "_pathAt": 0,
           "_wait": 2,
@@ -5420,8 +5670,8 @@
           "id": "server",
           "name": "Server",
           "role": "server",
-          "x": -4.2,
-          "z": -0.565,
+          "x": -4.209314575050761,
+          "z": -0.5999999999999996,
           "y": 0,
           "homeX": -4.2,
           "homeZ": -0.565,
@@ -5430,7 +5680,7 @@
           "moving": false,
           "action": "idle",
           "visible": true,
-          "facing": 1.3975506603425325,
+          "facing": -1.5707963267948966,
           "_path": [],
           "_pathAt": 0,
           "_wait": 2,
@@ -5470,10 +5720,10 @@
         "presses": 0,
         "secondsLeft": 0,
         "cooldown": 0,
-        "cleanupWorkBudget": 8.000000000000163,
+        "cleanupWorkBudget": 8.000000000000128,
         "pressAge": 0.05,
         "timeouts": 0,
-        "completedRounds": 1
+        "completedRounds": 2
       },
       "unfinished": [],
       "nearbyBodies": [
@@ -5820,6 +6070,7 @@
         "tissueThrows": 1,
         "litter": 80,
         "cleaned": 80,
+        "finaleEnsured": true,
         "cleanupStarted": true,
         "cleanupActive": false,
         "cleanupComplete": true,
@@ -5965,7 +6216,7 @@
     },
     {
       "seed": 14,
-      "seconds": 283.90000000000003,
+      "seconds": 281.95,
       "phase": "results",
       "maxStep": 0.09205627484771949,
       "fans": [
@@ -5993,7 +6244,7 @@
         {
           "id": "patron-11",
           "phase": "gone",
-          "distance": 0.1150000000000011,
+          "distance": 0.16137084989847938,
           "moving": false,
           "visible": false
         },
@@ -6014,14 +6265,14 @@
         {
           "id": "patron-14",
           "phase": "gone",
-          "distance": 0.15024169979695312,
+          "distance": 0.15250000000000252,
           "moving": false,
           "visible": false
         },
         {
           "id": "patron-15",
           "phase": "gone",
-          "distance": 0.17306344768285056,
+          "distance": 0.17318542494924127,
           "moving": false,
           "visible": false
         },
@@ -6035,7 +6286,7 @@
         {
           "id": "patron-1",
           "phase": "gone",
-          "distance": 0.1438130013797087,
+          "distance": 0.12387084989847885,
           "moving": false,
           "visible": false
         },
@@ -6063,7 +6314,7 @@
         {
           "id": "patron-5",
           "phase": "gone",
-          "distance": 0.15639847637797552,
+          "distance": 0.15250000000000252,
           "moving": false,
           "visible": false
         },
@@ -6084,7 +6335,7 @@
         {
           "id": "support-0",
           "phase": "gone",
-          "distance": 0.15392899704523155,
+          "distance": 0.17927737635424837,
           "moving": false,
           "visible": false
         },
@@ -6136,8 +6387,8 @@
           "greeting": 2,
           "timer": 0,
           "delay": 0,
-          "x": 8.785373195746665,
-          "z": -5.385373195746665,
+          "x": 8.8,
+          "z": -5.379314575050755,
           "stageLevel": 0,
           "visible": false,
           "approachX": null,
@@ -6154,7 +6405,7 @@
           "greeting": 2,
           "timer": 0,
           "delay": 0,
-          "x": 8.707943725152282,
+          "x": 8.708629150101517,
           "z": -5.3999999999999995,
           "stageLevel": 0,
           "visible": false,
@@ -6172,8 +6423,8 @@
           "greeting": 2,
           "timer": 0,
           "delay": 0,
-          "x": 8.792444263558531,
-          "z": -5.392444263558531,
+          "x": 8.8,
+          "z": -5.389314575050759,
           "stageLevel": 0,
           "visible": false,
           "approachX": null,
@@ -6215,8 +6466,8 @@
           "id": "guitarist",
           "name": "RUX Guitarist",
           "role": "band",
-          "x": 8.785373195746665,
-          "z": -5.385373195746665,
+          "x": 8.8,
+          "z": -5.379314575050755,
           "y": 0,
           "homeX": 3.8,
           "homeZ": 4.25,
@@ -6225,7 +6476,7 @@
           "moving": false,
           "action": "walk",
           "visible": false,
-          "facing": 2.356194490192345,
+          "facing": 3.141592653589793,
           "_path": [],
           "_pathAt": 0,
           "_wait": 2,
@@ -6241,7 +6492,7 @@
           "id": "bassist",
           "name": "FW Bassist / freewill",
           "role": "band",
-          "x": 8.707943725152282,
+          "x": 8.708629150101517,
           "z": -5.3999999999999995,
           "y": 0,
           "homeX": 7.7,
@@ -6267,8 +6518,8 @@
           "id": "drummer",
           "name": "JW Drummer / Julywantsmore",
           "role": "band",
-          "x": 8.792444263558531,
-          "z": -5.392444263558531,
+          "x": 8.8,
+          "z": -5.389314575050759,
           "y": 0,
           "homeX": 5.75,
           "homeZ": 5.55,
@@ -6277,7 +6528,7 @@
           "moving": false,
           "action": "walk",
           "visible": false,
-          "facing": 2.356194490192345,
+          "facing": 3.141592653589793,
           "_path": [],
           "_pathAt": 0,
           "_wait": 2,
@@ -6292,10 +6543,11 @@
       ],
       "floor": {
         "version": 1,
-        "confettiThrows": 0,
+        "confettiThrows": 1,
         "tissueThrows": 2,
-        "litter": 64,
-        "cleaned": 64,
+        "litter": 88,
+        "cleaned": 88,
+        "finaleEnsured": true,
         "cleanupStarted": true,
         "cleanupActive": false,
         "cleanupComplete": true,
@@ -6326,10 +6578,10 @@
           "presses": 0,
           "secondsLeft": 0,
           "cooldown": 0,
-          "cleanupWorkBudget": 0,
+          "cleanupWorkBudget": 8.000000000000028,
           "pressAge": 0.05,
           "timeouts": 0,
-          "completedRounds": 2
+          "completedRounds": 3
         }
       },
       "escort": null,
@@ -6422,10 +6674,10 @@
         "presses": 0,
         "secondsLeft": 0,
         "cooldown": 0,
-        "cleanupWorkBudget": 0,
+        "cleanupWorkBudget": 8.000000000000028,
         "pressAge": 0.05,
         "timeouts": 0,
-        "completedRounds": 2
+        "completedRounds": 3
       },
       "unfinished": [],
       "nearbyBodies": [
@@ -6441,7 +6693,7 @@
     },
     {
       "seed": 15,
-      "seconds": 285.45,
+      "seconds": 284.1,
       "phase": "results",
       "maxStep": 0.15137084989847915,
       "fans": [
@@ -6490,14 +6742,14 @@
         {
           "id": "patron-14",
           "phase": "gone",
-          "distance": 0.1721726055280059,
+          "distance": 0.17318542494924127,
           "moving": false,
           "visible": false
         },
         {
           "id": "patron-15",
           "phase": "gone",
-          "distance": 0.16720028496377054,
+          "distance": 0.17792048939826005,
           "moving": false,
           "visible": false
         },
@@ -6532,7 +6784,7 @@
         {
           "id": "patron-4",
           "phase": "gone",
-          "distance": 0.13818542494924113,
+          "distance": 0.1470562748477171,
           "moving": false,
           "visible": false
         },
@@ -6560,21 +6812,21 @@
         {
           "id": "support-0",
           "phase": "gone",
-          "distance": 0.1438130013797087,
+          "distance": 0.15392899704523155,
           "moving": false,
           "visible": false
         },
         {
           "id": "support-1",
           "phase": "gone",
-          "distance": 0.15338710753225687,
+          "distance": 0.15461646096066298,
           "moving": false,
           "visible": false
         },
         {
           "id": "support-2",
           "phase": "gone",
-          "distance": 0.13611360874457684,
+          "distance": 0.167705098312485,
           "moving": false,
           "visible": false
         },
@@ -6768,10 +7020,11 @@
       ],
       "floor": {
         "version": 1,
-        "confettiThrows": 0,
+        "confettiThrows": 1,
         "tissueThrows": 1,
-        "litter": 32,
-        "cleaned": 32,
+        "litter": 56,
+        "cleaned": 56,
+        "finaleEnsured": true,
         "cleanupStarted": true,
         "cleanupActive": false,
         "cleanupComplete": true,
@@ -6802,10 +7055,10 @@
           "presses": 0,
           "secondsLeft": 0,
           "cooldown": 0,
-          "cleanupWorkBudget": 0,
+          "cleanupWorkBudget": 8.000000000000014,
           "pressAge": 0.05,
           "timeouts": 0,
-          "completedRounds": 4
+          "completedRounds": 5
         }
       },
       "escort": null,
@@ -6900,10 +7153,10 @@
         "presses": 0,
         "secondsLeft": 0,
         "cooldown": 0,
-        "cleanupWorkBudget": 0,
+        "cleanupWorkBudget": 8.000000000000014,
         "pressAge": 0.05,
         "timeouts": 0,
-        "completedRounds": 4
+        "completedRounds": 5
       },
       "unfinished": [],
       "nearbyBodies": [
@@ -6919,7 +7172,7 @@
     },
     {
       "seed": 16,
-      "seconds": 290.6,
+      "seconds": 290.35,
       "phase": "results",
       "maxStep": 0.15331927667355078,
       "fans": [
@@ -6968,7 +7221,7 @@
         {
           "id": "patron-14",
           "phase": "gone",
-          "distance": 0.15887084989847722,
+          "distance": 0.16217284227056233,
           "moving": false,
           "visible": false
         },
@@ -7045,21 +7298,21 @@
         {
           "id": "support-1",
           "phase": "gone",
-          "distance": 0.15774169979694896,
+          "distance": 0.15338710753225687,
           "moving": false,
           "visible": false
         },
         {
           "id": "support-2",
           "phase": "gone",
-          "distance": 0.16527530995684742,
+          "distance": 0.167705098312485,
           "moving": false,
           "visible": false
         },
         {
           "id": "crowd-surfer",
           "phase": "gone",
-          "distance": 0.15639847637797552,
+          "distance": 0.167705098312485,
           "moving": false,
           "visible": false
         }
@@ -7090,8 +7343,8 @@
           "greeting": 2,
           "timer": 0,
           "delay": 0,
-          "x": 8.794212030511497,
-          "z": -5.394212030511497,
+          "x": 8.8,
+          "z": -5.391814575050754,
           "stageLevel": 0,
           "visible": false,
           "approachX": null,
@@ -7169,8 +7422,8 @@
           "id": "guitarist",
           "name": "RUX Guitarist",
           "role": "band",
-          "x": 8.794212030511497,
-          "z": -5.394212030511497,
+          "x": 8.8,
+          "z": -5.391814575050754,
           "y": 0,
           "homeX": 3.8,
           "homeZ": 4.25,
@@ -7179,7 +7432,7 @@
           "moving": false,
           "action": "walk",
           "visible": false,
-          "facing": 2.356194490192345,
+          "facing": 3.141592653589793,
           "_path": [],
           "_pathAt": 0,
           "_wait": 2,
@@ -7247,9 +7500,10 @@
       "floor": {
         "version": 1,
         "confettiThrows": 1,
-        "tissueThrows": 0,
-        "litter": 24,
-        "cleaned": 24,
+        "tissueThrows": 1,
+        "litter": 56,
+        "cleaned": 56,
+        "finaleEnsured": true,
         "cleanupStarted": true,
         "cleanupActive": false,
         "cleanupComplete": true,
@@ -7280,10 +7534,10 @@
           "presses": 0,
           "secondsLeft": 0,
           "cooldown": 0,
-          "cleanupWorkBudget": 8.000000000000155,
+          "cleanupWorkBudget": 8.000000000000085,
           "pressAge": 0.05,
           "timeouts": 0,
-          "completedRounds": 4
+          "completedRounds": 5
         }
       },
       "escort": null,
@@ -7292,8 +7546,8 @@
           "id": "bartender",
           "name": "Jessy Bartender",
           "role": "bartender",
-          "x": -7.273149022618366,
-          "z": -0.5743978420835717,
+          "x": -7.3,
+          "z": -0.565,
           "y": 0,
           "homeX": -7.3,
           "homeZ": -0.565,
@@ -7302,7 +7556,7 @@
           "moving": false,
           "action": "idle",
           "visible": true,
-          "facing": -1.2803311659395815,
+          "facing": -1.234121507408173,
           "_path": [],
           "_pathAt": 0,
           "_wait": 2,
@@ -7314,7 +7568,7 @@
             "z": -4.35
           },
           "_cleanupGoalSegment": 5,
-          "_floorRetry": 0.1999999999999999,
+          "_floorRetry": 0,
           "_cleanupParkGoal": {
             "x": -7.3,
             "z": -0.565
@@ -7378,10 +7632,10 @@
         "presses": 0,
         "secondsLeft": 0,
         "cooldown": 0,
-        "cleanupWorkBudget": 8.000000000000155,
+        "cleanupWorkBudget": 8.000000000000085,
         "pressAge": 0.05,
         "timeouts": 0,
-        "completedRounds": 4
+        "completedRounds": 5
       },
       "unfinished": [],
       "nearbyBodies": [
@@ -7397,7 +7651,7 @@
     },
     {
       "seed": 17,
-      "seconds": 302.65000000000003,
+      "seconds": 303.55,
       "phase": "results",
       "maxStep": 0.1450000000000005,
       "fans": [
@@ -7425,7 +7679,7 @@
         {
           "id": "patron-11",
           "phase": "gone",
-          "distance": 0.13568542494923808,
+          "distance": 0.16038470243731548,
           "moving": false,
           "visible": false
         },
@@ -7453,7 +7707,7 @@
         {
           "id": "patron-15",
           "phase": "gone",
-          "distance": 0.17929101648038898,
+          "distance": 0.17792048939826005,
           "moving": false,
           "visible": false
         },
@@ -7523,14 +7777,14 @@
         {
           "id": "support-1",
           "phase": "gone",
-          "distance": 0.15338710753225687,
+          "distance": 0.15461646096066298,
           "moving": false,
           "visible": false
         },
         {
           "id": "support-2",
           "phase": "gone",
-          "distance": 0.1150000000000011,
+          "distance": 0.167705098312485,
           "moving": false,
           "visible": false
         },
@@ -7605,7 +7859,7 @@
           "timer": 0,
           "delay": 0,
           "x": 8.8,
-          "z": -5.436814575050757,
+          "z": -5.389314575050757,
           "stageLevel": 0,
           "visible": false,
           "approachX": null,
@@ -7700,7 +7954,7 @@
           "name": "JW Drummer / Julywantsmore",
           "role": "band",
           "x": 8.8,
-          "z": -5.436814575050757,
+          "z": -5.389314575050757,
           "y": 0,
           "homeX": 5.75,
           "homeZ": 5.55,
@@ -7709,7 +7963,7 @@
           "moving": false,
           "action": "walk",
           "visible": false,
-          "facing": 2.70438448584172,
+          "facing": 3.141592653589793,
           "_path": [],
           "_pathAt": 0,
           "_wait": 2,
@@ -7725,9 +7979,10 @@
       "floor": {
         "version": 1,
         "confettiThrows": 2,
-        "tissueThrows": 0,
-        "litter": 48,
-        "cleaned": 48,
+        "tissueThrows": 1,
+        "litter": 80,
+        "cleaned": 80,
+        "finaleEnsured": true,
         "cleanupStarted": true,
         "cleanupActive": false,
         "cleanupComplete": true,
@@ -7761,7 +8016,7 @@
           "cleanupWorkBudget": 16.00000000000003,
           "pressAge": 0.05,
           "timeouts": 0,
-          "completedRounds": 5
+          "completedRounds": 6
         }
       },
       "escort": null,
@@ -7859,7 +8114,7 @@
         "cleanupWorkBudget": 16.00000000000003,
         "pressAge": 0.05,
         "timeouts": 0,
-        "completedRounds": 5
+        "completedRounds": 6
       },
       "unfinished": [],
       "nearbyBodies": [
@@ -7875,7 +8130,7 @@
     },
     {
       "seed": 18,
-      "seconds": 287.65000000000003,
+      "seconds": 290.2,
       "phase": "results",
       "maxStep": 0.14907442031467935,
       "fans": [
@@ -7924,7 +8179,7 @@
         {
           "id": "patron-14",
           "phase": "gone",
-          "distance": 0.16581973988988358,
+          "distance": 0.1738945105831622,
           "moving": false,
           "visible": false
         },
@@ -7987,7 +8242,7 @@
         {
           "id": "patron-7",
           "phase": "gone",
-          "distance": 0.14068542494924507,
+          "distance": 0.13568542494923808,
           "moving": false,
           "visible": false
         },
@@ -8008,7 +8263,7 @@
         {
           "id": "support-2",
           "phase": "gone",
-          "distance": 0.167705098312485,
+          "distance": 0.1438130013797087,
           "moving": false,
           "visible": false
         },
@@ -8064,8 +8319,8 @@
           "greeting": 2,
           "timer": 0,
           "delay": 0,
-          "x": 8.729999999999999,
-          "z": -5.3999999999999995,
+          "x": 8.8,
+          "z": -5.424314575050759,
           "stageLevel": 0,
           "visible": false,
           "approachX": null,
@@ -8082,8 +8337,8 @@
           "greeting": 2,
           "timer": 0,
           "delay": 0,
-          "x": 8.8,
-          "z": -5.39121447053896,
+          "x": 8.786689992457093,
+          "z": -5.386689992457093,
           "stageLevel": 0,
           "visible": false,
           "approachX": null,
@@ -8151,37 +8406,11 @@
           "id": "bassist",
           "name": "FW Bassist / freewill",
           "role": "band",
-          "x": 8.729999999999999,
-          "z": -5.3999999999999995,
+          "x": 8.8,
+          "z": -5.424314575050759,
           "y": 0,
           "homeX": 7.7,
           "homeZ": 4.25,
-          "targetX": 8.8,
-          "targetZ": -5.55,
-          "moving": false,
-          "action": "walk",
-          "visible": false,
-          "facing": 1.5707963267948966,
-          "_path": [],
-          "_pathAt": 0,
-          "_wait": 2,
-          "stageLevel": 0,
-          "actionProgress": 0,
-          "afterShowPhase": "gone",
-          "_partner": null,
-          "_floorRoute": false,
-          "_blocked": 0,
-          "_afterShowRetry": 0
-        },
-        {
-          "id": "drummer",
-          "name": "JW Drummer / Julywantsmore",
-          "role": "band",
-          "x": 8.8,
-          "z": -5.39121447053896,
-          "y": 0,
-          "homeX": 5.75,
-          "homeZ": 5.55,
           "targetX": 8.8,
           "targetZ": -5.55,
           "moving": false,
@@ -8198,14 +8427,41 @@
           "_floorRoute": false,
           "_blocked": 0,
           "_afterShowRetry": 0
+        },
+        {
+          "id": "drummer",
+          "name": "JW Drummer / Julywantsmore",
+          "role": "band",
+          "x": 8.786689992457093,
+          "z": -5.386689992457093,
+          "y": 0,
+          "homeX": 5.75,
+          "homeZ": 5.55,
+          "targetX": 8.8,
+          "targetZ": -5.55,
+          "moving": false,
+          "action": "walk",
+          "visible": false,
+          "facing": 2.356194490192345,
+          "_path": [],
+          "_pathAt": 0,
+          "_wait": 2,
+          "stageLevel": 0,
+          "actionProgress": 0,
+          "afterShowPhase": "gone",
+          "_partner": null,
+          "_floorRoute": false,
+          "_blocked": 0,
+          "_afterShowRetry": 0
         }
       ],
       "floor": {
         "version": 1,
-        "confettiThrows": 0,
+        "confettiThrows": 1,
         "tissueThrows": 2,
-        "litter": 64,
-        "cleaned": 64,
+        "litter": 88,
+        "cleaned": 88,
+        "finaleEnsured": true,
         "cleanupStarted": true,
         "cleanupActive": false,
         "cleanupComplete": true,
@@ -8236,10 +8492,10 @@
           "presses": 0,
           "secondsLeft": 0,
           "cooldown": 0,
-          "cleanupWorkBudget": 0,
+          "cleanupWorkBudget": 8.000000000000114,
           "pressAge": 0.05,
           "timeouts": 0,
-          "completedRounds": 5
+          "completedRounds": 6
         }
       },
       "escort": null,
@@ -8334,10 +8590,10 @@
         "presses": 0,
         "secondsLeft": 0,
         "cooldown": 0,
-        "cleanupWorkBudget": 0,
+        "cleanupWorkBudget": 8.000000000000114,
         "pressAge": 0.05,
         "timeouts": 0,
-        "completedRounds": 5
+        "completedRounds": 6
       },
       "unfinished": [],
       "nearbyBodies": [
@@ -8353,9 +8609,9 @@
     },
     {
       "seed": 19,
-      "seconds": 291.90000000000003,
+      "seconds": 291.3,
       "phase": "results",
-      "maxStep": 0.09205627484771949,
+      "maxStep": 0.09263990699562806,
       "fans": [
         {
           "id": "patron-8",
@@ -8381,7 +8637,7 @@
         {
           "id": "patron-11",
           "phase": "gone",
-          "distance": 0.15539382310012056,
+          "distance": 0.1150000000000011,
           "moving": false,
           "visible": false
         },
@@ -8402,14 +8658,14 @@
         {
           "id": "patron-14",
           "phase": "gone",
-          "distance": 0.17318542494924127,
+          "distance": 0.17074690369679427,
           "moving": false,
           "visible": false
         },
         {
           "id": "patron-15",
           "phase": "gone",
-          "distance": 0.16614284778097904,
+          "distance": 0.17718701720782523,
           "moving": false,
           "visible": false
         },
@@ -8451,7 +8707,7 @@
         {
           "id": "patron-5",
           "phase": "gone",
-          "distance": 0.15639847637797552,
+          "distance": 0.16137084989847938,
           "moving": false,
           "visible": false
         },
@@ -8472,14 +8728,14 @@
         {
           "id": "support-0",
           "phase": "gone",
-          "distance": 0.1721726055280059,
+          "distance": 0.15392899704523155,
           "moving": false,
           "visible": false
         },
         {
           "id": "support-1",
           "phase": "gone",
-          "distance": 0.15338710753225687,
+          "distance": 0.15461646096066298,
           "moving": false,
           "visible": false
         },
@@ -8524,8 +8780,8 @@
           "greeting": 2,
           "timer": 0,
           "delay": 0,
-          "x": 8.8,
-          "z": -5.436814575050756,
+          "x": 8.793242693252296,
+          "z": -5.393242693252295,
           "stageLevel": 0,
           "visible": false,
           "approachX": null,
@@ -8561,7 +8817,7 @@
           "timer": 0,
           "delay": 0,
           "x": 8.8,
-          "z": -5.393870849898468,
+          "z": -5.37681457505076,
           "stageLevel": 0,
           "visible": false,
           "approachX": null,
@@ -8603,8 +8859,8 @@
           "id": "guitarist",
           "name": "RUX Guitarist",
           "role": "band",
-          "x": 8.8,
-          "z": -5.436814575050756,
+          "x": 8.793242693252296,
+          "z": -5.393242693252295,
           "y": 0,
           "homeX": 3.8,
           "homeZ": 4.25,
@@ -8613,7 +8869,7 @@
           "moving": false,
           "action": "walk",
           "visible": false,
-          "facing": 3.141592653589793,
+          "facing": 2.3561944901923373,
           "_path": [],
           "_pathAt": 0,
           "_wait": 2,
@@ -8656,7 +8912,7 @@
           "name": "JW Drummer / Julywantsmore",
           "role": "band",
           "x": 8.8,
-          "z": -5.393870849898468,
+          "z": -5.37681457505076,
           "y": 0,
           "homeX": 5.75,
           "homeZ": 5.55,
@@ -8680,10 +8936,11 @@
       ],
       "floor": {
         "version": 1,
-        "confettiThrows": 0,
+        "confettiThrows": 1,
         "tissueThrows": 1,
-        "litter": 32,
-        "cleaned": 32,
+        "litter": 56,
+        "cleaned": 56,
+        "finaleEnsured": true,
         "cleanupStarted": true,
         "cleanupActive": false,
         "cleanupComplete": true,
@@ -8714,10 +8971,10 @@
           "presses": 0,
           "secondsLeft": 0,
           "cooldown": 0,
-          "cleanupWorkBudget": 0,
+          "cleanupWorkBudget": 8.000000000000128,
           "pressAge": 0.05,
           "timeouts": 0,
-          "completedRounds": 1
+          "completedRounds": 2
         }
       },
       "escort": null,
@@ -8726,8 +8983,8 @@
           "id": "bartender",
           "name": "Jessy Bartender",
           "role": "bartender",
-          "x": -7.2789340721591085,
-          "z": -0.5723730747443119,
+          "x": -7.3,
+          "z": -0.565,
           "y": 0,
           "homeX": -7.3,
           "homeZ": -0.565,
@@ -8736,7 +8993,7 @@
           "moving": false,
           "action": "idle",
           "visible": true,
-          "facing": -1.2341215074081742,
+          "facing": -1.234121507408173,
           "_path": [],
           "_pathAt": 0,
           "_wait": 2,
@@ -8760,8 +9017,8 @@
           "id": "server",
           "name": "Server",
           "role": "server",
-          "x": -4.2,
-          "z": -0.565,
+          "x": -4.209314575050761,
+          "z": -0.5999999999999996,
           "y": 0,
           "homeX": -4.2,
           "homeZ": -0.565,
@@ -8770,7 +9027,7 @@
           "moving": false,
           "action": "idle",
           "visible": true,
-          "facing": 1.3975506603425325,
+          "facing": -1.5707963267948966,
           "_path": [],
           "_pathAt": 0,
           "_wait": 2,
@@ -8810,10 +9067,10 @@
         "presses": 0,
         "secondsLeft": 0,
         "cooldown": 0,
-        "cleanupWorkBudget": 0,
+        "cleanupWorkBudget": 8.000000000000128,
         "pressAge": 0.05,
         "timeouts": 0,
-        "completedRounds": 1
+        "completedRounds": 2
       },
       "unfinished": [],
       "nearbyBodies": [
@@ -9160,6 +9417,7 @@
         "tissueThrows": 1,
         "litter": 80,
         "cleaned": 80,
+        "finaleEnsured": true,
         "cleanupStarted": true,
         "cleanupActive": false,
         "cleanupComplete": true,

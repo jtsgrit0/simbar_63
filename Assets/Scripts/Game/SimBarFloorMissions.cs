@@ -33,6 +33,7 @@ public static class SimBarFloorMissions
         public int version = 1;
         public int confettiThrows;
         public int tissueThrows;
+        public bool finaleEnsured;
         // Total litter produced, not remaining litter. Remaining() subtracts cleaned.
         public int litter;
         public float cleaned;
@@ -68,6 +69,7 @@ public static class SimBarFloorMissions
     public static void Sanitize(State state)
     {
         if (state == null) return;
+        state.finaleEnsured |= state.cleanupStarted || state.cleanupComplete || state.cleanupRewardClaimed || state.cleaned > 0f;
         state.version = 1;
         if (state.reaction != null) SimBarFloorChallenges.Sanitize(state.reaction);
         state.confettiThrows = Clamp(state.confettiThrows, 0, ThrowsPerEffect);
@@ -154,6 +156,19 @@ public static class SimBarFloorMissions
         result.energyGain = 0.04f;
         result.litterAdded = added;
         return result;
+    }
+
+    /// <summary>Add each missing finale effect once before any cleanup begins.</summary>
+    public static Result[] EnsureFinale(State state, bool eligible = true)
+    {
+        if (!Valid(state) || state.finaleEnsured) return Array.Empty<Result>();
+        state.finaleEnsured = true;
+        if (!eligible || state.cleanupStarted || state.cleanupComplete || state.cleanupRewardClaimed || state.cleaned > 0f)
+            return Array.Empty<Result>();
+        var bursts = new System.Collections.Generic.List<Result>(2);
+        if (state.confettiThrows == 0) bursts.Add(Throw(state, Confetti, true));
+        if (state.tissueThrows == 0) bursts.Add(Throw(state, Tissue, true));
+        return bursts.ToArray();
     }
 
     /// <summary>The caller opens performanceOver in its final-set or post-show phase.</summary>

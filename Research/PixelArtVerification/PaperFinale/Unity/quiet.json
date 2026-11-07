@@ -1,0 +1,16 @@
+{
+    "quiet":  true,
+    "buildId":  "build_b7ff90a94e40",
+    "compilerLinkerOrWasmOptProcesses":  0,
+    "generatedPerformanceFilesRemain":  0,
+    "profileUnchanged":  true,
+    "ownerPortraitAssetsAndResourcesUnchanged":  true,
+    "originalPrefsRestored":  true,
+    "originalGameViewRestored":  true,
+    "savedReferenceSceneClean":  true,
+    "playStopped":  true,
+    "runInBackground":  false,
+    "furtherPlayAfterBuild":  false,
+    "privatePrefsBackupIgnored":  true,
+    "exceptionAuditLimitationRecorded":  true
+}

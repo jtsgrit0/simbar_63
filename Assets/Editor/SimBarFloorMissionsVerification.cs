@@ -16,6 +16,34 @@ public static partial class SimBarRuntimeVerification
             var state = SimBarFloorMissions.NewState();
             report.Check(state.guestIndex == -1 && state.litter == 0 && !state.cleanupActive && !state.guestSpawned,
                 "A fresh shift has no litter, cleanup job or selected guest.");
+            var finale = SimBarFloorMissions.NewState();
+            var bursts = SimBarFloorMissions.EnsureFinale(finale);
+            report.Check(bursts.Length == 2 && finale.finaleEnsured && finale.confettiThrows == 1 && finale.tissueThrows == 1
+                && finale.litter == 56 && bursts[0].fanGain + bursts[1].fanGain == 4
+                && Mathf.Abs(bursts[0].energyGain + bursts[1].energyGain - .08f) < .0001f,
+                "An otherwise quiet finale emits both normal paper effects, audience rewards and matching cleanup debt once.");
+            string finaleSaved = JsonUtility.ToJson(finale);
+            report.Check(SimBarFloorMissions.EnsureFinale(finale).Length == 0 && JsonUtility.ToJson(finale) == finaleSaved,
+                "Repeated closing frames cannot add paper, repeat a burst or reward the finale twice.");
+            finale = JsonUtility.FromJson<SimBarFloorMissions.State>(finaleSaved); SimBarFloorMissions.Sanitize(finale);
+            report.Check(finale.finaleEnsured && SimBarFloorMissions.EnsureFinale(finale).Length == 0 && finale.litter == 56,
+                "The finale latch survives a saved closing without replaying effects or increasing debt.");
+            finale = SimBarFloorMissions.NewState(); SimBarFloorMissions.Throw(finale, 0, true); SimBarFloorMissions.Throw(finale, 0, true);
+            bursts = SimBarFloorMissions.EnsureFinale(finale);
+            report.Check(bursts.Length == 1 && bursts[0].code == "tissue" && finale.confettiThrows == 2 && finale.tissueThrows == 1 && finale.litter == 80,
+                "A finale adds only a missing kind; existing mid-show effects and the two-throw limit remain intact.");
+            finale = SimBarFloorMissions.NewState();
+            report.Check(SimBarFloorMissions.EnsureFinale(finale, false).Length == 0 && finale.finaleEnsured && finale.litter == 0,
+                "An already completed farewell or settled night latches without introducing new debt.");
+            finale = JsonUtility.FromJson<SimBarFloorMissions.State>("{\"cleanupComplete\":true}"); SimBarFloorMissions.Sanitize(finale);
+            report.Check(finale.finaleEnsured && !finale.cleanupComplete && SimBarFloorMissions.EnsureFinale(finale).Length == 0 && finale.litter == 0,
+                "Historical cleanup flags are captured before normalization, so an old zero-paper completion is not reopened.");
+            finale = SimBarFloorMissions.NewState(); SimBarFloorMissions.Throw(finale, 0, true); SimBarFloorMissions.StartCleanup(finale, 2, true);
+            SimBarFloorMissions.Tick(finale, 1f, 2, true); float priorWork = finale.cleaned;
+            report.Check(SimBarFloorMissions.EnsureFinale(finale).Length == 0 && finale.finaleEnsured && finale.litter == 24 && finale.cleaned == priorWork,
+                "An old closing with cleanup already started or partly worked retains its exact debt and progress.");
+            report.Check(!SimBarFloorMissions.NewState().finaleEnsured,
+                "A fresh night receives a fresh finale latch.");
             string original = JsonUtility.ToJson(state);
             report.Check(SimBarFloorMissions.Throw(state, 0, false).code == "not_performing"
                 && SimBarFloorMissions.Throw(state, -1, true).code == "invalid_effect"

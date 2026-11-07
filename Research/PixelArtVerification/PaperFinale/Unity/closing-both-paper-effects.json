@@ -1,0 +1,16 @@
+{
+  "naturalQuietScheduleSeed": 11,
+  "midshowPaperCount": 0,
+  "confetti": 56,
+  "tissueRibbons": 28,
+  "groundConfetti": 24,
+  "groundTissue": 16,
+  "litter": 56,
+  "normalFanGain": 4,
+  "normalEnergyGain": 0.08,
+  "activeFPartialPreserved": true,
+  "cleanupAssigned": true,
+  "stageOff": true,
+  "musicOnlyAutoPaused": true,
+  "popupMusicControls": 0
+}

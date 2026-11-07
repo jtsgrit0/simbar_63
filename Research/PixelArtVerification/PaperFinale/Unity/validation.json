@@ -1,0 +1,243 @@
+[
+  {
+    "entry": "Backup",
+    "result": {
+      "saved": true
+    }
+  },
+  {
+    "entry": "Rules",
+    "result": {
+      "passed": 35,
+      "failures": [],
+      "measurements": [
+        "Bounded confetti/tissue events; post-show staff work; pause/worker guards; partial and committed JSON recovery; unique cleanup receipt; ordered courteous guest exit."
+      ]
+    }
+  },
+  {
+    "entry": "BeginClosing",
+    "result": {
+      "naturalQuietScheduleSeed": 11,
+      "midshowPaperCount": 0,
+      "confetti": 56,
+      "tissueRibbons": 28,
+      "groundConfetti": 24,
+      "groundTissue": 16,
+      "litter": 56,
+      "normalFanGain": 4,
+      "normalEnergyGain": 0.08,
+      "activeFPartialPreserved": true,
+      "cleanupAssigned": true,
+      "stageOff": true,
+      "musicOnlyAutoPaused": true,
+      "popupMusicControls": 0
+    }
+  },
+  {
+    "entry": "PauseAndReplay",
+    "result": {
+      "pauseFrozen": true,
+      "repeatClosingNoBurst": true,
+      "repeatClosingNoReward": true,
+      "particleCount": 84
+    }
+  },
+  {
+    "entry": "ConcurrentChunk",
+    "result": {
+      "ticks": 100,
+      "seenC": false,
+      "concurrent": false,
+      "captured": false,
+      "cleaned": 0,
+      "ready": 1,
+      "members": [
+        {
+          "id": "singer",
+          "phase": "await-exit",
+          "greeting": 2
+        },
+        {
+          "id": "guitarist",
+          "phase": "highfive",
+          "greeting": 0
+        },
+        {
+          "id": "bassist",
+          "phase": "approach",
+          "greeting": 0
+        },
+        {
+          "id": "drummer",
+          "phase": "approach",
+          "greeting": 0
+        }
+      ]
+    }
+  },
+  {
+    "entry": "ConcurrentChunk",
+    "result": {
+      "ticks": 162,
+      "seenC": true,
+      "concurrent": true,
+      "captured": true,
+      "cleaned": 0.3,
+      "ready": 1,
+      "members": [
+        {
+          "id": "singer",
+          "phase": "await-exit",
+          "greeting": 2
+        },
+        {
+          "id": "guitarist",
+          "phase": "await-exit",
+          "greeting": 2
+        },
+        {
+          "id": "bassist",
+          "phase": "hug",
+          "greeting": 1
+        },
+        {
+          "id": "drummer",
+          "phase": "approach",
+          "greeting": 0
+        }
+      ]
+    }
+  },
+  {
+    "entry": "SaveResume",
+    "result": {
+      "finaleLatchPreserved": true,
+      "noAirReplay": true,
+      "groundDebtRestored": true,
+      "cleaned": 0.3,
+      "budget": 31.7,
+      "groundMarks": 40,
+      "noDuplicateRewards": true
+    }
+  },
+  {
+    "entry": "FinishChunk",
+    "result": {
+      "results": false,
+      "cleaned": 9.600003,
+      "remaining": 47,
+      "guestActive": false,
+      "afterShowPending": true,
+      "phase": "FloorClosing"
+    }
+  },
+  {
+    "entry": "FinishChunk",
+    "result": {
+      "results": false,
+      "cleaned": 30.9000015,
+      "remaining": 26,
+      "guestActive": false,
+      "afterShowPending": true,
+      "phase": "FloorClosing"
+    }
+  },
+  {
+    "entry": "FinishChunk",
+    "result": {
+      "results": false,
+      "cleaned": 56,
+      "remaining": 0,
+      "guestActive": false,
+      "afterShowPending": true,
+      "phase": "FloorClosing"
+    }
+  },
+  {
+    "entry": "FinishChunk",
+    "result": {
+      "results": false,
+      "cleaned": 56,
+      "remaining": 0,
+      "guestActive": false,
+      "afterShowPending": true,
+      "phase": "FloorClosing"
+    }
+  },
+  {
+    "entry": "FinishChunk",
+    "result": {
+      "results": false,
+      "cleaned": 56,
+      "remaining": 0,
+      "guestActive": false,
+      "afterShowPending": true,
+      "phase": "FloorClosing"
+    }
+  },
+  {
+    "entry": "FinishChunk",
+    "result": {
+      "results": false,
+      "cleaned": 56,
+      "remaining": 0,
+      "guestActive": false,
+      "afterShowPending": true,
+      "phase": "FloorClosing"
+    }
+  },
+  {
+    "entry": "FinishChunk",
+    "result": {
+      "results": false,
+      "cleaned": 56,
+      "remaining": 0,
+      "guestActive": false,
+      "afterShowPending": true,
+      "phase": "FloorClosing"
+    }
+  },
+  {
+    "entry": "FinishChunk",
+    "result": {
+      "results": false,
+      "cleaned": 56,
+      "remaining": 0,
+      "guestActive": false,
+      "afterShowPending": true,
+      "phase": "FloorClosing"
+    }
+  },
+  {
+    "entry": "FinishChunk",
+    "result": {
+      "results": false,
+      "farewellCaptured": true,
+      "cleaned": 56
+    }
+  },
+  {
+    "entry": "FinishChunk",
+    "result": {
+      "results": true,
+      "cleaned": 56,
+      "remaining": 0,
+      "guestActive": false,
+      "afterShowPending": false,
+      "phase": "Results"
+    }
+  },
+  {
+    "entry": "Restore",
+    "result": {
+      "prefsRestored": true,
+      "gameViewRestored": true,
+      "scene": "Assets/Scenes/SimBar_Reference.unity",
+      "sceneDirty": false,
+      "playing": false,
+      "runInBackground": false,
+      "compiling": false
+    }
+  }
+]

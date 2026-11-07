@@ -1,0 +1,33 @@
+{
+  "initialAttempt": {
+    "entry": "PaperFinaleQA.ConcurrentChunk",
+    "context": "First warm attempt, after BeginClosing and PauseAndReplay; no completed 100-step checkpoint.",
+    "exception": "ArgumentOutOfRangeException: Index was out of range; parameter index.",
+    "sourceSubcall": "Unknown: the original reflection wrapper rethrew InnerException and discarded its source stack.",
+    "retainedOffsets": {"Step": "0x24", "Call": "0x1c"},
+    "editorLogSourceStackFound": false
+  },
+  "boundedInvestigation": {
+    "controllerOrderMatchesProduction": true,
+    "sourceReview": "AfterShow, FloorActors, motion, navigation, and new paper rebuild paths reviewed without a concrete unsafe index found.",
+    "subsequentFullClosingRunsPassed": 2,
+    "freshEditorDiagnostic": {
+      "runtimeControllerCountAsserted": 1,
+      "controllerPinnedPerEntry": true,
+      "sourceExceptionStackPreserved": true,
+      "perSubcallFailureContextEnabled": true,
+      "first100ControllerStepsPassed": true,
+      "actualConcurrentHugAndCleanupAtSeconds": 16.2,
+      "actualHalfCleanupPassed": true,
+      "exceptionReproduced": false
+    },
+    "conclusion": "The initial exception remains unlocalized. No evidence establishes a harness race or a specific production defect; no speculative production fix was made."
+  },
+  "separateEditorEnvironmentIssue": {
+    "message": "ADTM: Attempting to update control while a mix is ongoing, but realtime thread is disabled will lead to a deadlock",
+    "occurredBeforeDiagnosticPlay": true,
+    "lastCompletedPreservationWasClean": true,
+    "recoveredByProjectScopedCliRestart": true,
+    "productionProfileChanged": false
+  }
+}

@@ -258,10 +258,11 @@ export class SimBarGame{
     this._ensureCleanup();this._tickFloorActors(dt);
     const timeout=Challenges.tick(r,dt,true);if(timeout.timedOut){this.state.satisfaction=Math.max(.3,this.state.satisfaction-.015);this._say('시간을 놓쳤어요. 잠시 뒤 다시 연타로 대응하세요!','Time ran out. A new response window will appear shortly.');}
     if(this.closing){const ready=this.cleanupReadyWorkers,before=f.cleaned,workDt=ready?Math.min(dt,r.cleanupWorkBudget/(ready*3)):0,result=Floor.tick(f,workDt,ready,true);r.cleanupWorkBudget=Math.max(0,r.cleanupWorkBudget-(f.cleaned-before));if(r.cleanupWorkBudget<.001)r.cleanupWorkBudget=0;if(result.cleanupFinished){this.journey.score+=150;this._say('직원 청소 미션 완료!','Staff cleanup mission complete!');}}
-    if(!r.activeKind&&r.cooldown<=0){if(f.guestActive)Challenges.start(r,2,f.guestStep);else if(this.closing&&f.cleanupActive&&this.cleanupReadyWorkers>0&&r.cleanupWorkBudget<=0)Challenges.start(r,1,Math.floor(f.cleaned/32));}
+    if(!r.activeKind&&r.cooldown<=0){if(this.closing&&f.cleanupActive&&this.cleanupReadyWorkers>0&&r.cleanupWorkBudget<=0)Challenges.start(r,1,Math.floor(f.cleaned/32));else if(f.guestActive)Challenges.start(r,2,f.guestStep);}
     if(this.closing&&!this.floorTasksPending&&!this.afterShowPending&&!this.farewellPending)this._settleNight();
   }
-  _paper(kind){const result=Floor.throw(this.floor,kind,this.playing);if(!result.success)return;this.state.fans+=result.fanGain;this.state.performance=Math.min(1,this.state.performance+result.energyGain);this.effects.push({kind,serial:++this._eventSerial,time:this.elapsed});this._say(kind===0?'밴드가 깜짝 꽃가루 퍼포먼스를 했어요!':'관객 위로 휴지가 날립니다!',kind===0?'The band unexpectedly throws confetti!':'Tissue streamers fly over the crowd!');}
+  _paper(kind){this._emitPaper(kind,Floor.throw(this.floor,kind,this.playing));}
+  _emitPaper(kind,result){if(!result.success)return;this.state.fans+=result.fanGain;this.state.performance=Math.min(1,this.state.performance+result.energyGain);this.effects.push({kind,serial:++this._eventSerial,time:this.elapsed});this._say(kind===0?'밴드가 깜짝 꽃가루 퍼포먼스를 했어요!':'관객 위로 휴지가 날립니다!',kind===0?'The band unexpectedly throws confetti!':'Tissue streamers fly over the crowd!');}
   _quick(kind){
     if(this.paused||(!this.playing&&!this.closing)||!this.reaction)return{success:false,code:'unavailable'};
     if(kind===2&&(!this.floor.guestActive||this.reaction.activeStage!==this.floor.guestStep))return{success:false,code:'no_guest'};
@@ -276,7 +277,11 @@ export class SimBarGame{
   _beginClosing(){
     const j=this.journey;this.phase='closing';j.floorClosing=true;j.inProgress=true;j.settlementPending=false;j.guidePending=false;
     if(j.musicPauseSession!==j.session){j.musicPauseSession=j.session;j.musicPaused=true;}
-    this._beginAfterShow();this.orders=[];this._routeOrders();this._ensureReaction();this._ensureCleanup();
+    this._beginAfterShow();this.orders=[];this._routeOrders();this._ensureReaction();
+    // The random mid-set schedule remains random; the final bow supplies only
+    // missing kinds before staff claim cleanup, while greetings are starting.
+    for(const burst of Floor.ensureFinale(this.floor,!j.afterShow.completed&&j.session!==j.settledSession))this._emitPaper(burst.kind,burst);
+    this._ensureCleanup();
     this.paused=this.farewellPending;this.pauseReason=this.paused?'farewell':'';
     this._say('공연이 끝났어요. C 청소·F 손님 안내 미션을 마쳐 주세요.','Show over. Finish C cleanup and F guest assistance.');
   }
