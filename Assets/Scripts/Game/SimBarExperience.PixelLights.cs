@@ -14,6 +14,7 @@ public sealed partial class SimBarExperience
     private static readonly Vector3[] PixelLightSources={new Vector3(2.55f,5.8f,4.6f),new Vector3(3.85f,5.8f,4.74f),new Vector3(7.25f,5.8f,5f),new Vector3(8.6f,5.8f,5.1f)};
     private static readonly Vector3[] PixelLightTargets={new Vector3(1.8f,.12f,-1.2f),new Vector3(6.5f,.65f,3f),new Vector3(3.9f,.12f,-1.8f),new Vector3(8.2f,.65f,2.8f)};
     private static readonly Color32[] PixelLightColors={new Color32(72,216,255,255),new Color32(255,80,201,255),new Color32(96,223,255,255),new Color32(255,193,107,255)};
+    private bool StagePerformanceLightingActive=>JourneyIsPlaying&&!journey.floorClosing&&journey.secondsLeft>0f&&(journey.afterShow==null||!journey.afterShow.started);
     private void InitializePixelLights()
     {
         pixelLightRoot=new GameObject("Moving Pixel Stage Spotlights",typeof(RectTransform)).transform;pixelLightRoot.SetParent(pixelRoom,false);
@@ -49,7 +50,8 @@ public sealed partial class SimBarExperience
     private void UpdatePixelLights()
     {
         if(pixelLightRoot==null)return;
-        pixelLightRoot.gameObject.SetActive(JourneyIsPlaying||JourneyIsFloorClosing);
+        UpdatePixelStageOff();
+        bool active=StagePerformanceLightingActive;pixelLightRoot.gameObject.SetActive(active);if(!active)return;
         float seconds=pixelAnimationSeconds;
         for(int i=0;i<pixelLightViews.Count;i++)
         {

@@ -1,0 +1,14 @@
+{
+  "stageSpotsOff": true,
+  "physicalBeamsOff": true,
+  "pixelConesPoolsFlaresOff": true,
+  "ambientAndPracticalsUnchanged": true,
+  "onlyMusicAutoPaused": true,
+  "manualExistingPlaylistResume": true,
+  "reactionLeft": true,
+  "duplicateLeftMusicControl": false,
+  "raycast": [
+    "Music Play Pause Button"
+  ],
+  "coverRetained": "SimBarAlbumJackets/freewill-electric-shocker"
+}

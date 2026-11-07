@@ -5,7 +5,7 @@ using UnityEngine.UI;
 public sealed partial class SimBarExperience
 {
     private bool floorMissionDrawerOpen;
-    private bool floorMissionUiVisible, floorMissionUiKorean;
+    private bool floorMissionUiVisible, floorMissionUiKorean, floorMissionUiClosing;
     private Canvas floorMissionCanvas;
     private SimBarBookingLayout floorMissionLayout;
     private RectTransform floorMissionUiRoot, floorMissionDrawer, floorReactionCard;
@@ -120,6 +120,7 @@ public sealed partial class SimBarExperience
         if(floorMissionCanvas.gameObject.activeSelf!=visible) floorMissionCanvas.gameObject.SetActive(visible);
         if(!visible) { floorMissionUiVisible=false; return; }
         if(!floorMissionUiVisible) { floorMissionUiVisible=true; floorMissionLayout.RefreshLayout(); }
+        if(floorMissionUiClosing!=JourneyIsFloorClosing){floorMissionUiClosing=JourneyIsFloorClosing;floorMissionLayout.RefreshLayout();}
         if(floorMissionUiKorean!=SimBarLocalization.IsKorean)
         {
             floorMissionUiKorean=SimBarLocalization.IsKorean;
@@ -210,7 +211,8 @@ public sealed partial class SimBarExperience
         float height=Mathf.Min(compact?260f:300f,size.y-top-(veryShort?8f:12f));
         bool tight=height<245f;
         float inner=width-28f;
-        BookingPlace(floorReactionCard,size.x-width-12f,top,width,height);
+        float panelX=JourneyIsFloorClosing?12f:size.x-width-12f;
+        BookingPlace(floorReactionCard,panelX,top,width,height);
         BookingPlace(floorReactionTitle.rectTransform,14f,tight?8f:12f,inner-100f,tight?24f:29f);
         BookingPlace(floorReactionClock.rectTransform,width-108f,8f,94f,45f);
         floorReactionTitle.fontSize=tight?15:compact?16:18;
@@ -235,7 +237,7 @@ public sealed partial class SimBarExperience
         float detailWidth=Mathf.Min(380f,size.x-24f);
         float detailHeight=Mathf.Min(390f,size.y-top-(veryShort?8f:12f));
         float detailInner=detailWidth-28f;
-        BookingPlace(floorMissionDrawer,size.x-detailWidth-12f,top,detailWidth,detailHeight);
+        BookingPlace(floorMissionDrawer,JourneyIsFloorClosing?12f:size.x-detailWidth-12f,top,detailWidth,detailHeight);
         BookingPlace(floorMissionTitle.rectTransform,14f,12f,detailInner,30f);
         BookingPlace(floorMissionDetailNote.rectTransform,14f,49f,detailInner,47f);
         float viewHeight=Mathf.Max(1f,detailHeight-158f);

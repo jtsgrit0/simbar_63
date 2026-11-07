@@ -1,0 +1,8 @@
+{
+  "stageSpots": 4,
+  "physicalBeams": 4,
+  "pixelLights": true,
+  "pausedGameLightsStayVisible": true,
+  "cover": "SimBarAlbumJackets/freewill-electric-shocker",
+  "fixtureMasks": 4
+}

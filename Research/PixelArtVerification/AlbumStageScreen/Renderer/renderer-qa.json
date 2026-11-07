@@ -1,0 +1,506 @@
+{
+  "passed": true,
+  "checks": [
+    "The first rendered frame requires no cover image or manifest request.",
+    "All five tracks use the manifest-matched original; shared album tracks reuse one decoded jacket.",
+    "Each original is drawn in full, centered with contain sizing in the normalized LED plane.",
+    "Pausing an unfinished performance freezes its existing lighting.",
+    "Closing/results have no dynamic beam/pool/flare pass; replaying music cannot turn stage effects back on.",
+    "Existing bar and ambient artwork stays pixel-identical when the stage effects turn off.",
+    "All five baked lamp lenses become unlit and the bright stage pools dim while cyan trim stays unchanged.",
+    "Overlapping drum occluders never darken beyond one deck treatment.",
+    "Portrait and wide diagnostic sources retain all four source edges and original aspect with dark bars."
+  ],
+  "errors": [],
+  "httpErrors": [],
+  "screenshots": [
+    "01-track-0-authentic-jacket.png",
+    "02-track-1-authentic-jacket.png",
+    "03-track-2-authentic-jacket.png",
+    "04-ended-show-stage-lights-off.png",
+    "05-diagnostic-portrait-full-image.png",
+    "05-diagnostic-wide-full-image.png"
+  ],
+  "rendererSha256": "fa5dadb22bf2dd5ef3c5b1879b9117c8b0b9ad29790a4f0d328581d7bb24a4dd",
+  "manifest": {
+    "version": 1,
+    "tracks": [
+      {
+        "index": 0,
+        "filename": "Electric Shocker.mp3",
+        "title": "Electric Shocker",
+        "artist": "프리윌(freewill)",
+        "release": "Electric Shocker",
+        "cover": "album-covers/freewill-electric-shocker.png",
+        "sourceUrl": "https://music.bugs.co.kr/album/20850049",
+        "sourceImageUrl": "https://image.bugsm.co.kr/album/images/1200/208500/20850049.jpg",
+        "width": 224,
+        "height": 224
+      },
+      {
+        "index": 1,
+        "filename": "Hey_spotdown.mp3",
+        "title": "Hey",
+        "artist": "Julywantsmore",
+        "release": "Hey",
+        "cover": "album-covers/julywantsmore-hey.png",
+        "sourceUrl": "https://music.bugs.co.kr/album/20845764",
+        "sourceImageUrl": "https://image.bugsm.co.kr/album/images/1200/208457/20845764.jpg",
+        "width": 224,
+        "height": 224
+      },
+      {
+        "index": 2,
+        "filename": "No Matter How.mp3",
+        "title": "No Matter How",
+        "artist": "Julywantsmore",
+        "release": "No Matter How",
+        "cover": "album-covers/julywantsmore-no-matter-how.png",
+        "sourceUrl": "https://music.bugs.co.kr/album/20817216",
+        "sourceImageUrl": "https://image.bugsm.co.kr/album/images/1200/208172/20817216.jpg",
+        "width": 224,
+        "height": 224
+      },
+      {
+        "index": 3,
+        "filename": "Bedroom Manifesto.mp3",
+        "title": "Bedroom Manifesto",
+        "artist": "프리윌(freewill)",
+        "release": "Electric Shocker",
+        "cover": "album-covers/freewill-electric-shocker.png",
+        "sourceUrl": "https://music.bugs.co.kr/album/20850049",
+        "sourceImageUrl": "https://image.bugsm.co.kr/album/images/1200/208500/20850049.jpg",
+        "width": 224,
+        "height": 224
+      },
+      {
+        "index": 4,
+        "filename": "Electric Shocker - Korean Version.mp3",
+        "title": "Electric Shocker (Korean Version)",
+        "artist": "프리윌(freewill)",
+        "release": "Electric Shocker",
+        "cover": "album-covers/freewill-electric-shocker.png",
+        "sourceUrl": "https://music.bugs.co.kr/album/20850049",
+        "sourceImageUrl": "https://image.bugsm.co.kr/album/images/1200/208500/20850049.jpg",
+        "width": 224,
+        "height": 224
+      }
+    ]
+  },
+  "tracks": [
+    {
+      "index": 0,
+      "phase": "playing",
+      "draws": [
+        {
+          "src": "http://127.0.0.1:49829/Tools/WebGLTemplate/FastGame/art/album-covers/freewill-electric-shocker.png",
+          "rect": [
+            0,
+            0,
+            224,
+            224,
+            57.93987095353974,
+            0,
+            67,
+            67
+          ]
+        }
+      ],
+      "gradients": 4,
+      "fit": {
+        "planeWidth": 182.87974190707948,
+        "planeHeight": 67,
+        "x": 57.93987095353974,
+        "y": 0,
+        "width": 67,
+        "height": 67,
+        "transform": [
+          0.9678491349245946,
+          0.25153141359622233,
+          0,
+          1,
+          665,
+          117
+        ]
+      }
+    },
+    {
+      "index": 1,
+      "phase": "playing",
+      "draws": [
+        {
+          "src": "http://127.0.0.1:49829/Tools/WebGLTemplate/FastGame/art/album-covers/julywantsmore-hey.png",
+          "rect": [
+            0,
+            0,
+            224,
+            224,
+            57.93987095353974,
+            0,
+            67,
+            67
+          ]
+        }
+      ],
+      "gradients": 4,
+      "fit": {
+        "planeWidth": 182.87974190707948,
+        "planeHeight": 67,
+        "x": 57.93987095353974,
+        "y": 0,
+        "width": 67,
+        "height": 67,
+        "transform": [
+          0.9678491349245946,
+          0.25153141359622233,
+          0,
+          1,
+          665,
+          117
+        ]
+      }
+    },
+    {
+      "index": 2,
+      "phase": "playing",
+      "draws": [
+        {
+          "src": "http://127.0.0.1:49829/Tools/WebGLTemplate/FastGame/art/album-covers/julywantsmore-no-matter-how.png",
+          "rect": [
+            0,
+            0,
+            224,
+            224,
+            57.93987095353974,
+            0,
+            67,
+            67
+          ]
+        }
+      ],
+      "gradients": 4,
+      "fit": {
+        "planeWidth": 182.87974190707948,
+        "planeHeight": 67,
+        "x": 57.93987095353974,
+        "y": 0,
+        "width": 67,
+        "height": 67,
+        "transform": [
+          0.9678491349245946,
+          0.25153141359622233,
+          0,
+          1,
+          665,
+          117
+        ]
+      }
+    },
+    {
+      "index": 3,
+      "phase": "playing",
+      "draws": [
+        {
+          "src": "http://127.0.0.1:49829/Tools/WebGLTemplate/FastGame/art/album-covers/freewill-electric-shocker.png",
+          "rect": [
+            0,
+            0,
+            224,
+            224,
+            57.93987095353974,
+            0,
+            67,
+            67
+          ]
+        }
+      ],
+      "gradients": 4,
+      "fit": {
+        "planeWidth": 182.87974190707948,
+        "planeHeight": 67,
+        "x": 57.93987095353974,
+        "y": 0,
+        "width": 67,
+        "height": 67,
+        "transform": [
+          0.9678491349245946,
+          0.25153141359622233,
+          0,
+          1,
+          665,
+          117
+        ]
+      }
+    },
+    {
+      "index": 4,
+      "phase": "playing",
+      "draws": [
+        {
+          "src": "http://127.0.0.1:49829/Tools/WebGLTemplate/FastGame/art/album-covers/freewill-electric-shocker.png",
+          "rect": [
+            0,
+            0,
+            224,
+            224,
+            57.93987095353974,
+            0,
+            67,
+            67
+          ]
+        }
+      ],
+      "gradients": 4,
+      "fit": {
+        "planeWidth": 182.87974190707948,
+        "planeHeight": 67,
+        "x": 57.93987095353974,
+        "y": 0,
+        "width": 67,
+        "height": 67,
+        "transform": [
+          0.9678491349245946,
+          0.25153141359622233,
+          0,
+          1,
+          665,
+          117
+        ]
+      }
+    }
+  ],
+  "lampPixels": {
+    "playing": [
+      [
+        255,
+        254,
+        254,
+        255
+      ],
+      [
+        252,
+        248,
+        248,
+        255
+      ],
+      [
+        252,
+        249,
+        244,
+        255
+      ],
+      [
+        255,
+        255,
+        254,
+        255
+      ],
+      [
+        251,
+        249,
+        245,
+        255
+      ]
+    ],
+    "ended": [
+      [
+        11,
+        17,
+        26,
+        255
+      ],
+      [
+        11,
+        17,
+        26,
+        255
+      ],
+      [
+        11,
+        17,
+        26,
+        255
+      ],
+      [
+        11,
+        17,
+        26,
+        255
+      ],
+      [
+        11,
+        17,
+        26,
+        255
+      ]
+    ]
+  },
+  "poolPixels": {
+    "playing": [
+      [
+        158,
+        38,
+        154,
+        255
+      ],
+      [
+        87,
+        35,
+        135,
+        255
+      ]
+    ],
+    "ended": [
+      [
+        47,
+        16,
+        56,
+        255
+      ],
+      [
+        28,
+        16,
+        51,
+        255
+      ]
+    ]
+  },
+  "overlappingOccluders": {
+    "before": [
+      [
+        220,
+        32,
+        18,
+        255
+      ],
+      [
+        220,
+        32,
+        18,
+        255
+      ],
+      [
+        100,
+        93,
+        144,
+        255
+      ],
+      [
+        246,
+        229,
+        211,
+        255
+      ]
+    ],
+    "ended": [
+      [
+        65,
+        15,
+        18,
+        255
+      ],
+      [
+        136,
+        23,
+        19,
+        255
+      ],
+      [
+        32,
+        32,
+        53,
+        255
+      ],
+      [
+        72,
+        69,
+        71,
+        255
+      ]
+    ]
+  },
+  "diagnostics": [
+    {
+      "label": "portrait",
+      "sourceSize": [
+        160,
+        240
+      ],
+      "fit": {
+        "planeWidth": 182.87974190707948,
+        "planeHeight": 67,
+        "x": 69.10653762020641,
+        "y": 0,
+        "width": 44.66666666666667,
+        "height": 67,
+        "transform": [
+          0.9678491349245946,
+          0.25153141359622233,
+          0,
+          1,
+          665,
+          117
+        ]
+      },
+      "draw": [
+        {
+          "src": "diagnostic",
+          "rect": [
+            0,
+            0,
+            160,
+            240,
+            69.10653762020641,
+            0,
+            44.66666666666667,
+            67
+          ]
+        }
+      ]
+    },
+    {
+      "label": "wide",
+      "sourceSize": [
+        320,
+        120
+      ],
+      "fit": {
+        "planeWidth": 182.87974190707948,
+        "planeHeight": 67,
+        "x": 2.106537620206396,
+        "y": 0,
+        "width": 178.66666666666669,
+        "height": 67,
+        "transform": [
+          0.9678491349245946,
+          0.25153141359622233,
+          0,
+          1,
+          665,
+          117
+        ]
+      },
+      "draw": [
+        {
+          "src": "diagnostic",
+          "rect": [
+            0,
+            0,
+            320,
+            120,
+            2.106537620206396,
+            0,
+            178.66666666666669,
+            67
+          ]
+        }
+      ]
+    }
+  ],
+  "coverRequests": [
+    "http://127.0.0.1:49829/Tools/WebGLTemplate/FastGame/art/album-covers.json",
+    "http://127.0.0.1:49829/Tools/WebGLTemplate/FastGame/art/album-covers/freewill-electric-shocker.png",
+    "http://127.0.0.1:49829/Tools/WebGLTemplate/FastGame/art/album-covers/julywantsmore-hey.png",
+    "http://127.0.0.1:49829/Tools/WebGLTemplate/FastGame/art/album-covers/julywantsmore-no-matter-how.png"
+  ]
+}

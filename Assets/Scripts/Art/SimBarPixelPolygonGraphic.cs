@@ -6,11 +6,17 @@ public sealed class SimBarPixelPolygonGraphic : MaskableGraphic
 {
     private Texture image;
     private Vector2[] points;
+    private Vector2[] textureCoordinates;
     public override Texture mainTexture => image != null ? image : s_WhiteTexture;
 
     public void Initialize(Texture texture, Vector2[] polygon)
     {
-        image=texture; points=polygon; raycastTarget=false;
+        Initialize(texture,polygon,null);
+    }
+
+    public void Initialize(Texture texture, Vector2[] polygon, Vector2[] uv)
+    {
+        image=texture; points=polygon; textureCoordinates=uv; raycastTarget=false;
         RectTransform rect=rectTransform;
         rect.anchorMin=rect.anchorMax=new Vector2(0f,1f);
         rect.pivot=new Vector2(0f,1f);rect.anchoredPosition=Vector2.zero;rect.sizeDelta=new Vector2(960f,558f);
@@ -24,7 +30,8 @@ public sealed class SimBarPixelPolygonGraphic : MaskableGraphic
         var indices=new System.Collections.Generic.List<int>();
         for(int i=0;i<points.Length;i++)
         {
-            Vector2 p=points[i];vertices.AddVert(new Vector3(p.x,-p.y,0f),color,new Vector2(p.x/960f,1f-p.y/558f));indices.Add(i);
+            Vector2 p=points[i];Vector2 uv=textureCoordinates!=null&&textureCoordinates.Length==points.Length?textureCoordinates[i]:new Vector2(p.x/960f,1f-p.y/558f);
+            vertices.AddVert(new Vector3(p.x,-p.y,0f),color,uv);indices.Add(i);
         }
         float area=0f;for(int i=0;i<points.Length;i++){Vector2 a=points[i],b=points[(i+1)%points.Length];area+=a.x*b.y-b.x*a.y;}
         float sign=area>=0f?1f:-1f;

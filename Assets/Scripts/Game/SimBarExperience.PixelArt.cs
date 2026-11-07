@@ -108,6 +108,8 @@ public sealed partial class SimBarExperience
         pixelRoom.SetParent(canvasObject.transform,false);pixelRoom.anchorMin=pixelRoom.anchorMax=new Vector2(.5f,.5f);
         pixelRoom.pivot=new Vector2(.5f,.5f);pixelRoom.sizeDelta=new Vector2(960f,558f);
         var plate=PixelImage("Approved Empty Room Plate",pixelRoom,venue);PixelRect(plate.rectTransform,Vector2.zero,new Vector2(960f,558f));
+        InitializeAlbumJackets(venue);
+        InitializePixelStageOff();
         InitializePixelLights();
         var paperRoot=new GameObject("Mission Paper from Saved State",typeof(RectTransform)).GetComponent<RectTransform>();
         paperRoot.SetParent(pixelRoom,false);PixelRect(paperRoot,Vector2.zero,new Vector2(960f,558f));
@@ -127,7 +129,10 @@ public sealed partial class SimBarExperience
             if(layer.actors!=null&&layer.actors.Length>0)continue;
             var polygon=new GameObject("Pixel Furniture Foreground",typeof(RectTransform),typeof(CanvasRenderer),typeof(SimBarPixelPolygonGraphic)).GetComponent<SimBarPixelPolygonGraphic>();
             polygon.transform.SetParent(pixelRoom,false);polygon.Initialize(venue,layer.points);
-            pixelStaticLayers.Add(new PixelLayer{root=polygon.transform,depth=layer.depth});
+            var staticLayer=new PixelLayer{root=polygon.transform,depth=layer.depth};
+            Transform unlit=CreatePixelStageOffOccluder(layer.points);
+            if(unlit!=null)staticLayer.after=new List<Transform>{unlit};
+            pixelStaticLayers.Add(staticLayer);
         }
         // Keep all navigation transforms, lights and mission actors alive. The main
         // camera now contributes only the base clear; the separate minimap still works.
@@ -165,9 +170,11 @@ public sealed partial class SimBarExperience
     }
     private void DestroyPixelPresentation()
     {
+        DestroyAlbumJackets();
         RestorePixelCamera();
         if(pixelWorldCanvas!=null)Destroy(pixelWorldCanvas.gameObject);
         pixelLightViews.Clear();pixelLightRoot=null;
+        pixelStageOffOccluders.Clear();pixelStageOffRoot=null;
         foreach(Texture2D texture in pixelDecodedTextures.Values)if(texture!=null)Destroy(texture);
         pixelDecodedTextures.Clear();pixelAtlasTextures.Clear();pixelAtlases.Clear();
         pixelActorViews.Clear();pixelStaticLayers.Clear();pixelDrawLayers.Clear();pixelParticles.Clear();pixelPaper.Clear();pixelPaperPositions.Clear();
@@ -510,6 +517,7 @@ public sealed partial class SimBarExperience
         bool visible=worldRoot!=null&&worldRoot.gameObject.activeInHierarchy;pixelWorldCanvas.enabled=visible;if(!visible)return;
         if(pixelScreenWidth!=Screen.width||pixelScreenHeight!=Screen.height)FitPixelPresentation();
         float delta=!paused&&(JourneyIsPlaying||JourneyIsFloorClosing)?Mathf.Min(.1f,Time.unscaledDeltaTime):0f;
+        UpdateAlbumJacket();
         UpdatePixelLights();
         pixelAnimationSeconds+=delta;
         // The 3D night-backdrop component can add its own layer on first activation.

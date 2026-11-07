@@ -911,10 +911,13 @@ public sealed partial class SimBarExperience : MonoBehaviour
 
     private void ApplyStageLighting()
     {
+        bool active=StagePerformanceLightingActive;
+        foreach(Renderer beam in stageBeams)if(beam!=null)beam.enabled=active;
         for (int i = 0; i < stageLights.Count; i++)
         {
             Light stageLight = stageLights[i];
             if (stageLight == null) continue;
+            stageLight.enabled=active;if(!active){stageLight.intensity=0f;continue;}
             // Opposite banks answer on each 120 BPM beat, with a soft rise/fall.
             // The room's warm practical lights remain steady.
             float phase = Mathf.Repeat(motionClock + .12f + (i % 2) * .5f, 1f);
@@ -1125,7 +1128,6 @@ public sealed partial class SimBarExperience : MonoBehaviour
         if(musicPlayPauseIcon!=null)
             musicPlayPauseIcon.text=musicPaused||musicWaitingForInput?"▶":"Ⅱ";
         foreach(Text label in juiMusicIcons)if(label!=null)label.text=musicPaused||musicWaitingForInput?"▶":"Ⅱ";
-        if(juiClosingMusicLabel!=null)juiClosingMusicLabel.text=musicPaused||musicWaitingForInput?SimBarLocalization.Text("MUSIC / RESUME ▶","음악 / 재생 ▶"):SimBarLocalization.Text("MUSIC / PAUSE Ⅱ","음악 / 일시 정지 Ⅱ");
     }
 
     private void TogglePause()

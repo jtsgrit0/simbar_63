@@ -16,8 +16,6 @@ public sealed partial class SimBarExperience
     private Text juiFarewellMessage;
     private readonly System.Collections.Generic.List<Text> juiMusicIcons = new System.Collections.Generic.List<Text>();
     private readonly System.Collections.Generic.List<Text> juiMusicTracks = new System.Collections.Generic.List<Text>();
-    private Canvas juiClosingMusicCanvas;
-    private Text juiClosingMusicLabel;
     private Text juiDay;
     private Text juiNightTitle;
     private Text juiClock;
@@ -102,7 +100,6 @@ public sealed partial class SimBarExperience
         BuildJourneyGuide();
         BuildJourneyResults();
         BuildJourneyFarewell();
-        BuildClosingMusicControl();
         ConfigureJourneyPauseMenu();
         juiBuilt = true;
         BuildBookingUI();
@@ -258,19 +255,10 @@ public sealed partial class SimBarExperience
         Button acknowledge=OpButton(SimBarLocalization.Text("SEE YOU TOMORROW!","내일 또 만나요!"),panel,Vector2.one*.5f,new Vector2(0f,-133f),new Vector2(510f,58f),23);acknowledge.name="Journey Farewell Acknowledge";acknowledge.onClick.AddListener(AcknowledgeAfterShowFarewell);
     }
 
-    private void BuildClosingMusicControl()
-    {
-        var root=new GameObject("Closing Music Above Floor Prompts",typeof(RectTransform),typeof(Canvas),typeof(CanvasScaler),typeof(GraphicRaycaster));root.transform.SetParent(transform,false);
-        juiClosingMusicCanvas=root.GetComponent<Canvas>();juiClosingMusicCanvas.renderMode=RenderMode.ScreenSpaceOverlay;juiClosingMusicCanvas.sortingOrder=630;
-        var scaler=root.GetComponent<CanvasScaler>();scaler.uiScaleMode=CanvasScaler.ScaleMode.ScaleWithScreenSize;scaler.referenceResolution=new Vector2(1920f,1080f);scaler.matchWidthOrHeight=.5f;
-        Button toggle=OpButton(string.Empty,root.transform,new Vector2(0f,1f),new Vector2(175f,-80f),new Vector2(290f,50f),19);toggle.name="Closing Music Play Pause";toggle.onClick.AddListener(TogglePlaylistMusic);juiClosingMusicLabel=toggle.GetComponentInChildren<Text>();root.SetActive(false);
-    }
-
     private void RefreshJourneyFarewell()
     {
         if(juiFarewell==null)return;
         bool show=JourneyIsFloorClosing&&AfterShowFarewellPending;
-        if(juiClosingMusicCanvas!=null)juiClosingMusicCanvas.gameObject.SetActive(JourneyIsFloorClosing&&!show);
         if(show)paused=true;
         JourneySetOverlay(juiFarewell,show);
         juiFarewellMessage.text=SimBarLocalization.Text("Tonight's live band gave it everything! Come back for another show tomorrow!","오늘의 라이브 밴드 공연은 하얗게 불태웠어요! 내일 또 공연 보러와요!");
@@ -324,6 +312,8 @@ public sealed partial class SimBarExperience
     private void RefreshJourneyHUD()
     {
         if (!juiBuilt) return;
+        ApplyStageLighting();
+        if(pixelLightRoot!=null&&pixelLightRoot.gameObject.activeSelf!=StagePerformanceLightingActive)UpdatePixelLights();
         RefreshBookingUI();
         RefreshFloorMissionUI();
         bool visible = !JourneyValidationMode;

@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "method": "Uniform LANCZOS resize within 224x224; full uncropped artwork; 24-bit RGB PNG; no palette quantization, redraw or synthesis",
+  "optionalLazyAssets": true,
+  "runtimeTotalBytes": 145154,
+  "uniqueJackets": 3,
+  "manifest": "Tools/WebGLTemplate/FastGame/art/album-covers.json",
+  "covers": [
+    {
+      "id": "freewill-electric-shocker",
+      "sourceUrl": "https://music.bugs.co.kr/album/20850049",
+      "sourcePageTitle": "Electric Shocker/프리윌(freewill) - 벅스",
+      "sourceImageUrl": "https://image.bugsm.co.kr/album/images/1200/208500/20850049.jpg",
+      "original": "ArtSource/AlbumJackets/originals/freewill-electric-shocker.jpg",
+      "originalDimensions": [
+        1200,
+        1200
+      ],
+      "originalFormat": "JPEG",
+      "originalBytes": 567635,
+      "originalSha256": "51957f42e3aa2f12fba3f2f703659c05b41ff0a66623bca1a147f5b4e1e954b7",
+      "cover": "album-covers/freewill-electric-shocker.png",
+      "width": 224,
+      "height": 224,
+      "runtimeBytes": 82234,
+      "runtimeSha256": "59e7b340e052bd2c575fc2ae731ec693a1368ca426078bf7ab23e68bae967f1c"
+    },
+    {
+      "id": "julywantsmore-hey",
+      "sourceUrl": "https://music.bugs.co.kr/album/20845764",
+      "sourcePageTitle": "Hey/Julywantsmore - 벅스",
+      "sourceImageUrl": "https://image.bugsm.co.kr/album/images/1200/208457/20845764.jpg",
+      "original": "ArtSource/AlbumJackets/originals/julywantsmore-hey.jpg",
+      "originalDimensions": [
+        1200,
+        1200
+      ],
+      "originalFormat": "JPEG",
+      "originalBytes": 157676,
+      "originalSha256": "515394368af2ee1622ad4099095f04ce284ec7fb275d74a8040d437ea3082442",
+      "cover": "album-covers/julywantsmore-hey.png",
+      "width": 224,
+      "height": 224,
+      "runtimeBytes": 22001,
+      "runtimeSha256": "1826f7082b8625acfdf42701333d9c33b4e858771b7ca01a6f604e62658c9f80"
+    },
+    {
+      "id": "julywantsmore-no-matter-how",
+      "sourceUrl": "https://music.bugs.co.kr/album/20817216",
+      "sourcePageTitle": "No Matter How/Julywantsmore - 벅스",
+      "sourceImageUrl": "https://image.bugsm.co.kr/album/images/1200/208172/20817216.jpg",
+      "original": "ArtSource/AlbumJackets/originals/julywantsmore-no-matter-how.jpg",
+      "originalDimensions": [
+        1200,
+        1200
+      ],
+      "originalFormat": "JPEG",
+      "originalBytes": 286185,
+      "originalSha256": "06a63ca0442d5dd0893599d10f8a848f0334ac8e11262bf43c0ef288678cac4b",
+      "cover": "album-covers/julywantsmore-no-matter-how.png",
+      "width": 224,
+      "height": 224,
+      "runtimeBytes": 40919,
+      "runtimeSha256": "c42bda9456074bf55e3963ef11ae6773ad34777c5a40c54138c4ee876047013d"
+    }
+  ]
+}

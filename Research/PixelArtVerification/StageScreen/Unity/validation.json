@@ -1,0 +1,168 @@
+[
+  {
+    "entry": "Backup",
+    "result": {
+      "saved": true
+    }
+  },
+  {
+    "entry": "Startup",
+    "result": {
+      "deferred": true,
+      "albumTexturesDecoded": 0
+    }
+  },
+  {
+    "entry": "Performance",
+    "result": {
+      "stageSpots": 4,
+      "physicalBeams": 4,
+      "pixelLights": true,
+      "pausedGameLightsStayVisible": true,
+      "cover": "SimBarAlbumJackets/freewill-electric-shocker",
+      "fixtureMasks": 4
+    }
+  },
+  {
+    "entry": "Track0",
+    "result": {
+      "index": 0,
+      "resource": "SimBarAlbumJackets/freewill-electric-shocker",
+      "width": 224,
+      "height": 224,
+      "projectedAspect": 1.00000083,
+      "fullSourceUV": true,
+      "physicalAspect": 1,
+      "textureFilter": "Bilinear"
+    }
+  },
+  {
+    "entry": "Track1",
+    "result": {
+      "index": 1,
+      "resource": "SimBarAlbumJackets/julywantsmore-hey",
+      "width": 224,
+      "height": 224,
+      "projectedAspect": 1.00000083,
+      "fullSourceUV": true,
+      "physicalAspect": 1,
+      "textureFilter": "Bilinear"
+    }
+  },
+  {
+    "entry": "Track2",
+    "result": {
+      "index": 2,
+      "resource": "SimBarAlbumJackets/julywantsmore-no-matter-how",
+      "width": 224,
+      "height": 224,
+      "projectedAspect": 1.00000083,
+      "fullSourceUV": true,
+      "physicalAspect": 1,
+      "textureFilter": "Bilinear"
+    }
+  },
+  {
+    "entry": "Track3",
+    "result": {
+      "index": 3,
+      "resource": "SimBarAlbumJackets/freewill-electric-shocker",
+      "width": 224,
+      "height": 224,
+      "projectedAspect": 1.00000083,
+      "fullSourceUV": true,
+      "physicalAspect": 1,
+      "textureFilter": "Bilinear"
+    }
+  },
+  {
+    "entry": "Track4",
+    "result": {
+      "index": 4,
+      "resource": "SimBarAlbumJackets/freewill-electric-shocker",
+      "width": 224,
+      "height": 224,
+      "projectedAspect": 1.00000083,
+      "fullSourceUV": true,
+      "physicalAspect": 1,
+      "textureFilter": "Bilinear"
+    }
+  },
+  {
+    "entry": "FitFixtures",
+    "result": {
+      "cases": [
+        {
+          "width": 224,
+          "height": 224,
+          "displayWidth": 67.00005,
+          "displayHeight": 67,
+          "ratio": 1.00000083
+        },
+        {
+          "width": 320,
+          "height": 180,
+          "displayWidth": 119.111145,
+          "displayHeight": 66.99999,
+          "ratio": 1.77777851
+        },
+        {
+          "width": 180,
+          "height": 320,
+          "displayWidth": 37.6875153,
+          "displayHeight": 67,
+          "ratio": 0.562500238
+        }
+      ]
+    }
+  },
+  {
+    "entry": "Pause",
+    "result": {
+      "sameCover": true,
+      "musicPaused": true,
+      "performanceLightsFrozenVisible": true
+    }
+  },
+  {
+    "entry": "Closing",
+    "result": {
+      "stageSpotsOff": true,
+      "physicalBeamsOff": true,
+      "pixelConesPoolsFlaresOff": true,
+      "ambientAndPracticalsUnchanged": true,
+      "onlyMusicAutoPaused": true,
+      "manualExistingPlaylistResume": true,
+      "reactionLeft": true,
+      "duplicateLeftMusicControl": false,
+      "raycast": [
+        "Music Play Pause Button"
+      ],
+      "coverRetained": "SimBarAlbumJackets/freewill-electric-shocker"
+    }
+  },
+  {
+    "entry": "ClosingTrack",
+    "result": {
+      "selectedTrack": 1,
+      "stageStillOff": true,
+      "existingPlaylistClickable": true,
+      "drawerLeft": true,
+      "raycast": [
+        "Music Play Pause Button"
+      ]
+    }
+  },
+  {
+    "entry": "Restore",
+    "result": {
+      "prefsRestored": true,
+      "gameViewRestored": true,
+      "scene": "Assets/Scenes/SimBar_Reference.unity",
+      "sceneDirty": false,
+      "playing": false,
+      "runInBackground": false,
+      "compiling": false
+    }
+  }
+]

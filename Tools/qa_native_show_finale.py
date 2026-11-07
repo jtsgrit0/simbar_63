@@ -11,7 +11,7 @@ from playwright.sync_api import sync_playwright
 from benchmark_web_loading import chromium_executable
 
 ROOT = Path(__file__).resolve().parent.parent
-OUT = ROOT / 'Research/PixelArtVerification/ShowFinale'
+OUT = ROOT / 'Research/PixelArtVerification/AlbumStageScreen/DOM'
 VIEW = ROOT / 'Library/ShowFinaleQA/index.html'
 FAREWELL = '오늘의 라이브 밴드 공연은 하얗게 불태웠어요! 내일 또 공연 보러와요!'
 HTML = '''<!doctype html><html lang="ko"><meta charset="utf-8">
@@ -39,7 +39,15 @@ SNAPSHOT = '''() => {
   farewellPending:g.farewellPending,afterShow:a,settledSession:g.journey.settledSession,
   money:g.state.money,xp:g.journey.xp,completedNights:g.journey.completedNights,
   audio:audio?{paused:audio.paused,currentTime:audio.currentTime,readyState:audio.readyState,error:audio.error?.code||0,src:audio.src}:null,
+  stageRender:window.qaStageRender||null,
   people:[...(a?.members||[]),...(a?.audience||[])].map(p=>{const actor=g.actors.find(x=>x.id===p.id);return{id:p.id,phase:p.phase,x:actor.x,z:actor.z,visible:actor.visible,moving:actor.moving};})};
+}'''
+OBSERVE_STAGE = '''() => {
+ const app=simbarApplication,ctx=app.canvas.getContext('2d'),draw=ctx.drawImage.bind(ctx),gradient=ctx.createLinearGradient.bind(ctx),render=app.world.render.bind(app.world);
+ window.qaStageRender={gradients:0,covers:[]};
+ ctx.drawImage=(...args)=>{if(args[0]?.src?.includes('/album-covers/'))qaStageRender.covers.push({src:args[0].src,rect:args.slice(1)});return draw(...args);};
+ ctx.createLinearGradient=(...args)=>{qaStageRender.gradients++;return gradient(...args);};
+ app.world.render=(...args)=>{window.qaStageRender={gradients:0,covers:[]};return render(...args);};
 }'''
 OBSERVE_TICKS = '''() => {
  const g=simbarGame,tick=g.tick.bind(g);
@@ -81,7 +89,7 @@ def main():
     thread.start()
     report = {'passed': False, 'checks': [], 'errors': [], 'httpErrors': [], 'screenshots': [],
               'sourceSha256': {name: hashlib.sha256((ROOT / 'Tools/WebGLTemplate/FastGame' / name).read_bytes()).hexdigest()
-                               for name in ['game.js', 'core.js', 'aftershow.js', 'music.js', 'world.js', 'style.css']}}
+                               for name in ['game.js', 'core.js', 'aftershow.js', 'music.js', 'album-art.js', 'world.js', 'style.css']}}
     try:
         with sync_playwright() as pw:
             executable = chromium_executable(None)
@@ -91,6 +99,8 @@ def main():
             page = context.new_page()
             page.on('pageerror', lambda error: report['errors'].append(str(error)))
             page.on('response', lambda response: report['httpErrors'].append({'url': response.url, 'status': response.status}) if response.status >= 400 else None)
+            cover_requests = []
+            page.on('request', lambda request: cover_requests.append(request.url) if '/album-covers' in request.url else None)
 
             def ready():
                 page.wait_for_function('window.simbarGameReadyAt>0', timeout=60000)
@@ -122,6 +132,8 @@ def main():
 
             page.goto(f'http://127.0.0.1:{server.server_port}/Library/ShowFinaleQA/index.html')
             ready()
+            assert not cover_requests, 'Album assets entered the initial loading path.'
+            report['checks'].append('Owner-selection readiness makes no album manifest or jacket request.')
             report['seed'] = page.evaluate('''async () => {
               const {SimBarGame}=await import('/Tools/WebGLTemplate/FastGame/core.js');
               for(let seed=1;seed<200;seed++){
@@ -134,21 +146,40 @@ def main():
             click('button[data-action="continue"]')
             page.wait_for_function('qaAudioElements.at(-1)?.paused===false && qaAudioElements.at(-1)?.readyState>=2')
             assert page.evaluate('simbarGame.phase') == 'playing'
+            page.evaluate(OBSERVE_STAGE)
+            report['albumTrackSelections'] = []
+            for index in range(5):
+                click(f'.playlist button[data-playlist="{index}"]')
+                page.wait_for_function('index=>!!simbarApplication.albumArt.covers[index]', arg=index)
+                page.wait_for_timeout(50)
+                stage = page.evaluate('qaStageRender')
+                assert stage['gradients'] == 4 and len(stage['covers']) == 1
+                assert stage['covers'][0]['rect'][:4] == [0, 0, 224, 224]
+                report['albumTrackSelections'].append({'index': index, 'stageRender': stage})
+            assert len(cover_requests) == 4 and len(set(cover_requests)) == 4
+            report['initialAlbumRequests'] = cover_requests[:]
+            report['checks'].append('All five actual playlist buttons lazily select full original jackets with one manifest and three shared images.')
+            click('.playlist button[data-playlist="0"]')
             report['performance'] = page.evaluate(SNAPSHOT)
             page.evaluate(OBSERVE_TICKS)
             page.evaluate('''() => {let n=0;while(simbarGame.phase==='playing'&&n++<4000)simbarGame.tick(.05);if(simbarGame.phase!=='closing')throw new Error('Performance never ended');}''')
             page.wait_for_function('qaAudioElements.at(-1)?.paused===true')
             end = page.evaluate(SNAPSHOT)
             assert end['musicPaused'] and end['phase'] == 'closing' and not end['farewellPending']
+            assert end['stageRender']['gradients'] == 0
+            end['unlitLensPixels'] = page.evaluate('''() => {const c=simbarApplication.canvas,p=c.getContext('2d'),offset=Math.round((c.width-960)/2);return[[643,121],[683,128],[735,140],[782,151],[822,162]].map(([x,y])=>Array.from(p.getImageData(x+offset,y,1,1).data));}''')
+            assert all(max(pixel[:3]) < 70 for pixel in end['unlitLensPixels'])
             report['endPerformance'] = end
             shot('01-performance-ended-audio-paused')
             report['checks'].append('Natural performance end pauses the actual HTMLAudioElement once.')
 
-            replay = '.closing-music button[data-action="ui:musicToggle"]'
+            assert page.locator('.closing-music').count() == 0, 'A removed extra left-side music control reappeared.'
+            replay = '.playlist button[data-action="ui:musicToggle"]'
             click(replay)
             page.wait_for_function('!simbarGame.journey.musicPaused && qaAudioElements.at(-1)?.paused===false')
             page.wait_for_timeout(150)
             assert not page.evaluate(SNAPSHOT)['audio']['paused']
+            assert page.evaluate('qaStageRender.gradients') == 0
             report['checks'].append('Manual replay after the performance survives subsequent rendering frames.')
             page.set_viewport_size({'width': 390, 'height': 844})
             page.wait_for_timeout(80)
@@ -157,6 +188,8 @@ def main():
             page.wait_for_function('simbarGame.journey.musicPaused && qaAudioElements.at(-1)?.paused===true')
             click(replay)
             page.wait_for_function('!simbarGame.journey.musicPaused && qaAudioElements.at(-1)?.paused===false')
+            assert page.locator('.closing-music').count() == 0
+            assert page.evaluate('qaStageRender.gradients') == 0
             report['checks'].append('Closing replay remains visible and touch-clickable on 390×844 with a floor reaction active.')
             page.set_viewport_size({'width': 1280, 'height': 800})
 
@@ -177,6 +210,7 @@ def main():
             assert not restored['musicPaused']
             click('button[data-action="continue"]')
             page.wait_for_function('qaAudioElements.at(-1)?.paused===false')
+            page.evaluate(OBSERVE_STAGE)
             assert not page.evaluate('simbarGame.journey.musicPaused')
             report['checks'].append('Reload preserves the in-progress greeting and manually resumed music choice.')
             page.evaluate(OBSERVE_TICKS)
@@ -280,6 +314,7 @@ def main():
             assert not receipt['farewellPending'] and not receipt['musicPaused']
             assert page.locator('.farewell-card').count() == 0
             report['checks'].append('Reloading the results preserves money/XP/completion and never repeats the popup or payout.')
+            report['coverRequests'] = cover_requests
             report['audioEvents'] = page.evaluate('qaAudioEvents')
             assert not report['errors'], report['errors']
             assert not report['httpErrors'], report['httpErrors']

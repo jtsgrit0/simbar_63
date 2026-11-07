@@ -1,0 +1,326 @@
+{
+  "version": 1,
+  "retrievedAtUtc": "2026-11-07T03:08:42.552757+00:00",
+  "runtimeManifest": "Tools/WebGLTemplate/FastGame/art/album-covers.json",
+  "runtimeTotalBytes": 145154,
+  "uniqueJackets": 3,
+  "identityNotes": [
+    "Hey_spotdown.mp3 has the embedded title Hey; the suffix is not the release title.",
+    "Bedroom Manifesto is listed in English by Apple and as the Korean title on the Bugs Electric Shocker three-track release.",
+    "The three freewill files share one release and the same embedded artwork hash.",
+    "No Matter How has different storefront release-date fields (Bugs domestic service June18 versus Apple May6/Spotify May5); artist, title, artwork and duration agree. Dates are not used for runtime selection."
+  ],
+  "artworkMethod": "Uniform LANCZOS resize within 224x224; full uncropped artwork; 24-bit RGB PNG; no palette quantization, redraw or synthesis",
+  "sourceComparison": "Research/AlbumJackets/source-comparison.png",
+  "covers": [
+    {
+      "id": "freewill-electric-shocker",
+      "sourceUrl": "https://music.bugs.co.kr/album/20850049",
+      "sourcePageTitle": "Electric Shocker/프리윌(freewill) - 벅스",
+      "sourceImageUrl": "https://image.bugsm.co.kr/album/images/1200/208500/20850049.jpg",
+      "original": "ArtSource/AlbumJackets/originals/freewill-electric-shocker.jpg",
+      "originalDimensions": [
+        1200,
+        1200
+      ],
+      "originalFormat": "JPEG",
+      "originalBytes": 567635,
+      "originalSha256": "51957f42e3aa2f12fba3f2f703659c05b41ff0a66623bca1a147f5b4e1e954b7",
+      "cover": "album-covers/freewill-electric-shocker.png",
+      "width": 224,
+      "height": 224,
+      "runtimeBytes": 82234,
+      "runtimeSha256": "59e7b340e052bd2c575fc2ae731ec693a1368ca426078bf7ab23e68bae967f1c"
+    },
+    {
+      "id": "julywantsmore-hey",
+      "sourceUrl": "https://music.bugs.co.kr/album/20845764",
+      "sourcePageTitle": "Hey/Julywantsmore - 벅스",
+      "sourceImageUrl": "https://image.bugsm.co.kr/album/images/1200/208457/20845764.jpg",
+      "original": "ArtSource/AlbumJackets/originals/julywantsmore-hey.jpg",
+      "originalDimensions": [
+        1200,
+        1200
+      ],
+      "originalFormat": "JPEG",
+      "originalBytes": 157676,
+      "originalSha256": "515394368af2ee1622ad4099095f04ce284ec7fb275d74a8040d437ea3082442",
+      "cover": "album-covers/julywantsmore-hey.png",
+      "width": 224,
+      "height": 224,
+      "runtimeBytes": 22001,
+      "runtimeSha256": "1826f7082b8625acfdf42701333d9c33b4e858771b7ca01a6f604e62658c9f80"
+    },
+    {
+      "id": "julywantsmore-no-matter-how",
+      "sourceUrl": "https://music.bugs.co.kr/album/20817216",
+      "sourcePageTitle": "No Matter How/Julywantsmore - 벅스",
+      "sourceImageUrl": "https://image.bugsm.co.kr/album/images/1200/208172/20817216.jpg",
+      "original": "ArtSource/AlbumJackets/originals/julywantsmore-no-matter-how.jpg",
+      "originalDimensions": [
+        1200,
+        1200
+      ],
+      "originalFormat": "JPEG",
+      "originalBytes": 286185,
+      "originalSha256": "06a63ca0442d5dd0893599d10f8a848f0334ac8e11262bf43c0ef288678cac4b",
+      "cover": "album-covers/julywantsmore-no-matter-how.png",
+      "width": 224,
+      "height": 224,
+      "runtimeBytes": 40919,
+      "runtimeSha256": "c42bda9456074bf55e3963ef11ae6773ad34777c5a40c54138c4ee876047013d"
+    }
+  ],
+  "tracks": [
+    {
+      "index": 0,
+      "filename": "Electric Shocker.mp3",
+      "title": "Electric Shocker",
+      "artist": "프리윌(freewill)",
+      "release": "Electric Shocker",
+      "cover": "album-covers/freewill-electric-shocker.png",
+      "sourceUrl": "https://music.bugs.co.kr/album/20850049",
+      "sourceImageUrl": "https://image.bugsm.co.kr/album/images/1200/208500/20850049.jpg",
+      "width": 224,
+      "height": 224,
+      "coverId": "freewill-electric-shocker",
+      "mp3": {
+        "path": "Assets/StreamingAssets/Music/Electric Shocker.mp3",
+        "sha256": "9612581e34ec39e8cbbc4484cd6b2aeea4dd337c637fc6a066845a0ccb1812bf",
+        "durationSeconds": 149.44653061224489,
+        "tags": {
+          "album": [
+            "Unknown Album"
+          ],
+          "title": [
+            "Electric Shocker"
+          ],
+          "artist": [
+            "프리윌(freewill)"
+          ]
+        },
+        "embeddedCoverDimensions": [
+          300,
+          300
+        ],
+        "embeddedCoverSha256": "4d0b0c2ada6431b9e608a6bd05a69a511b6abf84584b4f9bab30640a34def371"
+      },
+      "officialTrack": {
+        "artistId": 6827474410,
+        "artistName": "프리윌(freewill)",
+        "collectionId": 6827503438,
+        "collectionName": "Electric Shocker - Single",
+        "trackId": 6827503684,
+        "trackName": "Electric Shocker",
+        "trackTimeMillis": 149388,
+        "releaseDate": "2026-10-31T12:00:00Z",
+        "collectionViewUrl": "https://music.apple.com/us/album/electric-shocker/6827503438?i=6827503684&uo=4",
+        "trackViewUrl": "https://music.apple.com/us/album/electric-shocker/6827503438?i=6827503684&uo=4",
+        "artworkUrl100": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/1b/d6/de/1bd6de7d-0aa4-494a-d8a2-3abb66f79f03/8800319371134_cover.jpg/100x100bb.jpg"
+      },
+      "officialLookupUrl": "https://itunes.apple.com/lookup?id=6827503438&entity=song",
+      "durationDifferenceSeconds": 0.058530612244879876,
+      "verification": "Artist ID and title match the official catalog; duration matches within MP3 frame padding; publisher jacket visually matches the MP3 embedded front cover."
+    },
+    {
+      "index": 1,
+      "filename": "Hey_spotdown.mp3",
+      "title": "Hey",
+      "artist": "Julywantsmore",
+      "release": "Hey",
+      "cover": "album-covers/julywantsmore-hey.png",
+      "sourceUrl": "https://music.bugs.co.kr/album/20845764",
+      "sourceImageUrl": "https://image.bugsm.co.kr/album/images/1200/208457/20845764.jpg",
+      "width": 224,
+      "height": 224,
+      "coverId": "julywantsmore-hey",
+      "mp3": {
+        "path": "Assets/StreamingAssets/Music/Hey_spotdown.mp3",
+        "sha256": "ad38edfe7bbd90d76b2685a46b691241e3661e7d75f3c572a1b8738730793b1e",
+        "durationSeconds": 192.49632653061224,
+        "tags": {
+          "album": [
+            "Unknown Album"
+          ],
+          "title": [
+            "Hey"
+          ],
+          "artist": [
+            "Julywantsmore"
+          ]
+        },
+        "embeddedCoverDimensions": [
+          300,
+          300
+        ],
+        "embeddedCoverSha256": "93f73553fa7a83de54926895d0573d506e9788ab0649c72f2c435b496a4b07e7"
+      },
+      "officialTrack": {
+        "artistId": 1879996105,
+        "artistName": "Julywantsmore",
+        "collectionId": 6814752607,
+        "collectionName": "Hey - Single",
+        "trackId": 6814752608,
+        "trackName": "Hey",
+        "trackTimeMillis": 192433,
+        "releaseDate": "2026-10-12T12:00:00Z",
+        "collectionViewUrl": "https://music.apple.com/us/album/hey/6814752607?i=6814752608&uo=4",
+        "trackViewUrl": "https://music.apple.com/us/album/hey/6814752607?i=6814752608&uo=4",
+        "artworkUrl100": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/79/8f/f1/798ff179-9abb-7975-c14b-7542a53b095f/8800366478053.jpg/100x100bb.jpg"
+      },
+      "officialLookupUrl": "https://itunes.apple.com/lookup?id=6814752607&entity=song",
+      "durationDifferenceSeconds": 0.06332653061224391,
+      "verification": "Artist ID and title match the official catalog; duration matches within MP3 frame padding; publisher jacket visually matches the MP3 embedded front cover."
+    },
+    {
+      "index": 2,
+      "filename": "No Matter How.mp3",
+      "title": "No Matter How",
+      "artist": "Julywantsmore",
+      "release": "No Matter How",
+      "cover": "album-covers/julywantsmore-no-matter-how.png",
+      "sourceUrl": "https://music.bugs.co.kr/album/20817216",
+      "sourceImageUrl": "https://image.bugsm.co.kr/album/images/1200/208172/20817216.jpg",
+      "width": 224,
+      "height": 224,
+      "coverId": "julywantsmore-no-matter-how",
+      "mp3": {
+        "path": "Assets/StreamingAssets/Music/No Matter How.mp3",
+        "sha256": "97f97cb50e996af568db6ac09b925df4c92686ab63bf26f359273e66fdcf7e27",
+        "durationSeconds": 174.0538775510204,
+        "tags": {
+          "album": [
+            "Unknown Album"
+          ],
+          "title": [
+            "No Matter How"
+          ],
+          "artist": [
+            "Julywantsmore"
+          ]
+        },
+        "embeddedCoverDimensions": [
+          300,
+          300
+        ],
+        "embeddedCoverSha256": "f1f194d408479ddb460332befb470bcacaf5590584c7a2beb7bbd40d54ac5c27"
+      },
+      "officialTrack": {
+        "artistId": 1879996105,
+        "artistName": "Julywantsmore",
+        "collectionId": 1896024207,
+        "collectionName": "No Matter How - Single",
+        "trackId": 6765650723,
+        "trackName": "No Matter How",
+        "trackTimeMillis": 174000,
+        "releaseDate": "2026-05-06T12:00:00Z",
+        "collectionViewUrl": "https://music.apple.com/us/album/no-matter-how/1896024207?i=6765650723&uo=4",
+        "trackViewUrl": "https://music.apple.com/us/album/no-matter-how/1896024207?i=6765650723&uo=4",
+        "artworkUrl100": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/e5/26/eb/e526eb2e-ed47-e9ec-a821-4063b9f4fbf9/5063960942082_cover.jpg/100x100bb.jpg"
+      },
+      "officialLookupUrl": "https://itunes.apple.com/lookup?id=1896024207&entity=song",
+      "durationDifferenceSeconds": 0.053877551020406145,
+      "verification": "Artist ID and title match the official catalog; duration matches within MP3 frame padding; publisher jacket visually matches the MP3 embedded front cover."
+    },
+    {
+      "index": 3,
+      "filename": "Bedroom Manifesto.mp3",
+      "title": "Bedroom Manifesto",
+      "artist": "프리윌(freewill)",
+      "release": "Electric Shocker",
+      "cover": "album-covers/freewill-electric-shocker.png",
+      "sourceUrl": "https://music.bugs.co.kr/album/20850049",
+      "sourceImageUrl": "https://image.bugsm.co.kr/album/images/1200/208500/20850049.jpg",
+      "width": 224,
+      "height": 224,
+      "coverId": "freewill-electric-shocker",
+      "mp3": {
+        "path": "Assets/StreamingAssets/Music/Bedroom Manifesto.mp3",
+        "sha256": "c0a33f37f425a621f5ee3835b3bccd7a1b3a8b78ab0e04d85aa8c42e3c37826c",
+        "durationSeconds": 161.33224489795919,
+        "tags": {
+          "album": [
+            "Unknown Album"
+          ],
+          "title": [
+            "Bedroom Manifesto"
+          ],
+          "artist": [
+            "프리윌(freewill)"
+          ]
+        },
+        "embeddedCoverDimensions": [
+          300,
+          300
+        ],
+        "embeddedCoverSha256": "4d0b0c2ada6431b9e608a6bd05a69a511b6abf84584b4f9bab30640a34def371"
+      },
+      "officialTrack": {
+        "artistId": 6827474410,
+        "artistName": "프리윌(freewill)",
+        "collectionId": 6827503438,
+        "collectionName": "Electric Shocker - Single",
+        "trackId": 6827503695,
+        "trackName": "Bedroom Manifesto",
+        "trackTimeMillis": 161274,
+        "releaseDate": "2026-10-31T12:00:00Z",
+        "collectionViewUrl": "https://music.apple.com/us/album/bedroom-manifesto/6827503438?i=6827503695&uo=4",
+        "trackViewUrl": "https://music.apple.com/us/album/bedroom-manifesto/6827503438?i=6827503695&uo=4",
+        "artworkUrl100": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/1b/d6/de/1bd6de7d-0aa4-494a-d8a2-3abb66f79f03/8800319371134_cover.jpg/100x100bb.jpg"
+      },
+      "officialLookupUrl": "https://itunes.apple.com/lookup?id=6827503438&entity=song",
+      "durationDifferenceSeconds": 0.05824489795918453,
+      "verification": "Artist ID and title match the official catalog; duration matches within MP3 frame padding; publisher jacket visually matches the MP3 embedded front cover."
+    },
+    {
+      "index": 4,
+      "filename": "Electric Shocker - Korean Version.mp3",
+      "title": "Electric Shocker (Korean Version)",
+      "artist": "프리윌(freewill)",
+      "release": "Electric Shocker",
+      "cover": "album-covers/freewill-electric-shocker.png",
+      "sourceUrl": "https://music.bugs.co.kr/album/20850049",
+      "sourceImageUrl": "https://image.bugsm.co.kr/album/images/1200/208500/20850049.jpg",
+      "width": 224,
+      "height": 224,
+      "coverId": "freewill-electric-shocker",
+      "mp3": {
+        "path": "Assets/StreamingAssets/Music/Electric Shocker - Korean Version.mp3",
+        "sha256": "02e9c31bc01c93b12cce8838400980ca5fccd1ab1ef827cf73f191e355bcbdfe",
+        "durationSeconds": 149.44653061224489,
+        "tags": {
+          "album": [
+            "Unknown Album"
+          ],
+          "title": [
+            "Electric Shocker - Korean Version"
+          ],
+          "artist": [
+            "프리윌(freewill)"
+          ]
+        },
+        "embeddedCoverDimensions": [
+          300,
+          300
+        ],
+        "embeddedCoverSha256": "4d0b0c2ada6431b9e608a6bd05a69a511b6abf84584b4f9bab30640a34def371"
+      },
+      "officialTrack": {
+        "artistId": 6827474410,
+        "artistName": "프리윌(freewill)",
+        "collectionId": 6827503438,
+        "collectionName": "Electric Shocker - Single",
+        "trackId": 6827503706,
+        "trackName": "Electric Shocker (Korean Version)",
+        "trackTimeMillis": 149388,
+        "releaseDate": "2026-10-31T12:00:00Z",
+        "collectionViewUrl": "https://music.apple.com/us/album/electric-shocker-korean-version/6827503438?i=6827503706&uo=4",
+        "trackViewUrl": "https://music.apple.com/us/album/electric-shocker-korean-version/6827503438?i=6827503706&uo=4",
+        "artworkUrl100": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/1b/d6/de/1bd6de7d-0aa4-494a-d8a2-3abb66f79f03/8800319371134_cover.jpg/100x100bb.jpg"
+      },
+      "officialLookupUrl": "https://itunes.apple.com/lookup?id=6827503438&entity=song",
+      "durationDifferenceSeconds": 0.058530612244879876,
+      "verification": "Artist ID and title match the official catalog; duration matches within MP3 frame padding; publisher jacket visually matches the MP3 embedded front cover."
+    }
+  ]
+}

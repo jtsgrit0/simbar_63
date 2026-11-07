@@ -1,0 +1,14 @@
+{
+    "quiet":  true,
+    "buildId":  "build_0d9e0d58af1c",
+    "compilerOrWasmOptProcesses":  0,
+    "generatedPerformanceFilesRemain":  0,
+    "generatedPerformanceFilesRemovedByBuildPostprocessor":  true,
+    "profileUnchanged":  true,
+    "originalPrefsRestored":  true,
+    "originalGameViewRestored":  true,
+    "savedReferenceSceneClean":  true,
+    "playStopped":  true,
+    "runInBackground":  false,
+    "furtherPlayAfterBuild":  false
+}

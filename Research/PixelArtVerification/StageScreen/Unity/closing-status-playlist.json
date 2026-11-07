@@ -1,0 +1,9 @@
+{
+  "selectedTrack": 1,
+  "stageStillOff": true,
+  "existingPlaylistClickable": true,
+  "drawerLeft": true,
+  "raycast": [
+    "Music Play Pause Button"
+  ]
+}

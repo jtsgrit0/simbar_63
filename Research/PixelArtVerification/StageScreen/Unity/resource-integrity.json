@@ -1,0 +1,45 @@
+{
+  "tracks": [
+    {
+      "index": 0,
+      "resource": "SimBarAlbumJackets/freewill-electric-shocker"
+    },
+    {
+      "index": 1,
+      "resource": "SimBarAlbumJackets/julywantsmore-hey"
+    },
+    {
+      "index": 2,
+      "resource": "SimBarAlbumJackets/julywantsmore-no-matter-how"
+    },
+    {
+      "index": 3,
+      "resource": "SimBarAlbumJackets/freewill-electric-shocker"
+    },
+    {
+      "index": 4,
+      "resource": "SimBarAlbumJackets/freewill-electric-shocker"
+    }
+  ],
+  "uniqueCovers": [
+    {
+      "source": "album-covers/freewill-electric-shocker.png",
+      "bytes": 82234,
+      "sha256": "59e7b340e052bd2c575fc2ae731ec693a1368ca426078bf7ab23e68bae967f1c",
+      "byteIdentical": true
+    },
+    {
+      "source": "album-covers/julywantsmore-hey.png",
+      "bytes": 22001,
+      "sha256": "1826f7082b8625acfdf42701333d9c33b4e858771b7ca01a6f604e62658c9f80",
+      "byteIdentical": true
+    },
+    {
+      "source": "album-covers/julywantsmore-no-matter-how.png",
+      "bytes": 40919,
+      "sha256": "c42bda9456074bf55e3963ef11ae6773ad34777c5a40c54138c4ee876047013d",
+      "byteIdentical": true
+    }
+  ],
+  "totalBytes": 145154
+}

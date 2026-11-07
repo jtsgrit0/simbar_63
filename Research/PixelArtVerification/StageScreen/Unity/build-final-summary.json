@@ -1,0 +1,36 @@
+{
+  "buildId": "build_0d9e0d58af1c",
+  "result": "Succeeded",
+  "platform": "WebGL",
+  "outputPath": "E:/simbar_63/Builds/Pages/SimBarPlayerWebGL",
+  "buildTimeMs": 266587,
+  "totalErrors": 0,
+  "totalWarnings": 18,
+  "scene": "Assets/Scenes/SimBar_Reference.unity",
+  "options": [
+    "DetailedBuildReport"
+  ],
+  "profile": null,
+  "files": [
+    {
+      "name": "2e4ab24f889c7fefa5d0541f321d555b.framework.js",
+      "bytes": 328678,
+      "sha256": "f4c659d5db78f77b2e004a3a9b12c38191655bdbf00f0f644f48a4fdf4ae3bb7"
+    },
+    {
+      "name": "6151ffccf62125b1d3903848667d74a6.data",
+      "bytes": 20030980,
+      "sha256": "aab54f9df902b1293012e52f470cdbf02d000533be9b1ecb7f6c51b4a51e0358"
+    },
+    {
+      "name": "789e790c9542280a4906a1214e483532.wasm",
+      "bytes": 20682777,
+      "sha256": "3d9bb18263f7d9e5f8ceddd5fdeedbbc478bed75a1d30f79a5d351ea421f3b27"
+    },
+    {
+      "name": "dd25ddb47d26ea6a2f0049761a09cb92.loader.js",
+      "bytes": 27914,
+      "sha256": "ca51bef36b6f3f490aa6a5dc6d6008759c877372c5b8ad3a17f28166c69fbb87"
+    }
+  ]
+}

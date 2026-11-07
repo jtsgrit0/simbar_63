@@ -1,0 +1,25 @@
+{
+  "cases": [
+    {
+      "width": 224.0,
+      "height": 224.0,
+      "displayWidth": 67.00005,
+      "displayHeight": 67.0,
+      "ratio": 1.00000083
+    },
+    {
+      "width": 320.0,
+      "height": 180.0,
+      "displayWidth": 119.111145,
+      "displayHeight": 66.99999,
+      "ratio": 1.77777851
+    },
+    {
+      "width": 180.0,
+      "height": 320.0,
+      "displayWidth": 37.6875153,
+      "displayHeight": 67.0,
+      "ratio": 0.562500238
+    }
+  ]
+}

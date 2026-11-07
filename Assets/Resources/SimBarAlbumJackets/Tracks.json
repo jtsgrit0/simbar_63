@@ -1,0 +1,24 @@
+{
+  "tracks": [
+    {
+      "index": 0,
+      "resource": "SimBarAlbumJackets/freewill-electric-shocker"
+    },
+    {
+      "index": 1,
+      "resource": "SimBarAlbumJackets/julywantsmore-hey"
+    },
+    {
+      "index": 2,
+      "resource": "SimBarAlbumJackets/julywantsmore-no-matter-how"
+    },
+    {
+      "index": 3,
+      "resource": "SimBarAlbumJackets/freewill-electric-shocker"
+    },
+    {
+      "index": 4,
+      "resource": "SimBarAlbumJackets/freewill-electric-shocker"
+    }
+  ]
+}
