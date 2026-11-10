@@ -42,9 +42,16 @@ crashlytics-build.properties
 *.aab
 *.app
 *.unitypackage
+
+# Music is served from the HTTPS URLs in playlist.json.
+/Assets/StreamingAssets/Music/*.mp3
+/Assets/StreamingAssets/Music/*.mp3.meta
+/docs/StreamingAssets/Music/*.mp3
 ~UnityDirMonSyncFile~*
 
 # Local credentials, Python caches and OS files
+/supabase/.temp/
+/supabase/.branches/
 .env
 .env.*
 !.env.example

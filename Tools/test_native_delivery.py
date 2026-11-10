@@ -113,6 +113,18 @@ class NativeDeliveryTests(unittest.TestCase):
             self.assertIn("art/" + name, files)
             self.assertNotIn(name, index)
 
+    def test_remote_music_does_not_copy_local_mp3s_into_new_delivery(self):
+        streaming = self.source.parent / "streaming"
+        (streaming / "Music").mkdir(parents=True)
+        (streaming / "ScoutPosters").mkdir()
+        audio = streaming / "Music/Example.mp3"
+        audio.write_bytes(b"local original")
+        (streaming / "ScoutPosters/example.png").write_bytes(b"poster")
+        native.prepare_native_pages(self.source, self.output, template=self.template, streaming=streaming)
+        self.assertTrue(audio.is_file())
+        self.assertFalse((self.output / "StreamingAssets/Music").exists())
+        self.assertTrue((self.output / "StreamingAssets/ScoutPosters/example.png").is_file())
+
     def test_missing_selected_owner_desk_scene_prevents_release(self):
         (self.source / "art" / native.DEFERRED_IMAGES[1]).unlink()
         with self.assertRaisesRegex(FileNotFoundError, "office/desk-edison.png"):

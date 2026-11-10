@@ -91,6 +91,35 @@ class PackagingTests(unittest.TestCase):
         self.assert_packaged_assets(assets, "")
         self.assertFalse(list((self.output / "Build").glob("*.gz")))
 
+    def test_legacy_build_excludes_streamed_mp3s_and_preserves_other_assets(self):
+        self.make_build()
+        excluded = {
+            "StreamingAssets/Music/Electric Shocker.mp3": b"legacy local track",
+            "StreamingAssets/Music/Electric Shocker.mp3.meta": b"legacy Unity metadata",
+            "StreamingAssets/Music/Another.MP3": b"legacy track with uppercase extension",
+            "StreamingAssets/Music/Compressed.mp3.gz": gzip.compress(b"legacy compressed track"),
+        }
+        retained = {
+            "StreamingAssets/ScoutPosters/band.png": b"poster image",
+            "StreamingAssets/playlist.json": b'{"tracks": []}',
+            "StreamingAssets/Music/music.bundle": b"other music asset",
+            "StreamingAssets/Effects/crowd.mp3": b"unrelated sound effect",
+        }
+        for relative, payload in (excluded | retained).items():
+            path = self.source / relative
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(payload)
+
+        pages.package_player(self.source, self.output)
+
+        for relative in excluded:
+            with self.subTest(excluded=relative):
+                self.assertFalse((self.output / pages.deployed_path(Path(relative))).exists())
+                self.assertTrue((self.source / relative).is_file())
+        for relative, payload in retained.items():
+            with self.subTest(retained=relative):
+                self.assertEqual((self.output / relative).read_bytes(), payload)
+
     def test_legacy_brotli_uses_decoder_and_raw_urls(self):
         assets = self.make_build(".br")
         with patch.object(pages, "decompressor", return_value=lambda source, target:

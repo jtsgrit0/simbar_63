@@ -1,4 +1,4 @@
-// Real StreamingAssets tracks are fetched only after a user gesture.
+// Remote MP3s stream directly through the media element after a user gesture.
 export class MusicPlayer{
   constructor({getIndex,getPaused,tracks,baseURL,AudioClass=globalThis.Audio,onchange=()=>{},onPauseChange=()=>{}}){
     this.getIndex=getIndex;this.tracks=tracks;this.baseURL=baseURL;this.AudioClass=AudioClass;this.onchange=onchange;
@@ -14,7 +14,7 @@ export class MusicPlayer{
     const track=this.tracks[index];if(!track)return;
     this.index=index;this.paused=desired??false;this.failed=false;this.suspended=false;
     const audio=this.audio=new this.AudioClass();audio.preload='none';audio.loop=true;audio.volume=.14;
-    audio.src=new URL('StreamingAssets/Music/'+encodeURIComponent(track.filename),this.baseURL).href;
+    audio.src=track.audio_url;
     audio.addEventListener?.('error',()=>{if(this.audio===audio){this.failed=true;this.onchange();}});
     if(!this.paused)this.play();this.onchange();
   }

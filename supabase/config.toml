@@ -1,0 +1,39 @@
+# Local project identity; this does not link or modify the hosted project.
+project_id = "simbar_63"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+shadow_port = 54320
+# Set major_version only after checking SHOW server_version on the hosted DB.
+
+[db.migrations]
+enabled = true
+
+[db.seed]
+enabled = true
+sql_paths = ["./seed.sql"]
+
+[auth]
+enabled = true
+site_url = "https://jtsgrit0.github.io/simbar_63/"
+additional_redirect_urls = [
+  "https://jtsgrit0.github.io/simbar_63/",
+  "http://127.0.0.1:8000/",
+  "http://localhost:8000/",
+]
+enable_signup = true
+enable_anonymous_sign_ins = false
+minimum_password_length = 8
+
+[auth.email]
+enable_signup = true
+enable_confirmations = true
+
+# No audio bucket: the five tracks remain on the existing Cloudflare R2 host.

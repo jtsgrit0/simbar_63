@@ -1,5 +1,7 @@
 # SimBar
 
+참여형 공연장의 Supabase DB 구조·권한·설정과 적용 상태는 [supabase/README.md](supabase/README.md)에 정리했습니다. 원격 대상은 `ziyosbcfdsbirhdsgxax`이며, 음원은 기존 R2에 두고 DB에는 메타데이터만 저장합니다.
+
 웹 기본 플레이어는 브라우저에서 바로 실행하는 픽셀아트 버전입니다. 사장님 초상은 제공된 `owner_p.png` 원화를 바탕으로 캐릭터별 자세·배치와 레코드 책장·밴드셋 배경을 적용했습니다. 매장·인물은 승인된 시안에 맞는 픽셀아트이며 글자·버튼·메뉴는 선명한 UI로 유지합니다. 배경에 인물을 구워 넣지 않고 실제 게임 상태에 따라 걷기·연주·청소·손님 안내를 따로 그립니다.
 
 로컬 웹 실행과 배포 파일 갱신:
@@ -14,6 +16,8 @@ python -m http.server 8767 --bind 127.0.0.1 --directory docs
 이미지 원본과 실제 제작 프롬프트는 [ArtSource/PixelArt](ArtSource/PixelArt/Prompts.md)에 있습니다. `prepare_pixel_art.py`는 픽셀 간격을 유지하여 PNG 크기와 팔레트만 변환합니다. `prepare_native_font.py`는 게임에서 쓰는 글자로 OFL 글꼴을 다시 만들며 UI 전체 화면을 이미지로 바꾸지 않습니다.
 
 저장 데이터는 기존 `SimBar.Operations.v1` 구조를 유지합니다. 첫 접속 시 같은 주소의 Unity IndexedDB 저장을 읽기 전용으로 가져오고 원문을 백업합니다. 이미 새 게임에서 저장한 진행은 늦게 도착한 이전 데이터로 덮어쓰지 않습니다. 포스터와 MP3는 필요할 때만 요청하며 초기 다운로드에 포함하지 않습니다.
+
+음원 원본 설정은 루트 `playlist.json`입니다. 각 곡의 `audio_url`에는 파일명까지 포함한 HTTPS 주소를 적습니다. 브라우저 플레이어는 사용자 입력 뒤 선택한 MP3를 R2에서 직접 스트리밍합니다. `prepare_native_pages.py`는 목록에서 `playlist.js`와 Unity용 `Assets/StreamingAssets/playlist.json`을 생성하며, 새 웹 배포에는 로컬 MP3를 복사하지 않습니다. 곡 ID와 0–4 순서를 유지하면 기존 저장 데이터의 선곡이 보존됩니다. 로컬 MP3 원본과 배포·미리보기 사본은 제거했으며, Unity 패키징도 이전 빌드의 MP3를 복사하지 않습니다.
 
 모바일 성능 검사는 다음 명령으로 재현합니다. 실제 이동통신의 모든 상황을 보장하는 수치가 아니라, 캐시가 없는 Chromium에서 지정한 대역폭·지연·CPU 조건으로 실제 게임 엔진과 조작 준비 완료를 재는 검사입니다.
 

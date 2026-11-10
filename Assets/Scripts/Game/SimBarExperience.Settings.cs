@@ -96,6 +96,7 @@ public sealed partial class SimBarExperience
 
     private void OnDestroy()
     {
+        DestroyMusicRequests();
         DestroyPixelPresentation();
         SimBarLocalization.Changed -= RefreshLanguageUI;
         if (serviceMenuRoot != null) Destroy(serviceMenuRoot);
@@ -106,10 +107,10 @@ public sealed partial class SimBarExperience
             musicSource.Stop();
             musicSource.clip = null;
         }
-        for (int i = 0; i < generatedMusicClips.Length; i++)
+        for (int i = 0; i < loadedMusicClips.Length; i++)
         {
-            if (generatedMusicClips[i] != null) Destroy(generatedMusicClips[i]);
-            generatedMusicClips[i] = null;
+            if (loadedMusicClips[i] != null) Destroy(loadedMusicClips[i]);
+            loadedMusicClips[i] = null;
         }
     }
 }

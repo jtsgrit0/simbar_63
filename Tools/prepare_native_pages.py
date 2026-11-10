@@ -1,8 +1,8 @@
 """Package the complete browser-native game without touching the Unity build.
 
 Run ``python Tools/prepare_native_pages.py --output Temp/NativePreview`` to
-review locally. The default output is docs. Music and researched posters are
-copied for on-demand use, never preloaded on the game startup path.
+review locally. The default output is docs. Researched posters are copied for
+on-demand use; music streams from the URLs in the root playlist.json.
 """
 
 import argparse
@@ -13,13 +13,14 @@ from pathlib import Path
 import re
 import shutil
 import tempfile
+from prepare_streaming_playlist import PLAYLIST, prepare_streaming_playlist
 
 
 PROJECT = Path(__file__).resolve().parent.parent
 TEMPLATE = PROJECT / "Tools/WebGLTemplate"
 SOURCE = TEMPLATE / "FastGame"
 MODULES = ("boot.js", "game.js", "core.js", "world.js", "booking.js", "floor.js",
-           "navigation.js", "catalog.js", "legacy-save.js", "daily-poster.js", "music.js", "aftershow.js", "album-art.js", "daydesk.js")
+           "navigation.js", "catalog.js", "playlist.js", "legacy-save.js", "daily-poster.js", "music.js", "aftershow.js", "album-art.js", "daydesk.js")
 ESSENTIAL_IMAGES = ("owner-female.png", "owner-ff.png", "owner-pet.png", "seoul.png", "venue.png")
 ESSENTIAL_METADATA = ("venue.json", "sprites.json")
 DEFERRED_IMAGES = ("office/desk-jessy.png", "office/desk-edison.png", "office/desk-jaiden.png")
@@ -102,6 +103,8 @@ def prepare_native_pages(source=SOURCE, output=PROJECT / "docs", *, template=TEM
     assert_separate(source, output)
     if retain < 1:
         raise ValueError("At least one native release must be retained.")
+    if source == SOURCE.resolve():
+        prepare_streaming_playlist()
     files, manifest = snapshot(source)
     version = manifest["version"]
     output.mkdir(parents=True, exist_ok=True)
@@ -135,7 +138,7 @@ def prepare_native_pages(source=SOURCE, output=PROJECT / "docs", *, template=TEM
     if favicon.is_file() and favicon.resolve() != (template_data / "favicon.ico").resolve():
         shutil.copy2(favicon, template_data / "favicon.ico")
     if streaming and Path(streaming).is_dir():
-        for folder in ("ScoutPosters", "Music"):
+        for folder in ("ScoutPosters",):
             root = Path(streaming) / folder
             if not root.is_dir():
                 continue
@@ -144,6 +147,8 @@ def prepare_native_pages(source=SOURCE, output=PROJECT / "docs", *, template=TEM
                     target = output / "StreamingAssets" / folder / path.relative_to(root)
                     target.parent.mkdir(parents=True, exist_ok=True)
                     shutil.copy2(path, target)
+    if source == SOURCE.resolve():
+        shutil.copy2(PLAYLIST, output / "playlist.json")
     runtime = "FastGame/" + version
     hints = [f'<link rel="modulepreload" href="{runtime}/{module}">' for module in MODULES]
     hints.append(f'<link rel="preload" as="font" type="font/woff2" crossorigin href="{runtime}/font.woff2">')

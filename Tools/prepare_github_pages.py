@@ -58,6 +58,13 @@ def deployed_path(relative):
     return relative.with_suffix("") if relative.suffix in (".br", ".gz") else relative
 
 
+def is_streamed_music(relative):
+    """Do not republish the local music left in pre-R2 Unity builds."""
+    relative = deployed_path(relative)
+    return (tuple(part.lower() for part in relative.parts[:2]) == ("streamingassets", "music")
+            and relative.name.lower().endswith((".mp3", ".mp3.meta")))
+
+
 def brotli_executable(override):
     if override:
         executable = Path(override).resolve()
@@ -151,6 +158,7 @@ def package_player(source, output, brotli=None, host_only=False):
     if not host_only:
         selected = set(assets.values())
         files = [path for path in sorted(source.rglob("*")) if path.is_file()
+                 and not is_streamed_music(path.relative_to(source))
                  and not (path.parent == source / "Build" and is_build_asset(path) and path not in selected)]
         decompress = decompressor(brotli) if any(path.suffix == ".br" for path in files) else None
         deployed_files = set()

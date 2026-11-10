@@ -33,7 +33,7 @@ public sealed partial class SimBarExperience : MonoBehaviour
     private static readonly string[] Playlist =
     {
         "Electric Shocker",
-        "Hey_spotdown",
+        "Hey",
         "No Matter How",
         "Bedroom Manifesto",
         "Electric Shocker - Korean Version"
@@ -79,8 +79,28 @@ public sealed partial class SimBarExperience : MonoBehaviour
     private Image performanceFill;
     private GameObject pausePanel;
     private AudioSource musicSource;
-    private readonly AudioClip[] generatedMusicClips = new AudioClip[Playlist.Length];
     private readonly AudioClip[] loadedMusicClips = new AudioClip[Playlist.Length];
+    [Serializable]
+    private sealed class StreamingMusicPlaylist
+    {
+        public StreamingMusicTrack[] tracks;
+    }
+    [Serializable]
+    private sealed class StreamingMusicTrack
+    {
+        public string id;
+        public string title;
+        public string artist;
+        public string audio_url;
+        public string filename;
+    }
+    private StreamingMusicTrack[] streamingMusicTracks;
+    private readonly HashSet<UnityWebRequest> pendingMusicRequests = new HashSet<UnityWebRequest>();
+    private UnityWebRequest activeMusicRequest;
+    private int loadingMusicIndex = -1;
+    private int musicLoadVersion;
+    private bool musicManifestLoading;
+    private bool musicShuttingDown;
     private bool musicWaitingForInput;
     private bool musicPaused;
     private Text musicPlayPauseIcon;
@@ -213,67 +233,169 @@ public sealed partial class SimBarExperience : MonoBehaviour
         musicSource.loop = true;
         musicSource.spatialBlend = 0f;
         musicSource.volume = 0.14f;
-        StartCoroutine(LoadMusicPlaylist());
-#if UNITY_WEBGL && !UNITY_EDITOR
-        // Browsers need a user gesture for audio, so keep synthesis off the startup path.
+        // Only the small manifest is loaded at startup. Recordings wait for input.
         musicWaitingForInput = true;
-#else
-        PlaySelectedMusic();
-#endif
+        StartCoroutine(LoadMusicPlaylist());
     }
 
     private IEnumerator LoadMusicPlaylist()
     {
-        string[] filenames =
+        if (musicManifestLoading || streamingMusicTracks != null || musicShuttingDown) yield break;
+        musicManifestLoading = true;
+        string url = Application.streamingAssetsPath.TrimEnd('/') + "/playlist.json";
+        if (!url.Contains("://")) url = "file:///" + url.Replace('\\', '/');
+        var request = UnityWebRequest.Get(url);
+        pendingMusicRequests.Add(request);
+        try
         {
-            "Electric Shocker.mp3",
-            "Hey_spotdown.mp3",
-            "No Matter How.mp3",
-            "Bedroom Manifesto.mp3",
-            "Electric Shocker - Korean Version.mp3"
-        };
-
-        for(int i=0;i<filenames.Length;i++)
-        {
-            string fileUrl=Application.streamingAssetsPath.TrimEnd('/')+"/Music/"+Uri.EscapeUriString(filenames[i]);
-            if(!fileUrl.Contains("://")) fileUrl="file:///"+fileUrl.Replace('\\','/');
-            using(var request=UnityWebRequestMultimedia.GetAudioClip(fileUrl,AudioType.MPEG))
+            request.timeout = 20;
+            yield return request.SendWebRequest();
+            if (musicShuttingDown) yield break;
+            if (request.result != UnityWebRequest.Result.Success)
             {
-                request.timeout=20;
-                yield return request.SendWebRequest();
-                if(request.result==UnityWebRequest.Result.Success)
-                {
-                    AudioClip clip=DownloadHandlerAudioClip.GetContent(request);
-                    if(clip!=null)
-                    {
-                        clip.name=Playlist[i];
-                        loadedMusicClips[i]=clip;
-                        if(!musicWaitingForInput && !musicPaused && playlistIndex==i && musicSource!=null)
-                        {
-                            musicSource.Stop();
-                            musicSource.clip=clip;
-                            musicSource.Play();
-                        }
-                    }
-                }
-                else Debug.LogWarning("Could not load music: "+Playlist[i]+" ("+request.error+")");
+                Debug.LogWarning("Could not load streaming playlist: " + request.error);
+                yield break;
+            }
+            StreamingMusicPlaylist manifest = null;
+            try { manifest = JsonUtility.FromJson<StreamingMusicPlaylist>(request.downloadHandler.text); }
+            catch (Exception error) { Debug.LogWarning("Invalid streaming playlist: " + error.Message); }
+            if (!SetStreamingMusicPlaylist(manifest))
+            {
+                Debug.LogWarning("Streaming playlist must contain five named tracks with distinct IDs and HTTPS audio URLs.");
+                yield break;
             }
         }
+        finally
+        {
+            musicManifestLoading = false;
+            ReleaseMusicRequest(request);
+        }
+        if (!musicWaitingForInput && !musicPaused) PlaySelectedMusic();
         RefreshUI();
+    }
+
+    private bool SetStreamingMusicPlaylist(StreamingMusicPlaylist manifest)
+    {
+        if (manifest == null || manifest.tracks == null || manifest.tracks.Length != Playlist.Length) return false;
+        var ids = new HashSet<string>();
+        foreach (StreamingMusicTrack track in manifest.tracks)
+        {
+            if (track == null || string.IsNullOrWhiteSpace(track.id) || !ids.Add(track.id)
+                || string.IsNullOrWhiteSpace(track.title)
+                || !Uri.TryCreate(track.audio_url, UriKind.Absolute, out Uri audioUri)
+                || audioUri.Scheme != Uri.UriSchemeHttps || audioUri.AbsolutePath == "/") return false;
+        }
+        streamingMusicTracks = manifest.tracks;
+        for (int i = 0; i < Playlist.Length; i++)
+        {
+            Playlist[i] = streamingMusicTracks[i].title;
+            if (i >= playlistRows.Count || playlistRows[i] == null) continue;
+            Text label = playlistRows[i].GetComponentInChildren<Text>();
+            if (label != null) label.text = Playlist[i];
+        }
+        return true;
     }
 
     private void PlaySelectedMusic()
     {
         if (musicSource == null || musicWaitingForInput || musicPaused) return;
         AudioClip clip = loadedMusicClips[playlistIndex];
-        if (clip == null)
+        if (clip != null)
         {
-            clip = CreateProceduralTrack(playlistIndex);
-            generatedMusicClips[playlistIndex] = clip;
+            CancelPendingMusicLoad();
+            musicSource.Stop();
+            musicSource.clip = clip;
+            musicSource.Play();
+            return;
         }
+        if (activeMusicRequest != null && loadingMusicIndex == playlistIndex) return;
+        CancelPendingMusicLoad();
         musicSource.Stop();
-        musicSource.clip = clip;
-        musicSource.Play();
+        musicSource.clip = null;
+        if (streamingMusicTracks == null)
+        {
+            if (!musicManifestLoading) StartCoroutine(LoadMusicPlaylist());
+            return;
+        }
+        StartCoroutine(LoadSelectedMusic(playlistIndex, musicLoadVersion));
+    }
+
+    private IEnumerator LoadSelectedMusic(int index, int version)
+    {
+        var request = UnityWebRequestMultimedia.GetAudioClip(streamingMusicTracks[index].audio_url, AudioType.MPEG);
+        activeMusicRequest = request;
+        loadingMusicIndex = index;
+        pendingMusicRequests.Add(request);
+        try
+        {
+            request.timeout = 30;
+            yield return request.SendWebRequest();
+            if (musicShuttingDown) yield break;
+            if (version != musicLoadVersion)
+            {
+                if (request.result == UnityWebRequest.Result.Success)
+                {
+                    AudioClip staleClip = DownloadHandlerAudioClip.GetContent(request);
+                    if (staleClip != null) Destroy(staleClip);
+                }
+                yield break;
+            }
+            if (request.result != UnityWebRequest.Result.Success)
+            {
+                Debug.LogWarning("Could not load streaming music: " + Playlist[index] + " (" + request.error + ")");
+                yield break;
+            }
+            AudioClip clip = DownloadHandlerAudioClip.GetContent(request);
+            if (clip == null)
+            {
+                Debug.LogWarning("Streaming music did not decode: " + Playlist[index]);
+                yield break;
+            }
+            clip.name = streamingMusicTracks[index].title;
+            loadedMusicClips[index] = clip;
+            if (playlistIndex == index && !musicWaitingForInput && !musicPaused && musicSource != null)
+            {
+                musicSource.Stop();
+                musicSource.clip = clip;
+                musicSource.Play();
+            }
+        }
+        finally
+        {
+            if (activeMusicRequest == request)
+            {
+                activeMusicRequest = null;
+                loadingMusicIndex = -1;
+            }
+            ReleaseMusicRequest(request);
+        }
+    }
+
+    private void CancelPendingMusicLoad()
+    {
+        musicLoadVersion++;
+        if (activeMusicRequest != null) activeMusicRequest.Abort();
+        activeMusicRequest = null;
+        loadingMusicIndex = -1;
+    }
+
+    private void ReleaseMusicRequest(UnityWebRequest request)
+    {
+        if (pendingMusicRequests.Remove(request)) request.Dispose();
+    }
+
+    private void DestroyMusicRequests()
+    {
+        musicShuttingDown = true;
+        musicLoadVersion++;
+        foreach (UnityWebRequest request in pendingMusicRequests)
+        {
+            request.Abort();
+            request.Dispose();
+        }
+        pendingMusicRequests.Clear();
+        activeMusicRequest = null;
+        loadingMusicIndex = -1;
     }
 
     private void StartMusicOnInput()
@@ -285,45 +407,6 @@ public sealed partial class SimBarExperience : MonoBehaviour
         if (!pointerPressed && !keyPressed && !touchPressed) return;
         musicWaitingForInput = false;
         PlaySelectedMusic();
-    }
-
-    private AudioClip CreateProceduralTrack(int trackIndex)
-    {
-        const int sampleRate = 24000;
-        const float duration = 8f;
-        int sampleCount = Mathf.RoundToInt(sampleRate * duration);
-        float[] samples = new float[sampleCount];
-        float[] roots = { 130.81f, 146.83f, 164.81f, 110f, 146.83f, 123.47f };
-        float root = roots[Mathf.Clamp(trackIndex, 0, roots.Length - 1)];
-        float[] chordIntervals = { 1f, 1.1892f, 1.4983f };
-
-        for (int i = 0; i < sampleCount; i++)
-        {
-            float time = i / (float)sampleRate;
-            float beatPosition = time * 2f;
-            int beatIndex = Mathf.FloorToInt(beatPosition);
-            int barIndex = (beatIndex / 4) % 4;
-            float chordRoot = root * (barIndex == 1 ? 0.8909f : barIndex == 2 ? 1.1892f : barIndex == 3 ? 1.0595f : 1f);
-
-            float pad = 0f;
-            for (int note = 0; note < chordIntervals.Length; note++)
-            {
-                float frequency = chordRoot * chordIntervals[note];
-                pad += Mathf.Sin(2f * Mathf.PI * frequency * time + note * 0.19f) * (note == 0 ? 0.035f : 0.022f);
-            }
-
-            float beatPhase = beatPosition - Mathf.Floor(beatPosition);
-            float kick = Mathf.Sin(2f * Mathf.PI * (54f - beatPhase * 18f) * time) * Mathf.Exp(-beatPhase * 12f) * 0.11f;
-            float pluckPhase = (time * 4f) - Mathf.Floor(time * 4f);
-            float pluckFrequency = chordRoot * ((beatIndex % 2 == 0) ? 2f : 2.3784f);
-            float pluck = Mathf.Sin(2f * Mathf.PI * pluckFrequency * time) * Mathf.Exp(-pluckPhase * 9f) * 0.045f;
-            float fade = Mathf.Min(1f, Mathf.Min(time * 4f, (duration - time) * 4f));
-            samples[i] = (pad + kick + pluck) * fade;
-        }
-
-        AudioClip clip = AudioClip.Create("SimBar_Original_Loop_" + trackIndex, sampleCount, 1, sampleRate, false);
-        clip.SetData(samples, 0);
-        return clip;
     }
 
     private Material MakeMaterial(Color color, float emission)
