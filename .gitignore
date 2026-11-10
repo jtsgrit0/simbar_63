@@ -77,3 +77,10 @@ Desktop.ini
 /Research/unity-*-commands-band.json
 # Raw repeat-run recordings stay local; reports and selected frames are tracked.
 /Research/PixelArtVerification/**/*.webm
+
+# Local FF layout QA captures; runtime art is exported to its own Resources.
+/Assets/Temp.meta
+/Assets/Temp/FFLayout-20261110.meta
+/Assets/Temp/FFLayout-20261110/
+/Assets/Temp/FreebirdLayout-20261110.meta
+/Assets/Temp/FreebirdLayout-20261110/

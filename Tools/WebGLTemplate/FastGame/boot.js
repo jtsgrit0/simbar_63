@@ -1,6 +1,7 @@
 import {startGame} from './game.js';
 import {migrateLegacySave} from './legacy-save.js';
 import {SAVE_KEY} from './core.js';
+import {OWNER_VENUES,VENUE_PROPS} from './owner-venues.js';
 
 const shell=document.getElementById('game-shell'),stage=document.getElementById('game-stage');
 const full=document.getElementById('fullscreen-button');
@@ -15,12 +16,15 @@ try{
   // Assets, font and the read-only old-save lookup overlap on the critical path.
   const identity=migrateLegacySave({timeoutMs:150});
   const images=Promise.all(['owner-female.png','owner-ff.png','owner-pet.png','seoul.png','venue.png'].map(image));
-  const descriptors=Promise.all([metadata('sprites.json'),metadata('venue.json')]);
+  const venues=Promise.all(OWNER_VENUES.slice(0,2).map(async entry=>[entry.key,await image(entry.file)])).then(Object.fromEntries);
+  const props=Promise.all(Object.entries(VENUE_PROPS).map(async([key,file])=>[key,await image(file)])).then(Object.fromEntries);
+  const descriptors=Promise.all([metadata('sprites.json'),metadata('venue.json'),metadata('venue-ff.json'),metadata('venue-freebird.json'),metadata('band-models.json')]);
   const atlasImages=descriptors.then(async([meta])=>Object.fromEntries(await Promise.all(Object.entries(meta.atlases||{animation:{file:'sprites.png'}}).map(async([key,definition])=>[key,await image(definition.file)]))));
+  const bandImages=descriptors.then(async descriptors=>Object.fromEntries(await Promise.all(descriptors[4].bands.map(async band=>[band.id,await image(band.file)]))));
   const iconImages=Promise.all(icons.map(n=>image('icons/'+n+'.png')));
   const font=document.fonts.load('16px SimBarUI');
-  const [[female,ff,pet,seoul,venue],migration,,,[spriteMeta,venueMeta],atlases]=await Promise.all([images,identity,font,iconImages,descriptors,atlasImages]);
-  const app=await startGame({root:stage,assetsBase:new URL('art/',import.meta.url).href,assets:{female,ff,pet,seoul,venue,sprites:atlases.animation,atlases,spriteMeta,venueMeta}});
+  const [[female,ff,pet,seoul,venue],migration,,,[spriteMeta,venueMeta,ffVenueMeta,freebirdVenueMeta,bandModels],atlases,venueImages,propImages,bandAtlases]=await Promise.all([images,identity,font,iconImages,descriptors,atlasImages,venues,props,bandImages]);
+  const app=await startGame({root:stage,assetsBase:new URL('art/',import.meta.url).href,assets:{female,ff,pet,seoul,venue,venues:venueImages,propImages,bandModels,bandAtlases,venueMetas:{ff:ffVenueMeta,freebird:freebirdVenueMeta},sprites:atlases.animation,atlases,spriteMeta,venueMeta}});
   window.simbarApplication=app;
   migration.pending?.then(r=>{if(r.imported)app.g.importSave(localStorage.getItem(SAVE_KEY));}).catch(()=>{});
   document.getElementById('loading-panel')?.remove();

@@ -138,6 +138,10 @@ def main():
     prepare_owners(OUTPUT)
     from prepare_venue_presentation import prepare_venue_presentation
     prepare_venue_presentation(OUTPUT)
+    from prepare_owner_venues import prepare_owner_venues
+    prepare_owner_venues(OUTPUT)
+    from prepare_performing_bands import prepare_performing_bands
+    prepare_performing_bands(output=OUTPUT)
     from prepare_order_icons import register_order_icons
     register_order_icons(OUTPUT)
 

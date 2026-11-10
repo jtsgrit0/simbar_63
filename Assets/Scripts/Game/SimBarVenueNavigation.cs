@@ -6,10 +6,13 @@ internal sealed class SimBarVenueNavigation
 {
     internal const float Radius = 0.23f;
     private const float Cell = 0.4f;
-    private const int Rows = 24;
+    private const int OriginalRows = 24;
+    private readonly int rows;
     private readonly int columns;
     private readonly Vector2 origin;
     private readonly bool includeStaffAisle;
+    private readonly bool ffLayout;
+    private readonly bool freebirdLayout;
     private readonly Rect[] obstacles = {
         Rect.MinMaxRect(-10.02f, -2.32f, -2.02f, -.88f),
         Rect.MinMaxRect(-9.745f, -2.625f, -2.255f, -2.535f),
@@ -21,6 +24,21 @@ internal sealed class SimBarVenueNavigation
         Rect.MinMaxRect(1.4625f, 2.2075f, 9.3375f, 6.5f),
         Rect.MinMaxRect(4.3f, 1.6025f, 6.4f, 2.245f)
     };
+    private static readonly Rect[] FFObstacles = {
+        Rect.MinMaxRect(-8.15f,-3f,-6.95f,1.3f),
+        Rect.MinMaxRect(-1.85f,2.25f,1.75f,4.35f),
+        Rect.MinMaxRect(1.4625f,2.2075f,9.3375f,6.5f),
+        Rect.MinMaxRect(4.3f,1.6025f,6.4f,2.245f)
+    };
+    private static readonly Rect[] FreebirdObstacles = {
+        Rect.MinMaxRect(-6f,3f,-2f,4.2f),
+        Rect.MinMaxRect(-.3f,2.2075f,9.7f,6.5f),
+        Rect.MinMaxRect(4.3f,1.6025f,6.4f,2.245f)
+    };
+    private static readonly Vector2[] FFTableCenters = {
+        new Vector2(-6.7f,3.6f),new Vector2(-4f,4.75f),new Vector2(-3.6f,.15f),
+        new Vector2(-5.9f,-4.8f),new Vector2(-1.7f,-5f)
+    };
     private readonly Vector3[] points;
     private readonly bool[] walkable, closed;
     private readonly float[] scores;
@@ -30,12 +48,15 @@ internal sealed class SimBarVenueNavigation
     private Vector3 solidCrowdGoal;
     private bool floorBodyAvoidance;
 
-    internal SimBarVenueNavigation(bool includeStaffAisle=false)
+    internal SimBarVenueNavigation(bool includeStaffAisle=false,bool ffLayout=false,bool freebirdLayout=false)
     {
         this.includeStaffAisle=includeStaffAisle;
-        columns=includeStaffAisle?48:28;
-        origin=new Vector2(includeStaffAisle?-9.6f:-1.6f,-5.8f);
-        int count=columns*Rows;
+        this.ffLayout=ffLayout;
+        this.freebirdLayout=freebirdLayout;
+        columns=includeStaffAisle||ffLayout||freebirdLayout?48:28;
+        rows=ffLayout||freebirdLayout?30:OriginalRows;
+        origin=new Vector2(includeStaffAisle||ffLayout||freebirdLayout?-9.6f:-1.6f,-5.8f);
+        int count=columns*rows;
         points=new Vector3[count]; walkable=new bool[count]; closed=new bool[count];
         scores=new float[count]; parents=new int[count];
         open=new List<int>(count); reverse=new List<int>(count);
@@ -48,11 +69,26 @@ internal sealed class SimBarVenueNavigation
 
     internal bool IsWalkable(Vector3 p)
     {
-        if (p.x > 9.1f || p.z < -5.85f || p.z > 3.45f) return false;
-        if (p.x < -1.65f && (!includeStaffAisle || p.x < -9.4f || p.z < -.62f || p.z > 1.2f)) return false;
-        foreach (Rect obstacle in obstacles)
+        if (p.x > 9.1f || p.z < -5.85f || p.z > (ffLayout||freebirdLayout?5.8f:3.45f)) return false;
+        if(ffLayout)
+        {
+            if(p.x < -9.4f || !includeStaffAisle && p.x < -6.6f && p.z > -3.7f && p.z < 1.9f)return false;
+        }
+        else if(freebirdLayout)
+        {
+            if(p.x < -9.4f || !includeStaffAisle && p.x > -6.5f && p.x < -1.5f && p.z > 4.43f)return false;
+        }
+        else if (p.x < -1.65f && (!includeStaffAisle || p.x < -9.4f || p.z < -.62f || p.z > 1.2f)) return false;
+        foreach (Rect obstacle in ffLayout?FFObstacles:freebirdLayout?FreebirdObstacles:obstacles)
             if (p.x > obstacle.xMin - Radius && p.x < obstacle.xMax + Radius
                 && p.z > obstacle.yMin - Radius && p.z < obstacle.yMax + Radius) return false;
+        if(ffLayout)foreach(Vector2 center in FFTableCenters)
+        {
+            Vector2 point=new Vector2(p.x,p.z);
+            if((point-center).sqrMagnitude<(.55f+Radius)*(.55f+Radius))return false;
+            if((point-center-new Vector2(-.9f,0f)).sqrMagnitude<(.22f+Radius)*(.22f+Radius)
+                ||(point-center-new Vector2(.9f,0f)).sqrMagnitude<(.22f+Radius)*(.22f+Radius))return false;
+        }
         return true;
     }
 
@@ -131,7 +167,7 @@ internal sealed class SimBarVenueNavigation
             {
                 if (dx == 0 && dz == 0) continue;
                 int x = cx + dx, z = cz + dz;
-                if (x < 0 || x >= columns || z < 0 || z >= Rows) continue;
+                if (x < 0 || x >= columns || z < 0 || z >= rows) continue;
                 int next = z * columns + x;
                 if (!walkable[next] || closed[next] || !SegmentAllowed(points[current], points[next], avoidCrowd)) continue;
                 float crowdCost = 0f;
@@ -181,7 +217,7 @@ internal sealed class SimBarVenueNavigation
     private int Closest(Vector3 p, bool avoidCrowd)
     {
         int x = Mathf.Clamp(Mathf.RoundToInt((p.x - origin.x) / Cell), 0, columns - 1);
-        int z = Mathf.Clamp(Mathf.RoundToInt((p.z - origin.y) / Cell), 0, Rows - 1);
+        int z = Mathf.Clamp(Mathf.RoundToInt((p.z - origin.y) / Cell), 0, rows - 1);
         int nearest = z * columns + x;
         if (walkable[nearest] && SegmentAllowed(p, points[nearest], avoidCrowd)) return nearest;
         int found = -1; float distance = float.PositiveInfinity;

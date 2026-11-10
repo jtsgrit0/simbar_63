@@ -1,0 +1,3040 @@
+{
+  "actorOffsets": [],
+  "bandStageFeet": [
+    {
+      "id": "singer",
+      "offset": {
+        "x": 673,
+        "y": 332
+      }
+    },
+    {
+      "id": "guitarist",
+      "offset": {
+        "x": 608,
+        "y": 314
+      }
+    },
+    {
+      "id": "bassist",
+      "offset": {
+        "x": 843,
+        "y": 350
+      }
+    },
+    {
+      "id": "drummer",
+      "offset": {
+        "x": 753,
+        "y": 272
+      }
+    }
+  ],
+  "seatedActors": [],
+  "stageElevationPixels": 0,
+  "drumForegroundDepth": 317,
+  "barRegion": {
+    "boundedX": true,
+    "xMin": -6.5,
+    "xMax": -1.5,
+    "xFade": 0.7,
+    "zMin": 4.43,
+    "zMax": 5.5,
+    "zFade": 0.4,
+    "offset": {
+      "x": 0,
+      "y": 25
+    }
+  },
+  "occluders": [
+    {
+      "points": [
+        {
+          "x": 739,
+          "y": 266
+        },
+        {
+          "x": 753,
+          "y": 264
+        },
+        {
+          "x": 763,
+          "y": 268
+        },
+        {
+          "x": 770,
+          "y": 276
+        },
+        {
+          "x": 773,
+          "y": 287
+        },
+        {
+          "x": 770,
+          "y": 299
+        },
+        {
+          "x": 762,
+          "y": 308
+        },
+        {
+          "x": 750,
+          "y": 312
+        },
+        {
+          "x": 739,
+          "y": 308
+        },
+        {
+          "x": 731,
+          "y": 299
+        },
+        {
+          "x": 727,
+          "y": 287
+        },
+        {
+          "x": 730,
+          "y": 275
+        }
+      ],
+      "depth": 317,
+      "actors": []
+    },
+    {
+      "points": [
+        {
+          "x": 727,
+          "y": 250
+        },
+        {
+          "x": 734,
+          "y": 246
+        },
+        {
+          "x": 742,
+          "y": 247
+        },
+        {
+          "x": 748,
+          "y": 251
+        },
+        {
+          "x": 751,
+          "y": 257
+        },
+        {
+          "x": 750,
+          "y": 267
+        },
+        {
+          "x": 741,
+          "y": 275
+        },
+        {
+          "x": 728,
+          "y": 269
+        },
+        {
+          "x": 723,
+          "y": 263
+        },
+        {
+          "x": 723,
+          "y": 255
+        }
+      ],
+      "depth": 317,
+      "actors": []
+    },
+    {
+      "points": [
+        {
+          "x": 754,
+          "y": 252
+        },
+        {
+          "x": 763,
+          "y": 250
+        },
+        {
+          "x": 772,
+          "y": 254
+        },
+        {
+          "x": 777,
+          "y": 261
+        },
+        {
+          "x": 776,
+          "y": 271
+        },
+        {
+          "x": 769,
+          "y": 278
+        },
+        {
+          "x": 757,
+          "y": 276
+        },
+        {
+          "x": 750,
+          "y": 269
+        },
+        {
+          "x": 748,
+          "y": 261
+        }
+      ],
+      "depth": 317,
+      "actors": []
+    },
+    {
+      "points": [
+        {
+          "x": 704,
+          "y": 274
+        },
+        {
+          "x": 713,
+          "y": 269
+        },
+        {
+          "x": 724,
+          "y": 273
+        },
+        {
+          "x": 729,
+          "y": 281
+        },
+        {
+          "x": 729,
+          "y": 291
+        },
+        {
+          "x": 722,
+          "y": 298
+        },
+        {
+          "x": 709,
+          "y": 298
+        },
+        {
+          "x": 701,
+          "y": 292
+        },
+        {
+          "x": 701,
+          "y": 281
+        }
+      ],
+      "depth": 317,
+      "actors": []
+    },
+    {
+      "points": [
+        {
+          "x": 781,
+          "y": 280
+        },
+        {
+          "x": 791,
+          "y": 275
+        },
+        {
+          "x": 802,
+          "y": 280
+        },
+        {
+          "x": 805,
+          "y": 287
+        },
+        {
+          "x": 802,
+          "y": 299
+        },
+        {
+          "x": 794,
+          "y": 305
+        },
+        {
+          "x": 781,
+          "y": 301
+        },
+        {
+          "x": 777,
+          "y": 292
+        }
+      ],
+      "depth": 317,
+      "actors": []
+    },
+    {
+      "points": [
+        {
+          "x": 739.0,
+          "y": 230.0
+        },
+        {
+          "x": 738.12,
+          "y": 232.47
+        },
+        {
+          "x": 735.56,
+          "y": 234.7
+        },
+        {
+          "x": 731.58,
+          "y": 236.47
+        },
+        {
+          "x": 726.56,
+          "y": 237.61
+        },
+        {
+          "x": 721.0,
+          "y": 238.0
+        },
+        {
+          "x": 715.44,
+          "y": 237.61
+        },
+        {
+          "x": 710.42,
+          "y": 236.47
+        },
+        {
+          "x": 706.44,
+          "y": 234.7
+        },
+        {
+          "x": 703.88,
+          "y": 232.47
+        },
+        {
+          "x": 703.0,
+          "y": 230.0
+        },
+        {
+          "x": 703.88,
+          "y": 227.53
+        },
+        {
+          "x": 706.44,
+          "y": 225.3
+        },
+        {
+          "x": 710.42,
+          "y": 223.53
+        },
+        {
+          "x": 715.44,
+          "y": 222.39
+        },
+        {
+          "x": 721.0,
+          "y": 222.0
+        },
+        {
+          "x": 726.56,
+          "y": 222.39
+        },
+        {
+          "x": 731.58,
+          "y": 223.53
+        },
+        {
+          "x": 735.56,
+          "y": 225.3
+        },
+        {
+          "x": 738.12,
+          "y": 227.53
+        }
+      ],
+      "depth": 317,
+      "actors": []
+    },
+    {
+      "points": [
+        {
+          "x": 811.0,
+          "y": 244.0
+        },
+        {
+          "x": 810.12,
+          "y": 246.47
+        },
+        {
+          "x": 807.56,
+          "y": 248.7
+        },
+        {
+          "x": 803.58,
+          "y": 250.47
+        },
+        {
+          "x": 798.56,
+          "y": 251.61
+        },
+        {
+          "x": 793.0,
+          "y": 252.0
+        },
+        {
+          "x": 787.44,
+          "y": 251.61
+        },
+        {
+          "x": 782.42,
+          "y": 250.47
+        },
+        {
+          "x": 778.44,
+          "y": 248.7
+        },
+        {
+          "x": 775.88,
+          "y": 246.47
+        },
+        {
+          "x": 775.0,
+          "y": 244.0
+        },
+        {
+          "x": 775.88,
+          "y": 241.53
+        },
+        {
+          "x": 778.44,
+          "y": 239.3
+        },
+        {
+          "x": 782.42,
+          "y": 237.53
+        },
+        {
+          "x": 787.44,
+          "y": 236.39
+        },
+        {
+          "x": 793.0,
+          "y": 236.0
+        },
+        {
+          "x": 798.56,
+          "y": 236.39
+        },
+        {
+          "x": 803.58,
+          "y": 237.53
+        },
+        {
+          "x": 807.56,
+          "y": 239.3
+        },
+        {
+          "x": 810.12,
+          "y": 241.53
+        }
+      ],
+      "depth": 317,
+      "actors": []
+    },
+    {
+      "points": [
+        {
+          "x": 730.0,
+          "y": 273.0
+        },
+        {
+          "x": 729.12,
+          "y": 275.16
+        },
+        {
+          "x": 726.56,
+          "y": 277.11
+        },
+        {
+          "x": 722.58,
+          "y": 278.66
+        },
+        {
+          "x": 717.56,
+          "y": 279.66
+        },
+        {
+          "x": 712.0,
+          "y": 280.0
+        },
+        {
+          "x": 706.44,
+          "y": 279.66
+        },
+        {
+          "x": 701.42,
+          "y": 278.66
+        },
+        {
+          "x": 697.44,
+          "y": 277.11
+        },
+        {
+          "x": 694.88,
+          "y": 275.16
+        },
+        {
+          "x": 694.0,
+          "y": 273.0
+        },
+        {
+          "x": 694.88,
+          "y": 270.84
+        },
+        {
+          "x": 697.44,
+          "y": 268.89
+        },
+        {
+          "x": 701.42,
+          "y": 267.34
+        },
+        {
+          "x": 706.44,
+          "y": 266.34
+        },
+        {
+          "x": 712.0,
+          "y": 266.0
+        },
+        {
+          "x": 717.56,
+          "y": 266.34
+        },
+        {
+          "x": 722.58,
+          "y": 267.34
+        },
+        {
+          "x": 726.56,
+          "y": 268.89
+        },
+        {
+          "x": 729.12,
+          "y": 270.84
+        }
+      ],
+      "depth": 317,
+      "actors": []
+    },
+    {
+      "points": [
+        {
+          "x": 809.0,
+          "y": 269.0
+        },
+        {
+          "x": 808.12,
+          "y": 271.47
+        },
+        {
+          "x": 805.56,
+          "y": 273.7
+        },
+        {
+          "x": 801.58,
+          "y": 275.47
+        },
+        {
+          "x": 796.56,
+          "y": 276.61
+        },
+        {
+          "x": 791.0,
+          "y": 277.0
+        },
+        {
+          "x": 785.44,
+          "y": 276.61
+        },
+        {
+          "x": 780.42,
+          "y": 275.47
+        },
+        {
+          "x": 776.44,
+          "y": 273.7
+        },
+        {
+          "x": 773.88,
+          "y": 271.47
+        },
+        {
+          "x": 773.0,
+          "y": 269.0
+        },
+        {
+          "x": 773.88,
+          "y": 266.53
+        },
+        {
+          "x": 776.44,
+          "y": 264.3
+        },
+        {
+          "x": 780.42,
+          "y": 262.53
+        },
+        {
+          "x": 785.44,
+          "y": 261.39
+        },
+        {
+          "x": 791.0,
+          "y": 261.0
+        },
+        {
+          "x": 796.56,
+          "y": 261.39
+        },
+        {
+          "x": 801.58,
+          "y": 262.53
+        },
+        {
+          "x": 805.56,
+          "y": 264.3
+        },
+        {
+          "x": 808.12,
+          "y": 266.53
+        }
+      ],
+      "depth": 317,
+      "actors": []
+    },
+    {
+      "points": [
+        {
+          "x": 335.0,
+          "y": 200.0
+        },
+        {
+          "x": 352.0,
+          "y": 183.0
+        },
+        {
+          "x": 381.0,
+          "y": 190.0
+        },
+        {
+          "x": 381.0,
+          "y": 226.0
+        },
+        {
+          "x": 363.75,
+          "y": 242.75
+        },
+        {
+          "x": 335.0,
+          "y": 236.0
+        }
+      ],
+      "depth": 239.38,
+      "actors": []
+    },
+    {
+      "points": [
+        {
+          "x": 363.75,
+          "y": 206.75
+        },
+        {
+          "x": 381.0,
+          "y": 190.0
+        },
+        {
+          "x": 410.0,
+          "y": 197.0
+        },
+        {
+          "x": 410.0,
+          "y": 233.0
+        },
+        {
+          "x": 392.5,
+          "y": 249.5
+        },
+        {
+          "x": 363.75,
+          "y": 242.75
+        }
+      ],
+      "depth": 246.12,
+      "actors": []
+    },
+    {
+      "points": [
+        {
+          "x": 392.5,
+          "y": 213.5
+        },
+        {
+          "x": 410.0,
+          "y": 197.0
+        },
+        {
+          "x": 439.0,
+          "y": 204.0
+        },
+        {
+          "x": 439.0,
+          "y": 240.0
+        },
+        {
+          "x": 421.25,
+          "y": 256.25
+        },
+        {
+          "x": 392.5,
+          "y": 249.5
+        }
+      ],
+      "depth": 252.88,
+      "actors": []
+    },
+    {
+      "points": [
+        {
+          "x": 421.25,
+          "y": 220.25
+        },
+        {
+          "x": 439.0,
+          "y": 204.0
+        },
+        {
+          "x": 468.0,
+          "y": 211.0
+        },
+        {
+          "x": 468.0,
+          "y": 247.0
+        },
+        {
+          "x": 450.0,
+          "y": 263.0
+        },
+        {
+          "x": 421.25,
+          "y": 256.25
+        }
+      ],
+      "depth": 259.62,
+      "actors": []
+    }
+  ],
+  "frameWidth": 64,
+  "frameHeight": 64,
+  "columns": 4,
+  "drawHeight": 54,
+  "footX": 32,
+  "footY": 60,
+  "defaultAtlas": "wardrobe",
+  "roles": [
+    {
+      "id": "guest",
+      "atlas": "wardrobe",
+      "styles": [
+        "Casual",
+        "Suit",
+        "Beach",
+        "Worker",
+        "Farmer",
+        "Adventurer",
+        "Casual2",
+        "Punk"
+      ],
+      "variantStyles": [
+        {
+          "id": "Casual",
+          "row": 0
+        },
+        {
+          "id": "Suit",
+          "row": 1
+        },
+        {
+          "id": "Beach",
+          "row": 2
+        },
+        {
+          "id": "Worker",
+          "row": 3
+        },
+        {
+          "id": "Farmer",
+          "row": 4
+        },
+        {
+          "id": "Adventurer",
+          "row": 5
+        },
+        {
+          "id": "Casual2",
+          "row": 6
+        },
+        {
+          "id": "Punk",
+          "row": 7
+        }
+      ],
+      "actions": [
+        {
+          "id": "walk",
+          "atlasFrames": [
+            "wardrobe",
+            "walk"
+          ],
+          "hasRow": false,
+          "variantStyles": [],
+          "directionColumns": [],
+          "directionRows": [],
+          "directionRowOffsets": []
+        },
+        {
+          "id": "dance",
+          "atlas": "pit",
+          "hasRow": false,
+          "variantStyles": [],
+          "directionColumns": [],
+          "directionRows": [],
+          "directionRowOffsets": []
+        },
+        {
+          "id": "mosh",
+          "atlas": "pit",
+          "hasRow": false,
+          "variantStyles": [],
+          "directionColumns": [],
+          "directionRows": [],
+          "directionRowOffsets": []
+        },
+        {
+          "id": "slam",
+          "atlas": "pit",
+          "hasRow": false,
+          "variantStyles": [],
+          "directionColumns": [],
+          "directionRows": [],
+          "directionRowOffsets": []
+        },
+        {
+          "id": "highfive",
+          "atlas": "guestSocial",
+          "variantStyles": [
+            {
+              "id": "Casual",
+              "row": 0
+            },
+            {
+              "id": "Suit",
+              "row": 4
+            },
+            {
+              "id": "Beach",
+              "row": 8
+            },
+            {
+              "id": "Worker",
+              "row": 12
+            },
+            {
+              "id": "Farmer",
+              "row": 16
+            },
+            {
+              "id": "Adventurer",
+              "row": 20
+            },
+            {
+              "id": "Casual2",
+              "row": 24
+            },
+            {
+              "id": "Punk",
+              "row": 28
+            }
+          ],
+          "directionRowOffsets": [
+            {
+              "id": "FR",
+              "row": 0
+            },
+            {
+              "id": "BR",
+              "row": 1
+            },
+            {
+              "id": "BL",
+              "row": 2
+            },
+            {
+              "id": "FL",
+              "row": 3
+            }
+          ],
+          "frameColumns": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "frameCount": 4,
+          "progressFrames": true,
+          "fps": 8,
+          "hasRow": false,
+          "directionColumns": [],
+          "directionRows": []
+        },
+        {
+          "id": "hug",
+          "atlas": "guestSocial",
+          "variantStyles": [
+            {
+              "id": "Casual",
+              "row": 0
+            },
+            {
+              "id": "Suit",
+              "row": 4
+            },
+            {
+              "id": "Beach",
+              "row": 8
+            },
+            {
+              "id": "Worker",
+              "row": 12
+            },
+            {
+              "id": "Farmer",
+              "row": 16
+            },
+            {
+              "id": "Adventurer",
+              "row": 20
+            },
+            {
+              "id": "Casual2",
+              "row": 24
+            },
+            {
+              "id": "Punk",
+              "row": 28
+            }
+          ],
+          "directionRowOffsets": [
+            {
+              "id": "FR",
+              "row": 0
+            },
+            {
+              "id": "BR",
+              "row": 1
+            },
+            {
+              "id": "BL",
+              "row": 2
+            },
+            {
+              "id": "FL",
+              "row": 3
+            }
+          ],
+          "frameColumns": [
+            4,
+            5,
+            6,
+            7
+          ],
+          "frameCount": 4,
+          "progressFrames": true,
+          "fps": 8,
+          "hasRow": false,
+          "directionColumns": [],
+          "directionRows": []
+        }
+      ],
+      "hasRow": false,
+      "directionColumns": [],
+      "directionRows": [],
+      "directionRowOffsets": []
+    },
+    {
+      "id": "barseated",
+      "atlas": "poses",
+      "row": 1,
+      "styles": [
+        "Casual2",
+        "Punk"
+      ],
+      "variantStyles": [
+        {
+          "id": "Casual2",
+          "row": 1
+        },
+        {
+          "id": "Punk",
+          "row": 2
+        }
+      ],
+      "hasRow": true,
+      "directionColumns": [],
+      "directionRows": [],
+      "directionRowOffsets": [],
+      "actions": []
+    },
+    {
+      "id": "seated",
+      "atlas": "poses",
+      "row": 3,
+      "styles": [
+        "Casual",
+        "Suit"
+      ],
+      "variantStyles": [
+        {
+          "id": "Casual",
+          "row": 3
+        },
+        {
+          "id": "Suit",
+          "row": 4
+        }
+      ],
+      "hasRow": true,
+      "directionColumns": [],
+      "directionRows": [],
+      "directionRowOffsets": [],
+      "actions": []
+    },
+    {
+      "id": "bartender",
+      "atlas": "wardrobe",
+      "style": "Suit",
+      "row": 1,
+      "drawHeight": 58,
+      "actions": [
+        {
+          "id": "walk",
+          "atlasFrames": [
+            "wardrobe",
+            "walk"
+          ],
+          "hasRow": false,
+          "variantStyles": [],
+          "directionColumns": [],
+          "directionRows": [],
+          "directionRowOffsets": []
+        },
+        {
+          "id": "serve",
+          "atlas": "poses",
+          "row": 0,
+          "hasRow": true,
+          "variantStyles": [],
+          "directionColumns": [],
+          "directionRows": [],
+          "directionRowOffsets": []
+        },
+        {
+          "id": "clean",
+          "atlas": "poses",
+          "row": 0,
+          "hasRow": true,
+          "variantStyles": [],
+          "directionColumns": [],
+          "directionRows": [],
+          "directionRowOffsets": []
+        }
+      ],
+      "hasRow": true,
+      "variantStyles": [],
+      "directionColumns": [],
+      "directionRows": [],
+      "directionRowOffsets": []
+    },
+    {
+      "id": "server",
+      "atlas": "wardrobe",
+      "style": "Suit",
+      "row": 1,
+      "drawHeight": 58,
+      "actions": [
+        {
+          "id": "walk",
+          "atlasFrames": [
+            "wardrobe",
+            "walk"
+          ],
+          "hasRow": false,
+          "variantStyles": [],
+          "directionColumns": [],
+          "directionRows": [],
+          "directionRowOffsets": []
+        },
+        {
+          "id": "serve",
+          "atlas": "poses",
+          "row": 0,
+          "hasRow": true,
+          "variantStyles": [],
+          "directionColumns": [],
+          "directionRows": [],
+          "directionRowOffsets": []
+        },
+        {
+          "id": "clean",
+          "atlas": "poses",
+          "row": 0,
+          "hasRow": true,
+          "variantStyles": [],
+          "directionColumns": [],
+          "directionRows": [],
+          "directionRowOffsets": []
+        }
+      ],
+      "hasRow": true,
+      "variantStyles": [],
+      "directionColumns": [],
+      "directionRows": [],
+      "directionRowOffsets": []
+    },
+    {
+      "id": "hired-0",
+      "atlas": "wardrobe",
+      "style": "Suit",
+      "row": 1,
+      "drawHeight": 58,
+      "actions": [
+        {
+          "id": "walk",
+          "atlasFrames": [
+            "wardrobe",
+            "walk"
+          ],
+          "hasRow": false,
+          "variantStyles": [],
+          "directionColumns": [],
+          "directionRows": [],
+          "directionRowOffsets": []
+        },
+        {
+          "id": "serve",
+          "atlas": "poses",
+          "row": 0,
+          "hasRow": true,
+          "variantStyles": [],
+          "directionColumns": [],
+          "directionRows": [],
+          "directionRowOffsets": []
+        },
+        {
+          "id": "clean",
+          "atlas": "poses",
+          "row": 0,
+          "hasRow": true,
+          "variantStyles": [],
+          "directionColumns": [],
+          "directionRows": [],
+          "directionRowOffsets": []
+        }
+      ],
+      "hasRow": true,
+      "variantStyles": [],
+      "directionColumns": [],
+      "directionRows": [],
+      "directionRowOffsets": []
+    },
+    {
+      "id": "hired-1",
+      "atlas": "wardrobe",
+      "style": "Worker",
+      "row": 3,
+      "drawHeight": 58,
+      "actions": [
+        {
+          "id": "walk",
+          "atlasFrames": [
+            "wardrobe",
+            "walk"
+          ],
+          "hasRow": false,
+          "variantStyles": [],
+          "directionColumns": [],
+          "directionRows": [],
+          "directionRowOffsets": []
+        },
+        {
+          "id": "clean",
+          "atlas": "pit",
+          "hasRow": false,
+          "variantStyles": [],
+          "directionColumns": [],
+          "directionRows": [],
+          "directionRowOffsets": []
+        }
+      ],
+      "hasRow": true,
+      "variantStyles": [],
+      "directionColumns": [],
+      "directionRows": [],
+      "directionRowOffsets": []
+    },
+    {
+      "id": "hired-2",
+      "atlas": "wardrobe",
+      "style": "Adventurer",
+      "row": 5,
+      "drawHeight": 58,
+      "actions": [
+        {
+          "id": "walk",
+          "atlasFrames": [
+            "wardrobe",
+            "walk"
+          ],
+          "hasRow": false,
+          "variantStyles": [],
+          "directionColumns": [],
+          "directionRows": [],
+          "directionRowOffsets": []
+        },
+        {
+          "id": "clean",
+          "atlas": "pit",
+          "hasRow": false,
+          "variantStyles": [],
+          "directionColumns": [],
+          "directionRows": [],
+          "directionRowOffsets": []
+        }
+      ],
+      "hasRow": true,
+      "variantStyles": [],
+      "directionColumns": [],
+      "directionRows": [],
+      "directionRowOffsets": []
+    },
+    {
+      "id": "singer",
+      "atlas": "bandWalk",
+      "style": "Punk",
+      "row": 0,
+      "actions": [
+        {
+          "id": "perform",
+          "atlas": "bandPerformanceSinger",
+          "directionRows": [
+            {
+              "id": "FR",
+              "row": 0
+            },
+            {
+              "id": "BR",
+              "row": 1
+            },
+            {
+              "id": "BL",
+              "row": 2
+            },
+            {
+              "id": "FL",
+              "row": 3
+            }
+          ],
+          "direction": "FL",
+          "frameColumns": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "fps": 8,
+          "hasRow": false,
+          "variantStyles": [],
+          "directionColumns": [],
+          "directionRowOffsets": []
+        },
+        {
+          "id": "walk",
+          "atlas": "bandWalk",
+          "directionRows": [
+            {
+              "id": "FR",
+              "row": 0
+            },
+            {
+              "id": "BR",
+              "row": 1
+            },
+            {
+              "id": "BL",
+              "row": 2
+            },
+            {
+              "id": "FL",
+              "row": 3
+            }
+          ],
+          "frameColumns": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "fps": 8,
+          "hasRow": false,
+          "variantStyles": [],
+          "directionColumns": [],
+          "directionRowOffsets": []
+        },
+        {
+          "id": "exit",
+          "atlas": "bandWalk",
+          "directionRows": [
+            {
+              "id": "FR",
+              "row": 0
+            },
+            {
+              "id": "BR",
+              "row": 1
+            },
+            {
+              "id": "BL",
+              "row": 2
+            },
+            {
+              "id": "FL",
+              "row": 3
+            }
+          ],
+          "frameColumns": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "fps": 8,
+          "hasRow": false,
+          "variantStyles": [],
+          "directionColumns": [],
+          "directionRowOffsets": []
+        },
+        {
+          "id": "idle",
+          "atlas": "bandWalk",
+          "directionRows": [
+            {
+              "id": "FR",
+              "row": 0
+            },
+            {
+              "id": "BR",
+              "row": 1
+            },
+            {
+              "id": "BL",
+              "row": 2
+            },
+            {
+              "id": "FL",
+              "row": 3
+            }
+          ],
+          "frameColumns": [
+            0
+          ],
+          "hasRow": false,
+          "variantStyles": [],
+          "directionColumns": [],
+          "directionRowOffsets": []
+        },
+        {
+          "id": "aftershow-wait",
+          "atlas": "bandWalk",
+          "directionRows": [
+            {
+              "id": "FR",
+              "row": 0
+            },
+            {
+              "id": "BR",
+              "row": 1
+            },
+            {
+              "id": "BL",
+              "row": 2
+            },
+            {
+              "id": "FL",
+              "row": 3
+            }
+          ],
+          "frameColumns": [
+            0
+          ],
+          "hasRow": false,
+          "variantStyles": [],
+          "directionColumns": [],
+          "directionRowOffsets": []
+        },
+        {
+          "id": "highfive",
+          "atlas": "bandGreetA",
+          "directionRows": [
+            {
+              "id": "FR",
+              "row": 0
+            },
+            {
+              "id": "BR",
+              "row": 1
+            },
+            {
+              "id": "BL",
+              "row": 2
+            },
+            {
+              "id": "FL",
+              "row": 3
+            }
+          ],
+          "frameColumns": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "frameCount": 4,
+          "progressFrames": true,
+          "fps": 8,
+          "hasRow": false,
+          "variantStyles": [],
+          "directionColumns": [],
+          "directionRowOffsets": []
+        },
+        {
+          "id": "hug",
+          "atlas": "bandGreetA",
+          "directionRows": [
+            {
+              "id": "FR",
+              "row": 0
+            },
+            {
+              "id": "BR",
+              "row": 1
+            },
+            {
+              "id": "BL",
+              "row": 2
+            },
+            {
+              "id": "FL",
+              "row": 3
+            }
+          ],
+          "frameColumns": [
+            4,
+            5,
+            6,
+            7
+          ],
+          "frameCount": 4,
+          "progressFrames": true,
+          "fps": 8,
+          "hasRow": false,
+          "variantStyles": [],
+          "directionColumns": [],
+          "directionRowOffsets": []
+        }
+      ],
+      "directionRows": [
+        {
+          "id": "FR",
+          "row": 0
+        },
+        {
+          "id": "BR",
+          "row": 1
+        },
+        {
+          "id": "BL",
+          "row": 2
+        },
+        {
+          "id": "FL",
+          "row": 3
+        }
+      ],
+      "frameColumns": [
+        0
+      ],
+      "hasRow": true,
+      "variantStyles": [],
+      "directionColumns": [],
+      "directionRowOffsets": []
+    },
+    {
+      "id": "guitarist",
+      "atlas": "bandWalk",
+      "style": "Casual2",
+      "row": 4,
+      "actions": [
+        {
+          "id": "perform",
+          "atlas": "bandPerformanceGuitarist",
+          "directionRows": [
+            {
+              "id": "FR",
+              "row": 0
+            },
+            {
+              "id": "BR",
+              "row": 1
+            },
+            {
+              "id": "BL",
+              "row": 2
+            },
+            {
+              "id": "FL",
+              "row": 3
+            }
+          ],
+          "direction": "FR",
+          "frameColumns": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "fps": 8,
+          "hasRow": false,
+          "variantStyles": [],
+          "directionColumns": [],
+          "directionRowOffsets": []
+        },
+        {
+          "id": "walk",
+          "atlas": "bandWalk",
+          "directionRows": [
+            {
+              "id": "FR",
+              "row": 4
+            },
+            {
+              "id": "BR",
+              "row": 5
+            },
+            {
+              "id": "BL",
+              "row": 6
+            },
+            {
+              "id": "FL",
+              "row": 7
+            }
+          ],
+          "frameColumns": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "fps": 8,
+          "hasRow": false,
+          "variantStyles": [],
+          "directionColumns": [],
+          "directionRowOffsets": []
+        },
+        {
+          "id": "exit",
+          "atlas": "bandWalk",
+          "directionRows": [
+            {
+              "id": "FR",
+              "row": 4
+            },
+            {
+              "id": "BR",
+              "row": 5
+            },
+            {
+              "id": "BL",
+              "row": 6
+            },
+            {
+              "id": "FL",
+              "row": 7
+            }
+          ],
+          "frameColumns": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "fps": 8,
+          "hasRow": false,
+          "variantStyles": [],
+          "directionColumns": [],
+          "directionRowOffsets": []
+        },
+        {
+          "id": "idle",
+          "atlas": "bandWalk",
+          "directionRows": [
+            {
+              "id": "FR",
+              "row": 4
+            },
+            {
+              "id": "BR",
+              "row": 5
+            },
+            {
+              "id": "BL",
+              "row": 6
+            },
+            {
+              "id": "FL",
+              "row": 7
+            }
+          ],
+          "frameColumns": [
+            0
+          ],
+          "hasRow": false,
+          "variantStyles": [],
+          "directionColumns": [],
+          "directionRowOffsets": []
+        },
+        {
+          "id": "aftershow-wait",
+          "atlas": "bandWalk",
+          "directionRows": [
+            {
+              "id": "FR",
+              "row": 4
+            },
+            {
+              "id": "BR",
+              "row": 5
+            },
+            {
+              "id": "BL",
+              "row": 6
+            },
+            {
+              "id": "FL",
+              "row": 7
+            }
+          ],
+          "frameColumns": [
+            0
+          ],
+          "hasRow": false,
+          "variantStyles": [],
+          "directionColumns": [],
+          "directionRowOffsets": []
+        },
+        {
+          "id": "highfive",
+          "atlas": "bandGreetA",
+          "directionRows": [
+            {
+              "id": "FR",
+              "row": 4
+            },
+            {
+              "id": "BR",
+              "row": 5
+            },
+            {
+              "id": "BL",
+              "row": 6
+            },
+            {
+              "id": "FL",
+              "row": 7
+            }
+          ],
+          "frameColumns": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "frameCount": 4,
+          "progressFrames": true,
+          "fps": 8,
+          "hasRow": false,
+          "variantStyles": [],
+          "directionColumns": [],
+          "directionRowOffsets": []
+        },
+        {
+          "id": "hug",
+          "atlas": "bandGreetA",
+          "directionRows": [
+            {
+              "id": "FR",
+              "row": 4
+            },
+            {
+              "id": "BR",
+              "row": 5
+            },
+            {
+              "id": "BL",
+              "row": 6
+            },
+            {
+              "id": "FL",
+              "row": 7
+            }
+          ],
+          "frameColumns": [
+            4,
+            5,
+            6,
+            7
+          ],
+          "frameCount": 4,
+          "progressFrames": true,
+          "fps": 8,
+          "hasRow": false,
+          "variantStyles": [],
+          "directionColumns": [],
+          "directionRowOffsets": []
+        },
+        {
+          "id": "jump",
+          "atlas": "bandJump",
+          "direction": "FR",
+          "directionRows": [
+            {
+              "id": "FR",
+              "row": 0
+            },
+            {
+              "id": "BR",
+              "row": 1
+            },
+            {
+              "id": "BL",
+              "row": 2
+            },
+            {
+              "id": "FL",
+              "row": 3
+            }
+          ],
+          "frameColumns": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "fps": 8,
+          "hasRow": false,
+          "variantStyles": [],
+          "directionColumns": [],
+          "directionRowOffsets": []
+        }
+      ],
+      "directionRows": [
+        {
+          "id": "FR",
+          "row": 4
+        },
+        {
+          "id": "BR",
+          "row": 5
+        },
+        {
+          "id": "BL",
+          "row": 6
+        },
+        {
+          "id": "FL",
+          "row": 7
+        }
+      ],
+      "frameColumns": [
+        0
+      ],
+      "hasRow": true,
+      "variantStyles": [],
+      "directionColumns": [],
+      "directionRowOffsets": []
+    },
+    {
+      "id": "bassist",
+      "atlas": "bandWalk",
+      "style": "Punk",
+      "row": 8,
+      "actions": [
+        {
+          "id": "perform",
+          "atlas": "bandPerformanceBassist",
+          "directionRows": [
+            {
+              "id": "FR",
+              "row": 0
+            },
+            {
+              "id": "BR",
+              "row": 1
+            },
+            {
+              "id": "BL",
+              "row": 2
+            },
+            {
+              "id": "FL",
+              "row": 3
+            }
+          ],
+          "direction": "FL",
+          "frameColumns": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "fps": 8,
+          "hasRow": false,
+          "variantStyles": [],
+          "directionColumns": [],
+          "directionRowOffsets": []
+        },
+        {
+          "id": "walk",
+          "atlas": "bandWalk",
+          "directionRows": [
+            {
+              "id": "FR",
+              "row": 8
+            },
+            {
+              "id": "BR",
+              "row": 9
+            },
+            {
+              "id": "BL",
+              "row": 10
+            },
+            {
+              "id": "FL",
+              "row": 11
+            }
+          ],
+          "frameColumns": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "fps": 8,
+          "hasRow": false,
+          "variantStyles": [],
+          "directionColumns": [],
+          "directionRowOffsets": []
+        },
+        {
+          "id": "exit",
+          "atlas": "bandWalk",
+          "directionRows": [
+            {
+              "id": "FR",
+              "row": 8
+            },
+            {
+              "id": "BR",
+              "row": 9
+            },
+            {
+              "id": "BL",
+              "row": 10
+            },
+            {
+              "id": "FL",
+              "row": 11
+            }
+          ],
+          "frameColumns": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "fps": 8,
+          "hasRow": false,
+          "variantStyles": [],
+          "directionColumns": [],
+          "directionRowOffsets": []
+        },
+        {
+          "id": "idle",
+          "atlas": "bandWalk",
+          "directionRows": [
+            {
+              "id": "FR",
+              "row": 8
+            },
+            {
+              "id": "BR",
+              "row": 9
+            },
+            {
+              "id": "BL",
+              "row": 10
+            },
+            {
+              "id": "FL",
+              "row": 11
+            }
+          ],
+          "frameColumns": [
+            0
+          ],
+          "hasRow": false,
+          "variantStyles": [],
+          "directionColumns": [],
+          "directionRowOffsets": []
+        },
+        {
+          "id": "aftershow-wait",
+          "atlas": "bandWalk",
+          "directionRows": [
+            {
+              "id": "FR",
+              "row": 8
+            },
+            {
+              "id": "BR",
+              "row": 9
+            },
+            {
+              "id": "BL",
+              "row": 10
+            },
+            {
+              "id": "FL",
+              "row": 11
+            }
+          ],
+          "frameColumns": [
+            0
+          ],
+          "hasRow": false,
+          "variantStyles": [],
+          "directionColumns": [],
+          "directionRowOffsets": []
+        },
+        {
+          "id": "highfive",
+          "atlas": "bandGreetB",
+          "directionRows": [
+            {
+              "id": "FR",
+              "row": 0
+            },
+            {
+              "id": "BR",
+              "row": 1
+            },
+            {
+              "id": "BL",
+              "row": 2
+            },
+            {
+              "id": "FL",
+              "row": 3
+            }
+          ],
+          "frameColumns": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "frameCount": 4,
+          "progressFrames": true,
+          "fps": 8,
+          "hasRow": false,
+          "variantStyles": [],
+          "directionColumns": [],
+          "directionRowOffsets": []
+        },
+        {
+          "id": "hug",
+          "atlas": "bandGreetB",
+          "directionRows": [
+            {
+              "id": "FR",
+              "row": 0
+            },
+            {
+              "id": "BR",
+              "row": 1
+            },
+            {
+              "id": "BL",
+              "row": 2
+            },
+            {
+              "id": "FL",
+              "row": 3
+            }
+          ],
+          "frameColumns": [
+            4,
+            5,
+            6,
+            7
+          ],
+          "frameCount": 4,
+          "progressFrames": true,
+          "fps": 8,
+          "hasRow": false,
+          "variantStyles": [],
+          "directionColumns": [],
+          "directionRowOffsets": []
+        },
+        {
+          "id": "jump",
+          "atlas": "bandJump",
+          "direction": "FL",
+          "directionRows": [
+            {
+              "id": "FR",
+              "row": 4
+            },
+            {
+              "id": "BR",
+              "row": 5
+            },
+            {
+              "id": "BL",
+              "row": 6
+            },
+            {
+              "id": "FL",
+              "row": 7
+            }
+          ],
+          "frameColumns": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "fps": 8,
+          "hasRow": false,
+          "variantStyles": [],
+          "directionColumns": [],
+          "directionRowOffsets": []
+        }
+      ],
+      "directionRows": [
+        {
+          "id": "FR",
+          "row": 8
+        },
+        {
+          "id": "BR",
+          "row": 9
+        },
+        {
+          "id": "BL",
+          "row": 10
+        },
+        {
+          "id": "FL",
+          "row": 11
+        }
+      ],
+      "frameColumns": [
+        0
+      ],
+      "hasRow": true,
+      "variantStyles": [],
+      "directionColumns": [],
+      "directionRowOffsets": []
+    },
+    {
+      "id": "drummer",
+      "atlas": "bandWalk",
+      "style": "Punk",
+      "row": 12,
+      "drawHeight": 52,
+      "actions": [
+        {
+          "id": "perform",
+          "atlas": "bandPerformanceDrummer",
+          "directionRows": [
+            {
+              "id": "FR",
+              "row": 0
+            },
+            {
+              "id": "BR",
+              "row": 1
+            },
+            {
+              "id": "BL",
+              "row": 2
+            },
+            {
+              "id": "FL",
+              "row": 3
+            }
+          ],
+          "direction": "FL",
+          "frameColumns": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "fps": 8,
+          "hasRow": false,
+          "variantStyles": [],
+          "directionColumns": [],
+          "directionRowOffsets": []
+        },
+        {
+          "id": "walk",
+          "atlas": "bandWalk",
+          "directionRows": [
+            {
+              "id": "FR",
+              "row": 12
+            },
+            {
+              "id": "BR",
+              "row": 13
+            },
+            {
+              "id": "BL",
+              "row": 14
+            },
+            {
+              "id": "FL",
+              "row": 15
+            }
+          ],
+          "frameColumns": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "fps": 8,
+          "hasRow": false,
+          "variantStyles": [],
+          "directionColumns": [],
+          "directionRowOffsets": []
+        },
+        {
+          "id": "exit",
+          "atlas": "bandWalk",
+          "directionRows": [
+            {
+              "id": "FR",
+              "row": 12
+            },
+            {
+              "id": "BR",
+              "row": 13
+            },
+            {
+              "id": "BL",
+              "row": 14
+            },
+            {
+              "id": "FL",
+              "row": 15
+            }
+          ],
+          "frameColumns": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "fps": 8,
+          "hasRow": false,
+          "variantStyles": [],
+          "directionColumns": [],
+          "directionRowOffsets": []
+        },
+        {
+          "id": "idle",
+          "atlas": "bandWalk",
+          "directionRows": [
+            {
+              "id": "FR",
+              "row": 12
+            },
+            {
+              "id": "BR",
+              "row": 13
+            },
+            {
+              "id": "BL",
+              "row": 14
+            },
+            {
+              "id": "FL",
+              "row": 15
+            }
+          ],
+          "frameColumns": [
+            0
+          ],
+          "hasRow": false,
+          "variantStyles": [],
+          "directionColumns": [],
+          "directionRowOffsets": []
+        },
+        {
+          "id": "aftershow-wait",
+          "atlas": "bandWalk",
+          "directionRows": [
+            {
+              "id": "FR",
+              "row": 12
+            },
+            {
+              "id": "BR",
+              "row": 13
+            },
+            {
+              "id": "BL",
+              "row": 14
+            },
+            {
+              "id": "FL",
+              "row": 15
+            }
+          ],
+          "frameColumns": [
+            0
+          ],
+          "hasRow": false,
+          "variantStyles": [],
+          "directionColumns": [],
+          "directionRowOffsets": []
+        },
+        {
+          "id": "highfive",
+          "atlas": "bandGreetB",
+          "directionRows": [
+            {
+              "id": "FR",
+              "row": 4
+            },
+            {
+              "id": "BR",
+              "row": 5
+            },
+            {
+              "id": "BL",
+              "row": 6
+            },
+            {
+              "id": "FL",
+              "row": 7
+            }
+          ],
+          "frameColumns": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "frameCount": 4,
+          "progressFrames": true,
+          "fps": 8,
+          "hasRow": false,
+          "variantStyles": [],
+          "directionColumns": [],
+          "directionRowOffsets": []
+        },
+        {
+          "id": "hug",
+          "atlas": "bandGreetB",
+          "directionRows": [
+            {
+              "id": "FR",
+              "row": 4
+            },
+            {
+              "id": "BR",
+              "row": 5
+            },
+            {
+              "id": "BL",
+              "row": 6
+            },
+            {
+              "id": "FL",
+              "row": 7
+            }
+          ],
+          "frameColumns": [
+            4,
+            5,
+            6,
+            7
+          ],
+          "frameCount": 4,
+          "progressFrames": true,
+          "fps": 8,
+          "hasRow": false,
+          "variantStyles": [],
+          "directionColumns": [],
+          "directionRowOffsets": []
+        }
+      ],
+      "directionRows": [
+        {
+          "id": "FR",
+          "row": 12
+        },
+        {
+          "id": "BR",
+          "row": 13
+        },
+        {
+          "id": "BL",
+          "row": 14
+        },
+        {
+          "id": "FL",
+          "row": 15
+        }
+      ],
+      "frameColumns": [
+        0
+      ],
+      "hasRow": true,
+      "variantStyles": [],
+      "directionColumns": [],
+      "directionRowOffsets": []
+    },
+    {
+      "id": "support",
+      "atlas": "wardrobe",
+      "styles": [
+        "Casual",
+        "Suit",
+        "Beach",
+        "Worker",
+        "Farmer",
+        "Adventurer",
+        "Casual2",
+        "Punk"
+      ],
+      "variantStyles": [
+        {
+          "id": "Casual",
+          "row": 0
+        },
+        {
+          "id": "Suit",
+          "row": 1
+        },
+        {
+          "id": "Beach",
+          "row": 2
+        },
+        {
+          "id": "Worker",
+          "row": 3
+        },
+        {
+          "id": "Farmer",
+          "row": 4
+        },
+        {
+          "id": "Adventurer",
+          "row": 5
+        },
+        {
+          "id": "Casual2",
+          "row": 6
+        },
+        {
+          "id": "Punk",
+          "row": 7
+        }
+      ],
+      "actions": [
+        {
+          "id": "support",
+          "atlas": "pit",
+          "hasRow": false,
+          "variantStyles": [],
+          "directionColumns": [],
+          "directionRows": [],
+          "directionRowOffsets": []
+        },
+        {
+          "id": "walk",
+          "atlasFrames": [
+            "wardrobe",
+            "walk"
+          ],
+          "hasRow": false,
+          "variantStyles": [],
+          "directionColumns": [],
+          "directionRows": [],
+          "directionRowOffsets": []
+        },
+        {
+          "id": "highfive",
+          "atlas": "guestSocial",
+          "variantStyles": [
+            {
+              "id": "Casual",
+              "row": 0
+            },
+            {
+              "id": "Suit",
+              "row": 4
+            },
+            {
+              "id": "Beach",
+              "row": 8
+            },
+            {
+              "id": "Worker",
+              "row": 12
+            },
+            {
+              "id": "Farmer",
+              "row": 16
+            },
+            {
+              "id": "Adventurer",
+              "row": 20
+            },
+            {
+              "id": "Casual2",
+              "row": 24
+            },
+            {
+              "id": "Punk",
+              "row": 28
+            }
+          ],
+          "directionRowOffsets": [
+            {
+              "id": "FR",
+              "row": 0
+            },
+            {
+              "id": "BR",
+              "row": 1
+            },
+            {
+              "id": "BL",
+              "row": 2
+            },
+            {
+              "id": "FL",
+              "row": 3
+            }
+          ],
+          "frameColumns": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "frameCount": 4,
+          "progressFrames": true,
+          "fps": 8,
+          "hasRow": false,
+          "directionColumns": [],
+          "directionRows": []
+        },
+        {
+          "id": "hug",
+          "atlas": "guestSocial",
+          "variantStyles": [
+            {
+              "id": "Casual",
+              "row": 0
+            },
+            {
+              "id": "Suit",
+              "row": 4
+            },
+            {
+              "id": "Beach",
+              "row": 8
+            },
+            {
+              "id": "Worker",
+              "row": 12
+            },
+            {
+              "id": "Farmer",
+              "row": 16
+            },
+            {
+              "id": "Adventurer",
+              "row": 20
+            },
+            {
+              "id": "Casual2",
+              "row": 24
+            },
+            {
+              "id": "Punk",
+              "row": 28
+            }
+          ],
+          "directionRowOffsets": [
+            {
+              "id": "FR",
+              "row": 0
+            },
+            {
+              "id": "BR",
+              "row": 1
+            },
+            {
+              "id": "BL",
+              "row": 2
+            },
+            {
+              "id": "FL",
+              "row": 3
+            }
+          ],
+          "frameColumns": [
+            4,
+            5,
+            6,
+            7
+          ],
+          "frameCount": 4,
+          "progressFrames": true,
+          "fps": 8,
+          "hasRow": false,
+          "directionColumns": [],
+          "directionRows": []
+        }
+      ],
+      "hasRow": false,
+      "directionColumns": [],
+      "directionRows": [],
+      "directionRowOffsets": []
+    },
+    {
+      "id": "surfer",
+      "atlas": "wardrobe",
+      "style": "Casual",
+      "row": 0,
+      "actions": [
+        {
+          "id": "surf",
+          "atlas": "poses",
+          "row": 7,
+          "horizontal": true,
+          "footX": 32,
+          "footY": 32,
+          "hasRow": true,
+          "variantStyles": [],
+          "directionColumns": [],
+          "directionRows": [],
+          "directionRowOffsets": []
+        },
+        {
+          "id": "highfive",
+          "atlas": "guestSocial",
+          "variantStyles": [
+            {
+              "id": "Casual",
+              "row": 0
+            },
+            {
+              "id": "Suit",
+              "row": 4
+            },
+            {
+              "id": "Beach",
+              "row": 8
+            },
+            {
+              "id": "Worker",
+              "row": 12
+            },
+            {
+              "id": "Farmer",
+              "row": 16
+            },
+            {
+              "id": "Adventurer",
+              "row": 20
+            },
+            {
+              "id": "Casual2",
+              "row": 24
+            },
+            {
+              "id": "Punk",
+              "row": 28
+            }
+          ],
+          "directionRowOffsets": [
+            {
+              "id": "FR",
+              "row": 0
+            },
+            {
+              "id": "BR",
+              "row": 1
+            },
+            {
+              "id": "BL",
+              "row": 2
+            },
+            {
+              "id": "FL",
+              "row": 3
+            }
+          ],
+          "frameColumns": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "frameCount": 4,
+          "progressFrames": true,
+          "fps": 8,
+          "hasRow": false,
+          "directionColumns": [],
+          "directionRows": []
+        },
+        {
+          "id": "hug",
+          "atlas": "guestSocial",
+          "variantStyles": [
+            {
+              "id": "Casual",
+              "row": 0
+            },
+            {
+              "id": "Suit",
+              "row": 4
+            },
+            {
+              "id": "Beach",
+              "row": 8
+            },
+            {
+              "id": "Worker",
+              "row": 12
+            },
+            {
+              "id": "Farmer",
+              "row": 16
+            },
+            {
+              "id": "Adventurer",
+              "row": 20
+            },
+            {
+              "id": "Casual2",
+              "row": 24
+            },
+            {
+              "id": "Punk",
+              "row": 28
+            }
+          ],
+          "directionRowOffsets": [
+            {
+              "id": "FR",
+              "row": 0
+            },
+            {
+              "id": "BR",
+              "row": 1
+            },
+            {
+              "id": "BL",
+              "row": 2
+            },
+            {
+              "id": "FL",
+              "row": 3
+            }
+          ],
+          "frameColumns": [
+            4,
+            5,
+            6,
+            7
+          ],
+          "frameCount": 4,
+          "progressFrames": true,
+          "fps": 8,
+          "hasRow": false,
+          "directionColumns": [],
+          "directionRows": []
+        }
+      ],
+      "hasRow": true,
+      "variantStyles": [],
+      "directionColumns": [],
+      "directionRows": [],
+      "directionRowOffsets": []
+    }
+  ],
+  "atlases": [
+    {
+      "file": "wardrobe.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "columns": 4,
+      "directionColumns": [
+        {
+          "id": "FR",
+          "column": 0
+        },
+        {
+          "id": "BR",
+          "column": 1
+        },
+        {
+          "id": "BL",
+          "column": 2
+        },
+        {
+          "id": "FL",
+          "column": 3
+        }
+      ],
+      "id": "wardrobe",
+      "resource": "SimBarPixelArt/wardrobe"
+    },
+    {
+      "file": "walk.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "columns": 4,
+      "directionColumns": [
+        {
+          "id": "FR",
+          "column": 0
+        },
+        {
+          "id": "BR",
+          "column": 1
+        },
+        {
+          "id": "BL",
+          "column": 2
+        },
+        {
+          "id": "FL",
+          "column": 3
+        }
+      ],
+      "id": "walk",
+      "resource": "SimBarPixelArt/walk"
+    },
+    {
+      "file": "pit.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "columns": 4,
+      "directionColumns": [
+        {
+          "id": "FR",
+          "column": 0
+        },
+        {
+          "id": "BR",
+          "column": 1
+        },
+        {
+          "id": "BL",
+          "column": 2
+        },
+        {
+          "id": "FL",
+          "column": 3
+        }
+      ],
+      "id": "pit",
+      "resource": "SimBarPixelArt/pit"
+    },
+    {
+      "file": "poses.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "columns": 4,
+      "directionColumns": [
+        {
+          "id": "FR",
+          "column": 0
+        },
+        {
+          "id": "BR",
+          "column": 1
+        },
+        {
+          "id": "BL",
+          "column": 2
+        },
+        {
+          "id": "FL",
+          "column": 3
+        }
+      ],
+      "id": "poses",
+      "resource": "SimBarPixelArt/poses"
+    },
+    {
+      "file": "v4-guest-social.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "columns": 8,
+      "id": "guestSocial",
+      "resource": "SimBarPixelArt/v4-guest-social",
+      "directionColumns": []
+    },
+    {
+      "file": "v4-band-singer-performance.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "columns": 8,
+      "id": "bandPerformanceSinger",
+      "resource": "SimBarPixelArt/v4-band-singer-performance",
+      "directionColumns": []
+    },
+    {
+      "file": "v4-band-guitar-performance.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "columns": 8,
+      "id": "bandPerformanceGuitarist",
+      "resource": "SimBarPixelArt/v4-band-guitar-performance",
+      "directionColumns": []
+    },
+    {
+      "file": "v4-band-bass-performance.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "columns": 8,
+      "id": "bandPerformanceBassist",
+      "resource": "SimBarPixelArt/v4-band-bass-performance",
+      "directionColumns": []
+    },
+    {
+      "file": "v4-band-drums-performance.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "columns": 8,
+      "id": "bandPerformanceDrummer",
+      "resource": "SimBarPixelArt/v4-band-drums-performance",
+      "directionColumns": []
+    },
+    {
+      "file": "v4-band-walk.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "columns": 4,
+      "id": "bandWalk",
+      "resource": "SimBarPixelArt/v4-band-walk",
+      "directionColumns": []
+    },
+    {
+      "file": "v4-band-jump.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "columns": 8,
+      "id": "bandJump",
+      "resource": "SimBarPixelArt/v4-band-jump",
+      "directionColumns": []
+    },
+    {
+      "file": "v4-band-greet-a.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "columns": 8,
+      "id": "bandGreetA",
+      "resource": "SimBarPixelArt/v4-band-greet-a",
+      "directionColumns": []
+    },
+    {
+      "file": "v4-band-greet-b.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "columns": 8,
+      "id": "bandGreetB",
+      "resource": "SimBarPixelArt/v4-band-greet-b",
+      "directionColumns": []
+    },
+    {
+      "file": "order-icons.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "columns": 6,
+      "id": "orders",
+      "resource": "SimBarPixelArt/order-icons",
+      "directionColumns": []
+    }
+  ],
+  "ledQuad": [
+    {
+      "x": 626,
+      "y": 120
+    },
+    {
+      "x": 886,
+      "y": 189
+    },
+    {
+      "x": 886,
+      "y": 268
+    },
+    {
+      "x": 626,
+      "y": 200
+    }
+  ],
+  "ledLamps": [
+    {
+      "x": 683,
+      "y": 134
+    },
+    {
+      "x": 739,
+      "y": 146
+    },
+    {
+      "x": 802,
+      "y": 160
+    },
+    {
+      "x": 858,
+      "y": 172
+    }
+  ],
+  "stageDeck": [
+    {
+      "x": 503,
+      "y": 300
+    },
+    {
+      "x": 563,
+      "y": 243
+    },
+    {
+      "x": 591,
+      "y": 216
+    },
+    {
+      "x": 907,
+      "y": 291
+    },
+    {
+      "x": 916,
+      "y": 333
+    },
+    {
+      "x": 840,
+      "y": 391
+    }
+  ],
+  "stageLamps": [
+    {
+      "x": 631,
+      "y": 123
+    },
+    {
+      "x": 683,
+      "y": 134
+    },
+    {
+      "x": 739,
+      "y": 146
+    },
+    {
+      "x": 802,
+      "y": 160
+    },
+    {
+      "x": 858,
+      "y": 172
+    }
+  ],
+  "lightSources": [
+    {
+      "x": 631,
+      "y": 123
+    },
+    {
+      "x": 683,
+      "y": 134
+    },
+    {
+      "x": 802,
+      "y": 160
+    },
+    {
+      "x": 858,
+      "y": 172
+    }
+  ],
+  "ledFixtureScale": 0.5
+}

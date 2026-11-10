@@ -1,0 +1,4490 @@
+{
+  "passed": true,
+  "cell": [
+    64,
+    64
+  ],
+  "anchor": [
+    32,
+    60
+  ],
+  "columns": 12,
+  "bands": [
+    {
+      "source": "freewill.corrected.source.png",
+      "sourceSize": [
+        1774,
+        887
+      ],
+      "sourceSha256": "75bf10b132558dfef4ace6648eb5897be671c3d5014427f330a591a06e495eca",
+      "sourceAlphaExtrema": [
+        0,
+        255
+      ],
+      "file": "band-freewill.png",
+      "size": [
+        768,
+        384
+      ],
+      "sourceColumns": 11,
+      "sourceFrameCount": 66,
+      "runtimeRepeatedColumns": [
+        11
+      ],
+      "rowBoundaries": [
+        0,
+        174,
+        338,
+        493,
+        651,
+        795,
+        887
+      ],
+      "missingCells": [],
+      "rows": [
+        {
+          "row": 0,
+          "groups": [
+            {
+              "action": "perform",
+              "targetBodyHeight": 56,
+              "scale": 0.4357976653696498
+            },
+            {
+              "action": "walk",
+              "targetBodyHeight": 56,
+              "scale": 0.42748091603053434
+            },
+            {
+              "action": "expressions",
+              "targetBodyHeight": 56,
+              "scale": 0.427536231884058
+            }
+          ],
+          "cells": [
+            {
+              "column": 0,
+              "action": "perform",
+              "sourceColumn": 0,
+              "sourceCell": [
+                0,
+                0,
+                179,
+                174
+              ],
+              "sourceOpaqueBounds": [
+                57,
+                33,
+                138,
+                162
+              ],
+              "scale": 0.4357976653696498,
+              "placedRect": [
+                13,
+                3,
+                37,
+                58
+              ],
+              "packedOpaqueBounds": [
+                14,
+                4,
+                49,
+                60
+              ]
+            },
+            {
+              "column": 1,
+              "action": "perform",
+              "sourceColumn": 1,
+              "sourceCell": [
+                179,
+                0,
+                338,
+                174
+              ],
+              "sourceOpaqueBounds": [
+                41,
+                34,
+                120,
+                162
+              ],
+              "scale": 0.4357976653696498,
+              "placedRect": [
+                14,
+                3,
+                36,
+                58
+              ],
+              "packedOpaqueBounds": [
+                15,
+                4,
+                49,
+                60
+              ]
+            },
+            {
+              "column": 2,
+              "action": "perform",
+              "sourceColumn": 2,
+              "sourceCell": [
+                338,
+                0,
+                498,
+                174
+              ],
+              "sourceOpaqueBounds": [
+                40,
+                33,
+                119,
+                162
+              ],
+              "scale": 0.4357976653696498,
+              "placedRect": [
+                14,
+                3,
+                36,
+                58
+              ],
+              "packedOpaqueBounds": [
+                15,
+                4,
+                49,
+                60
+              ]
+            },
+            {
+              "column": 3,
+              "action": "perform",
+              "sourceColumn": 3,
+              "sourceCell": [
+                498,
+                0,
+                655,
+                174
+              ],
+              "sourceOpaqueBounds": [
+                42,
+                35,
+                117,
+                163
+              ],
+              "scale": 0.4357976653696498,
+              "placedRect": [
+                15,
+                3,
+                34,
+                58
+              ],
+              "packedOpaqueBounds": [
+                16,
+                4,
+                48,
+                60
+              ]
+            },
+            {
+              "column": 4,
+              "action": "walk",
+              "sourceColumn": 4,
+              "sourceCell": [
+                655,
+                0,
+                812,
+                174
+              ],
+              "sourceOpaqueBounds": [
+                40,
+                35,
+                117,
+                166
+              ],
+              "scale": 0.42748091603053434,
+              "placedRect": [
+                15,
+                3,
+                35,
+                58
+              ],
+              "packedOpaqueBounds": [
+                16,
+                4,
+                49,
+                60
+              ]
+            },
+            {
+              "column": 5,
+              "action": "walk",
+              "sourceColumn": 5,
+              "sourceCell": [
+                812,
+                0,
+                959,
+                174
+              ],
+              "sourceOpaqueBounds": [
+                40,
+                35,
+                104,
+                167
+              ],
+              "scale": 0.42748091603053434,
+              "placedRect": [
+                19,
+                3,
+                29,
+                58
+              ],
+              "packedOpaqueBounds": [
+                20,
+                4,
+                47,
+                60
+              ]
+            },
+            {
+              "column": 6,
+              "action": "walk",
+              "sourceColumn": 6,
+              "sourceCell": [
+                959,
+                0,
+                1116,
+                174
+              ],
+              "sourceOpaqueBounds": [
+                44,
+                36,
+                112,
+                166
+              ],
+              "scale": 0.42748091603053434,
+              "placedRect": [
+                17,
+                4,
+                31,
+                57
+              ],
+              "packedOpaqueBounds": [
+                18,
+                5,
+                47,
+                60
+              ]
+            },
+            {
+              "column": 7,
+              "action": "walk",
+              "sourceColumn": 7,
+              "sourceCell": [
+                1116,
+                0,
+                1270,
+                174
+              ],
+              "sourceOpaqueBounds": [
+                45,
+                35,
+                109,
+                166
+              ],
+              "scale": 0.42748091603053434,
+              "placedRect": [
+                17,
+                3,
+                29,
+                58
+              ],
+              "packedOpaqueBounds": [
+                18,
+                4,
+                45,
+                60
+              ]
+            },
+            {
+              "column": 8,
+              "action": "expressions",
+              "sourceColumn": 8,
+              "sourceCell": [
+                1270,
+                0,
+                1416,
+                174
+              ],
+              "sourceOpaqueBounds": [
+                46,
+                36,
+                107,
+                164
+              ],
+              "scale": 0.427536231884058,
+              "placedRect": [
+                18,
+                4,
+                28,
+                56
+              ],
+              "packedOpaqueBounds": [
+                19,
+                5,
+                45,
+                59
+              ]
+            },
+            {
+              "column": 9,
+              "action": "expressions",
+              "sourceColumn": 9,
+              "sourceCell": [
+                1416,
+                0,
+                1561,
+                174
+              ],
+              "sourceOpaqueBounds": [
+                40,
+                28,
+                111,
+                164
+              ],
+              "scale": 0.427536231884058,
+              "placedRect": [
+                14,
+                1,
+                32,
+                60
+              ],
+              "packedOpaqueBounds": [
+                15,
+                2,
+                45,
+                60
+              ]
+            },
+            {
+              "column": 10,
+              "action": "expressions",
+              "sourceColumn": 10,
+              "sourceCell": [
+                1561,
+                0,
+                1774,
+                174
+              ],
+              "sourceOpaqueBounds": [
+                35,
+                36,
+                140,
+                164
+              ],
+              "scale": 0.427536231884058,
+              "placedRect": [
+                4,
+                4,
+                47,
+                56
+              ],
+              "packedOpaqueBounds": [
+                5,
+                5,
+                50,
+                59
+              ]
+            },
+            {
+              "column": 11,
+              "action": "expressions",
+              "sourceColumn": 10,
+              "sourceCell": [
+                1561,
+                0,
+                1774,
+                174
+              ],
+              "sourceOpaqueBounds": [
+                35,
+                36,
+                140,
+                164
+              ],
+              "scale": 0.427536231884058,
+              "placedRect": [
+                4,
+                4,
+                47,
+                56
+              ],
+              "packedOpaqueBounds": [
+                5,
+                5,
+                50,
+                59
+              ]
+            }
+          ],
+          "performUniqueFrames": 4,
+          "performAdjacentChangedPixels": [
+            1070,
+            1009,
+            1052,
+            1169
+          ],
+          "walkUniqueFrames": 4,
+          "walkAdjacentChangedPixels": [
+            1172,
+            1160,
+            983,
+            1111
+          ],
+          "runtimeHeldColumns": [
+            11
+          ]
+        },
+        {
+          "row": 1,
+          "groups": [
+            {
+              "action": "perform",
+              "targetBodyHeight": 56,
+              "scale": 0.4043321299638989
+            },
+            {
+              "action": "walk",
+              "targetBodyHeight": 56,
+              "scale": 0.4072727272727273
+            },
+            {
+              "action": "expressions",
+              "targetBodyHeight": 56,
+              "scale": 0.39864864864864863
+            }
+          ],
+          "cells": [
+            {
+              "column": 0,
+              "action": "perform",
+              "sourceColumn": 0,
+              "sourceCell": [
+                0,
+                174,
+                178,
+                338
+              ],
+              "sourceOpaqueBounds": [
+                50,
+                14,
+                147,
+                155
+              ],
+              "scale": 0.4043321299638989,
+              "placedRect": [
+                14,
+                2,
+                41,
+                59
+              ],
+              "packedOpaqueBounds": [
+                15,
+                3,
+                54,
+                60
+              ]
+            },
+            {
+              "column": 1,
+              "action": "perform",
+              "sourceColumn": 1,
+              "sourceCell": [
+                178,
+                174,
+                337,
+                338
+              ],
+              "sourceOpaqueBounds": [
+                32,
+                15,
+                126,
+                153
+              ],
+              "scale": 0.4043321299638989,
+              "placedRect": [
+                15,
+                3,
+                40,
+                57
+              ],
+              "packedOpaqueBounds": [
+                16,
+                4,
+                54,
+                59
+              ]
+            },
+            {
+              "column": 2,
+              "action": "perform",
+              "sourceColumn": 2,
+              "sourceCell": [
+                337,
+                174,
+                498,
+                338
+              ],
+              "sourceOpaqueBounds": [
+                34,
+                19,
+                127,
+                152
+              ],
+              "scale": 0.4043321299638989,
+              "placedRect": [
+                14,
+                5,
+                39,
+                55
+              ],
+              "packedOpaqueBounds": [
+                15,
+                6,
+                52,
+                59
+              ]
+            },
+            {
+              "column": 3,
+              "action": "perform",
+              "sourceColumn": 3,
+              "sourceCell": [
+                498,
+                174,
+                657,
+                338
+              ],
+              "sourceOpaqueBounds": [
+                34,
+                16,
+                126,
+                155
+              ],
+              "scale": 0.4043321299638989,
+              "placedRect": [
+                15,
+                3,
+                39,
+                58
+              ],
+              "packedOpaqueBounds": [
+                16,
+                4,
+                53,
+                60
+              ]
+            },
+            {
+              "column": 4,
+              "action": "walk",
+              "sourceColumn": 4,
+              "sourceCell": [
+                657,
+                174,
+                815,
+                338
+              ],
+              "sourceOpaqueBounds": [
+                34,
+                16,
+                127,
+                155
+              ],
+              "scale": 0.4072727272727273,
+              "placedRect": [
+                15,
+                3,
+                40,
+                58
+              ],
+              "packedOpaqueBounds": [
+                16,
+                3,
+                54,
+                60
+              ]
+            },
+            {
+              "column": 5,
+              "action": "walk",
+              "sourceColumn": 5,
+              "sourceCell": [
+                815,
+                174,
+                966,
+                338
+              ],
+              "sourceOpaqueBounds": [
+                31,
+                16,
+                120,
+                154
+              ],
+              "scale": 0.4072727272727273,
+              "placedRect": [
+                18,
+                3,
+                38,
+                58
+              ],
+              "packedOpaqueBounds": [
+                19,
+                4,
+                55,
+                60
+              ]
+            },
+            {
+              "column": 6,
+              "action": "walk",
+              "sourceColumn": 6,
+              "sourceCell": [
+                966,
+                174,
+                1118,
+                338
+              ],
+              "sourceOpaqueBounds": [
+                31,
+                18,
+                117,
+                155
+              ],
+              "scale": 0.4072727272727273,
+              "placedRect": [
+                17,
+                3,
+                37,
+                57
+              ],
+              "packedOpaqueBounds": [
+                18,
+                4,
+                53,
+                59
+              ]
+            },
+            {
+              "column": 7,
+              "action": "walk",
+              "sourceColumn": 7,
+              "sourceCell": [
+                1118,
+                174,
+                1274,
+                338
+              ],
+              "sourceOpaqueBounds": [
+                36,
+                19,
+                124,
+                154
+              ],
+              "scale": 0.4072727272727273,
+              "placedRect": [
+                16,
+                4,
+                37,
+                57
+              ],
+              "packedOpaqueBounds": [
+                17,
+                5,
+                52,
+                60
+              ]
+            },
+            {
+              "column": 8,
+              "action": "expressions",
+              "sourceColumn": 8,
+              "sourceCell": [
+                1274,
+                174,
+                1417,
+                338
+              ],
+              "sourceOpaqueBounds": [
+                33,
+                17,
+                121,
+                154
+              ],
+              "scale": 0.39864864864864863,
+              "placedRect": [
+                18,
+                5,
+                37,
+                56
+              ],
+              "packedOpaqueBounds": [
+                19,
+                6,
+                54,
+                60
+              ]
+            },
+            {
+              "column": 9,
+              "action": "expressions",
+              "sourceColumn": 9,
+              "sourceCell": [
+                1417,
+                174,
+                1560,
+                338
+              ],
+              "sourceOpaqueBounds": [
+                22,
+                8,
+                124,
+                154
+              ],
+              "scale": 0.39864864864864863,
+              "placedRect": [
+                13,
+                1,
+                42,
+                60
+              ],
+              "packedOpaqueBounds": [
+                14,
+                2,
+                54,
+                60
+              ]
+            },
+            {
+              "column": 10,
+              "action": "expressions",
+              "sourceColumn": 10,
+              "sourceCell": [
+                1560,
+                174,
+                1774,
+                338
+              ],
+              "sourceOpaqueBounds": [
+                20,
+                17,
+                149,
+                153
+              ],
+              "scale": 0.39864864864864863,
+              "placedRect": [
+                3,
+                5,
+                53,
+                56
+              ],
+              "packedOpaqueBounds": [
+                4,
+                6,
+                55,
+                60
+              ]
+            },
+            {
+              "column": 11,
+              "action": "expressions",
+              "sourceColumn": 10,
+              "sourceCell": [
+                1560,
+                174,
+                1774,
+                338
+              ],
+              "sourceOpaqueBounds": [
+                20,
+                17,
+                149,
+                153
+              ],
+              "scale": 0.39864864864864863,
+              "placedRect": [
+                3,
+                5,
+                53,
+                56
+              ],
+              "packedOpaqueBounds": [
+                4,
+                6,
+                55,
+                60
+              ]
+            }
+          ],
+          "performUniqueFrames": 4,
+          "performAdjacentChangedPixels": [
+            1139,
+            1235,
+            1217,
+            1170
+          ],
+          "walkUniqueFrames": 4,
+          "walkAdjacentChangedPixels": [
+            1314,
+            1131,
+            1106,
+            1300
+          ],
+          "runtimeHeldColumns": [
+            11
+          ]
+        },
+        {
+          "row": 2,
+          "groups": [
+            {
+              "action": "perform",
+              "targetBodyHeight": 56,
+              "scale": 0.42105263157894735
+            },
+            {
+              "action": "walk",
+              "targetBodyHeight": 56,
+              "scale": 0.4148148148148148
+            },
+            {
+              "action": "expressions",
+              "targetBodyHeight": 56,
+              "scale": 0.4189189189189189
+            }
+          ],
+          "cells": [
+            {
+              "column": 0,
+              "action": "perform",
+              "sourceColumn": 0,
+              "sourceCell": [
+                0,
+                338,
+                175,
+                493
+              ],
+              "sourceOpaqueBounds": [
+                44,
+                13,
+                145,
+                146
+              ],
+              "scale": 0.42105263157894735,
+              "placedRect": [
+                13,
+                3,
+                44,
+                58
+              ],
+              "packedOpaqueBounds": [
+                14,
+                4,
+                56,
+                60
+              ]
+            },
+            {
+              "column": 1,
+              "action": "perform",
+              "sourceColumn": 1,
+              "sourceCell": [
+                175,
+                338,
+                336,
+                493
+              ],
+              "sourceOpaqueBounds": [
+                31,
+                12,
+                130,
+                146
+              ],
+              "scale": 0.42105263157894735,
+              "placedRect": [
+                13,
+                3,
+                43,
+                58
+              ],
+              "packedOpaqueBounds": [
+                14,
+                4,
+                55,
+                60
+              ]
+            },
+            {
+              "column": 2,
+              "action": "perform",
+              "sourceColumn": 2,
+              "sourceCell": [
+                336,
+                338,
+                500,
+                493
+              ],
+              "sourceOpaqueBounds": [
+                32,
+                17,
+                133,
+                146
+              ],
+              "scale": 0.42105263157894735,
+              "placedRect": [
+                13,
+                5,
+                44,
+                56
+              ],
+              "packedOpaqueBounds": [
+                14,
+                6,
+                56,
+                60
+              ]
+            },
+            {
+              "column": 3,
+              "action": "perform",
+              "sourceColumn": 3,
+              "sourceCell": [
+                500,
+                338,
+                655,
+                493
+              ],
+              "sourceOpaqueBounds": [
+                32,
+                13,
+                124,
+                146
+              ],
+              "scale": 0.42105263157894735,
+              "placedRect": [
+                14,
+                3,
+                40,
+                58
+              ],
+              "packedOpaqueBounds": [
+                15,
+                4,
+                53,
+                60
+              ]
+            },
+            {
+              "column": 4,
+              "action": "walk",
+              "sourceColumn": 4,
+              "sourceCell": [
+                655,
+                338,
+                815,
+                493
+              ],
+              "sourceOpaqueBounds": [
+                31,
+                13,
+                129,
+                148
+              ],
+              "scale": 0.4148148148148148,
+              "placedRect": [
+                14,
+                3,
+                42,
+                58
+              ],
+              "packedOpaqueBounds": [
+                15,
+                4,
+                55,
+                60
+              ]
+            },
+            {
+              "column": 5,
+              "action": "walk",
+              "sourceColumn": 5,
+              "sourceCell": [
+                815,
+                338,
+                969,
+                493
+              ],
+              "sourceOpaqueBounds": [
+                31,
+                12,
+                121,
+                147
+              ],
+              "scale": 0.4148148148148148,
+              "placedRect": [
+                18,
+                3,
+                39,
+                58
+              ],
+              "packedOpaqueBounds": [
+                19,
+                4,
+                56,
+                60
+              ]
+            },
+            {
+              "column": 6,
+              "action": "walk",
+              "sourceColumn": 6,
+              "sourceCell": [
+                969,
+                338,
+                1120,
+                493
+              ],
+              "sourceOpaqueBounds": [
+                33,
+                14,
+                113,
+                148
+              ],
+              "scale": 0.4148148148148148,
+              "placedRect": [
+                19,
+                4,
+                35,
+                57
+              ],
+              "packedOpaqueBounds": [
+                20,
+                5,
+                53,
+                60
+              ]
+            },
+            {
+              "column": 7,
+              "action": "walk",
+              "sourceColumn": 7,
+              "sourceCell": [
+                1120,
+                338,
+                1277,
+                493
+              ],
+              "sourceOpaqueBounds": [
+                38,
+                13,
+                124,
+                148
+              ],
+              "scale": 0.4148148148148148,
+              "placedRect": [
+                17,
+                3,
+                37,
+                58
+              ],
+              "packedOpaqueBounds": [
+                18,
+                4,
+                53,
+                60
+              ]
+            },
+            {
+              "column": 8,
+              "action": "expressions",
+              "sourceColumn": 8,
+              "sourceCell": [
+                1277,
+                338,
+                1417,
+                493
+              ],
+              "sourceOpaqueBounds": [
+                33,
+                13,
+                120,
+                146
+              ],
+              "scale": 0.4189189189189189,
+              "placedRect": [
+                18,
+                3,
+                38,
+                57
+              ],
+              "packedOpaqueBounds": [
+                19,
+                4,
+                55,
+                59
+              ]
+            },
+            {
+              "column": 9,
+              "action": "expressions",
+              "sourceColumn": 9,
+              "sourceCell": [
+                1417,
+                338,
+                1562,
+                493
+              ],
+              "sourceOpaqueBounds": [
+                21,
+                10,
+                124,
+                146
+              ],
+              "scale": 0.4189189189189189,
+              "placedRect": [
+                12,
+                2,
+                45,
+                59
+              ],
+              "packedOpaqueBounds": [
+                13,
+                3,
+                56,
+                60
+              ]
+            },
+            {
+              "column": 10,
+              "action": "expressions",
+              "sourceColumn": 10,
+              "sourceCell": [
+                1562,
+                338,
+                1774,
+                493
+              ],
+              "sourceOpaqueBounds": [
+                21,
+                14,
+                148,
+                146
+              ],
+              "scale": 0.4189189189189189,
+              "placedRect": [
+                1,
+                4,
+                55,
+                57
+              ],
+              "packedOpaqueBounds": [
+                2,
+                5,
+                55,
+                60
+              ]
+            },
+            {
+              "column": 11,
+              "action": "expressions",
+              "sourceColumn": 10,
+              "sourceCell": [
+                1562,
+                338,
+                1774,
+                493
+              ],
+              "sourceOpaqueBounds": [
+                21,
+                14,
+                148,
+                146
+              ],
+              "scale": 0.4189189189189189,
+              "placedRect": [
+                1,
+                4,
+                55,
+                57
+              ],
+              "packedOpaqueBounds": [
+                2,
+                5,
+                55,
+                60
+              ]
+            }
+          ],
+          "performUniqueFrames": 4,
+          "performAdjacentChangedPixels": [
+            1187,
+            1187,
+            1266,
+            1266
+          ],
+          "walkUniqueFrames": 4,
+          "walkAdjacentChangedPixels": [
+            1163,
+            1008,
+            1031,
+            1143
+          ],
+          "runtimeHeldColumns": [
+            11
+          ]
+        },
+        {
+          "row": 3,
+          "groups": [
+            {
+              "action": "perform",
+              "targetBodyHeight": 56,
+              "scale": 0.4072727272727273
+            },
+            {
+              "action": "walk",
+              "targetBodyHeight": 56,
+              "scale": 0.4072727272727273
+            },
+            {
+              "action": "expressions",
+              "targetBodyHeight": 56,
+              "scale": 0.4025974025974026
+            }
+          ],
+          "cells": [
+            {
+              "column": 0,
+              "action": "perform",
+              "sourceColumn": 0,
+              "sourceCell": [
+                0,
+                493,
+                176,
+                651
+              ],
+              "sourceOpaqueBounds": [
+                40,
+                8,
+                147,
+                147
+              ],
+              "scale": 0.4072727272727273,
+              "placedRect": [
+                13,
+                3,
+                45,
+                58
+              ],
+              "packedOpaqueBounds": [
+                14,
+                4,
+                57,
+                60
+              ]
+            },
+            {
+              "column": 1,
+              "action": "perform",
+              "sourceColumn": 1,
+              "sourceCell": [
+                176,
+                493,
+                338,
+                651
+              ],
+              "sourceOpaqueBounds": [
+                30,
+                10,
+                133,
+                147
+              ],
+              "scale": 0.4072727272727273,
+              "placedRect": [
+                13,
+                3,
+                44,
+                57
+              ],
+              "packedOpaqueBounds": [
+                14,
+                4,
+                56,
+                59
+              ]
+            },
+            {
+              "column": 2,
+              "action": "perform",
+              "sourceColumn": 2,
+              "sourceCell": [
+                338,
+                493,
+                499,
+                651
+              ],
+              "sourceOpaqueBounds": [
+                30,
+                14,
+                131,
+                147
+              ],
+              "scale": 0.4072727272727273,
+              "placedRect": [
+                13,
+                5,
+                43,
+                56
+              ],
+              "packedOpaqueBounds": [
+                14,
+                6,
+                55,
+                60
+              ]
+            },
+            {
+              "column": 3,
+              "action": "perform",
+              "sourceColumn": 3,
+              "sourceCell": [
+                499,
+                493,
+                655,
+                651
+              ],
+              "sourceOpaqueBounds": [
+                30,
+                10,
+                128,
+                148
+              ],
+              "scale": 0.4072727272727273,
+              "placedRect": [
+                14,
+                3,
+                42,
+                58
+              ],
+              "packedOpaqueBounds": [
+                15,
+                4,
+                55,
+                60
+              ]
+            },
+            {
+              "column": 4,
+              "action": "walk",
+              "sourceColumn": 4,
+              "sourceCell": [
+                655,
+                493,
+                812,
+                651
+              ],
+              "sourceOpaqueBounds": [
+                28,
+                10,
+                128,
+                148
+              ],
+              "scale": 0.4072727272727273,
+              "placedRect": [
+                13,
+                3,
+                42,
+                58
+              ],
+              "packedOpaqueBounds": [
+                14,
+                4,
+                54,
+                60
+              ]
+            },
+            {
+              "column": 5,
+              "action": "walk",
+              "sourceColumn": 5,
+              "sourceCell": [
+                812,
+                493,
+                968,
+                651
+              ],
+              "sourceOpaqueBounds": [
+                30,
+                10,
+                124,
+                149
+              ],
+              "scale": 0.4072727272727273,
+              "placedRect": [
+                17,
+                3,
+                40,
+                58
+              ],
+              "packedOpaqueBounds": [
+                18,
+                4,
+                56,
+                60
+              ]
+            },
+            {
+              "column": 6,
+              "action": "walk",
+              "sourceColumn": 6,
+              "sourceCell": [
+                968,
+                493,
+                1120,
+                651
+              ],
+              "sourceOpaqueBounds": [
+                32,
+                12,
+                114,
+                148
+              ],
+              "scale": 0.4072727272727273,
+              "placedRect": [
+                17,
+                4,
+                35,
+                57
+              ],
+              "packedOpaqueBounds": [
+                18,
+                5,
+                51,
+                60
+              ]
+            },
+            {
+              "column": 7,
+              "action": "walk",
+              "sourceColumn": 7,
+              "sourceCell": [
+                1120,
+                493,
+                1277,
+                651
+              ],
+              "sourceOpaqueBounds": [
+                39,
+                12,
+                127,
+                149
+              ],
+              "scale": 0.4072727272727273,
+              "placedRect": [
+                17,
+                3,
+                37,
+                57
+              ],
+              "packedOpaqueBounds": [
+                18,
+                4,
+                53,
+                59
+              ]
+            },
+            {
+              "column": 8,
+              "action": "expressions",
+              "sourceColumn": 8,
+              "sourceCell": [
+                1277,
+                493,
+                1420,
+                651
+              ],
+              "sourceOpaqueBounds": [
+                30,
+                10,
+                123,
+                147
+              ],
+              "scale": 0.4025974025974026,
+              "placedRect": [
+                18,
+                4,
+                39,
+                57
+              ],
+              "packedOpaqueBounds": [
+                19,
+                5,
+                56,
+                60
+              ]
+            },
+            {
+              "column": 9,
+              "action": "expressions",
+              "sourceColumn": 9,
+              "sourceCell": [
+                1420,
+                493,
+                1562,
+                651
+              ],
+              "sourceOpaqueBounds": [
+                20,
+                9,
+                122,
+                147
+              ],
+              "scale": 0.4025974025974026,
+              "placedRect": [
+                13,
+                4,
+                43,
+                57
+              ],
+              "packedOpaqueBounds": [
+                14,
+                5,
+                55,
+                60
+              ]
+            },
+            {
+              "column": 10,
+              "action": "expressions",
+              "sourceColumn": 10,
+              "sourceCell": [
+                1562,
+                493,
+                1774,
+                651
+              ],
+              "sourceOpaqueBounds": [
+                21,
+                13,
+                152,
+                148
+              ],
+              "scale": 0.4025974025974026,
+              "placedRect": [
+                1,
+                5,
+                54,
+                56
+              ],
+              "packedOpaqueBounds": [
+                2,
+                6,
+                54,
+                60
+              ]
+            },
+            {
+              "column": 11,
+              "action": "expressions",
+              "sourceColumn": 10,
+              "sourceCell": [
+                1562,
+                493,
+                1774,
+                651
+              ],
+              "sourceOpaqueBounds": [
+                21,
+                13,
+                152,
+                148
+              ],
+              "scale": 0.4025974025974026,
+              "placedRect": [
+                1,
+                5,
+                54,
+                56
+              ],
+              "packedOpaqueBounds": [
+                2,
+                6,
+                54,
+                60
+              ]
+            }
+          ],
+          "performUniqueFrames": 4,
+          "performAdjacentChangedPixels": [
+            1192,
+            1192,
+            1226,
+            1233
+          ],
+          "walkUniqueFrames": 4,
+          "walkAdjacentChangedPixels": [
+            1328,
+            1178,
+            1051,
+            1273
+          ],
+          "runtimeHeldColumns": [
+            11
+          ]
+        },
+        {
+          "row": 4,
+          "groups": [
+            {
+              "action": "perform",
+              "targetBodyHeight": 56,
+              "scale": 0.4497991967871486
+            },
+            {
+              "action": "walk",
+              "targetBodyHeight": 56,
+              "scale": 0.4534412955465587
+            },
+            {
+              "action": "expressions",
+              "targetBodyHeight": 56,
+              "scale": 0.41333333333333333
+            }
+          ],
+          "cells": [
+            {
+              "column": 0,
+              "action": "perform",
+              "sourceColumn": 0,
+              "sourceCell": [
+                0,
+                651,
+                173,
+                795
+              ],
+              "sourceOpaqueBounds": [
+                42,
+                11,
+                139,
+                139
+              ],
+              "scale": 0.4497991967871486,
+              "placedRect": [
+                12,
+                2,
+                45,
+                59
+              ],
+              "packedOpaqueBounds": [
+                13,
+                3,
+                56,
+                60
+              ]
+            },
+            {
+              "column": 1,
+              "action": "perform",
+              "sourceColumn": 1,
+              "sourceCell": [
+                173,
+                651,
+                340,
+                795
+              ],
+              "sourceOpaqueBounds": [
+                35,
+                13,
+                137,
+                138
+              ],
+              "scale": 0.4497991967871486,
+              "placedRect": [
+                12,
+                3,
+                48,
+                58
+              ],
+              "packedOpaqueBounds": [
+                13,
+                4,
+                59,
+                60
+              ]
+            },
+            {
+              "column": 2,
+              "action": "perform",
+              "sourceColumn": 2,
+              "sourceCell": [
+                340,
+                651,
+                500,
+                795
+              ],
+              "sourceOpaqueBounds": [
+                30,
+                15,
+                132,
+                139
+              ],
+              "scale": 0.4497991967871486,
+              "placedRect": [
+                12,
+                3,
+                48,
+                58
+              ],
+              "packedOpaqueBounds": [
+                13,
+                4,
+                59,
+                60
+              ]
+            },
+            {
+              "column": 3,
+              "action": "perform",
+              "sourceColumn": 3,
+              "sourceCell": [
+                500,
+                651,
+                660,
+                795
+              ],
+              "sourceOpaqueBounds": [
+                29,
+                14,
+                130,
+                138
+              ],
+              "scale": 0.4497991967871486,
+              "placedRect": [
+                12,
+                3,
+                47,
+                58
+              ],
+              "packedOpaqueBounds": [
+                13,
+                4,
+                58,
+                60
+              ]
+            },
+            {
+              "column": 4,
+              "action": "walk",
+              "sourceColumn": 4,
+              "sourceCell": [
+                660,
+                651,
+                811,
+                795
+              ],
+              "sourceOpaqueBounds": [
+                30,
+                14,
+                117,
+                141
+              ],
+              "scale": 0.4534412955465587,
+              "placedRect": [
+                13,
+                2,
+                41,
+                59
+              ],
+              "packedOpaqueBounds": [
+                14,
+                3,
+                53,
+                61
+              ]
+            },
+            {
+              "column": 5,
+              "action": "walk",
+              "sourceColumn": 5,
+              "sourceCell": [
+                811,
+                651,
+                965,
+                795
+              ],
+              "sourceOpaqueBounds": [
+                34,
+                16,
+                118,
+                137
+              ],
+              "scale": 0.4534412955465587,
+              "placedRect": [
+                15,
+                4,
+                40,
+                57
+              ],
+              "packedOpaqueBounds": [
+                16,
+                5,
+                54,
+                60
+              ]
+            },
+            {
+              "column": 6,
+              "action": "walk",
+              "sourceColumn": 6,
+              "sourceCell": [
+                965,
+                651,
+                1121,
+                795
+              ],
+              "sourceOpaqueBounds": [
+                36,
+                17,
+                121,
+                138
+              ],
+              "scale": 0.4534412955465587,
+              "placedRect": [
+                14,
+                4,
+                40,
+                57
+              ],
+              "packedOpaqueBounds": [
+                15,
+                5,
+                53,
+                60
+              ]
+            },
+            {
+              "column": 7,
+              "action": "walk",
+              "sourceColumn": 7,
+              "sourceCell": [
+                1121,
+                651,
+                1276,
+                795
+              ],
+              "sourceOpaqueBounds": [
+                35,
+                17,
+                123,
+                143
+              ],
+              "scale": 0.4534412955465587,
+              "placedRect": [
+                14,
+                2,
+                42,
+                58
+              ],
+              "packedOpaqueBounds": [
+                15,
+                3,
+                55,
+                59
+              ]
+            },
+            {
+              "column": 8,
+              "action": "expressions",
+              "sourceColumn": 8,
+              "sourceCell": [
+                1276,
+                651,
+                1403,
+                795
+              ],
+              "sourceOpaqueBounds": [
+                33,
+                15,
+                97,
+                138
+              ],
+              "scale": 0.41333333333333333,
+              "placedRect": [
+                18,
+                8,
+                28,
+                52
+              ],
+              "packedOpaqueBounds": [
+                19,
+                9,
+                45,
+                59
+              ]
+            },
+            {
+              "column": 9,
+              "action": "expressions",
+              "sourceColumn": 9,
+              "sourceCell": [
+                1403,
+                651,
+                1555,
+                795
+              ],
+              "sourceOpaqueBounds": [
+                30,
+                10,
+                127,
+                139
+              ],
+              "scale": 0.41333333333333333,
+              "placedRect": [
+                13,
+                6,
+                42,
+                55
+              ],
+              "packedOpaqueBounds": [
+                14,
+                7,
+                54,
+                60
+              ]
+            },
+            {
+              "column": 10,
+              "action": "expressions",
+              "sourceColumn": 10,
+              "sourceCell": [
+                1555,
+                651,
+                1774,
+                795
+              ],
+              "sourceOpaqueBounds": [
+                25,
+                17,
+                154,
+                139
+              ],
+              "scale": 0.41333333333333333,
+              "placedRect": [
+                1,
+                9,
+                55,
+                52
+              ],
+              "packedOpaqueBounds": [
+                2,
+                10,
+                55,
+                60
+              ]
+            },
+            {
+              "column": 11,
+              "action": "expressions",
+              "sourceColumn": 10,
+              "sourceCell": [
+                1555,
+                651,
+                1774,
+                795
+              ],
+              "sourceOpaqueBounds": [
+                25,
+                17,
+                154,
+                139
+              ],
+              "scale": 0.41333333333333333,
+              "placedRect": [
+                1,
+                9,
+                55,
+                52
+              ],
+              "packedOpaqueBounds": [
+                2,
+                10,
+                55,
+                60
+              ]
+            }
+          ],
+          "performUniqueFrames": 4,
+          "performAdjacentChangedPixels": [
+            1397,
+            1443,
+            1293,
+            1326
+          ],
+          "walkUniqueFrames": 4,
+          "walkAdjacentChangedPixels": [
+            1325,
+            1336,
+            1250,
+            1291
+          ],
+          "runtimeHeldColumns": [
+            11
+          ]
+        },
+        {
+          "row": 5,
+          "groups": [
+            {
+              "action": "perform",
+              "targetBodyHeight": 40,
+              "scale": 0.547945205479452
+            },
+            {
+              "action": "walk",
+              "targetBodyHeight": 56,
+              "scale": 0.759493670886076
+            },
+            {
+              "action": "expressions",
+              "targetBodyHeight": 56,
+              "scale": 0.5740740740740741
+            }
+          ],
+          "cells": [
+            {
+              "column": 0,
+              "action": "perform",
+              "sourceColumn": 0,
+              "sourceCell": [
+                0,
+                795,
+                171,
+                887
+              ],
+              "sourceOpaqueBounds": [
+                52,
+                7,
+                123,
+                81
+              ],
+              "scale": 0.547945205479452,
+              "placedRect": [
+                11,
+                18,
+                41,
+                43
+              ],
+              "packedOpaqueBounds": [
+                12,
+                19,
+                51,
+                60
+              ]
+            },
+            {
+              "column": 1,
+              "action": "perform",
+              "sourceColumn": 1,
+              "sourceCell": [
+                171,
+                795,
+                335,
+                887
+              ],
+              "sourceOpaqueBounds": [
+                49,
+                2,
+                118,
+                80
+              ],
+              "scale": 0.547945205479452,
+              "placedRect": [
+                12,
+                16,
+                40,
+                45
+              ],
+              "packedOpaqueBounds": [
+                13,
+                17,
+                51,
+                60
+              ]
+            },
+            {
+              "column": 2,
+              "action": "perform",
+              "sourceColumn": 2,
+              "sourceCell": [
+                335,
+                795,
+                497,
+                887
+              ],
+              "sourceOpaqueBounds": [
+                47,
+                10,
+                115,
+                80
+              ],
+              "scale": 0.547945205479452,
+              "placedRect": [
+                13,
+                21,
+                39,
+                41
+              ],
+              "packedOpaqueBounds": [
+                14,
+                22,
+                51,
+                61
+              ]
+            },
+            {
+              "column": 3,
+              "action": "perform",
+              "sourceColumn": 3,
+              "sourceCell": [
+                497,
+                795,
+                657,
+                887
+              ],
+              "sourceOpaqueBounds": [
+                47,
+                10,
+                113,
+                82
+              ],
+              "scale": 0.547945205479452,
+              "placedRect": [
+                13,
+                19,
+                38,
+                42
+              ],
+              "packedOpaqueBounds": [
+                14,
+                20,
+                50,
+                60
+              ]
+            },
+            {
+              "column": 4,
+              "action": "walk",
+              "sourceColumn": 4,
+              "sourceCell": [
+                657,
+                795,
+                805,
+                887
+              ],
+              "sourceOpaqueBounds": [
+                47,
+                6,
+                99,
+                79
+              ],
+              "scale": 0.759493670886076,
+              "placedRect": [
+                16,
+                3,
+                43,
+                58
+              ],
+              "packedOpaqueBounds": [
+                18,
+                5,
+                57,
+                59
+              ]
+            },
+            {
+              "column": 5,
+              "action": "walk",
+              "sourceColumn": 5,
+              "sourceCell": [
+                805,
+                795,
+                958,
+                887
+              ],
+              "sourceOpaqueBounds": [
+                50,
+                6,
+                104,
+                81
+              ],
+              "scale": 0.759493670886076,
+              "placedRect": [
+                12,
+                2,
+                44,
+                60
+              ],
+              "packedOpaqueBounds": [
+                14,
+                4,
+                54,
+                60
+              ]
+            },
+            {
+              "column": 6,
+              "action": "walk",
+              "sourceColumn": 6,
+              "sourceCell": [
+                958,
+                795,
+                1115,
+                887
+              ],
+              "sourceOpaqueBounds": [
+                49,
+                7,
+                102,
+                80
+              ],
+              "scale": 0.759493670886076,
+              "placedRect": [
+                13,
+                3,
+                43,
+                58
+              ],
+              "packedOpaqueBounds": [
+                15,
+                5,
+                54,
+                59
+              ]
+            },
+            {
+              "column": 7,
+              "action": "walk",
+              "sourceColumn": 7,
+              "sourceCell": [
+                1115,
+                795,
+                1265,
+                887
+              ],
+              "sourceOpaqueBounds": [
+                55,
+                9,
+                97,
+                80
+              ],
+              "scale": 0.759493670886076,
+              "placedRect": [
+                16,
+                5,
+                35,
+                57
+              ],
+              "packedOpaqueBounds": [
+                18,
+                7,
+                49,
+                60
+              ]
+            },
+            {
+              "column": 8,
+              "action": "expressions",
+              "sourceColumn": 8,
+              "sourceCell": [
+                1265,
+                795,
+                1401,
+                887
+              ],
+              "sourceOpaqueBounds": [
+                53,
+                6,
+                94,
+                81
+              ],
+              "scale": 0.5740740740740741,
+              "placedRect": [
+                18,
+                16,
+                26,
+                45
+              ],
+              "packedOpaqueBounds": [
+                19,
+                17,
+                43,
+                60
+              ]
+            },
+            {
+              "column": 9,
+              "action": "expressions",
+              "sourceColumn": 9,
+              "sourceCell": [
+                1401,
+                795,
+                1557,
+                887
+              ],
+              "sourceOpaqueBounds": [
+                42,
+                6,
+                111,
+                81
+              ],
+              "scale": 0.5740740740740741,
+              "placedRect": [
+                9,
+                16,
+                42,
+                45
+              ],
+              "packedOpaqueBounds": [
+                10,
+                17,
+                50,
+                60
+              ]
+            },
+            {
+              "column": 10,
+              "action": "expressions",
+              "sourceColumn": 10,
+              "sourceCell": [
+                1557,
+                795,
+                1774,
+                887
+              ],
+              "sourceOpaqueBounds": [
+                45,
+                6,
+                143,
+                82
+              ],
+              "scale": 0.5740740740740741,
+              "placedRect": [
+                1,
+                15,
+                59,
+                46
+              ],
+              "packedOpaqueBounds": [
+                2,
+                16,
+                59,
+                60
+              ]
+            },
+            {
+              "column": 11,
+              "action": "expressions",
+              "sourceColumn": 10,
+              "sourceCell": [
+                1557,
+                795,
+                1774,
+                887
+              ],
+              "sourceOpaqueBounds": [
+                45,
+                6,
+                143,
+                82
+              ],
+              "scale": 0.5740740740740741,
+              "placedRect": [
+                1,
+                15,
+                59,
+                46
+              ],
+              "packedOpaqueBounds": [
+                2,
+                16,
+                59,
+                60
+              ]
+            }
+          ],
+          "performUniqueFrames": 4,
+          "performAdjacentChangedPixels": [
+            1006,
+            1049,
+            969,
+            1015
+          ],
+          "walkUniqueFrames": 4,
+          "walkAdjacentChangedPixels": [
+            1478,
+            1482,
+            1488,
+            1445
+          ],
+          "runtimeHeldColumns": [
+            11
+          ]
+        }
+      ],
+      "bytes": 73437,
+      "sha256": "0f241d02e3a98c368fe6f39e2626967b4e89b5f674419562419b175834fd9267",
+      "alphaExtrema": [
+        0,
+        253
+      ],
+      "transparentPixels": 205006,
+      "expectedCells": 72,
+      "alphaCorners": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "nonEmptyCells": 72,
+      "passed": true
+    },
+    {
+      "source": "july.source.png",
+      "sourceSize": [
+        1942,
+        809
+      ],
+      "sourceSha256": "cb28de299d550263e7a1654687766c6b0324ffb1e82d4424123abc4111165fa4",
+      "sourceAlphaExtrema": [
+        0,
+        255
+      ],
+      "file": "band-july.png",
+      "size": [
+        768,
+        320
+      ],
+      "sourceColumns": 12,
+      "sourceFrameCount": 60,
+      "runtimeRepeatedColumns": [],
+      "rowBoundaries": [
+        0,
+        163,
+        323,
+        484,
+        647,
+        809
+      ],
+      "missingCells": [],
+      "rows": [
+        {
+          "row": 0,
+          "groups": [
+            {
+              "action": "perform",
+              "targetBodyHeight": 56,
+              "scale": 0.35668789808917195
+            },
+            {
+              "action": "walk",
+              "targetBodyHeight": 56,
+              "scale": 0.36363636363636365
+            },
+            {
+              "action": "expressions",
+              "targetBodyHeight": 56,
+              "scale": 0.35782747603833864
+            }
+          ],
+          "cells": [
+            {
+              "column": 0,
+              "action": "perform",
+              "sourceColumn": 0,
+              "sourceCell": [
+                0,
+                0,
+                177,
+                163
+              ],
+              "sourceOpaqueBounds": [
+                67,
+                3,
+                127,
+                160
+              ],
+              "scale": 0.35668789808917195,
+              "placedRect": [
+                22,
+                3,
+                23,
+                57
+              ],
+              "packedOpaqueBounds": [
+                23,
+                4,
+                44,
+                59
+              ]
+            },
+            {
+              "column": 1,
+              "action": "perform",
+              "sourceColumn": 1,
+              "sourceCell": [
+                177,
+                0,
+                338,
+                163
+              ],
+              "sourceOpaqueBounds": [
+                51,
+                3,
+                112,
+                160
+              ],
+              "scale": 0.35668789808917195,
+              "placedRect": [
+                21,
+                3,
+                23,
+                57
+              ],
+              "packedOpaqueBounds": [
+                22,
+                4,
+                43,
+                59
+              ]
+            },
+            {
+              "column": 2,
+              "action": "perform",
+              "sourceColumn": 2,
+              "sourceCell": [
+                338,
+                0,
+                507,
+                163
+              ],
+              "sourceOpaqueBounds": [
+                49,
+                3,
+                128,
+                160
+              ],
+              "scale": 0.35668789808917195,
+              "placedRect": [
+                21,
+                3,
+                30,
+                57
+              ],
+              "packedOpaqueBounds": [
+                22,
+                4,
+                50,
+                59
+              ]
+            },
+            {
+              "column": 3,
+              "action": "perform",
+              "sourceColumn": 3,
+              "sourceCell": [
+                507,
+                0,
+                662,
+                163
+              ],
+              "sourceOpaqueBounds": [
+                41,
+                4,
+                118,
+                160
+              ],
+              "scale": 0.35668789808917195,
+              "placedRect": [
+                21,
+                4,
+                29,
+                57
+              ],
+              "packedOpaqueBounds": [
+                22,
+                5,
+                49,
+                60
+              ]
+            },
+            {
+              "column": 4,
+              "action": "walk",
+              "sourceColumn": 4,
+              "sourceCell": [
+                662,
+                0,
+                813,
+                163
+              ],
+              "sourceOpaqueBounds": [
+                37,
+                3,
+                106,
+                158
+              ],
+              "scale": 0.36363636363636365,
+              "placedRect": [
+                18,
+                3,
+                27,
+                58
+              ],
+              "packedOpaqueBounds": [
+                19,
+                4,
+                44,
+                60
+              ]
+            },
+            {
+              "column": 5,
+              "action": "walk",
+              "sourceColumn": 5,
+              "sourceCell": [
+                813,
+                0,
+                979,
+                163
+              ],
+              "sourceOpaqueBounds": [
+                46,
+                4,
+                117,
+                155
+              ],
+              "scale": 0.36363636363636365,
+              "placedRect": [
+                18,
+                4,
+                27,
+                56
+              ],
+              "packedOpaqueBounds": [
+                19,
+                5,
+                44,
+                59
+              ]
+            },
+            {
+              "column": 6,
+              "action": "walk",
+              "sourceColumn": 6,
+              "sourceCell": [
+                979,
+                0,
+                1133,
+                163
+              ],
+              "sourceOpaqueBounds": [
+                50,
+                4,
+                108,
+                158
+              ],
+              "scale": 0.36363636363636365,
+              "placedRect": [
+                21,
+                3,
+                23,
+                57
+              ],
+              "packedOpaqueBounds": [
+                22,
+                4,
+                43,
+                59
+              ]
+            },
+            {
+              "column": 7,
+              "action": "walk",
+              "sourceColumn": 7,
+              "sourceCell": [
+                1133,
+                0,
+                1295,
+                163
+              ],
+              "sourceOpaqueBounds": [
+                47,
+                4,
+                110,
+                158
+              ],
+              "scale": 0.36363636363636365,
+              "placedRect": [
+                18,
+                3,
+                24,
+                57
+              ],
+              "packedOpaqueBounds": [
+                19,
+                4,
+                41,
+                59
+              ]
+            },
+            {
+              "column": 8,
+              "action": "expressions",
+              "sourceColumn": 8,
+              "sourceCell": [
+                1295,
+                0,
+                1447,
+                163
+              ],
+              "sourceOpaqueBounds": [
+                52,
+                3,
+                106,
+                160
+              ],
+              "scale": 0.35782747603833864,
+              "placedRect": [
+                21,
+                3,
+                21,
+                58
+              ],
+              "packedOpaqueBounds": [
+                22,
+                4,
+                41,
+                60
+              ]
+            },
+            {
+              "column": 9,
+              "action": "expressions",
+              "sourceColumn": 9,
+              "sourceCell": [
+                1447,
+                0,
+                1597,
+                163
+              ],
+              "sourceOpaqueBounds": [
+                47,
+                3,
+                114,
+                159
+              ],
+              "scale": 0.35782747603833864,
+              "placedRect": [
+                17,
+                3,
+                25,
+                57
+              ],
+              "packedOpaqueBounds": [
+                18,
+                4,
+                41,
+                59
+              ]
+            },
+            {
+              "column": 10,
+              "action": "expressions",
+              "sourceColumn": 10,
+              "sourceCell": [
+                1597,
+                0,
+                1787,
+                163
+              ],
+              "sourceOpaqueBounds": [
+                37,
+                4,
+                163,
+                159
+              ],
+              "scale": 0.35782747603833864,
+              "placedRect": [
+                8,
+                4,
+                47,
+                57
+              ],
+              "packedOpaqueBounds": [
+                10,
+                5,
+                54,
+                60
+              ]
+            },
+            {
+              "column": 11,
+              "action": "expressions",
+              "sourceColumn": 11,
+              "sourceCell": [
+                1787,
+                0,
+                1942,
+                163
+              ],
+              "sourceOpaqueBounds": [
+                27,
+                3,
+                102,
+                160
+              ],
+              "scale": 0.35782747603833864,
+              "placedRect": [
+                14,
+                3,
+                28,
+                58
+              ],
+              "packedOpaqueBounds": [
+                15,
+                4,
+                41,
+                60
+              ]
+            }
+          ],
+          "performUniqueFrames": 4,
+          "performAdjacentChangedPixels": [
+            710,
+            645,
+            758,
+            809
+          ],
+          "walkUniqueFrames": 4,
+          "walkAdjacentChangedPixels": [
+            843,
+            730,
+            682,
+            804
+          ],
+          "runtimeHeldColumns": []
+        },
+        {
+          "row": 1,
+          "groups": [
+            {
+              "action": "perform",
+              "targetBodyHeight": 56,
+              "scale": 0.3771043771043771
+            },
+            {
+              "action": "walk",
+              "targetBodyHeight": 56,
+              "scale": 0.37583892617449666
+            },
+            {
+              "action": "expressions",
+              "targetBodyHeight": 56,
+              "scale": 0.37333333333333335
+            }
+          ],
+          "cells": [
+            {
+              "column": 0,
+              "action": "perform",
+              "sourceColumn": 0,
+              "sourceCell": [
+                0,
+                163,
+                181,
+                323
+              ],
+              "sourceOpaqueBounds": [
+                59,
+                7,
+                141,
+                156
+              ],
+              "scale": 0.3771043771043771,
+              "placedRect": [
+                20,
+                3,
+                32,
+                58
+              ],
+              "packedOpaqueBounds": [
+                21,
+                4,
+                51,
+                60
+              ]
+            },
+            {
+              "column": 1,
+              "action": "perform",
+              "sourceColumn": 1,
+              "sourceCell": [
+                181,
+                163,
+                343,
+                323
+              ],
+              "sourceOpaqueBounds": [
+                41,
+                7,
+                124,
+                155
+              ],
+              "scale": 0.3771043771043771,
+              "placedRect": [
+                20,
+                3,
+                33,
+                57
+              ],
+              "packedOpaqueBounds": [
+                21,
+                4,
+                52,
+                59
+              ]
+            },
+            {
+              "column": 2,
+              "action": "perform",
+              "sourceColumn": 2,
+              "sourceCell": [
+                343,
+                163,
+                507,
+                323
+              ],
+              "sourceOpaqueBounds": [
+                39,
+                7,
+                127,
+                155
+              ],
+              "scale": 0.3771043771043771,
+              "placedRect": [
+                19,
+                3,
+                35,
+                57
+              ],
+              "packedOpaqueBounds": [
+                20,
+                4,
+                53,
+                59
+              ]
+            },
+            {
+              "column": 3,
+              "action": "perform",
+              "sourceColumn": 3,
+              "sourceCell": [
+                507,
+                163,
+                663,
+                323
+              ],
+              "sourceOpaqueBounds": [
+                38,
+                6,
+                119,
+                156
+              ],
+              "scale": 0.3771043771043771,
+              "placedRect": [
+                20,
+                3,
+                32,
+                58
+              ],
+              "packedOpaqueBounds": [
+                21,
+                4,
+                51,
+                60
+              ]
+            },
+            {
+              "column": 4,
+              "action": "walk",
+              "sourceColumn": 4,
+              "sourceCell": [
+                663,
+                163,
+                815,
+                323
+              ],
+              "sourceOpaqueBounds": [
+                37,
+                6,
+                107,
+                155
+              ],
+              "scale": 0.37583892617449666,
+              "placedRect": [
+                18,
+                3,
+                28,
+                58
+              ],
+              "packedOpaqueBounds": [
+                19,
+                4,
+                45,
+                60
+              ]
+            },
+            {
+              "column": 5,
+              "action": "walk",
+              "sourceColumn": 5,
+              "sourceCell": [
+                815,
+                163,
+                978,
+                323
+              ],
+              "sourceOpaqueBounds": [
+                46,
+                5,
+                116,
+                154
+              ],
+              "scale": 0.37583892617449666,
+              "placedRect": [
+                19,
+                3,
+                28,
+                58
+              ],
+              "packedOpaqueBounds": [
+                20,
+                4,
+                46,
+                60
+              ]
+            },
+            {
+              "column": 6,
+              "action": "walk",
+              "sourceColumn": 6,
+              "sourceCell": [
+                978,
+                163,
+                1144,
+                323
+              ],
+              "sourceOpaqueBounds": [
+                48,
+                5,
+                119,
+                155
+              ],
+              "scale": 0.37583892617449666,
+              "placedRect": [
+                21,
+                3,
+                28,
+                58
+              ],
+              "packedOpaqueBounds": [
+                22,
+                4,
+                48,
+                60
+              ]
+            },
+            {
+              "column": 7,
+              "action": "walk",
+              "sourceColumn": 7,
+              "sourceCell": [
+                1144,
+                163,
+                1302,
+                323
+              ],
+              "sourceOpaqueBounds": [
+                47,
+                6,
+                118,
+                155
+              ],
+              "scale": 0.37583892617449666,
+              "placedRect": [
+                21,
+                3,
+                28,
+                58
+              ],
+              "packedOpaqueBounds": [
+                22,
+                4,
+                48,
+                60
+              ]
+            },
+            {
+              "column": 8,
+              "action": "expressions",
+              "sourceColumn": 8,
+              "sourceCell": [
+                1302,
+                163,
+                1458,
+                323
+              ],
+              "sourceOpaqueBounds": [
+                41,
+                6,
+                122,
+                156
+              ],
+              "scale": 0.37333333333333335,
+              "placedRect": [
+                20,
+                3,
+                32,
+                57
+              ],
+              "packedOpaqueBounds": [
+                21,
+                4,
+                51,
+                59
+              ]
+            },
+            {
+              "column": 9,
+              "action": "expressions",
+              "sourceColumn": 9,
+              "sourceCell": [
+                1458,
+                163,
+                1611,
+                323
+              ],
+              "sourceOpaqueBounds": [
+                35,
+                3,
+                128,
+                156
+              ],
+              "scale": 0.37333333333333335,
+              "placedRect": [
+                15,
+                2,
+                36,
+                59
+              ],
+              "packedOpaqueBounds": [
+                16,
+                3,
+                50,
+                60
+              ]
+            },
+            {
+              "column": 10,
+              "action": "expressions",
+              "sourceColumn": 10,
+              "sourceCell": [
+                1611,
+                163,
+                1784,
+                323
+              ],
+              "sourceOpaqueBounds": [
+                26,
+                6,
+                143,
+                156
+              ],
+              "scale": 0.37333333333333335,
+              "placedRect": [
+                8,
+                3,
+                45,
+                57
+              ],
+              "packedOpaqueBounds": [
+                9,
+                4,
+                52,
+                59
+              ]
+            },
+            {
+              "column": 11,
+              "action": "expressions",
+              "sourceColumn": 11,
+              "sourceCell": [
+                1784,
+                163,
+                1942,
+                323
+              ],
+              "sourceOpaqueBounds": [
+                30,
+                6,
+                119,
+                156
+              ],
+              "scale": 0.37333333333333335,
+              "placedRect": [
+                13,
+                3,
+                35,
+                57
+              ],
+              "packedOpaqueBounds": [
+                14,
+                4,
+                47,
+                59
+              ]
+            }
+          ],
+          "performUniqueFrames": 4,
+          "performAdjacentChangedPixels": [
+            895,
+            942,
+            893,
+            842
+          ],
+          "walkUniqueFrames": 4,
+          "walkAdjacentChangedPixels": [
+            915,
+            801,
+            740,
+            877
+          ],
+          "runtimeHeldColumns": []
+        },
+        {
+          "row": 2,
+          "groups": [
+            {
+              "action": "perform",
+              "targetBodyHeight": 56,
+              "scale": 0.3822525597269625
+            },
+            {
+              "action": "walk",
+              "targetBodyHeight": 56,
+              "scale": 0.3835616438356164
+            },
+            {
+              "action": "expressions",
+              "targetBodyHeight": 56,
+              "scale": 0.38095238095238093
+            }
+          ],
+          "cells": [
+            {
+              "column": 0,
+              "action": "perform",
+              "sourceColumn": 0,
+              "sourceCell": [
+                0,
+                323,
+                180,
+                484
+              ],
+              "sourceOpaqueBounds": [
+                58,
+                9,
+                141,
+                155
+              ],
+              "scale": 0.3822525597269625,
+              "placedRect": [
+                19,
+                3,
+                33,
+                57
+              ],
+              "packedOpaqueBounds": [
+                20,
+                4,
+                51,
+                59
+              ]
+            },
+            {
+              "column": 1,
+              "action": "perform",
+              "sourceColumn": 1,
+              "sourceCell": [
+                180,
+                323,
+                343,
+                484
+              ],
+              "sourceOpaqueBounds": [
+                40,
+                8,
+                124,
+                155
+              ],
+              "scale": 0.3822525597269625,
+              "placedRect": [
+                19,
+                3,
+                34,
+                58
+              ],
+              "packedOpaqueBounds": [
+                20,
+                4,
+                52,
+                60
+              ]
+            },
+            {
+              "column": 2,
+              "action": "perform",
+              "sourceColumn": 2,
+              "sourceCell": [
+                343,
+                323,
+                507,
+                484
+              ],
+              "sourceOpaqueBounds": [
+                40,
+                9,
+                127,
+                156
+              ],
+              "scale": 0.3822525597269625,
+              "placedRect": [
+                19,
+                3,
+                35,
+                58
+              ],
+              "packedOpaqueBounds": [
+                20,
+                4,
+                53,
+                60
+              ]
+            },
+            {
+              "column": 3,
+              "action": "perform",
+              "sourceColumn": 3,
+              "sourceCell": [
+                507,
+                323,
+                659,
+                484
+              ],
+              "sourceOpaqueBounds": [
+                38,
+                9,
+                119,
+                154
+              ],
+              "scale": 0.3822525597269625,
+              "placedRect": [
+                19,
+                4,
+                32,
+                57
+              ],
+              "packedOpaqueBounds": [
+                20,
+                5,
+                50,
+                60
+              ]
+            },
+            {
+              "column": 4,
+              "action": "walk",
+              "sourceColumn": 4,
+              "sourceCell": [
+                659,
+                323,
+                814,
+                484
+              ],
+              "sourceOpaqueBounds": [
+                34,
+                9,
+                111,
+                155
+              ],
+              "scale": 0.3835616438356164,
+              "placedRect": [
+                17,
+                3,
+                31,
+                58
+              ],
+              "packedOpaqueBounds": [
+                18,
+                4,
+                47,
+                60
+              ]
+            },
+            {
+              "column": 5,
+              "action": "walk",
+              "sourceColumn": 5,
+              "sourceCell": [
+                814,
+                323,
+                978,
+                484
+              ],
+              "sourceOpaqueBounds": [
+                44,
+                9,
+                116,
+                153
+              ],
+              "scale": 0.3835616438356164,
+              "placedRect": [
+                19,
+                4,
+                29,
+                57
+              ],
+              "packedOpaqueBounds": [
+                20,
+                5,
+                47,
+                60
+              ]
+            },
+            {
+              "column": 6,
+              "action": "walk",
+              "sourceColumn": 6,
+              "sourceCell": [
+                978,
+                323,
+                1143,
+                484
+              ],
+              "sourceOpaqueBounds": [
+                48,
+                9,
+                119,
+                155
+              ],
+              "scale": 0.3835616438356164,
+              "placedRect": [
+                21,
+                3,
+                29,
+                58
+              ],
+              "packedOpaqueBounds": [
+                22,
+                4,
+                49,
+                60
+              ]
+            },
+            {
+              "column": 7,
+              "action": "walk",
+              "sourceColumn": 7,
+              "sourceCell": [
+                1143,
+                323,
+                1304,
+                484
+              ],
+              "sourceOpaqueBounds": [
+                47,
+                9,
+                119,
+                155
+              ],
+              "scale": 0.3835616438356164,
+              "placedRect": [
+                21,
+                3,
+                29,
+                58
+              ],
+              "packedOpaqueBounds": [
+                22,
+                4,
+                49,
+                60
+              ]
+            },
+            {
+              "column": 8,
+              "action": "expressions",
+              "sourceColumn": 8,
+              "sourceCell": [
+                1304,
+                323,
+                1460,
+                484
+              ],
+              "sourceOpaqueBounds": [
+                43,
+                9,
+                120,
+                156
+              ],
+              "scale": 0.38095238095238093,
+              "placedRect": [
+                20,
+                3,
+                31,
+                58
+              ],
+              "packedOpaqueBounds": [
+                21,
+                4,
+                50,
+                60
+              ]
+            },
+            {
+              "column": 9,
+              "action": "expressions",
+              "sourceColumn": 9,
+              "sourceCell": [
+                1460,
+                323,
+                1612,
+                484
+              ],
+              "sourceOpaqueBounds": [
+                37,
+                4,
+                126,
+                156
+              ],
+              "scale": 0.38095238095238093,
+              "placedRect": [
+                16,
+                1,
+                35,
+                59
+              ],
+              "packedOpaqueBounds": [
+                17,
+                2,
+                50,
+                59
+              ]
+            },
+            {
+              "column": 10,
+              "action": "expressions",
+              "sourceColumn": 10,
+              "sourceCell": [
+                1612,
+                323,
+                1785,
+                484
+              ],
+              "sourceOpaqueBounds": [
+                26,
+                9,
+                143,
+                156
+              ],
+              "scale": 0.38095238095238093,
+              "placedRect": [
+                7,
+                3,
+                46,
+                58
+              ],
+              "packedOpaqueBounds": [
+                8,
+                4,
+                52,
+                60
+              ]
+            },
+            {
+              "column": 11,
+              "action": "expressions",
+              "sourceColumn": 11,
+              "sourceCell": [
+                1785,
+                323,
+                1942,
+                484
+              ],
+              "sourceOpaqueBounds": [
+                30,
+                9,
+                117,
+                156
+              ],
+              "scale": 0.38095238095238093,
+              "placedRect": [
+                13,
+                3,
+                35,
+                58
+              ],
+              "packedOpaqueBounds": [
+                14,
+                4,
+                47,
+                60
+              ]
+            }
+          ],
+          "performUniqueFrames": 4,
+          "performAdjacentChangedPixels": [
+            853,
+            966,
+            885,
+            931
+          ],
+          "walkUniqueFrames": 4,
+          "walkAdjacentChangedPixels": [
+            878,
+            877,
+            764,
+            919
+          ],
+          "runtimeHeldColumns": []
+        },
+        {
+          "row": 3,
+          "groups": [
+            {
+              "action": "perform",
+              "targetBodyHeight": 56,
+              "scale": 0.37333333333333335
+            },
+            {
+              "action": "walk",
+              "targetBodyHeight": 56,
+              "scale": 0.3783783783783784
+            },
+            {
+              "action": "expressions",
+              "targetBodyHeight": 56,
+              "scale": 0.37209302325581395
+            }
+          ],
+          "cells": [
+            {
+              "column": 0,
+              "action": "perform",
+              "sourceColumn": 0,
+              "sourceCell": [
+                0,
+                484,
+                183,
+                647
+              ],
+              "sourceOpaqueBounds": [
+                56,
+                8,
+                146,
+                158
+              ],
+              "scale": 0.37333333333333335,
+              "placedRect": [
+                19,
+                3,
+                35,
+                57
+              ],
+              "packedOpaqueBounds": [
+                20,
+                4,
+                53,
+                59
+              ]
+            },
+            {
+              "column": 1,
+              "action": "perform",
+              "sourceColumn": 1,
+              "sourceCell": [
+                183,
+                484,
+                345,
+                647
+              ],
+              "sourceOpaqueBounds": [
+                37,
+                8,
+                127,
+                158
+              ],
+              "scale": 0.37333333333333335,
+              "placedRect": [
+                19,
+                3,
+                35,
+                57
+              ],
+              "packedOpaqueBounds": [
+                20,
+                4,
+                53,
+                59
+              ]
+            },
+            {
+              "column": 2,
+              "action": "perform",
+              "sourceColumn": 2,
+              "sourceCell": [
+                345,
+                484,
+                506,
+                647
+              ],
+              "sourceOpaqueBounds": [
+                36,
+                9,
+                128,
+                158
+              ],
+              "scale": 0.37333333333333335,
+              "placedRect": [
+                20,
+                4,
+                36,
+                57
+              ],
+              "packedOpaqueBounds": [
+                21,
+                5,
+                55,
+                60
+              ]
+            },
+            {
+              "column": 3,
+              "action": "perform",
+              "sourceColumn": 3,
+              "sourceCell": [
+                506,
+                484,
+                668,
+                647
+              ],
+              "sourceOpaqueBounds": [
+                33,
+                8,
+                127,
+                158
+              ],
+              "scale": 0.37333333333333335,
+              "placedRect": [
+                17,
+                3,
+                37,
+                57
+              ],
+              "packedOpaqueBounds": [
+                18,
+                4,
+                53,
+                59
+              ]
+            },
+            {
+              "column": 4,
+              "action": "walk",
+              "sourceColumn": 4,
+              "sourceCell": [
+                668,
+                484,
+                824,
+                647
+              ],
+              "sourceOpaqueBounds": [
+                35,
+                8,
+                119,
+                158
+              ],
+              "scale": 0.3783783783783784,
+              "placedRect": [
+                18,
+                2,
+                33,
+                58
+              ],
+              "packedOpaqueBounds": [
+                19,
+                3,
+                50,
+                59
+              ]
+            },
+            {
+              "column": 5,
+              "action": "walk",
+              "sourceColumn": 5,
+              "sourceCell": [
+                824,
+                484,
+                979,
+                647
+              ],
+              "sourceOpaqueBounds": [
+                38,
+                8,
+                121,
+                157
+              ],
+              "scale": 0.3783783783783784,
+              "placedRect": [
+                18,
+                3,
+                33,
+                58
+              ],
+              "packedOpaqueBounds": [
+                19,
+                4,
+                50,
+                60
+              ]
+            },
+            {
+              "column": 6,
+              "action": "walk",
+              "sourceColumn": 6,
+              "sourceCell": [
+                979,
+                484,
+                1147,
+                647
+              ],
+              "sourceOpaqueBounds": [
+                35,
+                9,
+                127,
+                156
+              ],
+              "scale": 0.3783783783783784,
+              "placedRect": [
+                18,
+                4,
+                36,
+                57
+              ],
+              "packedOpaqueBounds": [
+                19,
+                5,
+                53,
+                60
+              ]
+            },
+            {
+              "column": 7,
+              "action": "walk",
+              "sourceColumn": 7,
+              "sourceCell": [
+                1147,
+                484,
+                1302,
+                647
+              ],
+              "sourceOpaqueBounds": [
+                41,
+                10,
+                115,
+                157
+              ],
+              "scale": 0.3783783783783784,
+              "placedRect": [
+                20,
+                4,
+                30,
+                57
+              ],
+              "packedOpaqueBounds": [
+                21,
+                5,
+                49,
+                60
+              ]
+            },
+            {
+              "column": 8,
+              "action": "expressions",
+              "sourceColumn": 8,
+              "sourceCell": [
+                1302,
+                484,
+                1464,
+                647
+              ],
+              "sourceOpaqueBounds": [
+                41,
+                8,
+                133,
+                159
+              ],
+              "scale": 0.37209302325581395,
+              "placedRect": [
+                19,
+                3,
+                36,
+                58
+              ],
+              "packedOpaqueBounds": [
+                20,
+                4,
+                54,
+                60
+              ]
+            },
+            {
+              "column": 9,
+              "action": "expressions",
+              "sourceColumn": 9,
+              "sourceCell": [
+                1464,
+                484,
+                1613,
+                647
+              ],
+              "sourceOpaqueBounds": [
+                29,
+                5,
+                130,
+                159
+              ],
+              "scale": 0.37209302325581395,
+              "placedRect": [
+                15,
+                2,
+                39,
+                59
+              ],
+              "packedOpaqueBounds": [
+                16,
+                3,
+                53,
+                60
+              ]
+            },
+            {
+              "column": 10,
+              "action": "expressions",
+              "sourceColumn": 10,
+              "sourceCell": [
+                1613,
+                484,
+                1789,
+                647
+              ],
+              "sourceOpaqueBounds": [
+                20,
+                9,
+                150,
+                159
+              ],
+              "scale": 0.37209302325581395,
+              "placedRect": [
+                6,
+                3,
+                50,
+                57
+              ],
+              "packedOpaqueBounds": [
+                7,
+                4,
+                55,
+                59
+              ]
+            },
+            {
+              "column": 11,
+              "action": "expressions",
+              "sourceColumn": 11,
+              "sourceCell": [
+                1789,
+                484,
+                1942,
+                647
+              ],
+              "sourceOpaqueBounds": [
+                26,
+                9,
+                126,
+                159
+              ],
+              "scale": 0.37209302325581395,
+              "placedRect": [
+                13,
+                3,
+                39,
+                57
+              ],
+              "packedOpaqueBounds": [
+                14,
+                4,
+                51,
+                59
+              ]
+            }
+          ],
+          "performUniqueFrames": 4,
+          "performAdjacentChangedPixels": [
+            767,
+            942,
+            1089,
+            971
+          ],
+          "walkUniqueFrames": 4,
+          "walkAdjacentChangedPixels": [
+            858,
+            958,
+            1037,
+            935
+          ],
+          "runtimeHeldColumns": []
+        },
+        {
+          "row": 4,
+          "groups": [
+            {
+              "action": "perform",
+              "targetBodyHeight": 40,
+              "scale": 0.29411764705882354
+            },
+            {
+              "action": "walk",
+              "targetBodyHeight": 56,
+              "scale": 0.3835616438356164
+            },
+            {
+              "action": "expressions",
+              "targetBodyHeight": 56,
+              "scale": 0.37583892617449666
+            }
+          ],
+          "cells": [
+            {
+              "column": 0,
+              "action": "perform",
+              "sourceColumn": 0,
+              "sourceCell": [
+                0,
+                647,
+                161,
+                809
+              ],
+              "sourceOpaqueBounds": [
+                44,
+                20,
+                120,
+                156
+              ],
+              "scale": 0.29411764705882354,
+              "placedRect": [
+                23,
+                19,
+                24,
+                41
+              ],
+              "packedOpaqueBounds": [
+                24,
+                20,
+                46,
+                59
+              ]
+            },
+            {
+              "column": 1,
+              "action": "perform",
+              "sourceColumn": 1,
+              "sourceCell": [
+                161,
+                647,
+                327,
+                809
+              ],
+              "sourceOpaqueBounds": [
+                42,
+                21,
+                128,
+                156
+              ],
+              "scale": 0.29411764705882354,
+              "placedRect": [
+                23,
+                20,
+                26,
+                41
+              ],
+              "packedOpaqueBounds": [
+                24,
+                21,
+                48,
+                60
+              ]
+            },
+            {
+              "column": 2,
+              "action": "perform",
+              "sourceColumn": 2,
+              "sourceCell": [
+                327,
+                647,
+                487,
+                809
+              ],
+              "sourceOpaqueBounds": [
+                39,
+                20,
+                121,
+                156
+              ],
+              "scale": 0.29411764705882354,
+              "placedRect": [
+                23,
+                19,
+                25,
+                41
+              ],
+              "packedOpaqueBounds": [
+                24,
+                20,
+                47,
+                59
+              ]
+            },
+            {
+              "column": 3,
+              "action": "perform",
+              "sourceColumn": 3,
+              "sourceCell": [
+                487,
+                647,
+                657,
+                809
+              ],
+              "sourceOpaqueBounds": [
+                40,
+                17,
+                122,
+                156
+              ],
+              "scale": 0.29411764705882354,
+              "placedRect": [
+                23,
+                19,
+                25,
+                42
+              ],
+              "packedOpaqueBounds": [
+                24,
+                20,
+                47,
+                60
+              ]
+            },
+            {
+              "column": 4,
+              "action": "walk",
+              "sourceColumn": 4,
+              "sourceCell": [
+                657,
+                647,
+                809,
+                809
+              ],
+              "sourceOpaqueBounds": [
+                48,
+                7,
+                102,
+                154
+              ],
+              "scale": 0.3835616438356164,
+              "placedRect": [
+                20,
+                3,
+                22,
+                58
+              ],
+              "packedOpaqueBounds": [
+                21,
+                4,
+                41,
+                60
+              ]
+            },
+            {
+              "column": 5,
+              "action": "walk",
+              "sourceColumn": 5,
+              "sourceCell": [
+                809,
+                647,
+                974,
+                809
+              ],
+              "sourceOpaqueBounds": [
+                50,
+                6,
+                114,
+                151
+              ],
+              "scale": 0.3835616438356164,
+              "placedRect": [
+                20,
+                4,
+                26,
+                57
+              ],
+              "packedOpaqueBounds": [
+                21,
+                5,
+                45,
+                60
+              ]
+            },
+            {
+              "column": 6,
+              "action": "walk",
+              "sourceColumn": 6,
+              "sourceCell": [
+                974,
+                647,
+                1129,
+                809
+              ],
+              "sourceOpaqueBounds": [
+                52,
+                7,
+                107,
+                154
+              ],
+              "scale": 0.3835616438356164,
+              "placedRect": [
+                21,
+                3,
+                23,
+                58
+              ],
+              "packedOpaqueBounds": [
+                22,
+                4,
+                43,
+                60
+              ]
+            },
+            {
+              "column": 7,
+              "action": "walk",
+              "sourceColumn": 7,
+              "sourceCell": [
+                1129,
+                647,
+                1296,
+                809
+              ],
+              "sourceOpaqueBounds": [
+                49,
+                7,
+                116,
+                152
+              ],
+              "scale": 0.3835616438356164,
+              "placedRect": [
+                17,
+                4,
+                27,
+                57
+              ],
+              "packedOpaqueBounds": [
+                20,
+                5,
+                43,
+                60
+              ]
+            },
+            {
+              "column": 8,
+              "action": "expressions",
+              "sourceColumn": 8,
+              "sourceCell": [
+                1296,
+                647,
+                1445,
+                809
+              ],
+              "sourceOpaqueBounds": [
+                51,
+                7,
+                99,
+                156
+              ],
+              "scale": 0.37583892617449666,
+              "placedRect": [
+                21,
+                3,
+                20,
+                58
+              ],
+              "packedOpaqueBounds": [
+                22,
+                4,
+                40,
+                60
+              ]
+            },
+            {
+              "column": 9,
+              "action": "expressions",
+              "sourceColumn": 9,
+              "sourceCell": [
+                1445,
+                647,
+                1597,
+                809
+              ],
+              "sourceOpaqueBounds": [
+                51,
+                5,
+                115,
+                156
+              ],
+              "scale": 0.37583892617449666,
+              "placedRect": [
+                17,
+                2,
+                26,
+                58
+              ],
+              "packedOpaqueBounds": [
+                18,
+                3,
+                42,
+                59
+              ]
+            },
+            {
+              "column": 10,
+              "action": "expressions",
+              "sourceColumn": 10,
+              "sourceCell": [
+                1597,
+                647,
+                1790,
+                809
+              ],
+              "sourceOpaqueBounds": [
+                38,
+                8,
+                167,
+                156
+              ],
+              "scale": 0.37583892617449666,
+              "placedRect": [
+                6,
+                4,
+                50,
+                57
+              ],
+              "packedOpaqueBounds": [
+                8,
+                5,
+                55,
+                60
+              ]
+            },
+            {
+              "column": 11,
+              "action": "expressions",
+              "sourceColumn": 11,
+              "sourceCell": [
+                1790,
+                647,
+                1942,
+                809
+              ],
+              "sourceOpaqueBounds": [
+                26,
+                8,
+                110,
+                157
+              ],
+              "scale": 0.37583892617449666,
+              "placedRect": [
+                14,
+                3,
+                33,
+                58
+              ],
+              "packedOpaqueBounds": [
+                15,
+                4,
+                46,
+                60
+              ]
+            }
+          ],
+          "performUniqueFrames": 4,
+          "performAdjacentChangedPixels": [
+            524,
+            526,
+            507,
+            505
+          ],
+          "walkUniqueFrames": 4,
+          "walkAdjacentChangedPixels": [
+            764,
+            725,
+            806,
+            788
+          ],
+          "runtimeHeldColumns": []
+        }
+      ],
+      "bytes": 47211,
+      "sha256": "77d1800488305cc60dd4d5575920ab26e3c0c52b42398e6ca4b2c74611af9583",
+      "alphaExtrema": [
+        0,
+        252
+      ],
+      "transparentPixels": 190831,
+      "expectedCells": 60,
+      "alphaCorners": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "nonEmptyCells": 60,
+      "passed": true
+    }
+  ]
+}

@@ -27,23 +27,27 @@ public sealed partial class SimBarExperience
         public float fps;public PixelAction[] actions;public PixelStyle[] variantStyles,directionRows,directionRowOffsets;public PixelDirection[] directionColumns;
     }
     [Serializable] private sealed class PixelOffset{public string id;public Vector2 offset;}
-    [Serializable] private sealed class PixelBar{public float xMax,xFade,zMin,zMax;public Vector2 offset;}
+    [Serializable] private sealed class PixelBar{public float xMax,xFade,zMin,zMax,xMin,zFade;public bool boundedX;public Vector2 offset;}
     [Serializable] private sealed class PixelOccluder{public Vector2[] points;public float depth;public string[] actors;}
     [Serializable] private sealed class PixelSeat{public string id;public Vector2 feet;public float depth;public bool hideShadow;}
+    [Serializable] private sealed class PixelProp{public string resource;public float x,z,drawWidth,drawHeight,footX,footY,depthOffset;}
     [Serializable] private sealed class PixelManifest
     {
         public int frameWidth=64,frameHeight=64,columns=4,drawHeight=54,footX=32,footY=60;
         public string defaultAtlas;
-        public PixelOffset[] actorOffsets,bandStageFeet;public float stageElevationPixels,drumForegroundDepth;public PixelBar barRegion;public PixelOccluder[] occluders;public PixelSeat[] seatedActors;public PixelRole[] roles;public PixelAtlas[] atlases;
+        public Vector2[] ledQuad,ledLamps,stageDeck,stageLamps,lightSources;
+        public PixelOffset[] actorOffsets,bandStageFeet;public float stageElevationPixels,drumForegroundDepth,ledFixtureScale;public PixelBar barRegion;public PixelOccluder[] occluders;public PixelSeat[] seatedActors;public PixelRole[] roles;public PixelAtlas[] atlases;public PixelProp[] props;
     }
     private sealed class PixelActorView
     {
-        public MotionActor actor;public RectTransform root;public RawImage image;public Image marker,broom,bristles;public SimBarPixelPolygonGraphic shadow;public string id,role;public PixelLayer layer;
+        public MotionActor actor;public RectTransform root;public RawImage image;public Image marker,broom,bristles;public SimBarPixelPolygonGraphic shadow;public string id,role,originalRole;public PixelLayer layer;
         public RectTransform orderBubble;public RawImage orderIcon;
         public Vector2 orderBase;public SimBarPixelPolygonGraphic orderTail,orderTailFill;
         public uint variantSeed;public PixelSeat seat;
     }
     private sealed class PixelLayer{public Transform root;public float depth;public List<Transform> after;}
+    private sealed class PixelPropView{public PixelProp definition;public Texture2D texture;public float depth;}
+    private sealed class PixelVenueMask{public SimBarPixelPolygonGraphic graphic;public Vector2[] points;}
     private sealed class PixelParticle{public Vector3 position,velocity;public float age,phase;public bool tissue;public int index,sequence;public SimBarPixelPaperGraphic image;}
     private struct PixelPaperRandom
     {
@@ -53,14 +57,21 @@ public sealed partial class SimBarExperience
     }
     private Canvas pixelWorldCanvas;
     private RectTransform pixelRoom;
+    private RawImage pixelVenuePlate;
+    private Texture2D pixelVenueTexture;
+    private int pixelVenueOwner=-1;
+    private readonly List<PixelVenueMask> pixelVenueMasks=new List<PixelVenueMask>();
+    private SimBarMiniMap pixelMiniMap;
     private RawImage pixelCity;
     private Texture2D pixelCharacters;
     private Camera pixelSceneCamera;
     private int pixelOriginalCullingMask;
     private bool pixelCameraOwned;
     private PixelManifest pixelManifest;
+    private PixelManifest pixelOriginalManifest,pixelFFManifest,pixelFreebirdManifest;
     private readonly Dictionary<MotionActor,PixelActorView> pixelActorViews=new Dictionary<MotionActor,PixelActorView>();
     private readonly List<PixelLayer> pixelStaticLayers=new List<PixelLayer>();
+    private readonly List<PixelPropView> pixelPropViews=new List<PixelPropView>();
     private readonly List<PixelLayer> pixelDrawLayers=new List<PixelLayer>(64);
     private readonly List<MotionActor> pixelRemovedActors=new List<MotionActor>();
     private readonly List<SimBarPixelPaperGraphic> pixelPaper=new List<SimBarPixelPaperGraphic>(104);
@@ -88,13 +99,23 @@ public sealed partial class SimBarExperience
 
     private void InitializePixelPresentation()
     {
-        Texture2D venue=LoadPixelTexture("SimBarPixelArt/Venue");
+        LoadOwnerSelection();
+        Texture2D venue=LoadOwnerPixelVenue();
         pixelCharacters=LoadPixelTexture("SimBarPixelArt/Characters");
         Texture2D city=LoadPixelTexture("SimBarPixelArt/Seoul");
         TextAsset manifest=Resources.Load<TextAsset>("SimBarPixelArt/Presentation");
         if(venue==null||pixelCharacters==null||city==null||manifest==null)
         {Debug.LogWarning("Pixel room assets are incomplete; keeping the authored 3D presentation.");return;}
-        try{pixelManifest=JsonUtility.FromJson<PixelManifest>(manifest.text);}catch(Exception error){Debug.LogError(error);return;}
+        try
+        {
+            pixelOriginalManifest=JsonUtility.FromJson<PixelManifest>(manifest.text);
+            TextAsset ffManifest=Resources.Load<TextAsset>("SimBarPixelArt/PresentationFF");
+            if(ffManifest!=null)pixelFFManifest=JsonUtility.FromJson<PixelManifest>(ffManifest.text);
+            TextAsset freebirdManifest=Resources.Load<TextAsset>("SimBarPixelArt/PresentationFreebird");
+            if(freebirdManifest!=null)pixelFreebirdManifest=JsonUtility.FromJson<PixelManifest>(freebirdManifest.text);
+            pixelManifest=OwnerPixelManifest();
+        }
+        catch(Exception error){Debug.LogError(error);return;}
         if(pixelManifest?.roles==null||pixelManifest.roles.Length==0)return;
         venue.filterMode=pixelCharacters.filterMode=city.filterMode=FilterMode.Point;
         foreach(PixelRole role in pixelManifest.roles)pixelRoles[role.id]=role;
@@ -114,7 +135,8 @@ public sealed partial class SimBarExperience
         pixelRoom=new GameObject("Pixel Venue and Real Actors",typeof(RectTransform)).GetComponent<RectTransform>();
         pixelRoom.SetParent(canvasObject.transform,false);pixelRoom.anchorMin=pixelRoom.anchorMax=new Vector2(.5f,.5f);
         pixelRoom.pivot=new Vector2(.5f,.5f);pixelRoom.sizeDelta=new Vector2(960f,558f);
-        var plate=PixelImage("Approved Empty Room Plate",pixelRoom,venue);PixelRect(plate.rectTransform,Vector2.zero,new Vector2(960f,558f));
+        pixelVenueTexture=venue;pixelVenueOwner=selectedOwner;
+        pixelVenuePlate=PixelImage("Approved Empty Room Plate",pixelRoom,venue);PixelRect(pixelVenuePlate.rectTransform,Vector2.zero,new Vector2(960f,558f));
         InitializeAlbumJackets(venue);
         InitializePixelStageOff();
         InitializePixelLights();
@@ -131,20 +153,106 @@ public sealed partial class SimBarExperience
         pixelOrderBubbles=new GameObject("Actual Pending Order Bubbles",typeof(RectTransform)).GetComponent<RectTransform>();
         pixelOrderBubbles.SetParent(pixelRoom,false);PixelRect(pixelOrderBubbles,Vector2.zero,new Vector2(960f,558f));
         for(int i=0;i<160;i++){var particle=new PixelParticle{image=PixelPaperGraphic("Airborne Paper "+i,pixelAirborne)};particle.image.gameObject.SetActive(false);pixelParticles.Add(particle);}
+        BuildPixelStaticLayers();
+        // Keep all navigation transforms, lights and mission actors alive. The main
+        // camera now contributes only the base clear; the separate minimap still works.
+        pixelSceneCamera=Camera.main;TakePixelCamera();
+        FitPixelPresentation();
+    }
+    private void BuildPixelStaticLayers()
+    {
+        pixelPropViews.Clear();
         foreach(PixelOccluder layer in pixelManifest.occluders??Array.Empty<PixelOccluder>())
         {
             if(layer.actors!=null&&layer.actors.Length>0)continue;
             var polygon=new GameObject("Pixel Furniture Foreground",typeof(RectTransform),typeof(CanvasRenderer),typeof(SimBarPixelPolygonGraphic)).GetComponent<SimBarPixelPolygonGraphic>();
-            polygon.transform.SetParent(pixelRoom,false);polygon.Initialize(venue,layer.points);
+            polygon.transform.SetParent(pixelRoom,false);RegisterPixelVenueMask(polygon,layer.points);
             var staticLayer=new PixelLayer{root=polygon.transform,depth=layer.depth};
             Transform unlit=CreatePixelStageOffOccluder(layer.points);
             if(unlit!=null)staticLayer.after=new List<Transform>{unlit};
             pixelStaticLayers.Add(staticLayer);
         }
-        // Keep all navigation transforms, lights and mission actors alive. The main
-        // camera now contributes only the base clear; the separate minimap still works.
-        pixelSceneCamera=Camera.main;TakePixelCamera();
-        FitPixelPresentation();
+        foreach(PixelProp prop in pixelManifest.props??Array.Empty<PixelProp>())
+        {
+            Texture2D texture=LoadPixelTexture(prop.resource);
+            if(texture==null){Debug.LogWarning("Missing pixel venue prop: "+prop.resource);continue;}
+            Vector2 point=PixelProject(new Vector3(prop.x,0f,prop.z));
+            RawImage image=PixelImage("Pixel Venue Prop / "+prop.resource,pixelRoom,texture);
+            PixelRect(image.rectTransform,new Vector2(Mathf.Floor(point.x-prop.footX+.5f),Mathf.Floor(point.y-prop.footY+.5f)),new Vector2(prop.drawWidth,prop.drawHeight));
+            pixelStaticLayers.Add(new PixelLayer{root=image.transform,depth=point.y+prop.depthOffset});
+            pixelPropViews.Add(new PixelPropView{definition=prop,texture=texture,depth=point.y+prop.depthOffset});
+        }
+        pixelPropViews.Sort((a,b)=>a.depth.CompareTo(b.depth));
+    }
+    private Texture2D LoadOwnerPixelVenue()
+    {
+        string resource=selectedOwner==0?"SimBarPixelArt/VenueFreebird":selectedOwner==1?"SimBarPixelArt/VenueFF":"SimBarPixelArt/Venue";
+        return LoadPixelTexture(resource)??LoadPixelTexture("SimBarPixelArt/Venue");
+    }
+    private PixelManifest OwnerPixelManifest()=>selectedOwner==0&&pixelFreebirdManifest!=null?pixelFreebirdManifest:selectedOwner==1&&pixelFFManifest!=null?pixelFFManifest:pixelOriginalManifest;
+    private void RegisterPixelVenueMask(SimBarPixelPolygonGraphic graphic,Vector2[] points)
+    {
+        graphic.Initialize(pixelVenueTexture,points);
+        pixelVenueMasks.Add(new PixelVenueMask{graphic=graphic,points=points});
+    }
+    private void RefreshPixelVenue()
+    {
+        if(pixelVenueOwner==selectedOwner)return;
+        Texture2D venue=LoadOwnerPixelVenue();if(venue==null)return;
+        pixelVenueOwner=selectedOwner;
+        PixelManifest nextManifest=OwnerPixelManifest();
+        bool geometryChanged=!ReferenceEquals(nextManifest,pixelManifest);
+        if(pixelVenueTexture==venue&&!geometryChanged)return;
+        pixelVenueTexture=venue;pixelVenuePlate.texture=venue;
+        if(geometryChanged)
+        {
+            foreach(PixelLayer layer in pixelStaticLayers)DestroyPixelFurnitureLayer(layer);
+            pixelStaticLayers.Clear();pixelManifest=nextManifest;
+            RefreshPixelAlbumGeometry();
+            if(pixelStageOffRoot!=null){pixelStageOffRoot.gameObject.SetActive(false);Destroy(pixelStageOffRoot.gameObject);}
+            InitializePixelStageOff();BuildPixelStaticLayers();
+            foreach(PixelActorView view in pixelActorViews.Values)BindPixelActorFurniture(view);
+        }
+        for(int i=pixelVenueMasks.Count-1;i>=0;i--)
+        {
+            PixelVenueMask mask=pixelVenueMasks[i];
+            if(mask.graphic==null){pixelVenueMasks.RemoveAt(i);continue;}
+            mask.graphic.Initialize(venue,mask.points);
+        }
+    }
+    private void DestroyPixelFurnitureLayer(PixelLayer layer)
+    {
+        if(layer.root!=null)
+        {
+            SimBarPixelPolygonGraphic graphic=layer.root.GetComponent<SimBarPixelPolygonGraphic>();
+            pixelVenueMasks.RemoveAll(value=>value.graphic==graphic);
+            layer.root.gameObject.SetActive(false);Destroy(layer.root.gameObject);
+        }
+        if(layer.after!=null)foreach(Transform mask in layer.after)
+        {pixelStageOffOccluders.Remove(mask);mask.gameObject.SetActive(false);Destroy(mask.gameObject);}
+    }
+    private void BindPixelActorFurniture(PixelActorView view)
+    {
+        if(view.layer.after!=null)
+        {
+            foreach(Transform mask in view.layer.after)
+            {
+                SimBarPixelPolygonGraphic graphic=mask.GetComponent<SimBarPixelPolygonGraphic>();
+                pixelVenueMasks.RemoveAll(value=>value.graphic==graphic);
+                mask.gameObject.SetActive(false);Destroy(mask.gameObject);
+            }
+            view.layer.after.Clear();
+        }
+        view.role=IsStandingVenueLayout&&(view.originalRole=="seated"||view.originalRole=="barseated")?"guest":view.originalRole;
+        view.seat=null;
+        foreach(PixelSeat seat in pixelManifest.seatedActors??Array.Empty<PixelSeat>())if(seat.id==view.id){view.seat=seat;break;}
+        foreach(PixelOccluder layer in pixelManifest.occluders??Array.Empty<PixelOccluder>())
+        {
+            if(layer.actors==null||Array.IndexOf(layer.actors,view.id)<0)continue;
+            var mask=new GameObject("Pixel Seated Furniture / "+view.id,typeof(RectTransform),typeof(CanvasRenderer),typeof(SimBarPixelPolygonGraphic)).GetComponent<SimBarPixelPolygonGraphic>();
+            mask.transform.SetParent(pixelRoom,false);RegisterPixelVenueMask(mask,layer.points);
+            if(view.layer.after==null)view.layer.after=new List<Transform>();view.layer.after.Add(mask.transform);
+        }
     }
     private Texture2D LoadPixelTexture(string resource)
     {
@@ -177,6 +285,7 @@ public sealed partial class SimBarExperience
     }
     private void DestroyPixelPresentation()
     {
+        DestroyPerformingBandPresentation();
         DestroyAlbumJackets();
         RestorePixelCamera();
         if(pixelWorldCanvas!=null)Destroy(pixelWorldCanvas.gameObject);
@@ -184,7 +293,10 @@ public sealed partial class SimBarExperience
         pixelStageOffOccluders.Clear();pixelStageOffRoot=null;
         foreach(Texture2D texture in pixelDecodedTextures.Values)if(texture!=null)Destroy(texture);
         pixelDecodedTextures.Clear();pixelAtlasTextures.Clear();pixelAtlases.Clear();
+        pixelVenueMasks.Clear();pixelVenuePlate=null;pixelVenueTexture=null;pixelVenueOwner=-1;
+        if(pixelMiniMap!=null)pixelMiniMap.BeginPixelOverview(null);pixelMiniMap=null;
         pixelActorViews.Clear();pixelStaticLayers.Clear();pixelDrawLayers.Clear();pixelParticles.Clear();pixelPaper.Clear();pixelPaperPositions.Clear();
+        pixelPropViews.Clear();
     }
 
     private static RawImage PixelImage(string name,Transform parent,Texture image)
@@ -242,16 +354,9 @@ public sealed partial class SimBarExperience
         var bristles=PixelSolid("Cleaner Broom Bristles",broom.transform);bristles.color=new Color32(199,178,126,255);
         string modelKey=actor.visual!=null?actor.visual.ModelKey:actor.person.root.name;
         uint variantSeed=PixelHash(id+"|"+modelKey);
-        var view=new PixelActorView{actor=actor,root=root,image=image,shadow=shadow,marker=marker,broom=broom,bristles=bristles,id=id,role=role,variantSeed=variantSeed,layer=new PixelLayer{root=root}};
+        var view=new PixelActorView{actor=actor,root=root,image=image,shadow=shadow,marker=marker,broom=broom,bristles=bristles,id=id,role=role,originalRole=role,variantSeed=variantSeed,layer=new PixelLayer{root=root}};
         CreatePixelOrderBubble(view);
-        foreach(PixelSeat seat in pixelManifest.seatedActors??Array.Empty<PixelSeat>())if(seat.id==id){view.seat=seat;break;}
-        foreach(PixelOccluder layer in pixelManifest.occluders??Array.Empty<PixelOccluder>())
-        {
-            if(layer.actors==null||Array.IndexOf(layer.actors,id)<0)continue;
-            var mask=new GameObject("Pixel Seated Furniture / "+id,typeof(RectTransform),typeof(CanvasRenderer),typeof(SimBarPixelPolygonGraphic)).GetComponent<SimBarPixelPolygonGraphic>();
-            mask.transform.SetParent(pixelRoom,false);mask.Initialize(LoadPixelTexture("SimBarPixelArt/Venue"),layer.points);
-            if(view.layer.after==null)view.layer.after=new List<Transform>();view.layer.after.Add(mask.transform);
-        }
+        BindPixelActorFurniture(view);
         return view;
     }
 
@@ -313,7 +418,12 @@ public sealed partial class SimBarExperience
         PixelBar region=pixelManifest.barRegion;
         if(region!=null&&(view.role=="bartender"||view.role=="server"||view.role.StartsWith("hired-"))
             &&world.z>=region.zMin&&world.z<=region.zMax)
-            offset+=region.offset*Mathf.Clamp01((region.xMax-world.x)/Mathf.Max(.01f,region.xFade));
+        {
+            float weight=Mathf.Clamp01((region.xMax-world.x)/Mathf.Max(.01f,region.xFade));
+            if(region.boundedX)weight*=Mathf.Clamp01((world.x-region.xMin)/Mathf.Max(.01f,region.xFade));
+            if(region.zFade>0f)weight*=Mathf.Clamp01((world.z-region.zMin)/region.zFade)*Mathf.Clamp01((region.zMax-world.z)/region.zFade);
+            offset+=region.offset*weight;
+        }
         return offset;
     }
     private bool PixelBandJump(PixelActorView view,string action,bool active,out int frame,out float lift,out float shadow)
@@ -420,6 +530,7 @@ public sealed partial class SimBarExperience
         RectTransform image=view.image.rectTransform;image.anchorMin=image.anchorMax=new Vector2(.5f,.5f);
         image.pivot=new Vector2(footX/frameWidth,1f-footY/crop);
         image.sizeDelta=new Vector2(frameWidth*scale,height);
+        ApplyPerformingBandImage(view,action,active);
         float yaw=actor.person.root.localEulerAngles.y;
         float yawSin=Mathf.Sin(yaw*Mathf.Deg2Rad);
         bool flip=!directional&&yawSin<-.18f;
@@ -467,10 +578,10 @@ public sealed partial class SimBarExperience
         if(actor.queueIndex>=0&&!actor.moving)
         {
             Vector3 employee=new Vector3(-4.2f,0f,-.565f);
-            foreach(MotionActor other in motionActors)if(other.person.name=="Server"){employee=MotionPosition(other);break;}
+            foreach(MotionActor other in motionActors)if(other.person.name==(IsFreebirdLayout?"Bartender":"Server")){employee=MotionPosition(other);break;}
             Vector3 toward=employee-world;toward.y=0f;return toward.normalized;
         }
-        if((view.role=="bartender"||view.role=="server")&&!actor.moving&&!IsFloorMissionActor(actor.person.root))return Vector3.back;
+        if((view.role=="bartender"||view.role=="server")&&!actor.moving&&!IsFloorMissionActor(actor.person.root))return IsFFLayout?Vector3.right:Vector3.back;
         if(view.role=="guest"&&actor.kind==MotionKind.Guest&&!actor.moving)
             return new Vector3(5.5f-world.x,0f,2.7f-world.z).normalized;
         Vector3 forward=worldRoot.InverseTransformDirection(actor.person.root.forward);forward.y=0f;return forward.normalized;
@@ -548,6 +659,8 @@ public sealed partial class SimBarExperience
     {
         if(pixelWorldCanvas==null)return;
         bool visible=worldRoot!=null&&worldRoot.gameObject.activeInHierarchy;pixelWorldCanvas.enabled=visible;if(!visible)return;
+        RefreshPixelVenue();
+        RefreshPerformingBand();
         if(pixelScreenWidth!=Screen.width||pixelScreenHeight!=Screen.height)FitPixelPresentation();
         float delta=!paused&&(JourneyIsPlaying||JourneyIsFloorClosing)?Mathf.Min(.1f,Time.unscaledDeltaTime):0f;
         UpdateAlbumJacket();
@@ -563,7 +676,12 @@ public sealed partial class SimBarExperience
         {
             var view=pixelActorViews[actor];Destroy(view.root.gameObject);
             if(view.orderBubble!=null)Destroy(view.orderBubble.gameObject);
-            if(view.layer.after!=null)foreach(Transform mask in view.layer.after)Destroy(mask.gameObject);
+            if(view.layer.after!=null)foreach(Transform mask in view.layer.after)
+            {
+                SimBarPixelPolygonGraphic graphic=mask.GetComponent<SimBarPixelPolygonGraphic>();
+                pixelVenueMasks.RemoveAll(value=>value.graphic==graphic);
+                Destroy(mask.gameObject);
+            }
             pixelActorViews.Remove(actor);
         }
         foreach(MotionActor actor in motionActors)
@@ -573,6 +691,8 @@ public sealed partial class SimBarExperience
             bool active=actor.person.root.gameObject.activeInHierarchy;view.root.gameObject.SetActive(active);
             if(active)UpdatePixelActor(view);else{if(view.orderBubble!=null)view.orderBubble.gameObject.SetActive(false);if(view.layer.after!=null)foreach(Transform mask in view.layer.after)mask.gameObject.SetActive(false);}
         }
+        UpdateExtraPerformingBand();
+        UpdatePixelMiniMap();
         UpdatePixelPaper();pixelDrawLayers.Sort((a,b)=>a.depth.CompareTo(b.depth));
         foreach(PixelLayer layer in pixelDrawLayers)
         {
@@ -580,5 +700,33 @@ public sealed partial class SimBarExperience
             if(layer.after!=null)foreach(Transform mask in layer.after)mask.SetAsLastSibling();
         }
         UpdateAirbornePixelPaper(delta);pixelAirborne.SetAsLastSibling();PlacePixelOrderBubbles();pixelOrderBubbles.SetAsLastSibling();
+    }
+
+    private void UpdatePixelMiniMap()
+    {
+        if(pixelMiniMap==null&&worldRoot!=null)pixelMiniMap=worldRoot.GetComponentInChildren<SimBarMiniMap>(true);
+        if(pixelMiniMap==null)return;
+        bool pixelOverview=selectedOwner!=2||activePerformingBand!=null;
+        pixelMiniMap.BeginPixelOverview(pixelOverview?pixelVenueTexture:null);
+        if(!pixelOverview)return;
+        int propIndex=0;
+        foreach(PixelPropView prop in pixelPropViews)
+        {
+            PixelProp data=prop.definition;
+            pixelMiniMap.SetPixelProp(propIndex++,prop.texture,PixelProject(new Vector3(data.x,0f,data.z)),new Vector2(data.drawWidth,data.drawHeight),new Vector2(data.footX,data.footY));
+        }
+        pixelMiniMap.EndPixelProps(propIndex);
+        int index=0;
+        foreach(var pair in pixelActorViews)
+        {
+            PixelActorView view=pair.Value;if(!view.root.gameObject.activeSelf)continue;
+            MotionActor actor=view.actor;bool employee=actor.kind==MotionKind.BarStaff||actor.kind==MotionKind.FloorStaff;
+            Color color=actor==floorMissionGuestActor?new Color32(255,211,111,255):employee?new Color32(110,229,154,255):actor.kind==MotionKind.Band?new Color32(101,219,239,255):new Color32(245,228,200,255);
+            Vector2 point=view.root.anchoredPosition;point.y=-point.y;
+            pixelMiniMap.SetPixelMarker(index++,point,color);
+        }
+        foreach(ExtraPerformingBandView view in extraPerformingBandViews)
+            if(view.root!=null&&view.root.gameObject.activeSelf)pixelMiniMap.SetPixelMarker(index++,view.point,new Color32(101,219,239,255));
+        pixelMiniMap.EndPixelOverview(index);
     }
 }

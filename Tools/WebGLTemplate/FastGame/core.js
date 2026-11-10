@@ -2,7 +2,7 @@ import {catalog} from './catalog.js';
 import {createDailyPoster,DAILY_POSTER_INDEX} from './daily-poster.js';
 import {Booking,clamp,int,count} from './booking.js';
 import {Floor,Challenges} from './floor.js';
-import {distance,walkable,reserved,setRoute,move} from './navigation.js';
+import {distance,walkable,reserved,setRoute,move,FF_LAYOUT,FREEBIRD_LAYOUT} from './navigation.js';
 import {createAfterShow,sanitizeAfterShow,syncAfterShow,restoreAfterShow,ownsAfterShowActor,tickAfterShow} from './aftershow.js';
 export {catalog,Booking,Floor,Challenges};
 export const SAVE_KEY='SimBar.Operations.v1';
@@ -13,6 +13,9 @@ const round=n=>{const f=Math.floor(n),r=n-f;return r===.5?(f%2===0?f:f+1):Math.r
 const point=(x,z)=>({x,z});
 const cleanStops=[point(2.2,-3.9),point(2.2,.75),point(8.45,.75),point(8.35,-3.8),point(4.2,-4.8),point(7.9,-4.8)];
 const orderSlots=[point(-1.5,-1.75),point(-.85,-2.25),point(-.15,-2.7),point(.6,-3.1),point(1.4,-3.5),point(2.2,-3.7),point(3,-4)];
+const loungeHomes=[[-8.55,6.4],[-7,6.4],[-4.45,6.4],[-2.95,6.4],[-8.35,-6.5],[-6.85,-6.5],[-3.45,-6.5]];
+const seatedHome=id=>id.startsWith('bar-seat-')?point(-7.55+(+id.slice(9))*1.55,-3.15):point(...loungeHomes[+id.slice(7)]);
+const layoutForOwner=owner=>owner===0?FREEBIRD_LAYOUT:owner===1?FF_LAYOUT:null;
 const defaults=()=>({version:1,money:12340,fans:256,satisfaction:.94,performance:.98,clock:18,playlist:0,pours:0,staff:[0,0,0],upgrades:[0,0,0],wageTimer:60,wageDebt:0,
   activeEvent:-1,eventRemaining:0,eventStartPours:0,eventFanTimer:0,cooldowns:[0,0,0],completedEvents:0,autoServeTimer:12,promoterTimer:0,journeyJson:''});
 const newJourney=()=>({version:1,day:1,challenge:false,tutorialComplete:false,guideStep:0,guidePending:false,inProgress:false,session:0,settledSession:0,settlementPending:false,secondsLeft:180,
@@ -47,6 +50,7 @@ export class SimBarGame{
     this.selectedItem=0;this.lastQuality=null;this.lastResult={success:true,code:'ready'};this._message=['',''];this._messageTimer=0;this.elapsed=0;this._autosave=0;this._requestTimer=4;this._inputGuard=0;this._eventSerial=0;this._loading=false;
     this._buildActors();
     this.owner=Math.max(0,catalog.owners.findIndex(o=>o.id===this._get(OWNER_KEY)));
+    this._applyOwnerLayout({reset:true});
     this.language=this._get(LANGUAGE_KEY)==='en'?'en':'ko';
     const raw=this._get(SAVE_KEY);if(raw)this.importSave(raw,{save:false});
     this.phase='lobby';this.paused=true;this.pauseReason='lobby';
@@ -121,6 +125,7 @@ export class SimBarGame{
         this._seed=(n.seed>>>0)||this._seed;this.elapsed=clamp(n.elapsed,0,1e8);this._requestTimer=finite(n.requestTimer,3,0,10);this.selectedItem=int(n.selectedItem,0,catalog.drinks.length-1);this._eventSerial=int(n.eventSerial);
       }
       restoreAfterShow(this.journey.afterShow,this.actors);
+      if(this._applyOwnerLayout()){this._routeOrders();syncAfterShow(this.journey.afterShow,this.actors);}
       if(!this.orders.length&&this.journey.inProgress&&!this.journey.floorClosing)this._seedOrders();
       if(this.floor.guestSpawned&&!this.floor.guestComplete)this._ensureGuest();
       this.phase='lobby';this.paused=true;this.pauseReason='lobby';if(save)this.save();this._notify();return true;
@@ -148,7 +153,12 @@ export class SimBarGame{
   act(type,p={}){
     let r={success:true,code:type};const j=this.journey,s=this.state,idx=+p.index;
     switch(type){
-      case'owner':if(this.phase!=='lobby'||!Number.isInteger(idx)||idx<0||idx>2)return this._done(false);this.owner=idx;this._put(OWNER_KEY,catalog.owners[idx].id);break;
+      case'owner':{
+        if(this.phase!=='lobby'||!Number.isInteger(idx)||idx<0||idx>2)return this._done(false);
+        const previous=this.owner;this.owner=idx;this._put(OWNER_KEY,catalog.owners[idx].id);
+        if(previous!==idx){this._applyOwnerLayout({reset:true});this._routeOrders();}
+        break;
+      }
       case'language':this.language=p.language==='en'?'en':'ko';this._put(LANGUAGE_KEY,this.language);break;
       case'musicState':if(typeof p.paused!=='boolean')return this._done(false);j.musicPaused=p.paused;break;
       case'farewellAck':
@@ -251,7 +261,8 @@ export class SimBarGame{
   }
   _createOrder(excludeId){if(this.orders.length>=4+this.state.upgrades[2])return;const pool=this.actors.filter(a=>a.id.startsWith('patron-')&&a.id!==excludeId&&!this.orders.some(o=>o.id===a.id));if(!pool.length)return;const a=pool[Math.floor(this._random()*pool.length)];this._assignOrder(a.id,Math.floor(this._random()*catalog.drinks.length));}
   _routeOrders(){
-    for(const a of this.actors.filter(a=>a.id.startsWith('patron-'))){const i=this.orders.findIndex(o=>o.id===a.id);if(i>=0){const goal=orderSlots[Math.min(i,6)];if(a.action!=='queue'||Math.hypot(a.targetX-goal.x,a.targetZ-goal.z)>.1){a.action='queue';setRoute(a,goal,this.actors);}}
+    const slots=layoutForOwner(this.owner)?.orderSlots||orderSlots;
+    for(const a of this.actors.filter(a=>a.id.startsWith('patron-'))){const i=this.orders.findIndex(o=>o.id===a.id);if(i>=0){const goal=slots[Math.min(i,6)];if(a.action!=='queue'||Math.hypot(a.targetX-goal.x,a.targetZ-goal.z)>.1){a.action='queue';setRoute(a,goal,this.actors);}}
       else if(a.action==='queue'){a.action='return';setRoute(a,point(a.homeX,a.homeZ),this.actors);}}
   }
   _startPour(item){
@@ -347,15 +358,47 @@ export class SimBarGame{
     const positions=[[.1,.7],[1.5,.5],[2.85,.5],[-.1,-.8],[1.2,-1.1],[2.6,-1],[-.2,-2.55],[1.2,-2.6],[2.6,-2.75],[0,-4.4],[1.55,-4.3],[3,-4.55],[8.55,.65],[8.65,-1],[8.6,-2.7],[8.6,-4.7]];
     for(let i=0;i<16;i++){let [x,z]=positions[i];if(i<6){x=5.75+Math.cos(i*Math.PI/3)*1.58;z=-1.25+Math.sin(i*Math.PI/3)*1.58;}else if(i<8){x=5.75+(i===6?-.68:.68);z=-1.25;}const a=make('patron-'+i,catalog.guestNames[i%10],'guest',x,z);a.slot=i;this.actors.push(a);}
     for(let i=0;i<4;i++)this.actors.push(make('bar-seat-'+i,'Bar Guest '+i,'seated',-7.55+i*1.55,-3.15));
-    const seats=[[-8.55,6.4],[-7,6.4],[-4.45,6.4],[-2.95,6.4],[-8.35,-6.5],[-6.85,-6.5],[-3.45,-6.5]];seats.forEach(([x,z],i)=>this.actors.push(make('lounge-'+i,'Lounge Guest '+i,'seated',x,z)));
+    loungeHomes.forEach(([x,z],i)=>this.actors.push(make('lounge-'+i,'Lounge Guest '+i,'seated',x,z)));
     this.actors.filter(a=>a.id?.startsWith('bar-seat-')).forEach((a,i)=>{a.facing=[Math.PI/2,-Math.PI/2,Math.PI*.2,-Math.PI*.2][i];});
     this.actors.filter(a=>a.id?.startsWith('lounge-')).forEach((a,i)=>{a.facing=[-Math.PI/2,Math.PI/2,0,Math.PI/2,-Math.PI/2,Math.PI*.25,-Math.PI*.25][i];});
     for(let i=0;i<3;i++){const a=make('hired-'+i,catalog.staff[i].nameEnglish,'hired-'+i,...[[-5.8,-.565],[-.4,-4.9],[8.75,-3.5]][i]);a.visible=!!this.state.staff[i]&&!this.state.wageDebt;this.actors.push(a);}
     for(let i=0;i<3;i++)this.actors.push(make('support-'+i,'Crowd Supporter '+i,'support',6+(i===0?-.65:i===1?.65:0),-4.25+(i===2?-.65:0)));
     this.actors.push(make('crowd-surfer','Crowd Surfer','surfer',6,-4.25));
+    if(layoutForOwner(this.owner))this._applyOwnerLayout({reset:true});
+  }
+  _walkable(p,staff=false,floor=false){return walkable(p,staff,floor,layoutForOwner(this.owner)?.id);}
+  _applyOwnerLayout({reset=false}={}){
+    const layout=layoutForOwner(this.owner);let changed=false;
+    for(const a of this.actors){
+      const migrated=layout?(a.layout!==layout.id||a.layoutVersion!==layout.version):a.layout==='ff'||a.layout==='freebird';
+      if(layout){a.layout=layout.id;a.layoutVersion=layout.version;}else{delete a.layout;delete a.layoutVersion;}
+      if(migrated||reset){changed=true;a._path=[];a._pathAt=0;a._blocked=0;a.moving=false;delete a._cleanupGoal;delete a._cleanupGoalSegment;delete a._cleanupParkGoal;delete a._cleanupParkSession;}
+      let home=null;
+      if(a.id.startsWith('bar-seat-')||a.id.startsWith('lounge-')){
+        const index=a.id.startsWith('bar-seat-')?+a.id.slice(9):4+(+a.id.slice(7));
+        home=layout?layout.standing[index]:seatedHome(a.id);a.role=layout?'guest':'seated';
+      }else if(a.id==='bartender')home=layout?layout.bartender:point(-7.3,-.565);
+      else if(a.id==='server')home=layout?layout.server:point(-4.2,-.565);
+      else if(a.id==='hired-0')home=layout?layout.barback:point(-5.8,-.565);
+      else if(a.id==='hired-1')home=layout?.floorhost||point(-.4,-4.9);
+      if(home){
+        a.homeX=home.x;a.homeZ=home.z;
+        if(migrated||reset){a.x=a.targetX=home.x;a.z=a.targetZ=home.z;a.y=0;a.action='idle';}
+      }else if((migrated||reset)&&a.role!=='band'){
+        const staff=a.role==='bartender'||a.role==='server'||a.id.startsWith('hired-');
+        // A guest at one owner's counter cannot remain inside another owner's
+        // restored furniture or expanded stage when the layout changes.
+        if(!this._walkable(a,staff,false)){
+          const candidate=point(a.homeX,a.homeZ),fallback=point(1,0);
+          const safe=Number.isFinite(candidate.x)&&Number.isFinite(candidate.z)&&this._walkable(candidate,staff,false)?candidate:fallback;
+          a.x=a.targetX=safe.x;a.z=a.targetZ=safe.z;a.y=0;
+        }
+      }
+    }
+    return changed;
   }
   _cleanGoal(index){
-    const segment=Math.min(5,Math.floor(Floor.progress(this.floor)*6));let goal={...cleanStops[(segment+(index%2)*3)%6]};if(index>=2){goal.x+=index<4?-.45:.38;goal.z+=index<4?.32:-.32;if(!walkable(goal,true,true))goal={...cleanStops[(segment+(index%2)*3)%6]};}
+    const segment=Math.min(5,Math.floor(Floor.progress(this.floor)*6));let goal={...cleanStops[(segment+(index%2)*3)%6]};if(index>=2){goal.x+=index<4?-.45:.38;goal.z+=index<4?.32:-.32;if(!this._walkable(goal,true,true))goal={...cleanStops[(segment+(index%2)*3)%6]};}
     const worker=this.actors.find(a=>a.id===this.crew[index]);if(!worker)return goal;
     // A returned fan keeps their home position. Staff choose a nearby clear
     // working spot and retain it until this section of the floor is finished.
@@ -363,7 +406,7 @@ export class SimBarGame{
     const homes=(this.journey.afterShow?.audience||[]).map(a=>point(a.homeX,a.homeZ));
     const reserved=this.crew.filter(id=>id!==worker.id).map(id=>this.actors.find(a=>a.id===id))
       .filter(a=>a?._cleanupGoalSegment===segment&&a._cleanupGoal).map(a=>a._cleanupGoal);
-    const clear=p=>walkable(p,true,true)&&bodies.every(a=>distance(a,p)>=.4)&&homes.every(p2=>distance(p2,p)>=.45)&&reserved.every(p2=>distance(p2,p)>=.45);
+    const clear=p=>this._walkable(p,true,true)&&bodies.every(a=>distance(a,p)>=.4)&&homes.every(p2=>distance(p2,p)>=.45)&&reserved.every(p2=>distance(p2,p)>=.45);
     if(worker._cleanupGoalSegment===segment&&worker._cleanupGoal&&clear(worker._cleanupGoal))return worker._cleanupGoal;
     const candidates=[goal];for(const radius of [.45,.7,1])for(let turn=0;turn<8;turn++){
       const angle=(turn+index*2)*Math.PI/4;candidates.push(point(goal.x+Math.cos(angle)*radius,goal.z+Math.sin(angle)*radius));
@@ -377,7 +420,7 @@ export class SimBarGame{
     const bodies=this.actors.filter(a=>a!==worker&&a.visible&&a.role!=='band'&&a.role!=='seated'&&!this.crew.includes(a.id));
     const reserved=this.crew.filter(id=>id!==worker.id).map(id=>this.actors.find(a=>a.id===id))
       .filter(a=>a?._cleanupParkSession===this.journey.session&&a._cleanupParkGoal).map(a=>a._cleanupParkGoal);
-    const clear=p=>walkable(p,true,false)&&homes.every(p2=>distance(p2,p)>=.45)&&bodies.every(a=>distance(a,p)>=.4)&&reserved.every(p2=>distance(p2,p)>=.45);
+    const clear=p=>this._walkable(p,true,false)&&homes.every(p2=>distance(p2,p)>=.45)&&bodies.every(a=>distance(a,p)>=.4)&&reserved.every(p2=>distance(p2,p)>=.45);
     if(worker._cleanupParkSession===this.journey.session&&worker._cleanupParkGoal&&clear(worker._cleanupParkGoal))return worker._cleanupParkGoal;
     const home=point(worker.homeX,worker.homeZ),candidates=[home];
     for(const radius of [.45,.7,1])for(let turn=0;turn<8;turn++){
@@ -387,13 +430,15 @@ export class SimBarGame{
     return worker._cleanupParkGoal;
   }
   _readyWorkers(){if(!this.floor.cleanupActive||this.floor.cleanupComplete)return[];return this.crew.map((id,i)=>({a:this.actors.find(a=>a.id===id),i})).filter(({a,i})=>a&&a.visible&&a.id!==this.escort?.worker&&(!a.id.startsWith('hired-')||this._onDuty(+a.id.slice(-1)))&&distance(a,this._cleanGoal(i))<=.22).map(x=>x.a);}
-  _ensureGuest(){let a=this.actors.find(a=>a.id==='assisted-guest');if(!a){a={id:'assisted-guest',name:catalog.guestNames[this.floor.guestIndex%10]||'Guest',role:'assisted',x:-.65,z:-.25,y:0,homeX:-.65,homeZ:-.25,targetX:-.65,targetZ:-.25,moving:false,action:'needs-help',visible:true,_path:[],_pathAt:0};this.actors.push(a);}return a;}
+  _ensureGuest(){let a=this.actors.find(a=>a.id==='assisted-guest');if(!a){a={id:'assisted-guest',name:catalog.guestNames[this.floor.guestIndex%10]||'Guest',role:'assisted',x:-.65,z:-.25,y:0,homeX:-.65,homeZ:-.25,targetX:-.65,targetZ:-.25,moving:false,action:'needs-help',visible:true,_path:[],_pathAt:0};const layout=layoutForOwner(this.owner);if(layout){a.layout=layout.id;a.layoutVersion=layout.version;}this.actors.push(a);}return a;}
   _beginEscort(){const guest=this._ensureGuest(),worker=this.actors.find(a=>a.id==='server');this.escort={worker:worker.id,phase:'join',homeX:worker.homeX,homeZ:worker.homeZ};worker.action='escort';worker._partner=guest.id;guest._partner=worker.id;setRoute(worker,point(guest.x-.5,guest.z-.3),this.actors,true);}
   _tickBartender(a,dt){
     if(!this.playing){a.moving=false;a.action='idle';return;}
     // The authored staff aisle is straight and clear. Keep the same guarded
     // 9-second work cycle as the Unity bartender, without a grid-path zigzag.
-    const cycle=this.elapsed%9,x=this.pour?-9+2*clamp(this.pour.item/2,0,1):cycle<4.5?-8.95:-7.05,goal=point(x,-.565);
+    const cycle=this.elapsed%9,x=this.pour?-9+2*clamp(this.pour.item/2,0,1):cycle<4.5?-8.95:-7.05;
+    const goal=this.owner===0?point(this.pour?-5.3+1.25*clamp(this.pour.item/5,0,1):cycle<4.5?-5.3:-4.05,4.85)
+      :this.owner===1?point(-8.9,this.pour?-1.2+1.7*clamp(this.pour.item/5,0,1):cycle<4.5?-1.2:.5):point(x,-.565);
     const changed=distance(point(a.targetX,a.targetZ),goal)>.01;
     if(changed||distance(a,goal)>.035&&(!a._path?.length||a._pathAt>=a._path.length)){
       a.targetX=goal.x;a.targetZ=goal.z;a._floorRoute=false;a._path=[goal];a._pathAt=0;a._blocked=0;
@@ -434,7 +479,7 @@ export class SimBarGame{
       else if(a.role==='support'){a.action=this.playing?'support':'idle';const surfer=this.actors.find(v=>v.id==='crowd-surfer');if(surfer)a.facing=Math.atan2(surfer.z-a.z,surfer.x-a.x);}
       else if(a.role==='guest'&&a.action!=='queue'){
         if(a._pathAt<a._path.length){if(move(a,dt,1.1,this.actors)){a.action='idle';a._wait=2+this._random()*5;}}
-        else{a.moving=false;a._wait-=dt;if(a._wait<=0){const goal=point(1+this._random()*7,-5+this._random()*5.5);if(walkable(goal,false,true)&&walkable(a,false,true)){a.action='wander';setRoute(a,goal,this.actors,true);}a._wait=3+this._random()*5;}}
+        else{a.moving=false;a._wait-=dt;if(a._wait<=0){const goal=point(1+this._random()*7,-5+this._random()*5.5);if(this._walkable(goal,false,true)&&this._walkable(a,false,true)){a.action='wander';setRoute(a,goal,this.actors,true);}a._wait=3+this._random()*5;}}
       }else{a.moving=false;a.action=this.playing?'serve':'idle';}
     }
   }
@@ -464,7 +509,7 @@ export class SimBarGame{
     }else if(e.phase==='exit'){
       retryRoute(g,point(8.7,-5.4));
       if(distance(w,g)<1.35)move(g,dt,2.2,this.actors);
-      const goal=point(g.x-.36,g.z+.18);if(walkable(goal,true,false)){retryRoute(w,goal);move(w,dt,2.9,this.actors);}
+      const goal=point(g.x-.36,g.z+.18);if(this._walkable(goal,true,false)){retryRoute(w,goal);move(w,dt,2.9,this.actors);}
       if(distance(g,point(8.7,-5.4))<.2&&distance(w,g)<.9){g.visible=false;g.moving=false;e.phase='return';const ci=this.crew.indexOf(w.id),goal=ci>=0&&this.floor.cleanupActive?this._cleanGoal(ci):point(e.homeX,e.homeZ);setRoute(w,goal,this.actors,ci>=0&&this.floor.cleanupActive&&!this.closing);}
     }else if(e.phase==='return'){
       const cleaning=this.crew.includes(w.id)&&this.floor.cleanupActive;

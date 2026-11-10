@@ -58,7 +58,7 @@ public sealed partial class SimBarExperience
             var view=pixelLightViews[i];float phase=Mathf.Repeat(seconds+.12f+(i%2)*.5f,1f);
             float pulse=Mathf.SmoothStep(0f,1f,Mathf.Clamp01(phase/.08f))*(1f-Mathf.SmoothStep(0f,1f,Mathf.Clamp01((phase-.30f)/.18f)));
             float sway=Mathf.Sin(seconds*.72f+i*1.7f)*.48f+Mathf.Sin(seconds*Mathf.PI*4f+i*Mathf.PI)*.08f;
-            Vector3 target=PixelLightTargets[i]+new Vector3(sway,0f,Mathf.Cos(seconds*.58f+i*1.4f)*.24f);Vector2 source=PixelProject(PixelLightSources[i]);
+            Vector3 target=PixelLightTargets[i]+new Vector3(sway,0f,Mathf.Cos(seconds*.58f+i*1.4f)*.24f);Vector2 source=pixelManifest?.lightSources?.Length==4?pixelManifest.lightSources[i]:PixelProject(PixelLightSources[i]);
             Color color=PixelLightColors[i];float radius=i%2==1?1.18f:1.48f;
             for(int layer=0;layer<4;layer++){color.a=.05f+layer*.018f+pulse*.032f;view.pools[layer].color=color;view.pools[layer].Initialize(null,PixelLightRing(target+Vector3.up*.006f,radius*(1.25f-layer*.23f)));}
             for(int layer=0;layer<3;layer++){color.a=(layer==0?.11f:layer==1?.065f:.04f)+(layer==0?.07f:layer==1?.045f:.025f)*pulse;view.cones[layer].color=color;view.cones[layer].Initialize(null,PixelLightHull(source,PixelLightRing(target,radius*(layer==0?1f:layer==1?.7f:.38f))));}

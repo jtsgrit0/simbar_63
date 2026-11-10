@@ -51,14 +51,15 @@ public sealed partial class SimBarExperience
             actor.workMax = person.name == "Bartender" ? -6.9f : person.name == "Server" ? -2.7f : -5.5f;
         }
         if (actor.visual != null) { actor.visual.SetManaged(true); actor.visual.ApplyPresentation(motionClock, performance, 0, 0); }
-        motionActors.Add(actor); motionLookup.Add(person, actor);
+        motionActors.Add(actor); motionLookup.Add(person, actor);CaptureFFOriginalActor(actor);
         motionOrdersDirty = true;
     }
 
     private void InitializeVenueMotion()
     {
-        motionNavigation = new SimBarVenueNavigation();
+        motionNavigation = new SimBarVenueNavigation(false,IsFFLayout,IsFreebirdLayout);
         motionReady = true; motionOrdersDirty = true;
+        RefreshFFVenueLayout();
         ApplyStageLighting();
     }
 
@@ -145,7 +146,7 @@ public sealed partial class SimBarExperience
             foreach (Patron patron in orderQueue) { if (ReferenceEquals(patron, actor.person)) { slot = i; break; } i++; }
             if (IsPourInProgress && ReferenceEquals(pourPatron, actor.person)) continue;
             if (slot >= 0 && (actor.queueIndex != slot || actor.state != MotionState.ToOrder && actor.state != MotionState.Waiting))
-                SetMotionPath(actor, MotionOrderSlots[Mathf.Min(slot, MotionOrderSlots.Length - 1)], MotionState.ToOrder);
+                SetMotionPath(actor, VenueOrderSlot(slot), MotionState.ToOrder);
             else if (slot < 0 && actor.queueIndex >= 0) SetMotionPath(actor, actor.home, MotionState.Returning);
             actor.queueIndex = slot;
         }
@@ -198,6 +199,12 @@ public sealed partial class SimBarExperience
 
     private void TickBarStaff(MotionActor actor)
     {
+        if(IsStandingVenueLayout)
+        {
+            Vector3 ffTarget=FFBarTarget(actor);
+            if(actor.state==MotionState.Working&&(actor.target-ffTarget).sqrMagnitude<.01f)return;
+            actor.target=ffTarget;actor.state=MotionState.Working;actor.path.Clear();actor.path.Add(ffTarget);actor.pathIndex=0;return;
+        }
         float cycle = Mathf.Repeat(motionClock + actor.index * 1.9f, 9f);
         float x = cycle < 4.5f ? actor.workMin + .15f : actor.workMax - .15f;
         if (IsPourInProgress && actor.person.name == "Server") x = actor.workMax - .1f;
@@ -223,7 +230,7 @@ public sealed partial class SimBarExperience
             if (actor.state == MotionState.ToOrder) actor.state = MotionState.Waiting;
             if (actor.state == MotionState.Wandering) { actor.state = MotionState.Resting; actor.wait = 2f + actor.index % 3; }
             if (actor.state == MotionState.Returning) { actor.state = MotionState.Idle; actor.wait = 3f + actor.index % 7; }
-            float facing = actor.queueIndex >= 0 ? 270f : actor.kind == MotionKind.BarStaff ? 180f : actor.person.baseYaw + Mathf.Sin(motionClock * .35f + actor.person.phase) * 3f;
+            float facing = actor.queueIndex >= 0 ? (IsFreebirdLayout?0f:270f) : actor.kind == MotionKind.BarStaff ? (IsFFLayout?90f:180f) : actor.person.baseYaw + Mathf.Sin(motionClock * .35f + actor.person.phase) * 3f;
             actor.person.root.rotation = Quaternion.RotateTowards(actor.person.root.rotation, worldRoot.rotation * Quaternion.Euler(0, facing, 0), 160f * delta);
             return;
         }
@@ -258,7 +265,13 @@ public sealed partial class SimBarExperience
     private bool MotionStepAllowed(MotionActor actor, Vector3 current, Vector3 next)
     {
         if (actor.kind == MotionKind.BarStaff)
-        { if (next.x < actor.workMin || next.x > actor.workMax || Mathf.Abs(next.z + .565f) > .02f) return false; }
+        {
+            if(IsFFLayout)
+            {if(Mathf.Abs(next.x-actor.home.x)>.02f||actor.person.name=="Bartender"&&(next.z<actor.workMin||next.z>actor.workMax))return false;}
+            else if(IsFreebirdLayout)
+            {if(Mathf.Abs(next.z-actor.home.z)>.02f||actor.person.name=="Bartender"&&(next.x<actor.workMin||next.x>actor.workMax))return false;}
+            else if (next.x < actor.workMin || next.x > actor.workMax || Mathf.Abs(next.z + .565f) > .02f) return false;
+        }
         else if (!motionNavigation.SegmentClear(current, next)) return false;
         if (actor.pitSlot < 0 && CrowdFloorReserved(next)) return false;
         foreach (MotionActor other in motionActors)

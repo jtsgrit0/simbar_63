@@ -1,6 +1,8 @@
 /* Presentation of the real room and real game actors. Render timestamps are ms.
  * The HUD-free venue plate is static art; live actor behavior and effects remain
  * in core.js. Employee movement, guest exit, paper debt and rewards are unchanged. */
+import {ownerVenue} from './owner-venues.js';
+import {performingRoster,performingFrame} from './band-models.js';
 const REF_W=960,REF_H=558,ORTHO=8.4;
 const EYE=[13,21,-25],LOOK=[0,1.45,.15];
 const unit=v=>{const n=Math.hypot(...v);return v.map(x=>x/n);};
@@ -22,9 +24,9 @@ export const PIXEL_LED_QUAD=Object.freeze([[665,117],[842,163],[842,230],[665,18
 export const PIXEL_LED_LAMPS=Object.freeze([[683,128],[735,140],[782,151],[822,162]].map(Object.freeze));
 export const PIXEL_STAGE_LAMPS=Object.freeze([[643,121],...PIXEL_LED_LAMPS].map(Object.freeze));
 export const PIXEL_STAGE_DECK=Object.freeze([[556,299],[612,242],[639,209],[854,266],[867,311],[789,373]].map(Object.freeze));
-export function pixelLedCoverFit(imageWidth,imageHeight){
+export function pixelLedCoverFit(imageWidth,imageHeight,quad=PIXEL_LED_QUAD){
   if(!(imageWidth>0&&imageHeight>0&&Number.isFinite(imageWidth)&&Number.isFinite(imageHeight)))return null;
-  const [tl,tr,,bl]=PIXEL_LED_QUAD,dx=tr[0]-tl[0],dy=tr[1]-tl[1],vx=bl[0]-tl[0],vy=bl[1]-tl[1];
+  const [tl,tr,,bl]=quad,dx=tr[0]-tl[0],dy=tr[1]-tl[1],vx=bl[0]-tl[0],vy=bl[1]-tl[1];
   const planeWidth=Math.hypot(dx,dy),planeHeight=Math.hypot(vx,vy),scale=Math.min(planeWidth/imageWidth,planeHeight/imageHeight);
   const width=imageWidth*scale,height=imageHeight*scale;
   return{planeWidth,planeHeight,x:(planeWidth-width)/2,y:(planeHeight-height)/2,width,height,
@@ -78,10 +80,12 @@ export function pixelFacing(actor,role,action,state={}){
     return target(surfer?.x??6,surfer?.z??-4.25);
   }
   if(action==='queue'){
-    const employee=state.actors?.find(a=>a.id==='server')||state.actors?.find(a=>a.id==='bartender');
+    const employee=state.actors?.find(a=>a.id===([0,1].includes(state.owner)?'bartender':'server'))||state.actors?.find(a=>a.id==='bartender');
     return target(employee?.x??-4.2,employee?.z??-.565);
   }
   const employee=['bartender','server'].includes(role)||actor.id?.startsWith('hired-');
+  if(employee&&state.owner===0&&!actor.moving&&['idle','serve'].includes(action))return pixelDirection(0,-1);
+  if(employee&&state.owner===1&&!actor.moving&&['idle','serve'].includes(action))return pixelDirection(1,0);
   if(employee&&!actor.moving&&['idle','serve'].includes(action)&&finite(actor.x)<-1.35&&finite(actor.z)>-1.5&&finite(actor.z)<.5)return'FL';
   if(!actor.moving&&role==='guest'&&action==='idle')return target(5.5,2.7);
   const facing=finite(actor.facing);return pixelDirection(Math.sin(facing),Math.cos(facing));
@@ -121,7 +125,7 @@ export function pixelPendingOrders(state={},columns=6){
 }
 
 export function pixelOrderBubbleLayout(actor,point,meta={}){
-  const role=actor.id?.startsWith('bar-seat-')?'barseated':actor.role;
+  const role=actor.role==='seated'&&actor.id?.startsWith('bar-seat-')?'barseated':actor.role;
   const entry=meta.roles?.[role]||meta.roles?.guest||{},action=entry.actions?.[actor.moving?'walk':actor.action]||{};
   const height=action.drawHeight||entry.drawHeight||meta.drawHeight||40;
   const frameHeight=action.cropHeight||entry.cropHeight||action.frameHeight||entry.frameHeight||meta.frameHeight||64;
@@ -152,8 +156,10 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
   if(!assets.spriteMeta?.roles?.guest)throw new Error('The pixel character atlas metadata is missing.');
   if(!assets.spriteMeta.atlases&&!ready(assets.sprites))throw new Error('The pixel character artwork must finish loading before the game starts.');
   for(const key of Object.keys(assets.spriteMeta.atlases||{}))if(!ready(assets.atlases?.[key]))throw new Error('The '+key+' character atlas must finish loading before the game starts.');
+  const originalVenue=assets.venue,originalVenueMeta=assets.venueMeta;
+  const selectVenue=state=>{const key=ownerVenue(state.owner).key;assets.venue=assets.venues?.[key]||originalVenue;assets.venueMeta=assets.venueMetas?.[key]||originalVenueMeta;};
   const particles=[],seenEffects=new Set();
-  let width=960,height=558,offsetX=0,cssW=960,cssH=558,last=null,seconds=0,night=null,observedFloor,city=null,occluders=[],plate=null,destroyed=false;
+  let width=960,height=558,offsetX=0,cssW=960,cssH=558,last=null,seconds=0,night=null,observedFloor,city=null,occluders=[],propLayers=[],plate=null,layerMeta=null,destroyed=false;
   const project=(x,z,y=0)=>{
     const calibration=assets.venueMeta?.projection;
     if(calibration){const {origin,xAxis,zAxis,yAxis}=calibration;return{x:origin[0]+x*xAxis[0]+z*zAxis[0]+y*yAxis[0],y:origin[1]+x*xAxis[1]+z*zAxis[1]+y*yAxis[1]};}
@@ -166,7 +172,9 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
     if(seat){const ground=project(finite(a.x),finite(a.z));return{x:seat.feet[0]-ground.x,y:seat.feet[1]-ground.y};}
     const offset=assets.venueMeta?.actorOffsets?.[a.id]||[0,0],region=assets.venueMeta?.barRegion;
     const employee=['bartender','server'].includes(a.role)||a.id?.startsWith('hired-');
-    const weight=employee&&region&&a.z>=region.zMin&&a.z<=region.zMax?clamp((region.xMax-a.x)/region.xFade,0,1):0;
+    let weight=employee&&region&&a.z>=region.zMin&&a.z<=region.zMax?clamp((region.xMax-a.x)/region.xFade,0,1):0;
+    if(weight&&region.boundedX)weight*=clamp((a.x-region.xMin)/Math.max(.01,region.xFade),0,1);
+    if(weight&&region.zFade>0)weight*=clamp((a.z-region.zMin)/region.zFade,0,1)*clamp((region.zMax-a.z)/region.zFade,0,1);
     const stageWeight=a.role==='band'&&Number.isFinite(a.stageLevel)?clamp(a.stageLevel,0,1):1;
     const stageFoot=a.role==='band'&&assets.venueMeta?.bandStageFeet?.[a.id];
     if(stageFoot){const home=project(finite(a.homeX,a.x),finite(a.homeZ,a.z),finite(a.homeY));return{x:(stageFoot[0]-home.x)*stageWeight,y:(stageFoot[1]-home.y)*stageWeight};}
@@ -174,13 +182,36 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
     return{x:offset[0]*stageWeight+(region?.offset?.[0]||0)*weight,y:offset[1]*stageWeight+(region?.offset?.[1]||0)*weight-elevation};
   };
   const actorPoint=(a,y=0)=>{const p=project(finite(a.x),finite(a.z),y),o=actorOffset(a);return{x:p.x+o.x,y:p.y+o.y};};
+  const modelRoster=state=>assets.bandModels?performingRoster(state,assets.bandModels):[];
+  function modelPoint(entry){
+    const p=actorPoint(entry.actor,finite(entry.actor.y));if(!entry.extra)return p;
+    const member=entry.member,feet=assets.venueMeta?.bandStageFeet||{};
+    const from=feet[member.from],to=feet[member.to],parent=feet[member.anchor];
+    const weight=Number.isFinite(entry.actor.stageLevel)?clamp(entry.actor.stageLevel,0,1):1;
+    const stage=from&&to&&parent?{x:from[0]+(to[0]-from[0])*member.mix-parent[0],y:from[1]+(to[1]-from[1])*member.mix-parent[1]}:{x:0,y:0};
+    return{x:p.x+(stage.x+(member.stageOffset?.x||0))*weight+(member.floorOffset?.x||0)*(1-weight),
+      y:p.y+(stage.y+(member.stageOffset?.y||0))*weight+(member.floorOffset?.y||0)*(1-weight)};
+  }
+  function drawBandModel(entry){
+    const manifest=assets.bandModels,sheet=assets.bandAtlases?.[entry.bandId];
+    if(!ready(sheet))throw new Error('Missing performing band atlas: '+entry.bandId);
+    const {action,column}=performingFrame(entry,manifest,seconds),p=modelPoint(entry);
+    const fw=manifest.frameWidth||64,fh=manifest.frameHeight||64,dh=entry.member.drawHeight||manifest.drawHeight||54,dw=entry.member.drawWidth||manifest.drawWidth||dh;
+    if(entry.role!=='drummer'||action!=='perform')ellipse(ctx,p.x,p.y+1,4,1,'#16182360');
+    ctx.drawImage(sheet,column*fw,entry.row*fh,fw,fh,Math.round(p.x-(manifest.footX??32)*dw/fw),Math.round(p.y-(manifest.footY??60)*dh/fh),dw,dh);
+  }
   function resize(){const b=canvas.getBoundingClientRect();cssW=Math.max(1,b.width);cssH=Math.max(1,b.height);width=Math.max(160,Math.min(2304,Math.round(REF_H*cssW/cssH)));height=REF_H;offsetX=(width-REF_W)/2;if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.height=height;city=null;}ctx.imageSmoothingEnabled=false;}
   const observer=new ResizeObserver(resize);observer.observe(canvas);resize();
   canvas.style.imageRendering='pixelated';
   function background(){if(!city){city=surface(width,height);const c=city.getContext('2d');c.imageSmoothingEnabled=false;c.fillStyle='#10121e';c.fillRect(0,0,width,height);if(ready(assets.seoul)){const s=Math.max(width/assets.seoul.width,height/assets.seoul.height);c.drawImage(assets.seoul,Math.round((width-assets.seoul.width*s)/2),Math.round((height-assets.seoul.height*s)/2),Math.round(assets.seoul.width*s),Math.round(assets.seoul.height*s));}}ctx.drawImage(city,0,0);}
   function boxMask(x0,x1,z0,z1,h){return hull([project(x0,z0),project(x1,z0),project(x1,z1),project(x0,z1),project(x0,z0,h),project(x1,z0,h),project(x1,z1,h),project(x0,z1,h)]);}
   function roomLayers(){
-    if(plate===assets.venue)return;plate=assets.venue;occluders=[];
+    if(plate===assets.venue&&layerMeta===assets.venueMeta)return;plate=assets.venue;layerMeta=assets.venueMeta;occluders=[];propLayers=[];
+    for(const prop of assets.venueMeta?.props||[]){
+      const image=assets.propImages?.[prop.asset];if(!ready(image))throw new Error('Missing venue furniture: '+prop.asset);
+      const point=project(prop.x,prop.z),x=Math.round(point.x-prop.footX),y=Math.round(point.y-prop.footY);
+      propLayers.push({image,x,y,width:prop.drawWidth,height:prop.drawHeight,depth:point.y+finite(prop.depthOffset)});
+    }
     const supplied=assets.venueMeta?.occluders;
     const bar=Array.from({length:8},(_,i)=>{const x0=-9.95+i*1.09,x1=x0+1.1;return{points:boxMask(x0,x1,-2.35,-.88,1.48),worldX:(x0+x1)/2,worldZ:-2.35};});
     const boxes=(assets.venueMeta?.occluderBoxes||[]).map(({x0,x1,z0,z1,height,worldX=(x0+x1)/2,worldZ=z0})=>({points:boxMask(x0,x1,z0,z1,height),worldX,worldZ}));
@@ -218,7 +249,7 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
     return{sheet,sx:col*fw,sy:row*fh,sw:fw,sh:layout.cropHeight||fh,flip:false,meta:layout,entry:layout,direction,style,atlasKey};
   }
   function drawActor(a,state){
-    let role=String(a.role||'guest').toLowerCase();if(role==='band')role=String(a.id||'singer');if(a.id?.startsWith('bar-seat-'))role='barseated';
+    let role=String(a.role||'guest').toLowerCase();if(role==='band')role=String(a.id||'singer');if(role==='seated'&&a.id?.startsWith('bar-seat-'))role='barseated';
     let action=String(a.action||'idle');if(action==='sweep')action='clean';else if(a.moving&&!['mosh','slam','surf','support'].includes(action))action='walk';
     const bar=assets.venueMeta?.barRegion;
     if(role==='bartender'&&!a.moving&&bar&&a.x<bar.xMax&&a.z>=bar.zMin&&a.z<=bar.zMax&&['idle','serve'].includes(action))action='idle';
@@ -297,7 +328,7 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
       const pulse=smooth(phase/.08)*(1-smooth((phase-.30)/.18));
       const sway=Math.sin(seconds*.72+i*1.7)*.48+Math.sin(seconds*Math.PI*4+i*Math.PI)*.08;
       const [tx,tz,ty]=light.target,x=tx+sway,z=tz+Math.cos(seconds*.58+i*1.4)*.24;
-      const source=project(...light.source),end=project(x,z,ty),radius=i%2?1.18:1.48;
+      const calibrated=assets.venueMeta?.lightSources?.[i],source=calibrated?{x:calibrated[0],y:calibrated[1]}:project(...light.source),end=project(x,z,ty),radius=i%2?1.18:1.48;
       // Several projected rings make a feathered pool without blurring the art.
       for(let layer=0;layer<4;layer++){
         ctx.globalAlpha=.05+layer*.018+pulse*.032;
@@ -321,29 +352,31 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
   }
   function albumCover(target,state){
     const image=assets.albumCovers?.[state.playlist];if(!ready(image))return;
-    const iw=image.naturalWidth||image.width,ih=image.naturalHeight||image.height,fit=pixelLedCoverFit(iw,ih);if(!fit)return;
-    target.save();target.beginPath();PIXEL_LED_QUAD.forEach(([x,y],i)=>i?target.lineTo(x,y):target.moveTo(x,y));target.closePath();target.clip();
+    const quad=assets.venueMeta?.ledQuad||PIXEL_LED_QUAD;
+    const iw=image.naturalWidth||image.width,ih=image.naturalHeight||image.height,fit=pixelLedCoverFit(iw,ih,quad);if(!fit)return;
+    target.save();target.beginPath();quad.forEach(([x,y],i)=>i?target.lineTo(x,y):target.moveTo(x,y));target.closePath();target.clip();
     target.transform(...fit.transform);target.fillStyle='#080b13';target.fillRect(0,0,fit.planeWidth,fit.planeHeight);
     target.imageSmoothingEnabled=true;
     target.drawImage(image,0,0,iw,ih,fit.x,fit.y,fit.width,fit.height);target.restore();
     // The screen sits behind the hanging lamp housings. Restore only those
     // original foreground silhouettes, rather than painting over the fixtures.
     target.save();target.beginPath();
-    for(const [x,y]of PIXEL_LED_LAMPS){
+    const fixtureScale=assets.venueMeta?.ledFixtureScale>0?assets.venueMeta.ledFixtureScale:1;
+    for(const [x,y]of assets.venueMeta?.ledLamps||PIXEL_LED_LAMPS){
       const shape=[[-5,-12],[4,-11],[10,-4],[10,4],[4,10],[-5,9],[-11,3],[-10,-5]];
-      shape.forEach(([dx,dy],i)=>i?target.lineTo(x+dx,y+dy):target.moveTo(x+dx,y+dy));target.closePath();
+      shape.forEach(([dx,dy],i)=>i?target.lineTo(x+dx*fixtureScale,y+dy*fixtureScale):target.moveTo(x+dx*fixtureScale,y+dy*fixtureScale));target.closePath();
     }
     target.clip();target.drawImage(assets.venue,0,0,REF_W,REF_H);target.restore();
   }
   function dimStageDeck(target){
-    polygon(target,PIXEL_STAGE_DECK.map(([x,y])=>({x,y})),'rgba(5,9,18,0.72)');
+    polygon(target,(assets.venueMeta?.stageDeck||PIXEL_STAGE_DECK).map(([x,y])=>({x,y})),'rgba(5,9,18,0.72)');
   }
   function endedStage(target,state){
     if(!pixelStageLightingEnded(state))return;
     dimStageDeck(target);
     // Suppress the glow and bright glass baked into the authored lamp pixels.
     // Their housings remain visible; the separate LED and cyan rim stay lit.
-    for(const [x,y]of PIXEL_STAGE_LAMPS){
+    for(const [x,y]of assets.venueMeta?.stageLamps||PIXEL_STAGE_LAMPS){
       ellipse(target,x,y,12,11,'rgba(7,11,19,0.45)');
       ellipse(target,x,y,10,9,'rgba(7,11,19,0.70)');
       ellipse(target,x,y,7,6,'#17202c');ellipse(target,x,y,4,3,'#0b111a');
@@ -357,26 +390,37 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
   }
   function render(timestamp,state=getState()){
     if(destroyed)return;state=state||{};const now=finite(timestamp,performance.now()),dt=last==null?0:clamp((now-last)/1000,0,.1);last=now;const running=['playing','closing'].includes(state.phase)&&!state.paused;if(running)seconds+=dt;
-    background();roomLayers();ctx.save();ctx.translate(Math.round(offsetX),0);ctx.imageSmoothingEnabled=false;ctx.drawImage(assets.venue,0,0,REF_W,REF_H);albumCover(ctx,state);endedStage(ctx,state);stageLights(state);const airborne=paper(state,running?dt:0);
+    selectVenue(state);background();roomLayers();ctx.save();ctx.translate(Math.round(offsetX),0);ctx.imageSmoothingEnabled=false;ctx.drawImage(assets.venue,0,0,REF_W,REF_H);albumCover(ctx,state);endedStage(ctx,state);stageLights(state);const airborne=paper(state,running?dt:0);
     const drawables=occluders.filter(layer=>!layer.actors?.length).map(layer=>({depth:layer.depth,draw:()=>drawLayer(layer,state)}));
-    for(const actor of state.actors||[]){if(actor.visible===false)continue;const seat=seatFor(actor);let depth=seat?.depth??actorPoint(actor).y+(actor.action==='surf'?2:0);if(actor.id==='drummer'&&actor.action==='perform'&&assets.venueMeta?.drumForegroundDepth>0)depth=Math.min(depth,assets.venueMeta.drumForegroundDepth-1);drawables.push({depth,draw:()=>{drawActor(actor,state);for(const layer of occluders)if(seat&&layer.actors?.includes(actor.id))drawLayer(layer,state);}});}
+    for(const prop of propLayers)drawables.push({depth:prop.depth,draw:()=>drawProp(ctx,prop)});
+    const models=modelRoster(state);
+    for(const actor of state.actors||[]){if(actor.visible===false||models.length&&actor.role==='band')continue;const seat=seatFor(actor);let depth=seat?.depth??actorPoint(actor).y+(actor.action==='surf'?2:0);if(actor.id==='drummer'&&actor.action==='perform'&&assets.venueMeta?.drumForegroundDepth>0)depth=Math.min(depth,assets.venueMeta.drumForegroundDepth-1);drawables.push({depth,draw:()=>{drawActor(actor,state);for(const layer of occluders)if(seat&&layer.actors?.includes(actor.id))drawLayer(layer,state);}});}
+    for(const model of models){let depth=modelPoint(model).y;if(model.role==='drummer'&&model.actor.action==='perform'&&assets.venueMeta?.drumForegroundDepth>0)depth=Math.min(depth,assets.venueMeta.drumForegroundDepth-1);drawables.push({depth,draw:()=>drawBandModel(model)});}
     drawables.sort((a,b)=>a.depth-b.depth);for(const item of drawables)item.draw();airborne();orderBubbles(state);ctx.restore();
   }
   function worldToScreen(x,z,y=0){const p=project(x,z,y);return{x:(p.x+offsetX)*cssW/width,y:p.y*cssH/height};}
   function renderOverview(target,state=getState()){
+    selectVenue(state);roomLayers();
     const w=target.canvas.width,h=target.canvas.height,scale=Math.min((w-8)/REF_W,(h-8)/REF_H),left=(w-REF_W*scale)/2,top=(h-REF_H*scale)/2;
     target.imageSmoothingEnabled=false;target.fillStyle='#1e2632';target.fillRect(0,0,w,h);
     target.drawImage(assets.venue,Math.round(left),Math.round(top),Math.round(REF_W*scale),Math.round(REF_H*scale));
-    target.save();target.translate(left,top);target.scale(scale,scale);albumCover(target,state);endedStage(target,state);target.restore();
+    target.save();target.translate(left,top);target.scale(scale,scale);for(const prop of propLayers)drawProp(target,prop);albumCover(target,state);endedStage(target,state);target.restore();
+    const models=modelRoster(state);
     for(const actor of state.actors||[]){
-      if(actor.visible===false)continue;
+      if(actor.visible===false||models.length&&actor.role==='band')continue;
       const p=actorPoint(actor,finite(actor.y)),employee=['bartender','server'].includes(actor.role)||actor.id?.startsWith('hired-'),size=employee?4:3;
       const x=Math.round(left+p.x*scale-size/2),y=Math.round(top+p.y*scale-size/2);
       target.fillStyle='#111721';target.fillRect(x-1,y-1,size+2,size+2);
       target.fillStyle=actor.id==='assisted-guest'?'#ffd36f':employee?'#6ee59a':actor.role==='band'?'#65dbef':'#f5e4c8';
       target.fillRect(x,y,size,size);
     }
+    for(const model of models){const p=modelPoint(model),x=Math.round(left+p.x*scale-1.5),y=Math.round(top+p.y*scale-1.5);target.fillStyle='#111721';target.fillRect(x-1,y-1,5,5);target.fillStyle='#65dbef';target.fillRect(x,y,3,3);}
   }
-  function destroy(){destroyed=true;observer.disconnect();particles.length=0;occluders=[];city=null;}
-  return{render,resize,destroy,worldToScreen,project,renderOverview};
+  function drawProp(target,prop){target.drawImage(prop.image,prop.x,prop.y,prop.width,prop.height);}
+  function destroy(){destroyed=true;observer.disconnect();particles.length=0;occluders=[];propLayers=[];city=null;}
+  function getBandPresentation(state=getState()){
+    selectVenue(state);
+    return modelRoster(state).map(entry=>({id:entry.id,bandId:entry.bandId,role:entry.role,anchor:entry.member.anchor,row:entry.row,extra:entry.extra,file:entry.band.file,...performingFrame(entry,assets.bandModels,seconds),...modelPoint(entry)}));
+  }
+  return{render,resize,destroy,worldToScreen,project,renderOverview,getBandPresentation};
 }

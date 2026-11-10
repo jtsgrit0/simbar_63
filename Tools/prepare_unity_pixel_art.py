@@ -9,6 +9,7 @@ ROOT=Path(__file__).resolve().parent.parent
 SOURCE=ROOT/'Tools/WebGLTemplate/FastGame/art'
 DEST=ROOT/'Assets/Resources/SimBarPixelArt'
 ATLAS_NAMES={'sprites.png':'Characters','venue.png':'Venue','seoul.png':'Seoul'}
+PROP_NAMES={'standing-table':'FFStandingTable','standing-stool':'FFStandingStool'}
 
 def convert_manifest(raw,sprites):
     """Convert dictionary metadata to JsonUtility-compatible named lists."""
@@ -19,7 +20,7 @@ def convert_manifest(raw,sprites):
         atlas['directionColumns']=[{'id':direction,'column':column} for direction,column in entry.get('directionColumns',{}).items()]
         atlases.append(atlas)
     point=lambda p:{'x':p[0],'y':p[1]}
-    bar={**raw.get('barRegion',{})}
+    bar={**(raw.get('barRegion') or {})}
     if bar:bar['offset']=point(bar['offset'])
     result={'actorOffsets':[{'id':key,'offset':point(value)} for key,value in raw.get('actorOffsets',{}).items()],
       'bandStageFeet':[{'id':key,'offset':point(value)} for key,value in raw.get('bandStageFeet',{}).items()],
@@ -29,6 +30,12 @@ def convert_manifest(raw,sprites):
       'barRegion':bar,'occluders':[{'points':[point(p) for p in layer['points']],'depth':layer.get('depth',0),'actors':layer.get('actors',[])} for layer in raw.get('occluders',[])],
       'frameWidth':sprites['frameWidth'],'frameHeight':sprites['frameHeight'],'columns':sprites['columns'],
       'drawHeight':sprites['drawHeight'],'footX':sprites['footX'],'footY':sprites['footY'],'defaultAtlas':sprites.get('defaultAtlas','animation'),'roles':[],'atlases':atlases}
+    for key in ('ledQuad','ledLamps','stageDeck','stageLamps','lightSources'):
+        if raw.get(key):result[key]=[point(p) for p in raw[key]]
+    if 'ledFixtureScale' in raw:result['ledFixtureScale']=raw['ledFixtureScale']
+    if raw.get('props'):
+        result['props']=[{**{key:value for key,value in prop.items() if key!='asset'},
+                          'resource':'SimBarPixelArt/'+PROP_NAMES[prop['asset']]} for prop in raw['props']]
     def convert_entry(entry):
         value={**entry};value['hasRow']='row' in entry
         value['variantStyles']=[{'id':style,**({'row':row} if isinstance(row,int) else row)} for style,row in entry.get('variantStyles',{}).items()]
@@ -61,11 +68,43 @@ def compact_image(source,name):
     for old in (DEST/(name+'.png'),DEST/(name+'.png.meta')):
         if old.is_file():old.unlink()
 
+def prepare_ff_presentation():
+    """Encode the FF room's own furniture calibration, retaining shared sprites."""
+    path=SOURCE/'venue-ff.json'
+    if not path.is_file():return
+    raw=json.loads(path.read_text(encoding='utf-8'))
+    sprites=json.loads((SOURCE/'sprites.json').read_text(encoding='utf-8'))
+    target=DEST/'PresentationFF.json'
+    target.write_text(json.dumps(convert_manifest(raw,sprites),ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+    meta(target)
+
+def prepare_freebird_presentation():
+    """Encode Freebird's widened stage and half-size bar calibration."""
+    path=SOURCE/'venue-freebird.json'
+    if not path.is_file():return
+    raw=json.loads(path.read_text(encoding='utf-8'))
+    sprites=json.loads((SOURCE/'sprites.json').read_text(encoding='utf-8'))
+    target=DEST/'PresentationFreebird.json'
+    target.write_text(json.dumps(convert_manifest(raw,sprites),ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+    meta(target)
+
+def prepare_band_models():
+    """Retain the same canonical artist roster and packed cells in both players."""
+    path=SOURCE/'band-models.json'
+    if not path.is_file():return
+    raw=json.loads(path.read_text(encoding='utf-8'))
+    for band in raw.get('bands',[]):
+        compact_image(band['file'],Path(band['resource']).name)
+    target=DEST/'PerformingBands.json'
+    target.write_text(json.dumps(raw,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+    meta(target)
+
 def main():
     DEST.mkdir(parents=True,exist_ok=True)
     folder=Path(str(DEST)+'.meta')
     if not folder.exists():folder.write_text('fileFormatVersion: 2\nguid: '+uuid.uuid4().hex+'\nfolderAsset: yes\nDefaultImporter:\n  externalObjects: {}\n  userData: \n  assetBundleName: \n  assetBundleVariant: \n',encoding='utf-8')
-    for source,name in [('venue.png','Venue'),('sprites.png','Characters'),('seoul.png','Seoul')]:compact_image(source,name)
+    for source,name in [('venue.png','Venue'),('venue-freebird.png','VenueFreebird'),('venue-ff.png','VenueFF'),('sprites.png','Characters'),('seoul.png','Seoul')]:compact_image(source,name)
+    for asset,name in PROP_NAMES.items():compact_image(asset+'.png',name)
     for name in ('OwnerFemale','OwnerFF','OwnerPetSounds'):
         for old in (DEST/(name+'.png'),DEST/(name+'.png.meta')):
             if old.is_file():old.unlink()
@@ -98,6 +137,9 @@ def main():
                 if old.is_file():old.unlink()
     result=convert_manifest(raw,sprites)
     target=DEST/'Presentation.json';target.write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n',encoding='utf-8');meta(target)
+    prepare_ff_presentation()
+    prepare_freebird_presentation()
+    prepare_band_models()
     print('Unity pixel art prepared:',DEST)
 
 if __name__=='__main__':main()

@@ -20,9 +20,9 @@ PROJECT = Path(__file__).resolve().parent.parent
 TEMPLATE = PROJECT / "Tools/WebGLTemplate"
 SOURCE = TEMPLATE / "FastGame"
 MODULES = ("boot.js", "game.js", "core.js", "world.js", "booking.js", "floor.js",
-           "navigation.js", "catalog.js", "playlist.js", "legacy-save.js", "daily-poster.js", "music.js", "aftershow.js", "album-art.js", "daydesk.js")
-ESSENTIAL_IMAGES = ("owner-female.png", "owner-ff.png", "owner-pet.png", "seoul.png", "venue.png")
-ESSENTIAL_METADATA = ("venue.json", "sprites.json")
+           "navigation.js", "catalog.js", "playlist.js", "legacy-save.js", "daily-poster.js", "music.js", "aftershow.js", "album-art.js", "daydesk.js", "owner-venues.js", "band-models.js")
+ESSENTIAL_IMAGES = ("owner-female.png", "owner-ff.png", "owner-pet.png", "seoul.png", "venue.png", "venue-freebird.png", "venue-ff.png", "standing-table.png", "standing-stool.png", "band-freewill.png", "band-july.png")
+ESSENTIAL_METADATA = ("venue.json", "sprites.json", "venue-ff.json", "venue-freebird.json", "band-models.json")
 DEFERRED_IMAGES = ("office/desk-jessy.png", "office/desk-edison.png", "office/desk-jaiden.png")
 ICONS = ("setup", "cash", "fans", "time", "staff", "guestsati", "perrform", "upgrades", "guest", "events")
 EXCLUDED = {"index.html", "runtime-manifest.json", "package.json", "package-lock.json",

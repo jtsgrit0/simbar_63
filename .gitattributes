@@ -37,3 +37,6 @@
 *.data binary
 *.unityweb binary
 *.bytes binary
+
+# Immutable releases must retain the exact bytes recorded in runtime-manifest.json.
+/docs/FastGame/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

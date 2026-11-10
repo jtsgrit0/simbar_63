@@ -132,7 +132,7 @@ function findApproach(a,fan,item,m,actors){
   for(let offset=0;offset<16;offset++){
     const index=(offset+(m.standAttempt||0))%16,turn=index===0?0:Math.ceil(index/2)*(index%2?1:-1);
     const angle=base+turn*Math.PI/8,goal=point(fan.x+Math.cos(angle)*radius,fan.z+Math.sin(angle)*radius);
-    if(walkable(goal,false,false)&&clearStand(a,goal,actors)&&setRoute(a,goal,bodies(actors,a),false))return goal;
+    if(walkable(goal,false,false,a.layout)&&clearStand(a,goal,actors)&&setRoute(a,goal,bodies(actors,a),false))return goal;
   }
   return null;
 }

@@ -1,0 +1,201 @@
+{
+  "version": 1,
+  "frameWidth": 64,
+  "frameHeight": 64,
+  "columns": 12,
+  "footX": 32,
+  "footY": 60,
+  "drawWidth": 54,
+  "drawHeight": 54,
+  "actions": [
+    {
+      "id": "perform",
+      "frames": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "fps": 6
+    },
+    {
+      "id": "walk",
+      "frames": [
+        4,
+        5,
+        6,
+        7
+      ],
+      "fps": 6
+    },
+    {
+      "id": "idle",
+      "frames": [
+        8
+      ],
+      "fps": 0
+    },
+    {
+      "id": "highfive",
+      "frames": [
+        8,
+        9,
+        9,
+        8
+      ],
+      "progress": true
+    },
+    {
+      "id": "hug",
+      "frames": [
+        8,
+        10,
+        10,
+        8
+      ],
+      "progress": true
+    }
+  ],
+  "tracks": [
+    {
+      "id": "track_001",
+      "band": "freewill"
+    },
+    {
+      "id": "track_002",
+      "band": "julywantsmore"
+    },
+    {
+      "id": "track_003",
+      "band": "julywantsmore"
+    },
+    {
+      "id": "track_004",
+      "band": "freewill"
+    },
+    {
+      "id": "track_005",
+      "band": "freewill"
+    }
+  ],
+  "bands": [
+    {
+      "id": "freewill",
+      "file": "band-freewill.png",
+      "resource": "SimBarPixelArt/artist-freewill",
+      "members": [
+        {
+          "id": "fw-vocal",
+          "role": "singer",
+          "anchor": "singer",
+          "row": 0
+        },
+        {
+          "id": "fw-red-guitar",
+          "role": "guitarist",
+          "anchor": "guitarist",
+          "row": 1
+        },
+        {
+          "id": "fw-white-guitar",
+          "role": "guitarist",
+          "anchor": "guitarist",
+          "row": 2,
+          "extra": true,
+          "from": "singer",
+          "to": "bassist",
+          "mix": 0.74,
+          "stageOffset": {
+            "x": 0,
+            "y": -8
+          },
+          "floorOffset": {
+            "x": 20,
+            "y": -6
+          }
+        },
+        {
+          "id": "fw-dark-guitar",
+          "role": "guitarist",
+          "anchor": "guitarist",
+          "row": 3,
+          "extra": true,
+          "from": "guitarist",
+          "to": "drummer",
+          "mix": 0.24,
+          "stageOffset": {
+            "x": 0,
+            "y": -9
+          },
+          "floorOffset": {
+            "x": -20,
+            "y": -10
+          }
+        },
+        {
+          "id": "fw-bass",
+          "role": "bassist",
+          "anchor": "bassist",
+          "row": 4
+        },
+        {
+          "id": "fw-drums",
+          "role": "drummer",
+          "anchor": "drummer",
+          "row": 5,
+          "drawHeight": 52
+        }
+      ]
+    },
+    {
+      "id": "julywantsmore",
+      "file": "band-july.png",
+      "resource": "SimBarPixelArt/artist-julywantsmore",
+      "members": [
+        {
+          "id": "july-vocal",
+          "role": "singer",
+          "anchor": "singer",
+          "row": 0
+        },
+        {
+          "id": "july-leather",
+          "role": "guitarist",
+          "anchor": "guitarist",
+          "row": 1
+        },
+        {
+          "id": "july-vest",
+          "role": "guitarist",
+          "anchor": "guitarist",
+          "row": 2,
+          "extra": true,
+          "from": "guitarist",
+          "to": "drummer",
+          "mix": 0.4,
+          "stageOffset": {
+            "x": 0,
+            "y": -8
+          },
+          "floorOffset": {
+            "x": -20,
+            "y": -10
+          }
+        },
+        {
+          "id": "july-bass",
+          "role": "bassist",
+          "anchor": "bassist",
+          "row": 3
+        },
+        {
+          "id": "july-drums",
+          "role": "drummer",
+          "anchor": "drummer",
+          "row": 4,
+          "drawHeight": 52
+        }
+      ]
+    }
+  ]
+}

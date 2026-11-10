@@ -13,21 +13,27 @@ public sealed partial class SimBarExperience
     private int albumJacketIndex=-1;
     private RectTransform pixelAlbumRoot;
     private SimBarPixelPolygonGraphic pixelAlbumImage;
+    private SimBarPixelPolygonGraphic pixelAlbumPadding;
+    private readonly List<SimBarPixelPolygonGraphic> pixelAlbumFixtures=new List<SimBarPixelPolygonGraphic>();
     private GameObject physicalAlbumRoot;
     private Mesh physicalAlbumImageMesh;
     private Material physicalAlbumImageMaterial;
     private readonly List<UnityEngine.Object> albumJacketObjects=new List<UnityEngine.Object>();
-    private static readonly Vector2 AlbumLedOrigin=new Vector2(665f,117f);
-    private static readonly Vector2 AlbumLedHorizontal=new Vector2(177f,46f);
-    private const float AlbumLedHeight=67f;
     private static readonly Vector2[] AlbumFullUV={new Vector2(0f,1f),new Vector2(1f,1f),new Vector2(1f,0f),new Vector2(0f,0f)};
+    private static readonly Vector2[] AlbumDefaultQuad={new Vector2(665f,117f),new Vector2(842f,163f),new Vector2(842f,230f),new Vector2(665f,184f)};
+    private static readonly Vector2[] AlbumDefaultLamps={new Vector2(683f,128f),new Vector2(735f,140f),new Vector2(782f,151f),new Vector2(822f,162f)};
+    private Vector2[] AlbumActiveQuad=>pixelManifest?.ledQuad?.Length==4?pixelManifest.ledQuad:AlbumDefaultQuad;
 
-    private static Vector2 AlbumLedPoint(float x,float y)=>AlbumLedOrigin+AlbumLedHorizontal.normalized*x+Vector2.up*y;
-    private static Vector2[] AlbumLedFit(float width,float height)
+    private Vector2 AlbumLedPoint(float x,float y)
     {
-        float planeWidth=AlbumLedHorizontal.magnitude;
-        float scale=Mathf.Min(planeWidth/Mathf.Max(1f,width),AlbumLedHeight/Mathf.Max(1f,height));
-        float w=width*scale,h=height*scale,x=(planeWidth-w)*.5f,y=(AlbumLedHeight-h)*.5f;
+        Vector2[] q=AlbumActiveQuad;
+        return q[0]+(q[1]-q[0]).normalized*x+(q[3]-q[0]).normalized*y;
+    }
+    private Vector2[] AlbumLedFit(float width,float height)
+    {
+        Vector2[] quad=AlbumActiveQuad;float planeWidth=(quad[1]-quad[0]).magnitude,planeHeight=(quad[3]-quad[0]).magnitude;
+        float scale=Mathf.Min(planeWidth/Mathf.Max(1f,width),planeHeight/Mathf.Max(1f,height));
+        float w=width*scale,h=height*scale,x=(planeWidth-w)*.5f,y=(planeHeight-h)*.5f;
         return new[]{AlbumLedPoint(x,y),AlbumLedPoint(x+w,y),AlbumLedPoint(x+w,y+h),AlbumLedPoint(x,y+h)};
     }
     private SimBarPixelPolygonGraphic AlbumPolygon(string name,Texture texture,Vector2[] points,Vector2[] uv=null)
@@ -39,14 +45,30 @@ public sealed partial class SimBarExperience
     {
         pixelAlbumRoot=new GameObject("Selected Track Rear LED",typeof(RectTransform)).GetComponent<RectTransform>();
         pixelAlbumRoot.SetParent(pixelRoom,false);PixelRect(pixelAlbumRoot,Vector2.zero,new Vector2(960f,558f));
-        var background=AlbumPolygon("LED Dark Padding",null,new[]{new Vector2(665f,117f),new Vector2(842f,163f),new Vector2(842f,230f),new Vector2(665f,184f)});
-        background.color=new Color32(8,11,19,255);
+        pixelAlbumPadding=AlbumPolygon("LED Dark Padding",null,AlbumActiveQuad);
+        pixelAlbumPadding.color=new Color32(8,11,19,255);
         pixelAlbumImage=AlbumPolygon("Full Album Jacket",null,AlbumLedFit(1f,1f),AlbumFullUV);
         // These original fixture pixels are in front of the LED, before live light effects.
-        Vector2[] centers={new Vector2(683f,128f),new Vector2(735f,140f),new Vector2(782f,151f),new Vector2(822f,162f)};
-        Vector2[] silhouette={new Vector2(-5f,-12f),new Vector2(4f,-11f),new Vector2(10f,-4f),new Vector2(10f,4f),new Vector2(4f,10f),new Vector2(-5f,9f),new Vector2(-11f,3f),new Vector2(-10f,-5f)};
-        foreach(Vector2 center in centers){var points=new Vector2[silhouette.Length];for(int i=0;i<points.Length;i++)points[i]=center+silhouette[i];AlbumPolygon("Original Hanging Stage Fixture",venue,points);}
+        BuildPixelAlbumFixtures(venue);
         pixelAlbumRoot.gameObject.SetActive(false);
+    }
+    private void BuildPixelAlbumFixtures(Texture venue)
+    {
+        Vector2[] centers=pixelManifest?.ledLamps?.Length>0?pixelManifest.ledLamps:AlbumDefaultLamps;
+        Vector2[] silhouette={new Vector2(-5f,-12f),new Vector2(4f,-11f),new Vector2(10f,-4f),new Vector2(10f,4f),new Vector2(4f,10f),new Vector2(-5f,9f),new Vector2(-11f,3f),new Vector2(-10f,-5f)};
+        float scale=pixelManifest!=null&&pixelManifest.ledFixtureScale>0f?pixelManifest.ledFixtureScale:1f;
+        foreach(Vector2 center in centers){var points=new Vector2[silhouette.Length];for(int i=0;i<points.Length;i++)points[i]=center+silhouette[i]*scale;var fixture=AlbumPolygon("Original Hanging Stage Fixture",venue,points);RegisterPixelVenueMask(fixture,points);pixelAlbumFixtures.Add(fixture);}
+    }
+    private void RefreshPixelAlbumGeometry()
+    {
+        if(pixelAlbumRoot==null)return;
+        pixelAlbumPadding.Initialize(null,AlbumActiveQuad);
+        foreach(SimBarPixelPolygonGraphic fixture in pixelAlbumFixtures)
+        {
+            pixelVenueMasks.RemoveAll(value=>value.graphic==fixture);
+            fixture.gameObject.SetActive(false);Destroy(fixture.gameObject);
+        }
+        pixelAlbumFixtures.Clear();BuildPixelAlbumFixtures(pixelVenueTexture);albumJacketIndex=-1;
     }
     private void UpdateAlbumJacket()
     {
@@ -100,5 +122,6 @@ public sealed partial class SimBarExperience
         if(physicalAlbumRoot!=null)Destroy(physicalAlbumRoot);
         foreach(UnityEngine.Object item in albumJacketObjects)if(item!=null)Destroy(item);
         albumJacketObjects.Clear();
+        pixelAlbumFixtures.Clear();pixelAlbumPadding=null;
     }
 }

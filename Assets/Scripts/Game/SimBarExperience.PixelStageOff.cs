@@ -7,6 +7,7 @@ public sealed partial class SimBarExperience
     private readonly List<Transform> pixelStageOffOccluders=new List<Transform>();
     private static readonly Vector2[] PixelStageDeck={new Vector2(556f,299f),new Vector2(612f,242f),new Vector2(639f,209f),new Vector2(854f,266f),new Vector2(867f,311f),new Vector2(789f,373f)};
     private static readonly Color PixelStageDim=new Color(5f/255f,9f/255f,18f/255f,.72f);
+    private Vector2[] ActivePixelStageDeck=>pixelManifest?.stageDeck?.Length>=3?pixelManifest.stageDeck:PixelStageDeck;
     private bool StagePerformanceLightingEnded=>journeyPhase==JourneyPhase.FloorClosing||JourneyIsResults||journey.floorClosing||journey.afterShow!=null&&journey.afterShow.started||journey.session>0&&journey.secondsLeft<=0f;
 
     private SimBarPixelPolygonGraphic PixelStageOffPolygon(string name,Transform parent,Vector2[] points,Color color)
@@ -26,8 +27,8 @@ public sealed partial class SimBarExperience
     private void InitializePixelStageOff()
     {
         pixelStageOffRoot=new GameObject("Ended Stage Unlit Surface",typeof(RectTransform)).transform;pixelStageOffRoot.SetParent(pixelRoom,false);PixelRect((RectTransform)pixelStageOffRoot,Vector2.zero,new Vector2(960f,558f));
-        PixelStageOffPolygon("Stage Deck Without Concert Pools",pixelStageOffRoot,PixelStageDeck,PixelStageDim);
-        Vector2[] lamps={new Vector2(643f,121f),new Vector2(683f,128f),new Vector2(735f,140f),new Vector2(782f,151f),new Vector2(822f,162f)};
+        PixelStageOffPolygon("Stage Deck Without Concert Pools",pixelStageOffRoot,ActivePixelStageDeck,PixelStageDim);
+        Vector2[] lamps=pixelManifest?.stageLamps?.Length>0?pixelManifest.stageLamps:new[]{new Vector2(643f,121f),new Vector2(683f,128f),new Vector2(735f,140f),new Vector2(782f,151f),new Vector2(822f,162f)};
         foreach(Vector2 center in lamps)
         {
             PixelStageOffPolygon("Unlit Fixture Outer Glass",pixelStageOffRoot,PixelStageEllipse(center,12,11),new Color(7f/255f,11f/255f,19f/255f,.45f));
@@ -44,7 +45,8 @@ public sealed partial class SimBarExperience
         // stage-only dimming to their intersection so they cannot restore a pool.
         // The deck has one small concave notch: these non-overlapping convex
         // pieces preserve it instead of incorrectly clipping against its hull.
-        Vector2[][] deckParts={new[]{PixelStageDeck[5],PixelStageDeck[0],PixelStageDeck[1]},new[]{PixelStageDeck[1],PixelStageDeck[2],PixelStageDeck[3],PixelStageDeck[4],PixelStageDeck[5]}};
+        Vector2[] deck=ActivePixelStageDeck;
+        Vector2[][] deckParts=deck.Length==6?new[]{new[]{deck[5],deck[0],deck[1]},new[]{deck[1],deck[2],deck[3],deck[4],deck[5]}}:new[]{deck};
         Transform group=null;
         foreach(Vector2[] part in deckParts)
         {

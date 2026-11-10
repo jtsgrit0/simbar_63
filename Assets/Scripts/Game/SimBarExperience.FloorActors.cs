@@ -32,9 +32,9 @@ public sealed partial class SimBarExperience
     private SimBarVenueNavigation floorNavigation;
     private SimBarVenueNavigation FloorNavigation
     {
-        get { if (floorNavigation==null) floorNavigation=new SimBarVenueNavigation(true); return floorNavigation; }
+        get { if (floorNavigation==null) floorNavigation=new SimBarVenueNavigation(true,IsFFLayout,IsFreebirdLayout); return floorNavigation; }
     }
-    private static readonly Vector3 FloorBarExit = new Vector3(-1.35f, 0f, -.565f);
+    private Vector3 FloorBarExit=>IsFFLayout?new Vector3(-6.1f,0f,2f):IsFreebirdLayout?new Vector3(-6.8f,0f,2.5f):new Vector3(-1.35f,0f,-.565f);
     private static readonly Vector3 FloorGuestHome = new Vector3(-.65f, 0f, -.25f);
     private static readonly Vector3 FloorGuestExit = new Vector3(8.7f, 0f, -5.4f);
     private static readonly Vector3[] FloorCleanupStops =

@@ -51,6 +51,7 @@ public sealed partial class SimBarExperience
     {
         if (index < 0 || index >= OwnerIds.Length || !JourneyIsLobby) return;
         selectedOwner = index;
+        RefreshFFVenueLayout();
         PlayerPrefs.SetString(OwnerPreferenceKey, OwnerIds[index]);
         PlayerPrefs.Save();
         RefreshOwnerSelection();
