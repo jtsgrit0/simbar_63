@@ -17,17 +17,18 @@ export const FF_LAYOUT=Object.freeze({
   standing:Object.freeze([pt(-4.25,-5.25),pt(-3.3,-4.7),pt(-1.2,-3.9),pt(-.3,-4.7),pt(-5,1.7),pt(-3.4,2.5),pt(-1.8,1.25),pt(-.2,1.5),pt(-5.4,.25),pt(-1.9,-.15),pt(-1,.5)])
 });
 export const FREEBIRD_LAYOUT=Object.freeze({
-  id:'freebird',version:2,
+  id:'freebird',version:3,
   counter:Object.freeze([-6,3,-2,4.2]),
   stage:Object.freeze([-.3,2.2075,9.7,6.5]),
   bartender:pt(-4.8,4.85),server:pt(-1,2.7),barback:pt(-3.1,4.85),
   staffExit:pt(-6.8,4.85),
+  wallTable:Object.freeze([-9.4,-4.4,-8.75,2]),
   orderSlots:Object.freeze([pt(-4.8,1.75),pt(-3.95,1.75),pt(-3.1,1.75),pt(-2.25,1.75),pt(-1.4,1.45),pt(-.55,.65),pt(.3,-.15)]),
   standing:Object.freeze([pt(-4.8,-4.8),pt(-3.3,-4.7),pt(-1.8,-4.7),pt(-.3,-4.7),pt(-7,1),pt(-7.2,2.5),pt(-2.3,.8),pt(-.3,.7),pt(-6,-1),pt(-4.2,-.8),pt(-2.6,-.9)])
 });
 const ffObstacles=[FF_LAYOUT.counter,FF_LAYOUT.dj,...obstacles.slice(-2)];
 const ffRoundObstacles=[...FF_LAYOUT.tables,...FF_LAYOUT.stools];
-const freebirdObstacles=[FREEBIRD_LAYOUT.counter,FREEBIRD_LAYOUT.stage,obstacles.at(-1)];
+const freebirdObstacles=[FREEBIRD_LAYOUT.counter,FREEBIRD_LAYOUT.stage,FREEBIRD_LAYOUT.wallTable,obstacles.at(-1)];
 export const distance=(a,b)=>Math.hypot(a.x-b.x,a.z-b.z);
 export const reserved=p=>Math.hypot(p.x-5.75,p.z+1.25)<2.05||(p.x>4.3&&p.x<7.8&&p.z>-5.25&&p.z<-3.15);
 export function walkable(p,staff=false,floor=false,layout=p?.layout){
@@ -90,7 +91,7 @@ export function pathfind(start,goal,{staff=false,floor=false,people=[],layout=st
 }
 export function setRoute(actor,goal,actors=[],floor=false){
   actor.targetX=goal.x;actor.targetZ=goal.z;actor._floorRoute=floor;
-  actor._path=pathfind(actor,goal,{staff:actor.role==='bartender'||actor.role==='server'||actor.role.startsWith('hired'),floor,layout:actor.layout,people:actors.filter(a=>a!==actor&&a.visible&&a.role!=='band'&&a.role!=='seated'&&a.id!==actor._partner).map(a=>({x:a.x,z:a.z}))});
+  actor._path=pathfind(actor,goal,{staff:actor.role==='bartender'||actor.role==='server'||actor.role.startsWith('hired'),floor,layout:actor.layout,people:actors.filter(a=>a!==actor&&a.visible&&a.role!=='band'&&(a.role!=='seated'||a.waitingSeat)&&a.id!==actor._partner).map(a=>({x:a.x,z:a.z}))});
   actor._pathAt=0;actor._blocked=0;return actor._path.length>0;
 }
 export function move(actor,dt,speed,actors=[]){

@@ -1,6 +1,7 @@
 import {catalog} from './catalog.js';
 import {createDailyPoster,DAILY_POSTER_INDEX} from './daily-poster.js';
 import {Campaign} from './campaign.js';
+import {Audience} from './audience.js';
 
 export const clamp=(n,a,b)=>Math.max(a,Math.min(b,Number.isFinite(+n)?+n:a));
 export const int=(n,a=0,b=1e9)=>Math.trunc(clamp(n,a,b));
@@ -14,6 +15,7 @@ const allPosters=((1<<catalog.posters.length)-1)|(1<<DAILY_POSTER_INDEX);
 const first=(bits,limit)=>{let out=0;for(let i=0;i<=30&&limit>0;i++)if(bits&(1<<i)){out|=1<<i;limit--;}return out;};
 const arr=v=>Array.from({length:catalog.bands.length},(_,i)=>int(v?.[i],0,100));
 const campaignContext=context=>({completedNights:int(context?.completedNights),fans:int(context?.fans,0,1e7),upgrades:Array.from({length:3},(_,i)=>int(context?.upgrades?.[i],0,3)),
+  venueOwner:Number.isInteger(context?.venueOwner)&&context.venueOwner>=0&&context.venueOwner<3?context.venueOwner:null,
   relationships:arr(context?.career?.relationships??context?.relationships),growth:arr(context?.career?.growth??context?.growth)});
 const showMask=show=>show?.bandIndices.reduce((bits,index)=>bits|(1<<index),0)||0;
 const selected=p=>isCampaign(p)?!!Campaign.show(p.showId):p.freewillSelected;
@@ -157,13 +159,14 @@ export const Booking={
   },
   calculate(p){
     if(isCampaign(p)){
-      const show=Campaign.show(p.showId),context=p.campaignContext||campaignContext(),venueCapacity=catalog.venues[p.venue].capacity,ticketPrice=10+p.ticketTier*5;
-      if(!show)return{showId:'',tracks:[],fee:0,artistFee:0,tipMultiplier:1,preferredItems:[],attendance:0,ticketPrice,ticketIncome:0,netIncome:0,energyBonus:0,fanBonus:0,orderIntervalMultiplier:1,bookedCount:0,venueCapacity};
+      const show=Campaign.show(p.showId),context=p.campaignContext||campaignContext(),custom=Number.isInteger(context.venueOwner),venueCapacity=custom?Audience.capacity(context.venueOwner):catalog.venues[p.venue].capacity,ticketPrice=10+p.ticketTier*5;
+      const audience=custom?{audienceVersion:Audience.version,venueOwner:context.venueOwner}:{};
+      if(!show)return{...audience,showId:'',tracks:[],fee:0,artistFee:0,tipMultiplier:1,preferredItems:[],attendance:0,ticketPrice,ticketIncome:0,netIncome:0,energyBonus:0,fanBonus:0,orderIntervalMultiplier:1,bookedCount:0,venueCapacity};
       const average=values=>show.bandIndices.reduce((sum,index)=>sum+careerValue(values,index),0)/show.bandIndices.length;
       const fanDraw=Math.min(16,Math.floor(int(context.fans,0,1e7)/12)),relationshipDraw=Math.floor(average(context.relationships)/20),growthDraw=Math.floor(average(context.growth)/25),sound=int(context.upgrades?.[1],0,3);
-      const draw=10+show.draw+fanDraw+relationshipDraw+growthDraw+sound*3;
+      const draw=(10+show.draw+fanDraw+relationshipDraw+growthDraw+sound*3)*(custom?Audience.demand(context.venueOwner):1);
       const attendance=int(Math.floor(draw*[1.15,1,.78][p.ticketTier])+p.promotions*8,0,venueCapacity),ticketIncome=attendance*ticketPrice;
-      return{showId:show.id,tracks:[...show.tracks],fee:show.fee,artistFee:show.fee,tipMultiplier:show.tipMultiplier,preferredItems:[...show.preferredItems],
+      return{...audience,showId:show.id,tracks:[...show.tracks],fee:show.fee,artistFee:show.fee,tipMultiplier:show.tipMultiplier,preferredItems:[...show.preferredItems],
         attendance,ticketPrice,ticketIncome,netIncome:ticketIncome-show.fee,energyBonus:Math.min(.15,.025*show.bandIndices.length+sound*.015+p.promotions*.01),
         fanBonus:Math.trunc(attendance/10)+show.bandIndices.length,orderIntervalMultiplier:clamp(show.orderIntervalMultiplier*(1-Math.min(.12,attendance*.001)),.65,1.3),bookedCount:show.bandIndices.length,venueCapacity};
     }
@@ -177,10 +180,11 @@ export const Booking={
       fanBonus:bookedCount?Math.trunc(attendance/14)+bookedCount:0,orderIntervalMultiplier:Math.max(.75,1-bookedCount*.025-p.promotions*.015-attendance*.001),bookedCount,venueCapacity};
   },
   repairMetrics(m,venue,plan=null){
-    m=m||{};let venueCapacity=catalog.venues[venue].capacity,attendance=int(m.attendance,0,venueCapacity),bookedCount=int(m.bookedCount,0,3),ticketPrice=Number.isFinite(m.ticketPrice)?clamp(m.ticketPrice,10,20):15;
+    m=m||{};const custom=isCampaign(plan)&&m.audienceVersion===Audience.version&&Number.isInteger(m.venueOwner)&&m.venueOwner>=0&&m.venueOwner<3;
+    let venueCapacity=custom?Audience.capacity(m.venueOwner):catalog.venues[venue].capacity,attendance=int(m.attendance,0,venueCapacity),bookedCount=int(m.bookedCount,0,3),ticketPrice=Number.isFinite(m.ticketPrice)?clamp(m.ticketPrice,10,20):15;
     if(isCampaign(plan)){
       const show=Campaign.show(plan.showId)||Campaign.show('freewill'),fee=Number.isFinite(m.fee)?clamp(m.fee,0,1e6):show.fee,ticketIncome=bookedCount?clamp(m.ticketIncome,0,attendance*ticketPrice):0;
-      return{showId:show.id,tracks:[...show.tracks],fee,artistFee:fee,tipMultiplier:Number.isFinite(m.tipMultiplier)?clamp(m.tipMultiplier,.5,2):show.tipMultiplier,
+      return{...(custom?{audienceVersion:Audience.version,venueOwner:m.venueOwner}:{}),showId:show.id,tracks:[...show.tracks],fee,artistFee:fee,tipMultiplier:Number.isFinite(m.tipMultiplier)?clamp(m.tipMultiplier,.5,2):show.tipMultiplier,
         preferredItems:[...show.preferredItems],venueCapacity,attendance,bookedCount,ticketPrice,ticketIncome,netIncome:ticketIncome-fee,
         energyBonus:clamp(m.energyBonus,0,.15),fanBonus:int(m.fanBonus,0,20),orderIntervalMultiplier:Number.isFinite(m.orderIntervalMultiplier)?clamp(m.orderIntervalMultiplier,.65,1.3):show.orderIntervalMultiplier};
     }

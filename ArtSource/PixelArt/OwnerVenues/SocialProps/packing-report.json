@@ -1,0 +1,69 @@
+{
+  "method": "alpha crop, proportional nearest-neighbor sizing, PNG palette",
+  "props": [
+    {
+      "source": "FreebirdArch.v2.source.png",
+      "file": "freebird-arch.png",
+      "size": [
+        76,
+        130
+      ],
+      "sourceSize": [
+        1080,
+        1456
+      ],
+      "sourceBounds": [
+        112,
+        74,
+        960,
+        1372
+      ],
+      "sourceSha256": "329ff00f0110b7f5379f66d1ed8c979d836e0d8873517d8774bf7e50f61f66b7",
+      "sha256": "01ceb57d15181f213082ab564ec34d5d7f9a4f886c5df03615e0431e58b55cc9",
+      "bytes": 3945
+    },
+    {
+      "source": "FreebirdWallTable.source.png",
+      "file": "freebird-wall-table.png",
+      "size": [
+        142,
+        158
+      ],
+      "sourceSize": [
+        1190,
+        1322
+      ],
+      "sourceBounds": [
+        44,
+        128,
+        1151,
+        1252
+      ],
+      "sourceSha256": "2794553c47c05900bef75e2a3243e1536c48cc877ed2b411318c8763f4ffd4aa",
+      "sha256": "390549362fc37e37c747735957347983745f93fb6b7ed45b45923e2f2245ca3a",
+      "bytes": 3828
+    },
+    {
+      "source": "CocktailGlass.source.png",
+      "file": "cocktail-glass.png",
+      "size": [
+        12,
+        16
+      ],
+      "sourceSize": [
+        1287,
+        1222
+      ],
+      "sourceBounds": [
+        376,
+        283,
+        947,
+        899
+      ],
+      "sourceSha256": "8e16c45e65db62b4057d4626a2c45a0e2756396915844ca2dc0ec82792957448",
+      "sha256": "0abf2c542db8e5965e134838652e30d37eaeddfaa2189be7b5d62142fd08a451",
+      "bytes": 1195
+    }
+  ],
+  "passed": true
+}

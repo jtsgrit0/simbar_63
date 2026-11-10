@@ -1,0 +1,351 @@
+{
+  "version": "cd4d2af418158122",
+  "algorithm": "sha256",
+  "files": [
+    {
+      "path": "aftershow.js",
+      "bytes": 15487,
+      "sha256": "db6632f4c8685a58b99611d52e46b60239c54802e69daf78f42527304fb2c652"
+    },
+    {
+      "path": "album-art.js",
+      "bytes": 2219,
+      "sha256": "b19cffd29ae71fa5a700980bd6a658eb660775235777336f674551f1e5cc6139"
+    },
+    {
+      "path": "art/album-covers/freewill-electric-shocker.png",
+      "bytes": 82234,
+      "sha256": "59e7b340e052bd2c575fc2ae731ec693a1368ca426078bf7ab23e68bae967f1c"
+    },
+    {
+      "path": "art/album-covers/julywantsmore-hey.png",
+      "bytes": 22001,
+      "sha256": "1826f7082b8625acfdf42701333d9c33b4e858771b7ca01a6f604e62658c9f80"
+    },
+    {
+      "path": "art/album-covers/julywantsmore-no-matter-how.png",
+      "bytes": 40919,
+      "sha256": "c42bda9456074bf55e3963ef11ae6773ad34777c5a40c54138c4ee876047013d"
+    },
+    {
+      "path": "art/album-covers.json",
+      "bytes": 2206,
+      "sha256": "ab788f688aa021abbc667e1493f759d6632784bdba04ffee461cead71ae5e184"
+    },
+    {
+      "path": "art/band-freewill.png",
+      "bytes": 73437,
+      "sha256": "0f241d02e3a98c368fe6f39e2626967b4e89b5f674419562419b175834fd9267"
+    },
+    {
+      "path": "art/band-july.png",
+      "bytes": 47211,
+      "sha256": "77d1800488305cc60dd4d5575920ab26e3c0c52b42398e6ca4b2c74611af9583"
+    },
+    {
+      "path": "art/band-models.json",
+      "bytes": 1880,
+      "sha256": "e644946799a2ab55beb8c0eb13f2342eb6a562a5f33168b7600edf6f7724d1a5"
+    },
+    {
+      "path": "art/icons/cash.png",
+      "bytes": 3346,
+      "sha256": "fbf0d1d9835728d3a8245669d0e99e1f3824693e03045241cbe93b65d7776587"
+    },
+    {
+      "path": "art/icons/events.png",
+      "bytes": 1769,
+      "sha256": "a24cfa4bdbed079305396cf4a12fa093dcb5bc146c6e4df5c9a0484241818bc3"
+    },
+    {
+      "path": "art/icons/fans.png",
+      "bytes": 3670,
+      "sha256": "92ac5ca392f544895984779a4cbc5fc2a4e0982b0b771a8aff921c970a5346c3"
+    },
+    {
+      "path": "art/icons/guest.png",
+      "bytes": 1580,
+      "sha256": "74a906e5f71006b2db2111b646d3fefc754cf32763e55e8209d436ef00a45100"
+    },
+    {
+      "path": "art/icons/guestsati.png",
+      "bytes": 16810,
+      "sha256": "1df7f3023fa93174b435070e4a993d3b5a3018ddcbc409e80bf3a9b0e5a349a2"
+    },
+    {
+      "path": "art/icons/perrform.png",
+      "bytes": 16989,
+      "sha256": "ebe29d8ec62ff3f553da7e7174466263f4e81b1e09c5f6ac633b3559cb144b4b"
+    },
+    {
+      "path": "art/icons/setup.png",
+      "bytes": 4607,
+      "sha256": "6aa065afb8c757b3093778bb1d547f9a2fd89bbcd96b95450204841b7de2ce25"
+    },
+    {
+      "path": "art/icons/staff.png",
+      "bytes": 1672,
+      "sha256": "18c8896acde2136e8171a3e7d873e7f498fc6919e43dd1725aa368552822799a"
+    },
+    {
+      "path": "art/icons/time.png",
+      "bytes": 3737,
+      "sha256": "50debb07620610f76ee4617fd19e27855edd9b279441565e6daab9b05d22b9ac"
+    },
+    {
+      "path": "art/icons/upgrades.png",
+      "bytes": 1675,
+      "sha256": "c17003b77f0f690210510bc7a7a17d314b5b24d8baf30768dd31ed85e28ef34f"
+    },
+    {
+      "path": "art/office/desk-edison.png",
+      "bytes": 416394,
+      "sha256": "6671c7c62bed8b88b18404f74b7454acb1336ef8ac9bc2d493a5adc79f7eba2c"
+    },
+    {
+      "path": "art/office/desk-jaiden.png",
+      "bytes": 399936,
+      "sha256": "1e7e1b196d569c09c9ccaab1c916a2157111782e094bb22129a08ef1c1e97fb9"
+    },
+    {
+      "path": "art/office/desk-jessy.png",
+      "bytes": 412009,
+      "sha256": "0083d70441456b0a2544433eca2271efc6abe6beabe6029bf74c9ad5667750df"
+    },
+    {
+      "path": "art/order-icons.png",
+      "bytes": 12428,
+      "sha256": "7664b985f8beabae767e4dbb4d3509ac047c5c2dedc5108dd46f668e94fee866"
+    },
+    {
+      "path": "art/owner-female.png",
+      "bytes": 280650,
+      "sha256": "b2471d98bb0de20aaa297533caed9cc9d0d8a23ae9a486667c19feab0501113f"
+    },
+    {
+      "path": "art/owner-ff.png",
+      "bytes": 218030,
+      "sha256": "be581e80e16730260d2468d17e3e3fb2897062e35eaec463fdcee72220e2a350"
+    },
+    {
+      "path": "art/owner-pet.png",
+      "bytes": 189602,
+      "sha256": "f139dd68c81f915f20c1380eba95482a0524081393f965070b7f04358a57f417"
+    },
+    {
+      "path": "art/pit.png",
+      "bytes": 37715,
+      "sha256": "eced09ddbca3715b0fdeae20762268805c13774165e5c6683e4db5d5fee7901b"
+    },
+    {
+      "path": "art/poses.png",
+      "bytes": 28858,
+      "sha256": "a8a73bb319b4a92219ccd92673d1cfd4194091ad63e4311bc0b3cff9614c122a"
+    },
+    {
+      "path": "art/seoul.png",
+      "bytes": 151784,
+      "sha256": "fe4af846e2c55d91a2878f2a72711410a2fb9e9a7d26d5a7356bed67d5d27531"
+    },
+    {
+      "path": "art/sprites.json",
+      "bytes": 20892,
+      "sha256": "ede8350b588943613438235e3e444ee2f01fa8d99ad1f9d64c4bad8b35aea00e"
+    },
+    {
+      "path": "art/standing-stool.png",
+      "bytes": 838,
+      "sha256": "568b6dbd778295180377f2909f161f43deef3fd04903801355ece99927436490"
+    },
+    {
+      "path": "art/standing-table.png",
+      "bytes": 868,
+      "sha256": "59fc36e777592332ebbc5cf937954f573ee2f61b1dba3c6cae5a35e9b3a9d990"
+    },
+    {
+      "path": "art/v4-band-bass-performance.png",
+      "bytes": 39916,
+      "sha256": "afeba33a68015f57ce5ba55c36c2e46166c4107f9da99dca6f2b6b916f2280aa"
+    },
+    {
+      "path": "art/v4-band-drums-performance.png",
+      "bytes": 41517,
+      "sha256": "7248eacecb5a95ef8418a9a7d2475fceee66ce9c5074fe783eeefc04ca5ebec2"
+    },
+    {
+      "path": "art/v4-band-greet-a.png",
+      "bytes": 79111,
+      "sha256": "f3c93f8c7170a8ac61a4438d95bcef9ae4052fa9d128b64f80bdbe88b6f5f95e"
+    },
+    {
+      "path": "art/v4-band-greet-b.png",
+      "bytes": 78960,
+      "sha256": "9299e32df0527961eb9835bbd31731b66c838ac2b6965ce3ce13a2beb5e7e018"
+    },
+    {
+      "path": "art/v4-band-guitar-performance.png",
+      "bytes": 39011,
+      "sha256": "96cb1d3ad1602b0234b523eb0e9f1abcee80c3a4c476f8645e193396ea6c7a54"
+    },
+    {
+      "path": "art/v4-band-jump.png",
+      "bytes": 75396,
+      "sha256": "4a8555c20d949e9a41a65a76f3011f4542cda7ea98d8075fb5860c33fb6cb8ac"
+    },
+    {
+      "path": "art/v4-band-singer-performance.png",
+      "bytes": 29815,
+      "sha256": "d6ff6d83b81ac440528028943b8d90b17c1cfc91a1036edeec8eb16677a6b286"
+    },
+    {
+      "path": "art/v4-band-walk.png",
+      "bytes": 68619,
+      "sha256": "9ded44a557b9d7b36693dd8101c7e73df94c225282c99c6b169fd99fabae6c33"
+    },
+    {
+      "path": "art/v4-guest-social.png",
+      "bytes": 120628,
+      "sha256": "8522dc0a2ab8a709c5eae78e8434e467ecde82f895aba00d1af4760a9e262556"
+    },
+    {
+      "path": "art/venue-ff.json",
+      "bytes": 15828,
+      "sha256": "e418821bdef692f9bb8a57a63dd0fa7d27212abf689302927d84977bd454d8f2"
+    },
+    {
+      "path": "art/venue-ff.png",
+      "bytes": 140486,
+      "sha256": "0c2ceec30ecba550b034c56e307c2e5254de76e94116221b94ba39a3fbad9ce6"
+    },
+    {
+      "path": "art/venue-freebird.json",
+      "bytes": 10858,
+      "sha256": "3e98155b1110d1762e32425d60f6bf4b1fc2b841f126f57d0b3de10a2190baed"
+    },
+    {
+      "path": "art/venue-freebird.png",
+      "bytes": 150179,
+      "sha256": "412a03be6fb3aa73291f32aa51ce6a4862964b4e633b16ca31da2b02776e14ad"
+    },
+    {
+      "path": "art/venue.json",
+      "bytes": 16224,
+      "sha256": "8a00d37c912043dd886b965a7d38a64acee7e364a169b4b30700abaebbb5d6f5"
+    },
+    {
+      "path": "art/venue.png",
+      "bytes": 154329,
+      "sha256": "73f5b778a1f62a96e6711269870d0222a9bcf5afaa64d01b2885197f3194f1a8"
+    },
+    {
+      "path": "art/walk.png",
+      "bytes": 30722,
+      "sha256": "774a3bd478f6f876824783f133ab54467f5592f53dc8bc422bbc9b97184d370e"
+    },
+    {
+      "path": "art/wardrobe.png",
+      "bytes": 26041,
+      "sha256": "9b20800804a589c795448ba8d25791e248de991e48e9b923f50e858b0765bd4a"
+    },
+    {
+      "path": "audience.js",
+      "bytes": 5989,
+      "sha256": "d82379a393c955de188c11b4b1e9aa9b0feebbafc148e8ea7bf9cbd5c8cec6de"
+    },
+    {
+      "path": "band-models.js",
+      "bytes": 3203,
+      "sha256": "23667ef6a6422af73256aa041de83a0395e5910c7275d7c92c2abb2e51c3e466"
+    },
+    {
+      "path": "booking.js",
+      "bytes": 22201,
+      "sha256": "9e5c50b0716969a2a84a993d365d97ea6e4eb41f22f87147a5750aee9b1944ce"
+    },
+    {
+      "path": "boot.js",
+      "bytes": 4777,
+      "sha256": "655d5bc5fb938eb45c020d10fae4bf20fc61ea92cf6e1dee765dac15e84df36c"
+    },
+    {
+      "path": "campaign.js",
+      "bytes": 2419,
+      "sha256": "c78c1103d62ac5f20d75b08c0fb65bd41fe8bf06acc68103d91d1653e334c7bf"
+    },
+    {
+      "path": "catalog.js",
+      "bytes": 20592,
+      "sha256": "1b754e3f266930d1289a93deb4d0e562d7fdb180cf9377c3ac6aabaa9730b0aa"
+    },
+    {
+      "path": "core.js",
+      "bytes": 65850,
+      "sha256": "cb4bcbccccbff57c2abb1609bc3acec5c4ed32ec279535207ab75f77ce42996c"
+    },
+    {
+      "path": "daily-poster.js",
+      "bytes": 3171,
+      "sha256": "8452edc02506c8b6aa58e5dfd4604f12086e4d4876e0002fdee01a609ed3ad60"
+    },
+    {
+      "path": "daydesk.js",
+      "bytes": 20758,
+      "sha256": "b260f57dbbac27312ed17817f8c44d6dc53cdb7e7d461ca32b66e4e9e3811a7a"
+    },
+    {
+      "path": "floor.js",
+      "bytes": 9094,
+      "sha256": "b33d3dab89eb2e9c797ed21deb6abe4820c5652e36d3110a8d6d9acbb3616995"
+    },
+    {
+      "path": "font.woff2",
+      "bytes": 59928,
+      "sha256": "2917c5e4960a3ee25493fe506108405b4bf14123204311621eaf06a121450f03"
+    },
+    {
+      "path": "game.js",
+      "bytes": 48181,
+      "sha256": "1dd1a3ac6c27900c3b86f94286081a76eb45d752eb357523f5294a931ab1bc22"
+    },
+    {
+      "path": "legacy-save.js",
+      "bytes": 5472,
+      "sha256": "3124c7868035c56e4abf19f156634a74abdbbda03016c435a99d070f701a9610"
+    },
+    {
+      "path": "music.js",
+      "bytes": 2507,
+      "sha256": "a636aeb5d4acd4d7907bbadc3a648e94b5867a95878592892abe9ac0e0110031"
+    },
+    {
+      "path": "navigation.js",
+      "bytes": 8401,
+      "sha256": "d844a6624e45139b74655561d1a8c700a4dec944a37ba1dbfc5e3056d45bfad7"
+    },
+    {
+      "path": "OFL.txt",
+      "bytes": 4301,
+      "sha256": "6a73f9541c2de74158c0e7cf6b0a58ef774f5a780bf191f2d7ec9cc53efe2bf2"
+    },
+    {
+      "path": "owner-venues.js",
+      "bytes": 2144,
+      "sha256": "bc57a61bcd75241cd34b2e3c8832c4d2b9d49c6cdf8249fc1555822582feb6f0"
+    },
+    {
+      "path": "playlist.js",
+      "bytes": 1380,
+      "sha256": "d610aec630bfe43ba4317a3a9d1db9968a77b9be88c12bbf6e9808162340818b"
+    },
+    {
+      "path": "style.css",
+      "bytes": 47547,
+      "sha256": "ce90e9c174975b62ecfaf6906f21de904649577d1c97c9c287275c8ce51e69c3"
+    },
+    {
+      "path": "world.js",
+      "bytes": 39525,
+      "sha256": "266789553dd6bd01de4ce42a2f084c72bb000748ae3922ea45ac23b484e62dfa"
+    }
+  ]
+}

@@ -716,10 +716,59 @@
     ]
   },
   "drumForegroundDepth": 317,
-  "seatedActors": {},
+  "seatedActors": {
+    "freebird-wall-0": {
+      "feet": [
+        183.76,
+        313.42
+      ],
+      "depth": 314.42,
+      "hideShadow": true
+    },
+    "freebird-wall-1": {
+      "feet": [
+        199.01,
+        296.65
+      ],
+      "depth": 297.65,
+      "hideShadow": true
+    },
+    "freebird-wall-2": {
+      "feet": [
+        214.26,
+        279.88
+      ],
+      "depth": 280.88,
+      "hideShadow": true
+    },
+    "freebird-wall-3": {
+      "feet": [
+        229.52,
+        263.12
+      ],
+      "depth": 264.12,
+      "hideShadow": true
+    },
+    "freebird-wall-4": {
+      "feet": [
+        244.77,
+        246.35
+      ],
+      "depth": 247.35,
+      "hideShadow": true
+    },
+    "freebird-wall-5": {
+      "feet": [
+        260.02,
+        229.59
+      ],
+      "depth": 230.59,
+      "hideShadow": true
+    }
+  },
   "layout": {
     "id": "freebird",
-    "version": 2,
+    "version": 3,
     "counter": [
       -6,
       3,
@@ -735,6 +784,17 @@
     "staffExit": [
       -6.8,
       4.85
+    ],
+    "wallTable": [
+      -9.4,
+      -4.4,
+      -8.75,
+      2
+    ],
+    "waitingSeats": 6,
+    "archEntry": [
+      -1.12,
+      3.6
     ]
   },
   "stageDeck": [
@@ -839,5 +899,80 @@
       172
     ]
   ],
-  "ledFixtureScale": 0.5
+  "ledFixtureScale": 0.5,
+  "props": [
+    {
+      "asset": "freebird-arch",
+      "x": -1.12,
+      "z": 4.7,
+      "drawWidth": 76,
+      "drawHeight": 130,
+      "footX": 38,
+      "footY": 120,
+      "depthOffset": -100
+    },
+    {
+      "asset": "freebird-wall-table",
+      "x": -8.95,
+      "z": -1.2,
+      "drawWidth": 142,
+      "drawHeight": 158,
+      "footX": 71,
+      "footY": 104
+    },
+    {
+      "asset": "standing-stool",
+      "x": -8.05,
+      "z": -3.7,
+      "drawWidth": 24,
+      "drawHeight": 30,
+      "footX": 12,
+      "footY": 28
+    },
+    {
+      "asset": "standing-stool",
+      "x": -8.05,
+      "z": -2.7,
+      "drawWidth": 24,
+      "drawHeight": 30,
+      "footX": 12,
+      "footY": 28
+    },
+    {
+      "asset": "standing-stool",
+      "x": -8.05,
+      "z": -1.7,
+      "drawWidth": 24,
+      "drawHeight": 30,
+      "footX": 12,
+      "footY": 28
+    },
+    {
+      "asset": "standing-stool",
+      "x": -8.05,
+      "z": -0.7,
+      "drawWidth": 24,
+      "drawHeight": 30,
+      "footX": 12,
+      "footY": 28
+    },
+    {
+      "asset": "standing-stool",
+      "x": -8.05,
+      "z": 0.3,
+      "drawWidth": 24,
+      "drawHeight": 30,
+      "footX": 12,
+      "footY": 28
+    },
+    {
+      "asset": "standing-stool",
+      "x": -8.05,
+      "z": 1.3,
+      "drawWidth": 24,
+      "drawHeight": 30,
+      "footX": 12,
+      "footY": 28
+    }
+  ]
 }

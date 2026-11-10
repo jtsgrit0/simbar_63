@@ -1,10 +1,13 @@
 import {launchPreparedDesk} from './native_test_workflow.mjs';
 import assert from 'node:assert/strict';
-import {SimBarGame,SAVE_KEY} from './WebGLTemplate/FastGame/core.js';
-import {BAND_MEMBERS,AFTER_SHOW_AUDIENCE,GREETING_SECONDS,EXIT_POINT,SURFER_LOWER_SPEED} from './WebGLTemplate/FastGame/aftershow.js';
+import {SimBarGame,SAVE_KEY,Booking} from './WebGLTemplate/FastGame/core.js';
+import {BAND_MEMBERS,GREETING_SECONDS,EXIT_POINT,SURFER_LOWER_SPEED} from './WebGLTemplate/FastGame/aftershow.js';
+import {Audience} from './WebGLTemplate/FastGame/audience.js';
 
 function storage(){const map=new Map();return{getItem:k=>map.get(k)??null,setItem:(k,v)=>map.set(k,String(v))};}
-function openNight(seed=12){const g=new SimBarGame({storage:storage(),seed});g.act('start');launchPreparedDesk(g);for(let i=0;i<3;i++)g.act('guide');return g;}
+// This retained choreography fixture requires all twenty historical front-row
+// actors. Variable-size campaign crowds are covered by test_native_audience.
+function openNight(seed=12,owner=0){const g=new SimBarGame({storage:storage(),seed});g.act('owner',{index:owner});g.journey.booking=Booking.newDeskPlan(1,0);g.act('start');launchPreparedDesk(g);for(let i=0;i<3;i++)g.act('guide');return g;}
 function endPerformance(g){g.journey.secondsLeft=.05;g.tick(.05);assert.equal(g.phase,'closing');assert(g.afterShowPending);}
 function finish(g,max=240){for(let t=0;t<max&&g.phase!=='results';t+=.05){g.tick(.05);if(g.farewellPending)g.act('farewellAck');if(g.reaction.activeKind)g.act('quick',{kind:g.reaction.activeKind});}return g;}
 
@@ -13,7 +16,7 @@ const g=openNight();const wallet=g.state.money;endPerformance(g);
 assert.equal(g.journey.settledSession,0);assert.equal(g.state.money,wallet);
 assert.equal(g.journey.musicPaused,true);assert.equal(g.journey.musicPauseSession,g.journey.session);
 g.act('musicState',{paused:false});g.act('continue');assert.equal(g.journey.musicPaused,false,'Continue paused a manually resumed track');
-assert.equal(g.journey.afterShow.audience.length,20);
+assert.equal(g.journey.afterShow.audience.length,31,'The eleven seated listeners join the twenty front-row participants');
 const visited=new Map(BAND_MEMBERS.map(id=>[id,new Set()]));
 const seats=g.actors.filter(a=>a.role==='seated').map(a=>({id:a.id,x:a.x,z:a.z}));
 let previous=new Map(g.actors.map(a=>[a.id,{x:a.x,z:a.z,y:a.y}]));
@@ -21,7 +24,7 @@ for(let t=0;t<240&&!g.farewellPending;t+=.05){
   g.tick(.05);
   const state=g.journey.afterShow;
   if(state.departureStarted)assert(state.members.every(m=>m.greeting===2),'Departure began before all four musicians finished both greetings');
-  else assert([...state.members,...state.audience].every(m=>m.phase!=='gone'),'Someone left before the greeting barrier');
+  else assert([...state.members,...state.audience.filter(item=>!item.parallel)].every(m=>m.phase!=='gone'),'A front-row participant left before the greeting barrier');
   const surfer=g.actors.find(a=>a.id==='crowd-surfer'),oldSurfer=previous.get(surfer.id);
   assert(surfer.y<=oldSurfer.y&&oldSurfer.y-surfer.y<=SURFER_LOWER_SPEED*.05+1e-8,'Crowd surfer teleported to the floor');
   for(const a of g.actors){const p=previous.get(a.id);assert(Math.hypot(a.x-p.x,a.z-p.z)<=.19,`${a.id} teleported`);}
@@ -53,7 +56,7 @@ for(const fan of g.journey.afterShow.audience){
   assert.equal(a.visible,false);
   assert.equal(a.moving,false);assert.equal(a._path.length,0);
 }
-for(const seat of seats){const a=g.actors.find(a=>a.id===seat.id);assert.equal(a.visible,true);assert.equal(a.x,seat.x);assert.equal(a.z,seat.z);}
+for(const seat of seats){const a=g.actors.find(a=>a.id===seat.id);assert.equal(a.visible,false);assert(Math.hypot(a.x-EXIT_POINT.x,a.z-EXIT_POINT.z)<=.181,'A seated listener did not stand and leave through the real exit');}
 for(const id of BAND_MEMBERS){
   for(const phase of ['stage','approach','highfive','hug','exit','gone'])assert(visited.get(id).has(phase),`${id} missed ${phase}`);
   const a=g.actors.find(a=>a.id===id);assert.equal(a.visible,false);assert(Math.hypot(a.x-8.8,a.z+5.55)<.22);
@@ -104,6 +107,35 @@ resumedExit.act('continue');assert.equal(resumedExit.journey.musicPaused,false);
 assert.equal(resumedExit.journey.afterShow.departingActor,token);assert(Math.hypot(position.x-savedPosition.x,position.z-savedPosition.z)<.09);
 finish(resumedExit);assert.equal(resumedExit.phase,'results');
 
+// A v2 closing save knows only the former front-row IDs. Its actual saved
+// listeners must join the new exit roster from their real positions, and the
+// upgrade must survive another mid-closing save without replaying receipts.
+const oldV2=openNight(15);endPerformance(oldV2);oldV2.tick(.4);oldV2.act('pause');
+const v2Raw=JSON.parse(oldV2.exportSave()),v2Journey=JSON.parse(v2Raw.journeyJson);
+v2Journey.afterShow.version=2;v2Journey.afterShow.audience=v2Journey.afterShow.audience.slice(0,20);delete v2Journey.afterShow.departureElapsed;
+v2Raw.journeyJson=JSON.stringify(v2Journey);
+const upgradedV2=new SimBarGame({storage:storage()});assert(upgradedV2.importSave(v2Raw));
+assert.equal(upgradedV2.journey.afterShow.version,3);assert.equal(upgradedV2.journey.afterShow.audience.length,31);
+for(const oldActor of v2Raw.native.actors.filter(Audience.isAudience)){
+  const actor=upgradedV2.actors.find(a=>a.id===oldActor.id);assert.equal(actor.x,oldActor.x);assert.equal(actor.z,oldActor.z);assert.equal(actor.visible,oldActor.visible);
+}
+upgradedV2.act('continue');upgradedV2.tick(.3);upgradedV2.act('pause');upgradedV2.save();
+const v2RoundTrip=new SimBarGame({storage:upgradedV2.storage});assert.deepEqual(v2RoundTrip.journey.afterShow,upgradedV2.journey.afterShow);
+v2RoundTrip.act('continue');finish(v2RoundTrip);assert.equal(v2RoundTrip.phase,'results');
+assert(v2RoundTrip.actors.filter(Audience.isAudience).every(a=>a.visible===false),'A migrated v2 listener remained after the farewell');
+
+// The original room's eleven authored chairs are outside its walking mesh.
+// Their listeners stand, take the authored short aisle handoff and physically
+// reach the same doorway; they do not teleport or remain seated at results.
+const seatedRoom=openNight(14,2),chairIds=seatedRoom.actors.filter(a=>a.role==='seated').map(a=>a.id);
+assert.equal(chairIds.length,11);endPerformance(seatedRoom);let oldPositions=new Map(seatedRoom.actors.map(a=>[a.id,{x:a.x,z:a.z}]));
+for(let time=0;time<240&&seatedRoom.phase!=='results';time+=.05){
+  seatedRoom.tick(.05);if(seatedRoom.farewellPending)seatedRoom.act('farewellAck');if(seatedRoom.reaction.activeKind)seatedRoom.act('quick',{kind:seatedRoom.reaction.activeKind});
+  for(const id of chairIds){const a=seatedRoom.actors.find(a=>a.id===id),old=oldPositions.get(id);assert(Math.hypot(a.x-old.x,a.z-old.z)<.19,'A seated listener teleported during the aisle handoff');}
+  oldPositions=new Map(seatedRoom.actors.map(a=>[a.id,{x:a.x,z:a.z}]));
+}
+assert.equal(seatedRoom.phase,'results');assert(seatedRoom.actors.filter(Audience.isAudience).every(a=>a.visible===false));
+
 // Historical v1 receipts remain historical. Floor actors do not reappear and
 // neither the new popup nor the financial settlement is replayed on Continue.
 const historical=JSON.parse(receipt.exportSave()),oldReceipt=JSON.parse(historical.journeyJson);
@@ -119,5 +151,7 @@ const legacy=openNight();endPerformance(legacy);const old=JSON.parse(legacy.expo
 const journey=JSON.parse(old.journeyJson);delete journey.afterShow;old.journeyJson=JSON.stringify(journey);legacy.storage.setItem(SAVE_KEY,JSON.stringify(old));
 const upgraded=new SimBarGame({storage:legacy.storage});upgraded.act('continue');assert(upgraded.journey.afterShow?.started);assert.equal(upgraded.phase,'closing');finish(upgraded);assert.equal(upgraded.phase,'results');
 upgraded.act('next');launchPreparedDesk(upgraded);assert.equal(upgraded.journey.musicPauseSession,0);assert.equal(upgraded.journey.musicPaused,false);
-assert(AFTER_SHOW_AUDIENCE.every(id=>upgraded.actors.find(a=>a.id===id).visible),'A new night did not restore the audience');
-console.log('PASS: all greetings precede 24 physical exits, surfer lowering, retained bar/lounge guests, acknowledged popup, persisted manual music resume, pause/save migration, concurrent cleanup, once-only settlement');
+const nextAudience=upgraded.actors.filter(a=>a.audienceVersion===1);
+assert.equal(nextAudience.length,upgraded.metrics().attendance);
+assert(nextAudience.every(a=>a.visible),'A new night did not restore its newly booked audience');
+console.log('PASS: all greetings precede 35 physical exits including standing bar/lounge listeners, parallel extra departures, surfer lowering, acknowledged popup, persisted manual music resume, pause/save migration, concurrent cleanup, once-only settlement');

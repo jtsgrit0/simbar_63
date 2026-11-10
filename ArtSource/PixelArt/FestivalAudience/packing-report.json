@@ -1,0 +1,4245 @@
+{
+  "passed": true,
+  "frameWidth": 64,
+  "frameHeight": 64,
+  "atlases": [
+    {
+      "key": "gestures",
+      "source": "gestures.source.png",
+      "sourceSha256": "a476cbca4fea5a9b75d5905939531497c79ee936413a1fbf735d07f29a1b0aae",
+      "sourceSize": [
+        1536,
+        1024
+      ],
+      "sourceAlphaExtrema": [
+        0,
+        254
+      ],
+      "rowBoundaries": [
+        0,
+        131,
+        259,
+        387,
+        514,
+        644,
+        772,
+        899,
+        1024
+      ],
+      "rows": [
+        {
+          "row": 0,
+          "style": "Casual",
+          "scale": 0.48695652173913045,
+          "cells": [
+            {
+              "column": 0,
+              "sourceCell": [
+                0,
+                0,
+                128,
+                131
+              ],
+              "placedRect": [
+                20,
+                6,
+                25,
+                55
+              ]
+            },
+            {
+              "column": 1,
+              "sourceCell": [
+                128,
+                0,
+                261,
+                131
+              ],
+              "placedRect": [
+                19,
+                6,
+                31,
+                55
+              ]
+            },
+            {
+              "column": 2,
+              "sourceCell": [
+                261,
+                0,
+                390,
+                131
+              ],
+              "placedRect": [
+                18,
+                6,
+                34,
+                55
+              ]
+            },
+            {
+              "column": 3,
+              "sourceCell": [
+                390,
+                0,
+                517,
+                131
+              ],
+              "placedRect": [
+                18,
+                5,
+                33,
+                56
+              ]
+            },
+            {
+              "column": 4,
+              "sourceCell": [
+                517,
+                0,
+                637,
+                131
+              ],
+              "placedRect": [
+                17,
+                6,
+                27,
+                55
+              ]
+            },
+            {
+              "column": 5,
+              "sourceCell": [
+                637,
+                0,
+                771,
+                131
+              ],
+              "placedRect": [
+                16,
+                7,
+                34,
+                54
+              ]
+            },
+            {
+              "column": 6,
+              "sourceCell": [
+                771,
+                0,
+                900,
+                131
+              ],
+              "placedRect": [
+                17,
+                10,
+                33,
+                51
+              ]
+            },
+            {
+              "column": 7,
+              "sourceCell": [
+                900,
+                0,
+                1029,
+                131
+              ],
+              "placedRect": [
+                18,
+                7,
+                31,
+                54
+              ]
+            },
+            {
+              "column": 8,
+              "sourceCell": [
+                1029,
+                0,
+                1148,
+                131
+              ],
+              "placedRect": [
+                20,
+                6,
+                24,
+                55
+              ]
+            },
+            {
+              "column": 9,
+              "sourceCell": [
+                1148,
+                0,
+                1276,
+                131
+              ],
+              "placedRect": [
+                17,
+                11,
+                28,
+                50
+              ]
+            },
+            {
+              "column": 10,
+              "sourceCell": [
+                1276,
+                0,
+                1408,
+                131
+              ],
+              "placedRect": [
+                17,
+                16,
+                29,
+                45
+              ]
+            },
+            {
+              "column": 11,
+              "sourceCell": [
+                1408,
+                0,
+                1536,
+                131
+              ],
+              "placedRect": [
+                18,
+                5,
+                26,
+                56
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "firstColumn": 0,
+              "uniqueFrames": 4,
+              "adjacentChangedPixels": [
+                1122,
+                1067,
+                1076,
+                1194
+              ]
+            },
+            {
+              "firstColumn": 4,
+              "uniqueFrames": 4,
+              "adjacentChangedPixels": [
+                1320,
+                1139,
+                1184,
+                1230
+              ]
+            },
+            {
+              "firstColumn": 8,
+              "uniqueFrames": 4,
+              "adjacentChangedPixels": [
+                1173,
+                1077,
+                1228,
+                949
+              ]
+            }
+          ]
+        },
+        {
+          "row": 1,
+          "style": "Suit",
+          "scale": 0.48695652173913045,
+          "cells": [
+            {
+              "column": 0,
+              "sourceCell": [
+                0,
+                131,
+                128,
+                259
+              ],
+              "placedRect": [
+                19,
+                5,
+                26,
+                56
+              ]
+            },
+            {
+              "column": 1,
+              "sourceCell": [
+                128,
+                131,
+                261,
+                259
+              ],
+              "placedRect": [
+                18,
+                6,
+                32,
+                55
+              ]
+            },
+            {
+              "column": 2,
+              "sourceCell": [
+                261,
+                131,
+                390,
+                259
+              ],
+              "placedRect": [
+                17,
+                6,
+                33,
+                55
+              ]
+            },
+            {
+              "column": 3,
+              "sourceCell": [
+                390,
+                131,
+                517,
+                259
+              ],
+              "placedRect": [
+                17,
+                5,
+                33,
+                56
+              ]
+            },
+            {
+              "column": 4,
+              "sourceCell": [
+                517,
+                131,
+                639,
+                259
+              ],
+              "placedRect": [
+                18,
+                6,
+                28,
+                55
+              ]
+            },
+            {
+              "column": 5,
+              "sourceCell": [
+                639,
+                131,
+                769,
+                259
+              ],
+              "placedRect": [
+                17,
+                7,
+                32,
+                54
+              ]
+            },
+            {
+              "column": 6,
+              "sourceCell": [
+                769,
+                131,
+                900,
+                259
+              ],
+              "placedRect": [
+                16,
+                9,
+                34,
+                52
+              ]
+            },
+            {
+              "column": 7,
+              "sourceCell": [
+                900,
+                131,
+                1029,
+                259
+              ],
+              "placedRect": [
+                19,
+                7,
+                31,
+                54
+              ]
+            },
+            {
+              "column": 8,
+              "sourceCell": [
+                1029,
+                131,
+                1148,
+                259
+              ],
+              "placedRect": [
+                20,
+                5,
+                24,
+                56
+              ]
+            },
+            {
+              "column": 9,
+              "sourceCell": [
+                1148,
+                131,
+                1277,
+                259
+              ],
+              "placedRect": [
+                17,
+                11,
+                28,
+                50
+              ]
+            },
+            {
+              "column": 10,
+              "sourceCell": [
+                1277,
+                131,
+                1409,
+                259
+              ],
+              "placedRect": [
+                17,
+                15,
+                29,
+                46
+              ]
+            },
+            {
+              "column": 11,
+              "sourceCell": [
+                1409,
+                131,
+                1536,
+                259
+              ],
+              "placedRect": [
+                19,
+                5,
+                26,
+                56
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "firstColumn": 0,
+              "uniqueFrames": 4,
+              "adjacentChangedPixels": [
+                1089,
+                1141,
+                1118,
+                1259
+              ]
+            },
+            {
+              "firstColumn": 4,
+              "uniqueFrames": 4,
+              "adjacentChangedPixels": [
+                1241,
+                1253,
+                1368,
+                1178
+              ]
+            },
+            {
+              "firstColumn": 8,
+              "uniqueFrames": 4,
+              "adjacentChangedPixels": [
+                1171,
+                1043,
+                1245,
+                881
+              ]
+            }
+          ]
+        },
+        {
+          "row": 2,
+          "style": "Beach",
+          "scale": 0.4827586206896552,
+          "cells": [
+            {
+              "column": 0,
+              "sourceCell": [
+                0,
+                259,
+                128,
+                387
+              ],
+              "placedRect": [
+                20,
+                6,
+                25,
+                55
+              ]
+            },
+            {
+              "column": 1,
+              "sourceCell": [
+                128,
+                259,
+                262,
+                387
+              ],
+              "placedRect": [
+                18,
+                7,
+                32,
+                54
+              ]
+            },
+            {
+              "column": 2,
+              "sourceCell": [
+                262,
+                259,
+                391,
+                387
+              ],
+              "placedRect": [
+                18,
+                5,
+                33,
+                56
+              ]
+            },
+            {
+              "column": 3,
+              "sourceCell": [
+                391,
+                259,
+                517,
+                387
+              ],
+              "placedRect": [
+                17,
+                5,
+                32,
+                56
+              ]
+            },
+            {
+              "column": 4,
+              "sourceCell": [
+                517,
+                259,
+                636,
+                387
+              ],
+              "placedRect": [
+                18,
+                7,
+                27,
+                54
+              ]
+            },
+            {
+              "column": 5,
+              "sourceCell": [
+                636,
+                259,
+                770,
+                387
+              ],
+              "placedRect": [
+                16,
+                9,
+                35,
+                52
+              ]
+            },
+            {
+              "column": 6,
+              "sourceCell": [
+                770,
+                259,
+                902,
+                387
+              ],
+              "placedRect": [
+                17,
+                10,
+                35,
+                51
+              ]
+            },
+            {
+              "column": 7,
+              "sourceCell": [
+                902,
+                259,
+                1029,
+                387
+              ],
+              "placedRect": [
+                18,
+                8,
+                31,
+                53
+              ]
+            },
+            {
+              "column": 8,
+              "sourceCell": [
+                1029,
+                259,
+                1148,
+                387
+              ],
+              "placedRect": [
+                19,
+                6,
+                25,
+                55
+              ]
+            },
+            {
+              "column": 9,
+              "sourceCell": [
+                1148,
+                259,
+                1276,
+                387
+              ],
+              "placedRect": [
+                17,
+                12,
+                28,
+                49
+              ]
+            },
+            {
+              "column": 10,
+              "sourceCell": [
+                1276,
+                259,
+                1409,
+                387
+              ],
+              "placedRect": [
+                17,
+                16,
+                29,
+                45
+              ]
+            },
+            {
+              "column": 11,
+              "sourceCell": [
+                1409,
+                259,
+                1536,
+                387
+              ],
+              "placedRect": [
+                19,
+                6,
+                25,
+                55
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "firstColumn": 0,
+              "uniqueFrames": 4,
+              "adjacentChangedPixels": [
+                1276,
+                1256,
+                1260,
+                1371
+              ]
+            },
+            {
+              "firstColumn": 4,
+              "uniqueFrames": 4,
+              "adjacentChangedPixels": [
+                1436,
+                1236,
+                1342,
+                1180
+              ]
+            },
+            {
+              "firstColumn": 8,
+              "uniqueFrames": 4,
+              "adjacentChangedPixels": [
+                1217,
+                1105,
+                1287,
+                970
+              ]
+            }
+          ]
+        },
+        {
+          "row": 3,
+          "style": "Worker",
+          "scale": 0.4827586206896552,
+          "cells": [
+            {
+              "column": 0,
+              "sourceCell": [
+                0,
+                387,
+                127,
+                514
+              ],
+              "placedRect": [
+                19,
+                6,
+                25,
+                55
+              ]
+            },
+            {
+              "column": 1,
+              "sourceCell": [
+                127,
+                387,
+                262,
+                514
+              ],
+              "placedRect": [
+                18,
+                7,
+                33,
+                54
+              ]
+            },
+            {
+              "column": 2,
+              "sourceCell": [
+                262,
+                387,
+                390,
+                514
+              ],
+              "placedRect": [
+                18,
+                7,
+                34,
+                54
+              ]
+            },
+            {
+              "column": 3,
+              "sourceCell": [
+                390,
+                387,
+                519,
+                514
+              ],
+              "placedRect": [
+                17,
+                6,
+                34,
+                55
+              ]
+            },
+            {
+              "column": 4,
+              "sourceCell": [
+                519,
+                387,
+                636,
+                514
+              ],
+              "placedRect": [
+                18,
+                6,
+                26,
+                55
+              ]
+            },
+            {
+              "column": 5,
+              "sourceCell": [
+                636,
+                387,
+                769,
+                514
+              ],
+              "placedRect": [
+                16,
+                8,
+                33,
+                53
+              ]
+            },
+            {
+              "column": 6,
+              "sourceCell": [
+                769,
+                387,
+                901,
+                514
+              ],
+              "placedRect": [
+                16,
+                9,
+                35,
+                52
+              ]
+            },
+            {
+              "column": 7,
+              "sourceCell": [
+                901,
+                387,
+                1029,
+                514
+              ],
+              "placedRect": [
+                18,
+                9,
+                30,
+                52
+              ]
+            },
+            {
+              "column": 8,
+              "sourceCell": [
+                1029,
+                387,
+                1149,
+                514
+              ],
+              "placedRect": [
+                20,
+                6,
+                24,
+                55
+              ]
+            },
+            {
+              "column": 9,
+              "sourceCell": [
+                1149,
+                387,
+                1277,
+                514
+              ],
+              "placedRect": [
+                18,
+                13,
+                28,
+                48
+              ]
+            },
+            {
+              "column": 10,
+              "sourceCell": [
+                1277,
+                387,
+                1411,
+                514
+              ],
+              "placedRect": [
+                18,
+                17,
+                29,
+                44
+              ]
+            },
+            {
+              "column": 11,
+              "sourceCell": [
+                1411,
+                387,
+                1536,
+                514
+              ],
+              "placedRect": [
+                20,
+                5,
+                25,
+                56
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "firstColumn": 0,
+              "uniqueFrames": 4,
+              "adjacentChangedPixels": [
+                1119,
+                1094,
+                1102,
+                1159
+              ]
+            },
+            {
+              "firstColumn": 4,
+              "uniqueFrames": 4,
+              "adjacentChangedPixels": [
+                1352,
+                1249,
+                1288,
+                1149
+              ]
+            },
+            {
+              "firstColumn": 8,
+              "uniqueFrames": 4,
+              "adjacentChangedPixels": [
+                1211,
+                995,
+                1280,
+                930
+              ]
+            }
+          ]
+        },
+        {
+          "row": 4,
+          "style": "Farmer",
+          "scale": 0.47863247863247865,
+          "cells": [
+            {
+              "column": 0,
+              "sourceCell": [
+                0,
+                514,
+                129,
+                644
+              ],
+              "placedRect": [
+                19,
+                6,
+                26,
+                55
+              ]
+            },
+            {
+              "column": 1,
+              "sourceCell": [
+                129,
+                514,
+                264,
+                644
+              ],
+              "placedRect": [
+                19,
+                8,
+                33,
+                53
+              ]
+            },
+            {
+              "column": 2,
+              "sourceCell": [
+                264,
+                514,
+                391,
+                644
+              ],
+              "placedRect": [
+                19,
+                7,
+                33,
+                54
+              ]
+            },
+            {
+              "column": 3,
+              "sourceCell": [
+                391,
+                514,
+                519,
+                644
+              ],
+              "placedRect": [
+                18,
+                6,
+                34,
+                55
+              ]
+            },
+            {
+              "column": 4,
+              "sourceCell": [
+                519,
+                514,
+                637,
+                644
+              ],
+              "placedRect": [
+                18,
+                7,
+                26,
+                54
+              ]
+            },
+            {
+              "column": 5,
+              "sourceCell": [
+                637,
+                514,
+                769,
+                644
+              ],
+              "placedRect": [
+                16,
+                8,
+                33,
+                53
+              ]
+            },
+            {
+              "column": 6,
+              "sourceCell": [
+                769,
+                514,
+                901,
+                644
+              ],
+              "placedRect": [
+                17,
+                11,
+                35,
+                50
+              ]
+            },
+            {
+              "column": 7,
+              "sourceCell": [
+                901,
+                514,
+                1029,
+                644
+              ],
+              "placedRect": [
+                18,
+                9,
+                31,
+                52
+              ]
+            },
+            {
+              "column": 8,
+              "sourceCell": [
+                1029,
+                514,
+                1148,
+                644
+              ],
+              "placedRect": [
+                20,
+                6,
+                24,
+                55
+              ]
+            },
+            {
+              "column": 9,
+              "sourceCell": [
+                1148,
+                514,
+                1277,
+                644
+              ],
+              "placedRect": [
+                17,
+                12,
+                29,
+                49
+              ]
+            },
+            {
+              "column": 10,
+              "sourceCell": [
+                1277,
+                514,
+                1411,
+                644
+              ],
+              "placedRect": [
+                17,
+                15,
+                30,
+                46
+              ]
+            },
+            {
+              "column": 11,
+              "sourceCell": [
+                1411,
+                514,
+                1536,
+                644
+              ],
+              "placedRect": [
+                19,
+                5,
+                25,
+                56
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "firstColumn": 0,
+              "uniqueFrames": 4,
+              "adjacentChangedPixels": [
+                1164,
+                1076,
+                1131,
+                1236
+              ]
+            },
+            {
+              "firstColumn": 4,
+              "uniqueFrames": 4,
+              "adjacentChangedPixels": [
+                1369,
+                1267,
+                1227,
+                1232
+              ]
+            },
+            {
+              "firstColumn": 8,
+              "uniqueFrames": 4,
+              "adjacentChangedPixels": [
+                1161,
+                1056,
+                1284,
+                1003
+              ]
+            }
+          ]
+        },
+        {
+          "row": 5,
+          "style": "Adventurer",
+          "scale": 0.49122807017543857,
+          "cells": [
+            {
+              "column": 0,
+              "sourceCell": [
+                0,
+                644,
+                128,
+                772
+              ],
+              "placedRect": [
+                18,
+                5,
+                28,
+                56
+              ]
+            },
+            {
+              "column": 1,
+              "sourceCell": [
+                128,
+                644,
+                263,
+                772
+              ],
+              "placedRect": [
+                18,
+                5,
+                34,
+                56
+              ]
+            },
+            {
+              "column": 2,
+              "sourceCell": [
+                263,
+                644,
+                390,
+                772
+              ],
+              "placedRect": [
+                17,
+                5,
+                34,
+                56
+              ]
+            },
+            {
+              "column": 3,
+              "sourceCell": [
+                390,
+                644,
+                517,
+                772
+              ],
+              "placedRect": [
+                16,
+                5,
+                34,
+                56
+              ]
+            },
+            {
+              "column": 4,
+              "sourceCell": [
+                517,
+                644,
+                636,
+                772
+              ],
+              "placedRect": [
+                17,
+                5,
+                29,
+                56
+              ]
+            },
+            {
+              "column": 5,
+              "sourceCell": [
+                636,
+                644,
+                767,
+                772
+              ],
+              "placedRect": [
+                15,
+                7,
+                35,
+                54
+              ]
+            },
+            {
+              "column": 6,
+              "sourceCell": [
+                767,
+                644,
+                900,
+                772
+              ],
+              "placedRect": [
+                15,
+                10,
+                37,
+                51
+              ]
+            },
+            {
+              "column": 7,
+              "sourceCell": [
+                900,
+                644,
+                1028,
+                772
+              ],
+              "placedRect": [
+                17,
+                8,
+                32,
+                53
+              ]
+            },
+            {
+              "column": 8,
+              "sourceCell": [
+                1028,
+                644,
+                1148,
+                772
+              ],
+              "placedRect": [
+                18,
+                5,
+                27,
+                56
+              ]
+            },
+            {
+              "column": 9,
+              "sourceCell": [
+                1148,
+                644,
+                1275,
+                772
+              ],
+              "placedRect": [
+                16,
+                12,
+                29,
+                49
+              ]
+            },
+            {
+              "column": 10,
+              "sourceCell": [
+                1275,
+                644,
+                1409,
+                772
+              ],
+              "placedRect": [
+                15,
+                16,
+                31,
+                45
+              ]
+            },
+            {
+              "column": 11,
+              "sourceCell": [
+                1409,
+                644,
+                1536,
+                772
+              ],
+              "placedRect": [
+                18,
+                5,
+                26,
+                56
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "firstColumn": 0,
+              "uniqueFrames": 4,
+              "adjacentChangedPixels": [
+                1183,
+                1222,
+                1230,
+                1346
+              ]
+            },
+            {
+              "firstColumn": 4,
+              "uniqueFrames": 4,
+              "adjacentChangedPixels": [
+                1470,
+                1274,
+                1313,
+                1315
+              ]
+            },
+            {
+              "firstColumn": 8,
+              "uniqueFrames": 4,
+              "adjacentChangedPixels": [
+                1272,
+                1112,
+                1301,
+                993
+              ]
+            }
+          ]
+        },
+        {
+          "row": 6,
+          "style": "Casual2",
+          "scale": 0.48695652173913045,
+          "cells": [
+            {
+              "column": 0,
+              "sourceCell": [
+                0,
+                772,
+                129,
+                899
+              ],
+              "placedRect": [
+                19,
+                5,
+                25,
+                56
+              ]
+            },
+            {
+              "column": 1,
+              "sourceCell": [
+                129,
+                772,
+                263,
+                899
+              ],
+              "placedRect": [
+                19,
+                5,
+                32,
+                56
+              ]
+            },
+            {
+              "column": 2,
+              "sourceCell": [
+                263,
+                772,
+                391,
+                899
+              ],
+              "placedRect": [
+                18,
+                6,
+                34,
+                55
+              ]
+            },
+            {
+              "column": 3,
+              "sourceCell": [
+                391,
+                772,
+                518,
+                899
+              ],
+              "placedRect": [
+                17,
+                5,
+                33,
+                56
+              ]
+            },
+            {
+              "column": 4,
+              "sourceCell": [
+                518,
+                772,
+                637,
+                899
+              ],
+              "placedRect": [
+                18,
+                6,
+                27,
+                55
+              ]
+            },
+            {
+              "column": 5,
+              "sourceCell": [
+                637,
+                772,
+                770,
+                899
+              ],
+              "placedRect": [
+                16,
+                8,
+                33,
+                53
+              ]
+            },
+            {
+              "column": 6,
+              "sourceCell": [
+                770,
+                772,
+                901,
+                899
+              ],
+              "placedRect": [
+                18,
+                10,
+                33,
+                51
+              ]
+            },
+            {
+              "column": 7,
+              "sourceCell": [
+                901,
+                772,
+                1029,
+                899
+              ],
+              "placedRect": [
+                19,
+                8,
+                31,
+                53
+              ]
+            },
+            {
+              "column": 8,
+              "sourceCell": [
+                1029,
+                772,
+                1149,
+                899
+              ],
+              "placedRect": [
+                20,
+                5,
+                24,
+                56
+              ]
+            },
+            {
+              "column": 9,
+              "sourceCell": [
+                1149,
+                772,
+                1276,
+                899
+              ],
+              "placedRect": [
+                17,
+                13,
+                28,
+                48
+              ]
+            },
+            {
+              "column": 10,
+              "sourceCell": [
+                1276,
+                772,
+                1409,
+                899
+              ],
+              "placedRect": [
+                16,
+                16,
+                30,
+                45
+              ]
+            },
+            {
+              "column": 11,
+              "sourceCell": [
+                1409,
+                772,
+                1536,
+                899
+              ],
+              "placedRect": [
+                19,
+                5,
+                25,
+                56
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "firstColumn": 0,
+              "uniqueFrames": 4,
+              "adjacentChangedPixels": [
+                1068,
+                1129,
+                1229,
+                1261
+              ]
+            },
+            {
+              "firstColumn": 4,
+              "uniqueFrames": 4,
+              "adjacentChangedPixels": [
+                1365,
+                1188,
+                1136,
+                1262
+              ]
+            },
+            {
+              "firstColumn": 8,
+              "uniqueFrames": 4,
+              "adjacentChangedPixels": [
+                1277,
+                1032,
+                1266,
+                977
+              ]
+            }
+          ]
+        },
+        {
+          "row": 7,
+          "style": "Punk",
+          "scale": 0.4827586206896552,
+          "cells": [
+            {
+              "column": 0,
+              "sourceCell": [
+                0,
+                899,
+                128,
+                1024
+              ],
+              "placedRect": [
+                19,
+                5,
+                26,
+                56
+              ]
+            },
+            {
+              "column": 1,
+              "sourceCell": [
+                128,
+                899,
+                263,
+                1024
+              ],
+              "placedRect": [
+                18,
+                6,
+                33,
+                55
+              ]
+            },
+            {
+              "column": 2,
+              "sourceCell": [
+                263,
+                899,
+                390,
+                1024
+              ],
+              "placedRect": [
+                17,
+                6,
+                33,
+                55
+              ]
+            },
+            {
+              "column": 3,
+              "sourceCell": [
+                390,
+                899,
+                518,
+                1024
+              ],
+              "placedRect": [
+                17,
+                5,
+                34,
+                56
+              ]
+            },
+            {
+              "column": 4,
+              "sourceCell": [
+                518,
+                899,
+                636,
+                1024
+              ],
+              "placedRect": [
+                18,
+                7,
+                27,
+                54
+              ]
+            },
+            {
+              "column": 5,
+              "sourceCell": [
+                636,
+                899,
+                767,
+                1024
+              ],
+              "placedRect": [
+                15,
+                8,
+                34,
+                53
+              ]
+            },
+            {
+              "column": 6,
+              "sourceCell": [
+                767,
+                899,
+                902,
+                1024
+              ],
+              "placedRect": [
+                15,
+                11,
+                37,
+                50
+              ]
+            },
+            {
+              "column": 7,
+              "sourceCell": [
+                902,
+                899,
+                1029,
+                1024
+              ],
+              "placedRect": [
+                19,
+                9,
+                30,
+                52
+              ]
+            },
+            {
+              "column": 8,
+              "sourceCell": [
+                1029,
+                899,
+                1148,
+                1024
+              ],
+              "placedRect": [
+                19,
+                6,
+                25,
+                55
+              ]
+            },
+            {
+              "column": 9,
+              "sourceCell": [
+                1148,
+                899,
+                1276,
+                1024
+              ],
+              "placedRect": [
+                17,
+                12,
+                29,
+                49
+              ]
+            },
+            {
+              "column": 10,
+              "sourceCell": [
+                1276,
+                899,
+                1410,
+                1024
+              ],
+              "placedRect": [
+                16,
+                16,
+                32,
+                45
+              ]
+            },
+            {
+              "column": 11,
+              "sourceCell": [
+                1410,
+                899,
+                1536,
+                1024
+              ],
+              "placedRect": [
+                18,
+                5,
+                26,
+                56
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "firstColumn": 0,
+              "uniqueFrames": 4,
+              "adjacentChangedPixels": [
+                1268,
+                1107,
+                1138,
+                1246
+              ]
+            },
+            {
+              "firstColumn": 4,
+              "uniqueFrames": 4,
+              "adjacentChangedPixels": [
+                1287,
+                1268,
+                1348,
+                1194
+              ]
+            },
+            {
+              "firstColumn": 8,
+              "uniqueFrames": 4,
+              "adjacentChangedPixels": [
+                1194,
+                1148,
+                1353,
+                986
+              ]
+            }
+          ]
+        }
+      ],
+      "file": "festival-gestures.png",
+      "bytes": 93697,
+      "sha256": "597a849b656f80c20464e5cf8fe1cdbff1fd6d0d8f5cd1516ea1515e9b116232",
+      "size": [
+        768,
+        512
+      ],
+      "nonEmptyCells": 96
+    },
+    {
+      "key": "vocals",
+      "source": "vocals.corrected.source.png",
+      "sourceSha256": "78bbd304da2ac5094244007ea232bde01bad2a222c497c54046f1b476238c582",
+      "sourceSize": [
+        1536,
+        1024
+      ],
+      "sourceAlphaExtrema": [
+        0,
+        254
+      ],
+      "rowBoundaries": [
+        0,
+        133,
+        262,
+        390,
+        514,
+        640,
+        764,
+        891,
+        1024
+      ],
+      "rows": [
+        {
+          "row": 0,
+          "style": "Casual",
+          "scale": 0.4827586206896552,
+          "cells": [
+            {
+              "column": 0,
+              "sourceCell": [
+                0,
+                0,
+                139,
+                133
+              ],
+              "placedRect": [
+                20,
+                13,
+                25,
+                48
+              ]
+            },
+            {
+              "column": 1,
+              "sourceCell": [
+                139,
+                0,
+                269,
+                133
+              ],
+              "placedRect": [
+                20,
+                13,
+                27,
+                48
+              ]
+            },
+            {
+              "column": 2,
+              "sourceCell": [
+                269,
+                0,
+                400,
+                133
+              ],
+              "placedRect": [
+                20,
+                13,
+                31,
+                48
+              ]
+            },
+            {
+              "column": 3,
+              "sourceCell": [
+                400,
+                0,
+                521,
+                133
+              ],
+              "placedRect": [
+                20,
+                13,
+                33,
+                48
+              ]
+            },
+            {
+              "column": 4,
+              "sourceCell": [
+                521,
+                0,
+                649,
+                133
+              ],
+              "placedRect": [
+                13,
+                13,
+                35,
+                48
+              ]
+            },
+            {
+              "column": 5,
+              "sourceCell": [
+                649,
+                0,
+                760,
+                133
+              ],
+              "placedRect": [
+                20,
+                5,
+                21,
+                56
+              ]
+            },
+            {
+              "column": 6,
+              "sourceCell": [
+                760,
+                0,
+                903,
+                133
+              ],
+              "placedRect": [
+                12,
+                13,
+                35,
+                48
+              ]
+            },
+            {
+              "column": 7,
+              "sourceCell": [
+                903,
+                0,
+                1019,
+                133
+              ],
+              "placedRect": [
+                20,
+                5,
+                21,
+                56
+              ]
+            },
+            {
+              "column": 8,
+              "sourceCell": [
+                1019,
+                0,
+                1144,
+                133
+              ],
+              "placedRect": [
+                19,
+                13,
+                26,
+                48
+              ]
+            },
+            {
+              "column": 9,
+              "sourceCell": [
+                1144,
+                0,
+                1271,
+                133
+              ],
+              "placedRect": [
+                18,
+                13,
+                30,
+                48
+              ]
+            },
+            {
+              "column": 10,
+              "sourceCell": [
+                1271,
+                0,
+                1403,
+                133
+              ],
+              "placedRect": [
+                19,
+                13,
+                32,
+                48
+              ]
+            },
+            {
+              "column": 11,
+              "sourceCell": [
+                1403,
+                0,
+                1536,
+                133
+              ],
+              "placedRect": [
+                20,
+                13,
+                26,
+                48
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "firstColumn": 0,
+              "uniqueFrames": 4,
+              "adjacentChangedPixels": [
+                797,
+                854,
+                812,
+                964
+              ]
+            },
+            {
+              "firstColumn": 4,
+              "uniqueFrames": 4,
+              "adjacentChangedPixels": [
+                1042,
+                1010,
+                1042,
+                1048
+              ]
+            },
+            {
+              "firstColumn": 8,
+              "uniqueFrames": 4,
+              "adjacentChangedPixels": [
+                993,
+                1031,
+                1100,
+                865
+              ]
+            }
+          ]
+        },
+        {
+          "row": 1,
+          "style": "Suit",
+          "scale": 0.48695652173913045,
+          "cells": [
+            {
+              "column": 0,
+              "sourceCell": [
+                0,
+                133,
+                138,
+                262
+              ],
+              "placedRect": [
+                19,
+                12,
+                27,
+                49
+              ]
+            },
+            {
+              "column": 1,
+              "sourceCell": [
+                138,
+                133,
+                268,
+                262
+              ],
+              "placedRect": [
+                19,
+                12,
+                28,
+                49
+              ]
+            },
+            {
+              "column": 2,
+              "sourceCell": [
+                268,
+                133,
+                399,
+                262
+              ],
+              "placedRect": [
+                20,
+                12,
+                33,
+                49
+              ]
+            },
+            {
+              "column": 3,
+              "sourceCell": [
+                399,
+                133,
+                521,
+                262
+              ],
+              "placedRect": [
+                19,
+                12,
+                34,
+                49
+              ]
+            },
+            {
+              "column": 4,
+              "sourceCell": [
+                521,
+                133,
+                649,
+                262
+              ],
+              "placedRect": [
+                12,
+                12,
+                36,
+                49
+              ]
+            },
+            {
+              "column": 5,
+              "sourceCell": [
+                649,
+                133,
+                762,
+                262
+              ],
+              "placedRect": [
+                20,
+                5,
+                22,
+                56
+              ]
+            },
+            {
+              "column": 6,
+              "sourceCell": [
+                762,
+                133,
+                904,
+                262
+              ],
+              "placedRect": [
+                12,
+                12,
+                37,
+                49
+              ]
+            },
+            {
+              "column": 7,
+              "sourceCell": [
+                904,
+                133,
+                1019,
+                262
+              ],
+              "placedRect": [
+                20,
+                5,
+                21,
+                56
+              ]
+            },
+            {
+              "column": 8,
+              "sourceCell": [
+                1019,
+                133,
+                1145,
+                262
+              ],
+              "placedRect": [
+                18,
+                12,
+                28,
+                49
+              ]
+            },
+            {
+              "column": 9,
+              "sourceCell": [
+                1145,
+                133,
+                1271,
+                262
+              ],
+              "placedRect": [
+                20,
+                12,
+                30,
+                49
+              ]
+            },
+            {
+              "column": 10,
+              "sourceCell": [
+                1271,
+                133,
+                1402,
+                262
+              ],
+              "placedRect": [
+                19,
+                12,
+                33,
+                49
+              ]
+            },
+            {
+              "column": 11,
+              "sourceCell": [
+                1402,
+                133,
+                1536,
+                262
+              ],
+              "placedRect": [
+                18,
+                12,
+                28,
+                49
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "firstColumn": 0,
+              "uniqueFrames": 4,
+              "adjacentChangedPixels": [
+                921,
+                965,
+                987,
+                1067
+              ]
+            },
+            {
+              "firstColumn": 4,
+              "uniqueFrames": 4,
+              "adjacentChangedPixels": [
+                1174,
+                1112,
+                1144,
+                1167
+              ]
+            },
+            {
+              "firstColumn": 8,
+              "uniqueFrames": 4,
+              "adjacentChangedPixels": [
+                1082,
+                1028,
+                1124,
+                946
+              ]
+            }
+          ]
+        },
+        {
+          "row": 2,
+          "style": "Beach",
+          "scale": 0.49557522123893805,
+          "cells": [
+            {
+              "column": 0,
+              "sourceCell": [
+                0,
+                262,
+                138,
+                390
+              ],
+              "placedRect": [
+                19,
+                11,
+                27,
+                50
+              ]
+            },
+            {
+              "column": 1,
+              "sourceCell": [
+                138,
+                262,
+                268,
+                390
+              ],
+              "placedRect": [
+                19,
+                11,
+                28,
+                50
+              ]
+            },
+            {
+              "column": 2,
+              "sourceCell": [
+                268,
+                262,
+                400,
+                390
+              ],
+              "placedRect": [
+                20,
+                11,
+                33,
+                50
+              ]
+            },
+            {
+              "column": 3,
+              "sourceCell": [
+                400,
+                262,
+                521,
+                390
+              ],
+              "placedRect": [
+                19,
+                11,
+                35,
+                50
+              ]
+            },
+            {
+              "column": 4,
+              "sourceCell": [
+                521,
+                262,
+                649,
+                390
+              ],
+              "placedRect": [
+                12,
+                12,
+                37,
+                49
+              ]
+            },
+            {
+              "column": 5,
+              "sourceCell": [
+                649,
+                262,
+                761,
+                390
+              ],
+              "placedRect": [
+                19,
+                5,
+                23,
+                56
+              ]
+            },
+            {
+              "column": 6,
+              "sourceCell": [
+                761,
+                262,
+                904,
+                390
+              ],
+              "placedRect": [
+                12,
+                11,
+                38,
+                50
+              ]
+            },
+            {
+              "column": 7,
+              "sourceCell": [
+                904,
+                262,
+                1019,
+                390
+              ],
+              "placedRect": [
+                20,
+                5,
+                22,
+                56
+              ]
+            },
+            {
+              "column": 8,
+              "sourceCell": [
+                1019,
+                262,
+                1144,
+                390
+              ],
+              "placedRect": [
+                18,
+                11,
+                28,
+                50
+              ]
+            },
+            {
+              "column": 9,
+              "sourceCell": [
+                1144,
+                262,
+                1270,
+                390
+              ],
+              "placedRect": [
+                18,
+                11,
+                31,
+                50
+              ]
+            },
+            {
+              "column": 10,
+              "sourceCell": [
+                1270,
+                262,
+                1401,
+                390
+              ],
+              "placedRect": [
+                18,
+                12,
+                33,
+                49
+              ]
+            },
+            {
+              "column": 11,
+              "sourceCell": [
+                1401,
+                262,
+                1536,
+                390
+              ],
+              "placedRect": [
+                18,
+                11,
+                28,
+                50
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "firstColumn": 0,
+              "uniqueFrames": 4,
+              "adjacentChangedPixels": [
+                1013,
+                1061,
+                1065,
+                1114
+              ]
+            },
+            {
+              "firstColumn": 4,
+              "uniqueFrames": 4,
+              "adjacentChangedPixels": [
+                1263,
+                1315,
+                1309,
+                1266
+              ]
+            },
+            {
+              "firstColumn": 8,
+              "uniqueFrames": 4,
+              "adjacentChangedPixels": [
+                1118,
+                1125,
+                1196,
+                1016
+              ]
+            }
+          ]
+        },
+        {
+          "row": 3,
+          "style": "Worker",
+          "scale": 0.49557522123893805,
+          "cells": [
+            {
+              "column": 0,
+              "sourceCell": [
+                0,
+                390,
+                139,
+                514
+              ],
+              "placedRect": [
+                19,
+                12,
+                27,
+                49
+              ]
+            },
+            {
+              "column": 1,
+              "sourceCell": [
+                139,
+                390,
+                269,
+                514
+              ],
+              "placedRect": [
+                20,
+                12,
+                27,
+                49
+              ]
+            },
+            {
+              "column": 2,
+              "sourceCell": [
+                269,
+                390,
+                401,
+                514
+              ],
+              "placedRect": [
+                20,
+                12,
+                33,
+                49
+              ]
+            },
+            {
+              "column": 3,
+              "sourceCell": [
+                401,
+                390,
+                521,
+                514
+              ],
+              "placedRect": [
+                20,
+                12,
+                34,
+                49
+              ]
+            },
+            {
+              "column": 4,
+              "sourceCell": [
+                521,
+                390,
+                649,
+                514
+              ],
+              "placedRect": [
+                11,
+                12,
+                37,
+                49
+              ]
+            },
+            {
+              "column": 5,
+              "sourceCell": [
+                649,
+                390,
+                761,
+                514
+              ],
+              "placedRect": [
+                20,
+                5,
+                23,
+                56
+              ]
+            },
+            {
+              "column": 6,
+              "sourceCell": [
+                761,
+                390,
+                904,
+                514
+              ],
+              "placedRect": [
+                11,
+                12,
+                38,
+                49
+              ]
+            },
+            {
+              "column": 7,
+              "sourceCell": [
+                904,
+                390,
+                1019,
+                514
+              ],
+              "placedRect": [
+                20,
+                5,
+                22,
+                56
+              ]
+            },
+            {
+              "column": 8,
+              "sourceCell": [
+                1019,
+                390,
+                1144,
+                514
+              ],
+              "placedRect": [
+                18,
+                12,
+                28,
+                49
+              ]
+            },
+            {
+              "column": 9,
+              "sourceCell": [
+                1144,
+                390,
+                1271,
+                514
+              ],
+              "placedRect": [
+                18,
+                12,
+                31,
+                49
+              ]
+            },
+            {
+              "column": 10,
+              "sourceCell": [
+                1271,
+                390,
+                1402,
+                514
+              ],
+              "placedRect": [
+                19,
+                13,
+                33,
+                48
+              ]
+            },
+            {
+              "column": 11,
+              "sourceCell": [
+                1402,
+                390,
+                1536,
+                514
+              ],
+              "placedRect": [
+                17,
+                12,
+                28,
+                49
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "firstColumn": 0,
+              "uniqueFrames": 4,
+              "adjacentChangedPixels": [
+                828,
+                838,
+                883,
+                947
+              ]
+            },
+            {
+              "firstColumn": 4,
+              "uniqueFrames": 4,
+              "adjacentChangedPixels": [
+                1307,
+                1220,
+                1182,
+                1292
+              ]
+            },
+            {
+              "firstColumn": 8,
+              "uniqueFrames": 4,
+              "adjacentChangedPixels": [
+                962,
+                1102,
+                1191,
+                951
+              ]
+            }
+          ]
+        },
+        {
+          "row": 4,
+          "style": "Farmer",
+          "scale": 0.49557522123893805,
+          "cells": [
+            {
+              "column": 0,
+              "sourceCell": [
+                0,
+                514,
+                139,
+                640
+              ],
+              "placedRect": [
+                19,
+                11,
+                27,
+                50
+              ]
+            },
+            {
+              "column": 1,
+              "sourceCell": [
+                139,
+                514,
+                268,
+                640
+              ],
+              "placedRect": [
+                20,
+                11,
+                28,
+                50
+              ]
+            },
+            {
+              "column": 2,
+              "sourceCell": [
+                268,
+                514,
+                399,
+                640
+              ],
+              "placedRect": [
+                20,
+                11,
+                33,
+                50
+              ]
+            },
+            {
+              "column": 3,
+              "sourceCell": [
+                399,
+                514,
+                520,
+                640
+              ],
+              "placedRect": [
+                19,
+                11,
+                35,
+                50
+              ]
+            },
+            {
+              "column": 4,
+              "sourceCell": [
+                520,
+                514,
+                648,
+                640
+              ],
+              "placedRect": [
+                11,
+                11,
+                37,
+                50
+              ]
+            },
+            {
+              "column": 5,
+              "sourceCell": [
+                648,
+                514,
+                762,
+                640
+              ],
+              "placedRect": [
+                19,
+                5,
+                23,
+                56
+              ]
+            },
+            {
+              "column": 6,
+              "sourceCell": [
+                762,
+                514,
+                904,
+                640
+              ],
+              "placedRect": [
+                12,
+                11,
+                37,
+                50
+              ]
+            },
+            {
+              "column": 7,
+              "sourceCell": [
+                904,
+                514,
+                1019,
+                640
+              ],
+              "placedRect": [
+                20,
+                5,
+                22,
+                56
+              ]
+            },
+            {
+              "column": 8,
+              "sourceCell": [
+                1019,
+                514,
+                1143,
+                640
+              ],
+              "placedRect": [
+                18,
+                11,
+                27,
+                50
+              ]
+            },
+            {
+              "column": 9,
+              "sourceCell": [
+                1143,
+                514,
+                1270,
+                640
+              ],
+              "placedRect": [
+                18,
+                11,
+                32,
+                50
+              ]
+            },
+            {
+              "column": 10,
+              "sourceCell": [
+                1270,
+                514,
+                1401,
+                640
+              ],
+              "placedRect": [
+                19,
+                12,
+                33,
+                49
+              ]
+            },
+            {
+              "column": 11,
+              "sourceCell": [
+                1401,
+                514,
+                1536,
+                640
+              ],
+              "placedRect": [
+                17,
+                11,
+                29,
+                50
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "firstColumn": 0,
+              "uniqueFrames": 4,
+              "adjacentChangedPixels": [
+                858,
+                940,
+                1034,
+                1034
+              ]
+            },
+            {
+              "firstColumn": 4,
+              "uniqueFrames": 4,
+              "adjacentChangedPixels": [
+                1262,
+                1222,
+                1189,
+                1282
+              ]
+            },
+            {
+              "firstColumn": 8,
+              "uniqueFrames": 4,
+              "adjacentChangedPixels": [
+                1056,
+                1127,
+                1216,
+                937
+              ]
+            }
+          ]
+        },
+        {
+          "row": 5,
+          "style": "Adventurer",
+          "scale": 0.509090909090909,
+          "cells": [
+            {
+              "column": 0,
+              "sourceCell": [
+                0,
+                640,
+                138,
+                764
+              ],
+              "placedRect": [
+                18,
+                12,
+                27,
+                49
+              ]
+            },
+            {
+              "column": 1,
+              "sourceCell": [
+                138,
+                640,
+                267,
+                764
+              ],
+              "placedRect": [
+                19,
+                12,
+                28,
+                49
+              ]
+            },
+            {
+              "column": 2,
+              "sourceCell": [
+                267,
+                640,
+                399,
+                764
+              ],
+              "placedRect": [
+                19,
+                12,
+                34,
+                49
+              ]
+            },
+            {
+              "column": 3,
+              "sourceCell": [
+                399,
+                640,
+                520,
+                764
+              ],
+              "placedRect": [
+                19,
+                12,
+                36,
+                49
+              ]
+            },
+            {
+              "column": 4,
+              "sourceCell": [
+                520,
+                640,
+                649,
+                764
+              ],
+              "placedRect": [
+                11,
+                12,
+                39,
+                49
+              ]
+            },
+            {
+              "column": 5,
+              "sourceCell": [
+                649,
+                640,
+                761,
+                764
+              ],
+              "placedRect": [
+                19,
+                5,
+                23,
+                56
+              ]
+            },
+            {
+              "column": 6,
+              "sourceCell": [
+                761,
+                640,
+                903,
+                764
+              ],
+              "placedRect": [
+                11,
+                12,
+                38,
+                49
+              ]
+            },
+            {
+              "column": 7,
+              "sourceCell": [
+                903,
+                640,
+                1019,
+                764
+              ],
+              "placedRect": [
+                19,
+                5,
+                23,
+                56
+              ]
+            },
+            {
+              "column": 8,
+              "sourceCell": [
+                1019,
+                640,
+                1143,
+                764
+              ],
+              "placedRect": [
+                18,
+                12,
+                28,
+                49
+              ]
+            },
+            {
+              "column": 9,
+              "sourceCell": [
+                1143,
+                640,
+                1272,
+                764
+              ],
+              "placedRect": [
+                18,
+                12,
+                32,
+                49
+              ]
+            },
+            {
+              "column": 10,
+              "sourceCell": [
+                1272,
+                640,
+                1403,
+                764
+              ],
+              "placedRect": [
+                19,
+                13,
+                33,
+                48
+              ]
+            },
+            {
+              "column": 11,
+              "sourceCell": [
+                1403,
+                640,
+                1536,
+                764
+              ],
+              "placedRect": [
+                19,
+                12,
+                29,
+                49
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "firstColumn": 0,
+              "uniqueFrames": 4,
+              "adjacentChangedPixels": [
+                802,
+                889,
+                980,
+                1040
+              ]
+            },
+            {
+              "firstColumn": 4,
+              "uniqueFrames": 4,
+              "adjacentChangedPixels": [
+                1285,
+                1166,
+                1230,
+                1299
+              ]
+            },
+            {
+              "firstColumn": 8,
+              "uniqueFrames": 4,
+              "adjacentChangedPixels": [
+                1040,
+                1092,
+                1114,
+                955
+              ]
+            }
+          ]
+        },
+        {
+          "row": 6,
+          "style": "Casual2",
+          "scale": 0.5,
+          "cells": [
+            {
+              "column": 0,
+              "sourceCell": [
+                0,
+                764,
+                140,
+                891
+              ],
+              "placedRect": [
+                20,
+                12,
+                26,
+                50
+              ]
+            },
+            {
+              "column": 1,
+              "sourceCell": [
+                140,
+                764,
+                269,
+                891
+              ],
+              "placedRect": [
+                21,
+                12,
+                26,
+                49
+              ]
+            },
+            {
+              "column": 2,
+              "sourceCell": [
+                269,
+                764,
+                401,
+                891
+              ],
+              "placedRect": [
+                20,
+                12,
+                32,
+                49
+              ]
+            },
+            {
+              "column": 3,
+              "sourceCell": [
+                401,
+                764,
+                520,
+                891
+              ],
+              "placedRect": [
+                21,
+                12,
+                34,
+                48
+              ]
+            },
+            {
+              "column": 4,
+              "sourceCell": [
+                520,
+                764,
+                649,
+                891
+              ],
+              "placedRect": [
+                10,
+                12,
+                38,
+                49
+              ]
+            },
+            {
+              "column": 5,
+              "sourceCell": [
+                649,
+                764,
+                760,
+                891
+              ],
+              "placedRect": [
+                20,
+                5,
+                22,
+                56
+              ]
+            },
+            {
+              "column": 6,
+              "sourceCell": [
+                760,
+                764,
+                904,
+                891
+              ],
+              "placedRect": [
+                10,
+                12,
+                38,
+                48
+              ]
+            },
+            {
+              "column": 7,
+              "sourceCell": [
+                904,
+                764,
+                1019,
+                891
+              ],
+              "placedRect": [
+                20,
+                6,
+                22,
+                56
+              ]
+            },
+            {
+              "column": 8,
+              "sourceCell": [
+                1019,
+                764,
+                1144,
+                891
+              ],
+              "placedRect": [
+                19,
+                12,
+                27,
+                48
+              ]
+            },
+            {
+              "column": 9,
+              "sourceCell": [
+                1144,
+                764,
+                1272,
+                891
+              ],
+              "placedRect": [
+                18,
+                12,
+                31,
+                48
+              ]
+            },
+            {
+              "column": 10,
+              "sourceCell": [
+                1272,
+                764,
+                1403,
+                891
+              ],
+              "placedRect": [
+                20,
+                14,
+                32,
+                48
+              ]
+            },
+            {
+              "column": 11,
+              "sourceCell": [
+                1403,
+                764,
+                1536,
+                891
+              ],
+              "placedRect": [
+                19,
+                12,
+                27,
+                48
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "firstColumn": 0,
+              "uniqueFrames": 4,
+              "adjacentChangedPixels": [
+                855,
+                971,
+                980,
+                1038
+              ]
+            },
+            {
+              "firstColumn": 4,
+              "uniqueFrames": 4,
+              "adjacentChangedPixels": [
+                1201,
+                1193,
+                1191,
+                1221
+              ]
+            },
+            {
+              "firstColumn": 8,
+              "uniqueFrames": 4,
+              "adjacentChangedPixels": [
+                971,
+                1139,
+                1183,
+                899
+              ]
+            }
+          ]
+        },
+        {
+          "row": 7,
+          "style": "Punk",
+          "scale": 0.509090909090909,
+          "cells": [
+            {
+              "column": 0,
+              "sourceCell": [
+                0,
+                891,
+                138,
+                1024
+              ],
+              "placedRect": [
+                21,
+                12,
+                24,
+                49
+              ]
+            },
+            {
+              "column": 1,
+              "sourceCell": [
+                138,
+                891,
+                267,
+                1024
+              ],
+              "placedRect": [
+                20,
+                12,
+                25,
+                49
+              ]
+            },
+            {
+              "column": 2,
+              "sourceCell": [
+                267,
+                891,
+                400,
+                1024
+              ],
+              "placedRect": [
+                21,
+                13,
+                32,
+                48
+              ]
+            },
+            {
+              "column": 3,
+              "sourceCell": [
+                400,
+                891,
+                519,
+                1024
+              ],
+              "placedRect": [
+                20,
+                13,
+                33,
+                48
+              ]
+            },
+            {
+              "column": 4,
+              "sourceCell": [
+                519,
+                891,
+                649,
+                1024
+              ],
+              "placedRect": [
+                11,
+                12,
+                38,
+                49
+              ]
+            },
+            {
+              "column": 5,
+              "sourceCell": [
+                649,
+                891,
+                759,
+                1024
+              ],
+              "placedRect": [
+                20,
+                5,
+                22,
+                56
+              ]
+            },
+            {
+              "column": 6,
+              "sourceCell": [
+                759,
+                891,
+                905,
+                1024
+              ],
+              "placedRect": [
+                10,
+                12,
+                40,
+                49
+              ]
+            },
+            {
+              "column": 7,
+              "sourceCell": [
+                905,
+                891,
+                1019,
+                1024
+              ],
+              "placedRect": [
+                20,
+                5,
+                21,
+                56
+              ]
+            },
+            {
+              "column": 8,
+              "sourceCell": [
+                1019,
+                891,
+                1144,
+                1024
+              ],
+              "placedRect": [
+                18,
+                13,
+                28,
+                48
+              ]
+            },
+            {
+              "column": 9,
+              "sourceCell": [
+                1144,
+                891,
+                1269,
+                1024
+              ],
+              "placedRect": [
+                17,
+                13,
+                32,
+                48
+              ]
+            },
+            {
+              "column": 10,
+              "sourceCell": [
+                1269,
+                891,
+                1402,
+                1024
+              ],
+              "placedRect": [
+                17,
+                13,
+                36,
+                48
+              ]
+            },
+            {
+              "column": 11,
+              "sourceCell": [
+                1402,
+                891,
+                1536,
+                1024
+              ],
+              "placedRect": [
+                17,
+                13,
+                31,
+                48
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "firstColumn": 0,
+              "uniqueFrames": 4,
+              "adjacentChangedPixels": [
+                788,
+                966,
+                798,
+                903
+              ]
+            },
+            {
+              "firstColumn": 4,
+              "uniqueFrames": 4,
+              "adjacentChangedPixels": [
+                1175,
+                1240,
+                1277,
+                1202
+              ]
+            },
+            {
+              "firstColumn": 8,
+              "uniqueFrames": 4,
+              "adjacentChangedPixels": [
+                1009,
+                1162,
+                1114,
+                955
+              ]
+            }
+          ]
+        }
+      ],
+      "file": "festival-vocals.png",
+      "bytes": 83963,
+      "sha256": "88abe52fad72bc0196ec2ab693acaf6901dad01f3c98787e427ac791402fed99",
+      "size": [
+        768,
+        512
+      ],
+      "nonEmptyCells": 96
+    },
+    {
+      "key": "surf",
+      "source": "surf.source.png",
+      "sourceSha256": "f35a15c7a30627c05d649971f764135029593b668f93d7aab54561f18e10ba2c",
+      "sourceSize": [
+        887,
+        1774
+      ],
+      "sourceAlphaExtrema": [
+        0,
+        255
+      ],
+      "rowBoundaries": [
+        0,
+        222,
+        443,
+        665,
+        889,
+        1109,
+        1333,
+        1553,
+        1774
+      ],
+      "rows": [
+        {
+          "row": 0,
+          "style": "Casual",
+          "scale": 0.30456852791878175,
+          "cells": [
+            {
+              "column": 0,
+              "sourceCell": [
+                0,
+                0,
+                225,
+                222
+              ],
+              "placedRect": [
+                2,
+                16,
+                60,
+                31
+              ]
+            },
+            {
+              "column": 1,
+              "sourceCell": [
+                225,
+                0,
+                443,
+                222
+              ],
+              "placedRect": [
+                3,
+                13,
+                58,
+                37
+              ]
+            },
+            {
+              "column": 2,
+              "sourceCell": [
+                443,
+                0,
+                667,
+                222
+              ],
+              "placedRect": [
+                2,
+                16,
+                60,
+                31
+              ]
+            },
+            {
+              "column": 3,
+              "sourceCell": [
+                667,
+                0,
+                887,
+                222
+              ],
+              "placedRect": [
+                3,
+                16,
+                59,
+                31
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "firstColumn": 0,
+              "uniqueFrames": 4,
+              "adjacentChangedPixels": [
+                1312,
+                1233,
+                1092,
+                1019
+              ]
+            }
+          ]
+        },
+        {
+          "row": 1,
+          "style": "Suit",
+          "scale": 0.30456852791878175,
+          "cells": [
+            {
+              "column": 0,
+              "sourceCell": [
+                0,
+                222,
+                223,
+                443
+              ],
+              "placedRect": [
+                2,
+                15,
+                60,
+                34
+              ]
+            },
+            {
+              "column": 1,
+              "sourceCell": [
+                223,
+                222,
+                443,
+                443
+              ],
+              "placedRect": [
+                2,
+                10,
+                59,
+                43
+              ]
+            },
+            {
+              "column": 2,
+              "sourceCell": [
+                443,
+                222,
+                666,
+                443
+              ],
+              "placedRect": [
+                2,
+                15,
+                60,
+                34
+              ]
+            },
+            {
+              "column": 3,
+              "sourceCell": [
+                666,
+                222,
+                887,
+                443
+              ],
+              "placedRect": [
+                2,
+                15,
+                59,
+                34
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "firstColumn": 0,
+              "uniqueFrames": 4,
+              "adjacentChangedPixels": [
+                1423,
+                1364,
+                997,
+                932
+              ]
+            }
+          ]
+        },
+        {
+          "row": 2,
+          "style": "Beach",
+          "scale": 0.30456852791878175,
+          "cells": [
+            {
+              "column": 0,
+              "sourceCell": [
+                0,
+                443,
+                223,
+                665
+              ],
+              "placedRect": [
+                2,
+                15,
+                59,
+                34
+              ]
+            },
+            {
+              "column": 1,
+              "sourceCell": [
+                223,
+                443,
+                443,
+                665
+              ],
+              "placedRect": [
+                2,
+                10,
+                59,
+                44
+              ]
+            },
+            {
+              "column": 2,
+              "sourceCell": [
+                443,
+                443,
+                666,
+                665
+              ],
+              "placedRect": [
+                2,
+                14,
+                60,
+                37
+              ]
+            },
+            {
+              "column": 3,
+              "sourceCell": [
+                666,
+                443,
+                887,
+                665
+              ],
+              "placedRect": [
+                2,
+                15,
+                59,
+                34
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "firstColumn": 0,
+              "uniqueFrames": 4,
+              "adjacentChangedPixels": [
+                1589,
+                1543,
+                1413,
+                1122
+              ]
+            }
+          ]
+        },
+        {
+          "row": 3,
+          "style": "Worker",
+          "scale": 0.30612244897959184,
+          "cells": [
+            {
+              "column": 0,
+              "sourceCell": [
+                0,
+                665,
+                223,
+                889
+              ],
+              "placedRect": [
+                3,
+                14,
+                59,
+                36
+              ]
+            },
+            {
+              "column": 1,
+              "sourceCell": [
+                223,
+                665,
+                443,
+                889
+              ],
+              "placedRect": [
+                3,
+                10,
+                58,
+                45
+              ]
+            },
+            {
+              "column": 2,
+              "sourceCell": [
+                443,
+                665,
+                667,
+                889
+              ],
+              "placedRect": [
+                2,
+                14,
+                60,
+                36
+              ]
+            },
+            {
+              "column": 3,
+              "sourceCell": [
+                667,
+                665,
+                887,
+                889
+              ],
+              "placedRect": [
+                3,
+                15,
+                59,
+                35
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "firstColumn": 0,
+              "uniqueFrames": 4,
+              "adjacentChangedPixels": [
+                1551,
+                1465,
+                1115,
+                995
+              ]
+            }
+          ]
+        },
+        {
+          "row": 4,
+          "style": "Farmer",
+          "scale": 0.30303030303030304,
+          "cells": [
+            {
+              "column": 0,
+              "sourceCell": [
+                0,
+                889,
+                223,
+                1109
+              ],
+              "placedRect": [
+                2,
+                15,
+                59,
+                34
+              ]
+            },
+            {
+              "column": 1,
+              "sourceCell": [
+                223,
+                889,
+                442,
+                1109
+              ],
+              "placedRect": [
+                3,
+                10,
+                58,
+                43
+              ]
+            },
+            {
+              "column": 2,
+              "sourceCell": [
+                442,
+                889,
+                666,
+                1109
+              ],
+              "placedRect": [
+                2,
+                14,
+                60,
+                35
+              ]
+            },
+            {
+              "column": 3,
+              "sourceCell": [
+                666,
+                889,
+                887,
+                1109
+              ],
+              "placedRect": [
+                2,
+                15,
+                59,
+                34
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "firstColumn": 0,
+              "uniqueFrames": 4,
+              "adjacentChangedPixels": [
+                1481,
+                1437,
+                1197,
+                1046
+              ]
+            }
+          ]
+        },
+        {
+          "row": 5,
+          "style": "Adventurer",
+          "scale": 0.30303030303030304,
+          "cells": [
+            {
+              "column": 0,
+              "sourceCell": [
+                0,
+                1109,
+                224,
+                1333
+              ],
+              "placedRect": [
+                2,
+                15,
+                59,
+                35
+              ]
+            },
+            {
+              "column": 1,
+              "sourceCell": [
+                224,
+                1109,
+                444,
+                1333
+              ],
+              "placedRect": [
+                3,
+                10,
+                59,
+                45
+              ]
+            },
+            {
+              "column": 2,
+              "sourceCell": [
+                444,
+                1109,
+                667,
+                1333
+              ],
+              "placedRect": [
+                2,
+                14,
+                60,
+                36
+              ]
+            },
+            {
+              "column": 3,
+              "sourceCell": [
+                667,
+                1109,
+                887,
+                1333
+              ],
+              "placedRect": [
+                3,
+                15,
+                58,
+                34
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "firstColumn": 0,
+              "uniqueFrames": 4,
+              "adjacentChangedPixels": [
+                1586,
+                1542,
+                1184,
+                1145
+              ]
+            }
+          ]
+        },
+        {
+          "row": 6,
+          "style": "Casual2",
+          "scale": 0.30303030303030304,
+          "cells": [
+            {
+              "column": 0,
+              "sourceCell": [
+                0,
+                1333,
+                225,
+                1553
+              ],
+              "placedRect": [
+                2,
+                15,
+                59,
+                34
+              ]
+            },
+            {
+              "column": 1,
+              "sourceCell": [
+                225,
+                1333,
+                444,
+                1553
+              ],
+              "placedRect": [
+                2,
+                10,
+                59,
+                43
+              ]
+            },
+            {
+              "column": 2,
+              "sourceCell": [
+                444,
+                1333,
+                667,
+                1553
+              ],
+              "placedRect": [
+                2,
+                15,
+                60,
+                35
+              ]
+            },
+            {
+              "column": 3,
+              "sourceCell": [
+                667,
+                1333,
+                887,
+                1553
+              ],
+              "placedRect": [
+                2,
+                15,
+                59,
+                33
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "firstColumn": 0,
+              "uniqueFrames": 4,
+              "adjacentChangedPixels": [
+                1475,
+                1386,
+                1310,
+                1155
+              ]
+            }
+          ]
+        },
+        {
+          "row": 7,
+          "style": "Punk",
+          "scale": 0.30612244897959184,
+          "cells": [
+            {
+              "column": 0,
+              "sourceCell": [
+                0,
+                1553,
+                224,
+                1774
+              ],
+              "placedRect": [
+                2,
+                15,
+                59,
+                35
+              ]
+            },
+            {
+              "column": 1,
+              "sourceCell": [
+                224,
+                1553,
+                444,
+                1774
+              ],
+              "placedRect": [
+                2,
+                10,
+                59,
+                44
+              ]
+            },
+            {
+              "column": 2,
+              "sourceCell": [
+                444,
+                1553,
+                668,
+                1774
+              ],
+              "placedRect": [
+                2,
+                14,
+                60,
+                36
+              ]
+            },
+            {
+              "column": 3,
+              "sourceCell": [
+                668,
+                1553,
+                887,
+                1774
+              ],
+              "placedRect": [
+                3,
+                15,
+                58,
+                35
+              ]
+            }
+          ],
+          "actions": [
+            {
+              "firstColumn": 0,
+              "uniqueFrames": 4,
+              "adjacentChangedPixels": [
+                1454,
+                1405,
+                1197,
+                1047
+              ]
+            }
+          ]
+        }
+      ],
+      "file": "festival-surf.png",
+      "bytes": 35593,
+      "sha256": "a5ccb80e4f2b75dc91b8e96f8da70a76f7265b6a8ea74863a210cf0b440702de",
+      "size": [
+        256,
+        512
+      ],
+      "nonEmptyCells": 32
+    }
+  ]
+}

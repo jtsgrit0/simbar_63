@@ -1,8 +1,8 @@
 import {launchPreparedDesk} from './native_test_workflow.mjs';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {createWorld,pixelDirection,pixelFacing,pixelStyle,pixelBandJump} from './WebGLTemplate/FastGame/world.js';
-import {SimBarGame} from './WebGLTemplate/FastGame/core.js';
+import {createWorld,pixelDirection,pixelFacing,pixelStyle,pixelBandJump,pixelAudiencePose,pixelStageLightingProfile} from './WebGLTemplate/FastGame/world.js';
+import {SimBarGame,Booking} from './WebGLTemplate/FastGame/core.js';
 
 assert.deepEqual([[0,1],[1,0],[0,-1],[-1,0]].map(([x,z])=>pixelDirection(x,z)),['BR','FR','FL','BL']);
 assert.equal(pixelFacing({id:'bar-seat-0',facing:Math.PI},'barseated','idle'),'BR');
@@ -31,6 +31,20 @@ assert.deepEqual([...jumpFrames],[0,1,2,3,4,5,6,7]);
 assert.equal(pixelBandJump('guitarist','perform',8.9).lift,0);
 assert.equal(pixelBandJump('guitarist','perform',9.4).lift,7);
 assert.equal(pixelBandJump('guitarist','perform',9.89).lift,0);
+
+// Quiet concertgoers stay upright instead of borrowing pit/surf drawings.
+for(const behavior of ['listen','sway','headbang'])for(let time=0;time<20;time+=.25){
+  const pose=pixelAudiencePose({id:'quiet-listener',behavior,action:behavior,behaviorPhase:0,animationSpeed:1},{owner:2},time);
+  assert.equal(pose.action,'idle');assert(Math.abs(pose.lean)<=.05);assert(Math.abs(pose.sway)<=1);assert(Math.abs(pose.bob)<=1.2);
+}
+const cheering=[];
+for(let time=0;time<8.4;time+=.05)cheering.push(pixelAudiencePose({id:'quiet-cheer',behavior:'cheer',action:'cheer',behaviorPhase:0,animationSpeed:1},{owner:0},time));
+assert(cheering.every(pose=>['idle','highfive'].includes(pose.action)));
+const raised=cheering.filter(pose=>pose.cheer);assert(raised.length>0&&raised.length<cheering.length*.25,'Raised-hand cheering should be occasional');
+assert.deepEqual([...new Set(raised.map(pose=>pose.frameOverride))].sort(),[0,1,2,3]);
+assert.equal(pixelAudiencePose({action:'walk',behavior:'sway',moving:true},{},7).action,'walk');
+assert.equal(pixelAudiencePose({action:'mosh',moving:true},{},7).action,'mosh');
+assert.equal(new Set([0,1,2].map(owner=>JSON.stringify(pixelStageLightingProfile({owner,playlist:0})))).size,3);
 
 function context(){return new Proxy({draws:[],scales:[],rotations:[],translations:[],createLinearGradient(){return{addColorStop(){}};},drawImage(...args){this.draws.push(args);},translate(...args){this.translations.push(args);},scale(...args){this.scales.push(args);},rotate(value){this.rotations.push(value);}},{get(o,key){return key in o?o[key]:(()=>{});}});}
 function canvas(){const ctx=context(),value={width:960,height:558,style:{},getContext(){return ctx;},getBoundingClientRect(){return{width:960,height:558};},ctx};ctx.canvas=value;return value;}
@@ -79,7 +93,25 @@ stageWorld.destroy();
 const contract=JSON.parse(readFileSync(new URL('../ArtSource/PixelArt/DirectionalSpriteContract.json',import.meta.url),'utf8'));
 const contractAtlases=Object.fromEntries(Object.entries(contract.atlases).map(([key,definition])=>{const png=readFileSync(new URL('./WebGLTemplate/FastGame/art/'+definition.file,import.meta.url));return[key,{id:key,width:png.readUInt32BE(16),height:png.readUInt32BE(20)}];}));
 const realCanvas=canvas(),realWorld=createWorld(realCanvas,{assets:{venue:assets.venue,atlases:contractAtlases,spriteMeta:contract,venueMeta:{occluders:[]}}});
+for(const behavior of ['listen','sway','headbang']){
+  realCanvas.ctx.draws=[];
+  realWorld.render(0,{phase:'playing',actors:[{id:'quiet-person',slot:0,role:'guest',x:1,z:1,behavior,action:behavior,behaviorPhase:0,animationSpeed:1}]});
+  const sprite=realCanvas.ctx.draws.find(args=>Object.values(contractAtlases).includes(args[0]));
+  assert.equal(sprite?.[0],contractAtlases.wardrobe,`${behavior} used a pit pose instead of its standing costume`);
+}
+const cheerActor={id:'quiet-cheer',slot:0,role:'guest',x:1,z:1,behavior:'cheer',action:'cheer',behaviorPhase:0,animationSpeed:1},cheerFrames=new Set();
+let idleFrames=0,socialFrames=0;
+for(let frame=0;frame<110;frame++){
+  realCanvas.ctx.draws=[];realWorld.render(100+frame*100,{phase:'playing',actors:[cheerActor]});
+  const sprite=realCanvas.ctx.draws.find(args=>Object.values(contractAtlases).includes(args[0]));
+  assert([contractAtlases.wardrobe,contractAtlases.guestSocial].includes(sprite?.[0]),'A quiet cheer borrowed unrelated pit/surf artwork');
+  if(sprite[0]===contractAtlases.guestSocial){socialFrames++;cheerFrames.add(sprite[1]/64);}else idleFrames++;
+}
+assert(idleFrames>socialFrames&&socialFrames>0);
+assert.deepEqual([...cheerFrames].sort(),[0,1,2,3],'The occasional cheer must display all four authored raised-hand frames');
 const game=new SimBarGame({storage:{getItem(){return null;},setItem(){},removeItem(){}}});
+// The retained directional/pit fixture explicitly includes the old surf team.
+game.journey.booking=Booking.newDeskPlan(1,0);
 game.act('start');launchPreparedDesk(game);game.act('guide');game.act('guide');game.act('guide');
 realWorld.render(0,{phase:game.phase,actors:game.actors});
 for(const actor of game.actors.filter(a=>a.slot>=0&&a.slot<8)){actor.action=actor.slot<6?'mosh':'slam';actor.moving=true;}

@@ -22,13 +22,20 @@ packs its two isolated alpha cells, preserving proportions and original edge
 alpha, into `standing-table.png` (40×38) and `standing-stool.png` (24×30).
 Prop foot offsets are logical drawing pixels, shared by native and Unity.
 
-Freebird's subsequent renovation also removes all sofas and stools. Its bar is
+Freebird's base plate removes all sofas and stools. Its bar is
 half the original length and sits immediately left of the concert stage; the
 stage is roughly 25% wider in the same isometric room. The active source is
 `ClubFreebird.v2.source.png`, with prompts in `ClubFreebird.v2.prompts.json` and
 independent calibration in `ClubFreebird.layout.json`. Freebird uses a regional,
 fading staff offset to keep bartenders behind the counter while preserving
 their floor positions when they leave the aisle.
+
+The social layout adds a separate arched open doorway between the bar and stage,
+a long left-wall table and six waiting stools, with matching seated audience
+anchors and a walkable route toward the stage. FF adds ten standing audience
+anchors beside its existing tables and ten small cocktail-glass props on their
+tops. These are depth-sorted independent sprites; see
+[social prop sources, prompts and calibration](SocialProps/README.md).
 
 The 960×558 isometric format is shared. FF has its own furniture masks, stage
 calibration, staff aisle, queue and navigation obstacles in `ClubFF.layout.json`

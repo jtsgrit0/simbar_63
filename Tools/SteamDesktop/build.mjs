@@ -62,6 +62,7 @@ const {packager} = await import(pathToFileURL(requireTool.resolve('@electron/pac
 const results = await packager({
   dir: appDirectory, out, name: 'SimBar', platform: 'win32', arch: 'x64',
   electronVersion: desktopToolchain.electron, asar: true, overwrite: false,
+  electronZipDir: args['electron-zip-dir'] ? path.resolve(args['electron-zip-dir']) : undefined,
   executableName: 'SimBar', extraResource: game, icon: path.join(game, 'TemplateData/favicon.ico'),
   appVersion: info.version, buildVersion: info.version,
   win32metadata: {FileDescription: 'SimBar', ProductName: 'SimBar', OriginalFilename: 'SimBar.exe'}

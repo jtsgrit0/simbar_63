@@ -2,7 +2,7 @@
  * The HUD-free venue plate is static art; live actor behavior and effects remain
  * in core.js. Employee movement, guest exit, paper debt and rewards are unchanged. */
 import {ownerVenue} from './owner-venues.js';
-import {performingRoster,performingFrame} from './band-models.js';
+import {performingRoster,performingFrame,bandPerformanceProfile} from './band-models.js';
 const REF_W=960,REF_H=558,ORTHO=8.4;
 const EYE=[13,21,-25],LOOK=[0,1.45,.15];
 const unit=v=>{const n=Math.hypot(...v);return v.map(x=>x/n);};
@@ -40,6 +40,71 @@ export function pixelStageLightingEnded(state={}){
   const journey=state.journey;
   return ['closing','results'].includes(state.phase)||!!journey?.floorClosing||!!journey?.afterShow?.started||journey?.session>0&&Number.isFinite(journey?.secondsLeft)&&journey.secondsLeft<=0;
 }
+export function pixelStageLightingProfile(state={}){
+  const performance=bandPerformanceProfile(state);
+  if(performance.legacy)return{speed:1,intensity:1,energy:1,colors:['#48d8ff','#ff50c9','#60dfff','#ffc16b']};
+  const profiles=[
+    {speed:.82,intensity:.78,colors:['#ffbb67','#e961a3','#58c9ca','#f3da83']},
+    {speed:1.38,intensity:1.12,colors:['#50e7ff','#b366ff','#ff4da5','#83dfff']},
+    {speed:.48,intensity:.52,colors:['#e9b675','#e89b7a','#a2c6c5','#f2d9a5']}
+  ];
+  const profile=profiles[state.owner],gentle=performance.energy/[.95,1.2,.65][state.owner];
+  return{...profile,speed:profile.speed*gentle,intensity:profile.intensity*(gentle<1?.86:1),energy:performance.energy};
+}
+
+// Quiet audience moods use standing idle drawings; only an occasional cheer
+// borrows an authored raised-hand social pose. Pit drawings stay in the pit.
+// Offsets are only a
+// small body pose: collision paths, feet, orders and serving stay in core.js.
+export function pixelFestivalPose(actor={},state={},seconds=0){
+  if(state.phase!=='playing'||state.journey?.floorClosing||state.journey?.afterShow?.started||actor.visible===false||actor.moving||!['guest','seated','support','surfer'].includes(actor.role))return null;
+  if(['queue','return','arrive','to-stage','exit','escorted','walk'].includes(actor.action))return null;
+  let id=actor.festivalRemaining>0?actor.festivalAction:null;
+  if(!id&&actor.audienceVersion&&['horns','dance'].includes(actor.behavior))id=actor.behavior;
+  if(!['slam','mosh','surf','jump','horns','airguitar','sing','encore','headbang','dance'].includes(id))return null;
+  const phase=finite(actor.behaviorPhase,(hash(actor.id)%997)/997*Math.PI*2),speed=clamp(finite(actor.animationSpeed,1),.5,1.5),time=Math.max(0,finite(seconds))*speed+phase;
+  const base={kind:'festival-'+id,festivalAction:id,action:'idle',animationSeconds:time,speed,phase,sway:0,bob:0,lean:0,lift:0,cheer:false};
+  // A waiting spectator keeps the authored bent-knee seat drawing. A real
+  // departure changes role/path in the simulation before any standing pose.
+  if(actor.role==='seated')return{...base,kind:'seated-'+id,sway:Math.sin(time*2)*.3,bob:Math.sin(time*3)*.25,lean:Math.sin(time*2)*.009};
+  if(id==='surf'){
+    if(actor.festivalLead)return actor.festivalLiftReady&&finite(actor.y)>.05
+      ?{...base,action:'surf',atlasAction:'surf',lean:Math.sin(time*2.2)*.025}
+      :{...base,atlasAction:'horns',sway:Math.sin(time*1.8)*.25};
+    if(actor.festivalSupport)return{...base,action:'support',bob:Math.sin(time*4)*.45};
+    return{...base,atlasAction:'horns',sway:Math.sin(time*2)*.45};
+  }
+  if(id==='jump')return{...base,atlasAction:'horns',lift:Math.max(0,Math.sin(time*4.4))*7,lean:Math.sin(time*2.2)*.012};
+  if(id==='mosh')return{...base,action:'mosh',sway:Math.sin(time*4)*2.1,bob:Math.cos(time*4)*.8,lean:Math.sin(time*4)*.045};
+  if(id==='slam')return{...base,action:'slam',sway:Math.sin(time*3.6)*2.6,bob:Math.abs(Math.sin(time*3.6))*.4,lean:Math.sin(time*3.6)*.065};
+  if(id==='dance')return{...base,atlasAction:id,sway:Math.sin(time*3)*.8,bob:Math.sin(time*6)*.3};
+  if(id==='airguitar')return{...base,atlasAction:id,sway:Math.sin(time*2.8)*.6};
+  return{...base,atlasAction:id,sway:Math.sin(time*1.8)*.25};
+}
+
+export function pixelFestivalFrame(actor={},state={},seconds=0,manifest={}){
+  const pose=pixelFestivalPose(actor,state,seconds),action=pose?.atlasAction,definition=manifest.actions?.[action];
+  if(!definition)return null;
+  const styles=manifest.styles||{},keys=Object.keys(styles),explicit=String(actor.styleKey||actor.modelKey||'').split('/').at(-1);
+  const index=Number.isInteger(actor.slot)?actor.slot:hash(actor.id),style=styles[explicit]!=null?explicit:keys[((index%keys.length)+keys.length)%keys.length];
+  const frames=definition.frames?.length?definition.frames:[0],at=Math.floor(pose.animationSeconds*(definition.fps||6))%frames.length;
+  return{action,atlas:definition.atlas,column:frames[at],row:styles[style]??0,style,pose};
+}
+
+export function pixelAudiencePose(actor={},state={},seconds=0){
+  const festival=pixelFestivalPose(actor,state,seconds);if(festival)return festival;
+  let action=String(actor.action||'idle');
+  if(action==='idle'&&['listen','sway','cheer','headbang'].includes(actor.behavior))action=actor.behavior;
+  const base={action,animationSeconds:seconds,speed:1,phase:0,sway:0,bob:0,lean:0,cheer:false};
+  if(!['listen','sway','cheer','headbang'].includes(action)||actor.moving)return base;
+  const seed=hash(actor.id),speed=clamp(finite(actor.animationSpeed,1),.35,1.8),phase=((finite(actor.behaviorPhase,(seed%997)/997*Math.PI*2)%(Math.PI*2))+Math.PI*2)%(Math.PI*2),time=Math.max(0,finite(seconds))*speed+phase;
+  const pose={...base,kind:action,action:'idle',speed,phase};
+  if(action==='listen')return{...pose,animationSeconds:time*.36,lean:Math.sin(time*.8)*.012};
+  if(action==='sway')return{...pose,animationSeconds:time*.58,sway:Math.sin(time*1.6)*.8,bob:Math.sin(time*1.6+.4)*.25,lean:Math.sin(time*1.6)*.025};
+  if(action==='headbang')return{...pose,animationSeconds:time*1.28,sway:Math.sin(time*3.8)*.25,bob:Math.max(0,Math.sin(time*5.2))*1.1,lean:Math.sin(time*5.2)*.04};
+  const cycle=time%8.4,cheer=cycle>6.9,progress=clamp((cycle-6.9)/1.5,0,1);
+  return{...pose,action:cheer?'highfive':'idle',animationSeconds:time*.95,sway:Math.sin(time*1.8)*.35,bob:cheer?-Math.sin(progress*Math.PI)*.7:0,lean:Math.sin(time*2.1)*.015,cheer,frameOverride:cheer?Math.min(3,Math.floor(progress*4)):null};
+}
 export const PIXEL_PAPER_COLORS=Object.freeze(['#ff6fa9','#62e2ed','#ffe17c','#b9a0ff']);
 export function pixelGroundPaper(floor={}){
   const remaining=floor.litter>0?clamp(1-finite(floor.cleaned)/floor.litter,0,1):0;
@@ -67,6 +132,7 @@ export function pixelDirection(dx,dz){
 }
 export function pixelFacing(actor,role,action,state={}){
   if(role==='barseated')return'BR';
+  if(role==='seated'&&actor.waitingSeat)return pixelDirection(Math.sin(finite(actor.facing)),Math.cos(finite(actor.facing)));
   if(role==='seated')return Number(String(actor.id).split('-').at(-1))<4?'FL':'BR';
   const target=(x,z)=>pixelDirection(x-finite(actor.x),z-finite(actor.z));
   if(['highfive','hug','aftershow-wait'].includes(action)&&actor._partner){
@@ -76,7 +142,7 @@ export function pixelFacing(actor,role,action,state={}){
   if(action==='mosh')return pixelDirection(-(finite(actor.z)+1.25),finite(actor.x)-5.75);
   if(action==='slam')return target(5.75,-1.25);
   if(action==='support'){
-    const surfer=state.actors?.find(a=>a.id==='crowd-surfer');
+    const surfer=actor.festivalSupport?state.actors?.find(a=>a.festivalLead):state.actors?.find(a=>a.id==='crowd-surfer');
     return target(surfer?.x??6,surfer?.z??-4.25);
   }
   if(action==='queue'){
@@ -87,7 +153,7 @@ export function pixelFacing(actor,role,action,state={}){
   if(employee&&state.owner===0&&!actor.moving&&['idle','serve'].includes(action))return pixelDirection(0,-1);
   if(employee&&state.owner===1&&!actor.moving&&['idle','serve'].includes(action))return pixelDirection(1,0);
   if(employee&&!actor.moving&&['idle','serve'].includes(action)&&finite(actor.x)<-1.35&&finite(actor.z)>-1.5&&finite(actor.z)<.5)return'FL';
-  if(!actor.moving&&role==='guest'&&action==='idle')return target(5.5,2.7);
+  if(!actor.moving&&role==='guest'&&(action==='idle'||['listen','sway','cheer','headbang'].includes(actor.action)||['listen','sway','cheer','headbang'].includes(actor.behavior)))return target(5.5,2.7);
   const facing=finite(actor.facing);return pixelDirection(Math.sin(facing),Math.cos(facing));
 }
 
@@ -104,12 +170,12 @@ export function pixelStyle(actor,entry,meta={}){
 
 // A brief, staggered jump is presentation only. The gameplay positions and the
 // grounded contact shadow continue to use the real stage floor throughout.
-export function pixelBandJump(role,action,seconds,active=true){
-  if(!active||action!=='perform'||!['guitarist','bassist'].includes(role))return null;
+export function pixelBandJump(role,action,seconds,active=true,intensity=1){
+  if(!active||!(intensity>0)||action!=='perform'||!['guitarist','bassist'].includes(role))return null;
   const phase=(Math.max(0,seconds)+(role==='bassist'?2.6:0))%10.4;
   if(phase<8.9||phase>=9.9)return null;
   const progress=phase-8.9,air=Math.max(0,Math.sin(clamp((progress-.125)/.75,0,1)*Math.PI));
-  return{frame:Math.min(7,Math.floor(progress*8)),lift:Math.round(air*7),shadow:1-air*.32};
+  return{frame:Math.min(7,Math.floor(progress*8)),lift:Math.round(air*7*intensity),shadow:1-air*.32*Math.min(1.2,intensity)};
 }
 
 // Orders are the source of truth: serving, expiration or closing removes the
@@ -166,7 +232,7 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
     const position=[x-EYE[0],y-EYE[1],z-EYE[2]],scale=REF_H/(2*ORTHO);
     return{x:REF_W/2+dot(position,RIGHT)*scale,y:REF_H/2-dot(position,UP)*scale};
   };
-  const seatFor=a=>a.role==='seated'&&!a.moving&&['idle','sit','drink'].includes(a.action||'idle')?assets.venueMeta?.seatedActors?.[a.id]:null;
+  const seatFor=a=>a.role==='seated'&&!a.moving&&['idle','sit','drink','listen','sway','cheer'].includes(a.action||'idle')?assets.venueMeta?.seatedActors?.[a.seatId||a.id]:null;
   const actorOffset=a=>{
     const seat=seatFor(a);
     if(seat){const ground=project(finite(a.x),finite(a.z));return{x:seat.feet[0]-ground.x,y:seat.feet[1]-ground.y};}
@@ -192,13 +258,14 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
     return{x:p.x+(stage.x+(member.stageOffset?.x||0))*weight+(member.floorOffset?.x||0)*(1-weight),
       y:p.y+(stage.y+(member.stageOffset?.y||0))*weight+(member.floorOffset?.y||0)*(1-weight)};
   }
-  function drawBandModel(entry){
+  function drawBandModel(entry,state){
     const manifest=assets.bandModels,sheet=assets.bandAtlases?.[entry.bandId];
     if(!ready(sheet))throw new Error('Missing performing band atlas: '+entry.bandId);
-    const {action,column}=performingFrame(entry,manifest,seconds),p=modelPoint(entry);
+    const {action,column}=performingFrame(entry,manifest,seconds),p=modelPoint(entry),active=['playing','closing'].includes(state.phase);
+    const jump=entry.jumpIntensity?pixelBandJump(entry.role,action,seconds*(entry.performanceSpeed||1)+(entry.performancePhase||0),active,entry.jumpIntensity):null;
     const fw=manifest.frameWidth||64,fh=manifest.frameHeight||64,dh=entry.member.drawHeight||manifest.drawHeight||54,dw=entry.member.drawWidth||manifest.drawWidth||dh;
-    if(entry.role!=='drummer'||action!=='perform')ellipse(ctx,p.x,p.y+1,4,1,'#16182360');
-    ctx.drawImage(sheet,column*fw,entry.row*fh,fw,fh,Math.round(p.x-(manifest.footX??32)*dw/fw),Math.round(p.y-(manifest.footY??60)*dh/fh),dw,dh);
+    if(entry.role!=='drummer'||action!=='perform')ellipse(ctx,p.x,p.y+1,Math.round(4*(jump?.shadow||1)),1,'#16182360');
+    ctx.drawImage(sheet,column*fw,entry.row*fh,fw,fh,Math.round(p.x-(manifest.footX??32)*dw/fw),Math.round(p.y-(manifest.footY??60)*dh/fh-(jump?.lift||0)),dw,dh);
   }
   function resize(){const b=canvas.getBoundingClientRect();cssW=Math.max(1,b.width);cssH=Math.max(1,b.height);width=Math.max(160,Math.min(2304,Math.round(REF_H*cssW/cssH)));height=REF_H;offsetX=(width-REF_W)/2;if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.height=height;city=null;}ctx.imageSmoothingEnabled=false;}
   const observer=new ResizeObserver(resize);observer.observe(canvas);resize();
@@ -218,7 +285,7 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
     const layers=[...(supplied||bar),...boxes];
     for(const layer of layers){if(!layer.points?.length)continue;const p=layer.points.map(p=>Array.isArray(p)?{x:p[0],y:p[1]}:p),xs=p.map(v=>v.x),ys=p.map(v=>v.y),left=Math.floor(Math.min(...xs)),top=Math.floor(Math.min(...ys)),w=Math.ceil(Math.max(...xs))-left+1,h=Math.ceil(Math.max(...ys))-top+1;if(w<=0||h<=0)continue;const mask=surface(w,h),c=mask.getContext('2d');c.imageSmoothingEnabled=false;c.translate(-left,-top);c.beginPath();p.forEach((v,i)=>i?c.lineTo(Math.round(v.x),Math.round(v.y)):c.moveTo(Math.round(v.x),Math.round(v.y)));c.closePath();c.clip();c.drawImage(plate,0,0,REF_W,REF_H);occluders.push({image:mask,x:left,y:top,points:p,stage:left+w>556&&left<867&&top+h>209&&top<373,actors:layer.actors||null,depth:Number.isFinite(layer.depth)?layer.depth:project(layer.worldX||0,layer.worldZ||0).y});}
   }
-  function atlasFrame(actor,role,action,frame,state,frameOverride=null){
+  function atlasFrame(actor,role,action,frame,state,frameOverride=null,animationSeconds=seconds){
     const meta=assets.spriteMeta||{};
     let entry=meta.roles?.[role]??meta.roles?.[actor.role]??meta.roles?.guest??meta.roles?.default;
     if(entry==null)return null;if(typeof entry==='number')entry={row:entry};
@@ -226,7 +293,7 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
     let selected=entry.actions?.[action]||entry.actions?.[['dance','mosh','slam','support'].includes(action)?'dance':action==='walk'?'walk':action==='clean'?'clean':'idle']||entry;
     if(selected.preserveStyle&&selected.variantStyles&&selected.variantStyles[style]==null)selected=entry;
     const phase=['playing','closing'].includes(state.phase),fps=finite(selected.fps||entry.fps);
-    if(fps>0)frame=phase?Math.floor(seconds*fps+(action==='perform'?0:hash(actor.id)%4)):0;
+    if(fps>0)frame=phase?Math.floor(animationSeconds*fps+(action==='perform'?0:hash(actor.id)%4)):0;
     if(selected.progressFrames){
       const count=selected.frameCount||selected.frameColumns?.length||8;
       frame=Math.min(count-1,Math.floor(clamp(actor.actionProgress,0,1)*count));
@@ -248,25 +315,37 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
     if(row<0||col<0||col>=columns||(row+1)*fh>sheet.height)throw new Error('Pixel character atlas frame is out of bounds.');
     return{sheet,sx:col*fw,sy:row*fh,sw:fw,sh:layout.cropHeight||fh,flip:false,meta:layout,entry:layout,direction,style,atlasKey};
   }
+  function festivalAtlasFrame(actor,state){
+    const manifest=assets.festivalModels;if(!manifest)return null;
+    const selected=pixelFestivalFrame(actor,state,seconds,manifest);if(!selected)return null;
+    const definition=manifest.actions[selected.action],layout={...manifest,...manifest.atlases?.[selected.atlas],...definition};
+    const sheet=assets.festivalAtlases?.[selected.atlas];if(!ready(sheet))throw new Error('Missing festival audience atlas: '+selected.atlas);
+    const fw=manifest.frameWidth||64,fh=manifest.frameHeight||64;
+    return{sheet,sx:selected.column*fw,sy:selected.row*fh,sw:fw,sh:fh,flip:false,meta:layout,entry:layout,style:selected.style,atlasKey:'festival-'+selected.atlas};
+  }
   function drawActor(a,state){
     let role=String(a.role||'guest').toLowerCase();if(role==='band')role=String(a.id||'singer');if(role==='seated'&&a.id?.startsWith('bar-seat-'))role='barseated';
-    let action=String(a.action||'idle');if(action==='sweep')action='clean';else if(a.moving&&!['mosh','slam','surf','support'].includes(action))action='walk';
+    const pose=pixelAudiencePose(a,state,seconds);
+    let action=pose.action;if(pose.kind==='cheer'&&action==='highfive'&&!assets.spriteMeta.roles?.[role]?.actions?.highfive)action='idle';if(action==='sweep')action='clean';else if(a.moving&&!['mosh','slam','surf','support'].includes(action))action='walk';
     const bar=assets.venueMeta?.barRegion;
     if(role==='bartender'&&!a.moving&&bar&&a.x<bar.xMax&&a.z>=bar.zMin&&a.z<=bar.zMax&&['idle','serve'].includes(action))action='idle';
     const active=['playing','closing'].includes(state.phase);
     const band=role==='singer'||role==='guitarist'||role==='bassist'||role==='drummer';
-    const jump=assets.spriteMeta.roles?.[role]?.actions?.jump?pixelBandJump(role,action,seconds,active):null;
+    const performance=bandPerformanceProfile(state),bandTime=performance.legacy?seconds:seconds*performance.speed+hash(a.id)%17*.23;
+    const jump=assets.spriteMeta.roles?.[role]?.actions?.jump?pixelBandJump(role,action,bandTime,active,performance.legacy?1:performance.jumpIntensity):null;
     if(jump)action='jump';
     const frame=active?Math.floor(seconds*(action==='walk'?7:action==='clean'?6:band?8:5)+hash(a.id)%4):0;
-    const p=actorPoint(a,finite(a.y)),ground=actorPoint(a,role==='surfer'?0:finite(a.y)),surf=(action==='surf'||role==='surfer')&&finite(a.y)>.1;
-    if(!seatFor(a)?.hideShadow&&(role!=='drummer'||action!=='perform'))ellipse(ctx,ground.x,ground.y+1,Math.round(4*(jump?.shadow||1)),1,jump?'#16182348':'#16182360');
-    const atlas=atlasFrame(a,role,action,frame,state,jump?.frame),meta=atlas?.meta||{},entry=atlas?.entry||{},size=entry.drawHeight||meta.drawHeight||40;
-    const bob=!band&&active&&['dance','mosh','slam'].includes(action)?Math.round(Math.sin(seconds*5+hash(a.id)%17)*.6):0;
-    ctx.save();ctx.translate(Math.round(p.x),Math.round(p.y+bob-(jump?.lift||0)));
+    const p=actorPoint(a,finite(a.y)),ground=actorPoint(a,role==='surfer'||a.festivalLead?0:finite(a.y)),surf=(action==='surf'||role==='surfer')&&finite(a.y)>.1;
+    const liftedSurfer=a.festivalLead&&a.festivalLiftReady&&finite(a.y)>.05;
+    if(!seatFor(a)?.hideShadow&&(role!=='drummer'||action!=='perform'))ellipse(ctx,ground.x,ground.y+1,liftedSurfer?12:Math.round(4*(jump?.shadow||1)),liftedSurfer?2:1,liftedSurfer||jump?'#16182348':'#16182360');
+    const atlas=festivalAtlasFrame(a,state)||atlasFrame(a,a.festivalLead&&action==='surf'?'surfer':role,action,frame,state,jump?.frame??(action==='highfive'?pose.frameOverride:null),band&&action==='perform'?bandTime:pose.animationSeconds),meta=atlas?.meta||{},entry=atlas?.entry||{},size=entry.drawHeight||meta.drawHeight||40;
+    const varied=!!pose.kind,bob=!band&&active?(varied?pose.bob:['dance','mosh','slam'].includes(action)?Math.round(Math.sin(seconds*5+hash(a.id)%17)*.6):0):0;
+    ctx.save();ctx.translate(Math.round(p.x+(active?pose.sway:0)),Math.round(p.y+bob-(jump?.lift||0)-(active?pose.lift||0:0)));if(active&&pose.lean)ctx.rotate(pose.lean);
     if(surf&&!entry.horizontal){ctx.rotate(-Math.PI/2);ctx.translate(0,-7);}
     if(atlas){const scale=size/atlas.sh,dw=entry.drawWidth||meta.drawWidth||atlas.sw*scale,dh=size,footX=entry.footX??meta.footX??atlas.sw/2,footY=entry.footY??meta.footY??atlas.sh;if(atlas.flip)ctx.scale(-1,1);ctx.drawImage(atlas.sheet,atlas.sx,atlas.sy,atlas.sw,atlas.sh,Math.round(-footX*dw/atlas.sw),Math.round(-footY*dh/atlas.sh),Math.round(dw),Math.round(dh));}
     else throw new Error('No pixel character atlas entry for '+role);
     ctx.restore();
+    if(active&&pose.cheer){ctx.fillStyle='#ffe9ac';ctx.fillRect(Math.round(p.x-9),Math.round(p.y-size+6),1,3);ctx.fillRect(Math.round(p.x+8),Math.round(p.y-size+2),1,3);}
     if(action==='clean'){const swing=Math.sin(seconds*7+hash(a.id)%5)*2;polygon(ctx,[{x:p.x+4,y:p.y-16},{x:p.x+5,y:p.y-16},{x:p.x+10+swing,y:p.y+2},{x:p.x+9+swing,y:p.y+2}],'#b69061');ctx.fillStyle='#c7b27e';ctx.fillRect(Math.round(p.x+6+swing),Math.round(p.y+2),7,2);ctx.fillStyle='#857150';for(let i=0;i<3;i++)ctx.fillRect(Math.round(p.x+6+swing+i*2),Math.round(p.y+4),1,2);}
     if((a.id==='assisted-guest'||role==='assisted')&&state.floor?.guestActive){ctx.fillStyle='#f4c86e';ctx.fillRect(Math.round(p.x),Math.round(p.y-48),2,5);ctx.fillRect(Math.round(p.x),Math.round(p.y-41),2,2);}
   }
@@ -312,8 +391,9 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
   }
   function stageLights(state){
     if(!pixelStageLightingActive(state))return;
-    // Match the illustrated truss; targets and alternating 120 BPM banks follow
-    // SimBarReferenceLighting. The gameplay clock freezes these lights on pause.
+    // Authored venue / artist lighting style. These speeds do not imply track
+    // BPM. The shared presentation clock freezes all light movement on pause.
+    const profile=pixelStageLightingProfile(state),lightTime=seconds*profile.speed;
     const rig=[
       {source:[2.55,5.8,4.6],target:[1.8,-1.2,.12],color:'#48d8ff'},
       {source:[3.85,5.8,4.74],target:[6.5,3,.65],color:'#ff50c9'},
@@ -324,27 +404,27 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
     const ring=(x,z,y,radius)=>Array.from({length:20},(_,i)=>{const a=i*Math.PI/10;return project(x+Math.cos(a)*radius,z+Math.sin(a)*radius*.8,y);});
     ctx.save();ctx.globalCompositeOperation='screen';
     for(let i=0;i<rig.length;i++){
-      const light=rig[i],phase=(seconds+.12+(i%2)*.5)%1;
+      const light={...rig[i],color:profile.colors[i]},phase=(lightTime+.12+(i%2)*.5)%1;
       const pulse=smooth(phase/.08)*(1-smooth((phase-.30)/.18));
-      const sway=Math.sin(seconds*.72+i*1.7)*.48+Math.sin(seconds*Math.PI*4+i*Math.PI)*.08;
-      const [tx,tz,ty]=light.target,x=tx+sway,z=tz+Math.cos(seconds*.58+i*1.4)*.24;
+      const sway=(Math.sin(lightTime*.72+i*1.7)*.48+Math.sin(lightTime*Math.PI*4+i*Math.PI)*.08)*Math.min(1.15,profile.energy);
+      const [tx,tz,ty]=light.target,x=tx+sway,z=tz+Math.cos(lightTime*.58+i*1.4)*.24;
       const calibrated=assets.venueMeta?.lightSources?.[i],source=calibrated?{x:calibrated[0],y:calibrated[1]}:project(...light.source),end=project(x,z,ty),radius=i%2?1.18:1.48;
       // Several projected rings make a feathered pool without blurring the art.
       for(let layer=0;layer<4;layer++){
-        ctx.globalAlpha=.05+layer*.018+pulse*.032;
+        ctx.globalAlpha=(.05+layer*.018+pulse*.032)*profile.intensity;
         polygon(ctx,ring(x,z,ty+.006,radius*(1.25-layer*.23)),light.color);
       }
       const haze=ctx.createLinearGradient(source.x,source.y,end.x,end.y);
       haze.addColorStop(0,light.color+'d9');haze.addColorStop(.3,light.color+'b3');haze.addColorStop(1,light.color+'73');
       for(let layer=0;layer<3;layer++){
-        ctx.globalAlpha=[.11,.065,.04][layer]+[.07,.045,.025][layer]*pulse;
+        ctx.globalAlpha=([.11,.065,.04][layer]+[.07,.045,.025][layer]*pulse)*profile.intensity;
         polygon(ctx,hull([source,...ring(x,z,ty,radius*[1,.7,.38][layer])]),haze);
       }
       // Small pixel-stepped source flares stay attached to the visible lamps.
-      ctx.globalAlpha=.08+pulse*.08;ellipse(ctx,source.x,source.y,12,8,light.color);
-      ctx.globalAlpha=.2+pulse*.15;ellipse(ctx,source.x,source.y,6,4,light.color);
-      ctx.globalAlpha=.7+pulse*.2;ellipse(ctx,source.x,source.y,2,2,'#fff6df');
-      ctx.globalAlpha=.22+pulse*.1;ctx.fillStyle=light.color;
+      ctx.globalAlpha=(.08+pulse*.08)*profile.intensity;ellipse(ctx,source.x,source.y,12,8,light.color);
+      ctx.globalAlpha=(.2+pulse*.15)*profile.intensity;ellipse(ctx,source.x,source.y,6,4,light.color);
+      ctx.globalAlpha=Math.min(1,(.7+pulse*.2)*profile.intensity);ellipse(ctx,source.x,source.y,2,2,'#fff6df');
+      ctx.globalAlpha=(.22+pulse*.1)*profile.intensity;ctx.fillStyle=light.color;
       ctx.fillRect(Math.round(source.x-9),Math.round(source.y),19,1);
       ctx.fillRect(Math.round(source.x),Math.round(source.y-7),1,15);
     }
@@ -395,7 +475,7 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
     for(const prop of propLayers)drawables.push({depth:prop.depth,draw:()=>drawProp(ctx,prop)});
     const models=modelRoster(state);
     for(const actor of state.actors||[]){if(actor.visible===false||models.length&&actor.role==='band')continue;const seat=seatFor(actor);let depth=seat?.depth??actorPoint(actor).y+(actor.action==='surf'?2:0);if(actor.id==='drummer'&&actor.action==='perform'&&assets.venueMeta?.drumForegroundDepth>0)depth=Math.min(depth,assets.venueMeta.drumForegroundDepth-1);drawables.push({depth,draw:()=>{drawActor(actor,state);for(const layer of occluders)if(seat&&layer.actors?.includes(actor.id))drawLayer(layer,state);}});}
-    for(const model of models){let depth=modelPoint(model).y;if(model.role==='drummer'&&model.actor.action==='perform'&&assets.venueMeta?.drumForegroundDepth>0)depth=Math.min(depth,assets.venueMeta.drumForegroundDepth-1);drawables.push({depth,draw:()=>drawBandModel(model)});}
+    for(const model of models){let depth=modelPoint(model).y;if(model.role==='drummer'&&model.actor.action==='perform'&&assets.venueMeta?.drumForegroundDepth>0)depth=Math.min(depth,assets.venueMeta.drumForegroundDepth-1);drawables.push({depth,draw:()=>drawBandModel(model,state)});}
     drawables.sort((a,b)=>a.depth-b.depth);for(const item of drawables)item.draw();airborne();orderBubbles(state);ctx.restore();
   }
   function worldToScreen(x,z,y=0){const p=project(x,z,y);return{x:(p.x+offsetX)*cssW/width,y:p.y*cssH/height};}
@@ -422,5 +502,13 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
     selectVenue(state);
     return modelRoster(state).map(entry=>({id:entry.id,bandId:entry.bandId,role:entry.role,anchor:entry.member.anchor,row:entry.row,extra:entry.extra,file:entry.band.file,...performingFrame(entry,assets.bandModels,seconds),...modelPoint(entry)}));
   }
-  return{render,resize,destroy,worldToScreen,project,renderOverview,getBandPresentation};
+  function getAudiencePresentation(state=getState()){
+    selectVenue(state);
+    return(state.actors||[]).filter(actor=>actor.visible!==false&&['guest','seated','support','surfer'].includes(actor.role)).map(actor=>{
+      const pose=pixelAudiencePose(actor,state,seconds),selected=assets.festivalModels?pixelFestivalFrame(actor,state,seconds,assets.festivalModels):null;
+      return{id:actor.id,role:actor.role,seated:!!seatFor(actor),moving:!!actor.moving,action:pose.action,festivalAction:pose.festivalAction||null,
+        atlas:selected?.atlas||null,row:selected?.row??null,column:selected?.column??null,style:selected?.style||null,lift:pose.lift||0,...actorPoint(actor,finite(actor.y))};
+    });
+  }
+  return{render,resize,destroy,worldToScreen,project,renderOverview,getBandPresentation,getAudiencePresentation};
 }

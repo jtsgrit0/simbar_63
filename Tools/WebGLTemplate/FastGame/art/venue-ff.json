@@ -899,7 +899,8 @@
       2
     ],
     "tableCount": 5,
-    "stoolCount": 10
+    "stoolCount": 10,
+    "cocktailGlassCount": 10
   },
   "ledQuad": [
     [
@@ -1138,6 +1139,106 @@
       "drawHeight": 30,
       "footX": 12,
       "footY": 28
+    },
+    {
+      "asset": "cocktail-glass",
+      "x": -6.930000000000001,
+      "z": 3.6,
+      "drawWidth": 12,
+      "drawHeight": 16,
+      "footX": 6,
+      "footY": 43,
+      "depthOffset": 4
+    },
+    {
+      "asset": "cocktail-glass",
+      "x": -6.47,
+      "z": 3.6,
+      "drawWidth": 12,
+      "drawHeight": 16,
+      "footX": 6,
+      "footY": 43,
+      "depthOffset": 4
+    },
+    {
+      "asset": "cocktail-glass",
+      "x": -4.23,
+      "z": 4.75,
+      "drawWidth": 12,
+      "drawHeight": 16,
+      "footX": 6,
+      "footY": 43,
+      "depthOffset": 4
+    },
+    {
+      "asset": "cocktail-glass",
+      "x": -3.77,
+      "z": 4.75,
+      "drawWidth": 12,
+      "drawHeight": 16,
+      "footX": 6,
+      "footY": 43,
+      "depthOffset": 4
+    },
+    {
+      "asset": "cocktail-glass",
+      "x": -3.83,
+      "z": 0.15,
+      "drawWidth": 12,
+      "drawHeight": 16,
+      "footX": 6,
+      "footY": 43,
+      "depthOffset": 4
+    },
+    {
+      "asset": "cocktail-glass",
+      "x": -3.37,
+      "z": 0.15,
+      "drawWidth": 12,
+      "drawHeight": 16,
+      "footX": 6,
+      "footY": 43,
+      "depthOffset": 4
+    },
+    {
+      "asset": "cocktail-glass",
+      "x": -6.130000000000001,
+      "z": -4.8,
+      "drawWidth": 12,
+      "drawHeight": 16,
+      "footX": 6,
+      "footY": 43,
+      "depthOffset": 4
+    },
+    {
+      "asset": "cocktail-glass",
+      "x": -5.67,
+      "z": -4.8,
+      "drawWidth": 12,
+      "drawHeight": 16,
+      "footX": 6,
+      "footY": 43,
+      "depthOffset": 4
+    },
+    {
+      "asset": "cocktail-glass",
+      "x": -1.93,
+      "z": -5,
+      "drawWidth": 12,
+      "drawHeight": 16,
+      "footX": 6,
+      "footY": 43,
+      "depthOffset": 4
+    },
+    {
+      "asset": "cocktail-glass",
+      "x": -1.47,
+      "z": -5,
+      "drawWidth": 12,
+      "drawHeight": 16,
+      "footX": 6,
+      "footY": 43,
+      "depthOffset": 4
     }
   ]
 }

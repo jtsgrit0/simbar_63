@@ -2,6 +2,9 @@ import {catalog} from './catalog.js';
 import {createDailyPoster,DAILY_POSTER_INDEX} from './daily-poster.js';
 import {Booking,clamp,int,count} from './booking.js';
 import {Campaign} from './campaign.js';
+import {Audience} from './audience.js';
+import {Festival} from './festival.js';
+import {ownerVenue} from './owner-venues.js';
 import {Floor,Challenges} from './floor.js';
 import {distance,walkable,reserved,setRoute,move,FF_LAYOUT,FREEBIRD_LAYOUT} from './navigation.js';
 import {createAfterShow,sanitizeAfterShow,syncAfterShow,restoreAfterShow,ownsAfterShowActor,tickAfterShow} from './aftershow.js';
@@ -23,7 +26,7 @@ const newJourney=()=>({version:1,day:1,challenge:false,tutorialComplete:false,gu
   score:0,combo:0,bestCombo:0,manualPerfects:0,orders:0,mistakes:0,successfulEvents:0,manualStreak:0,feverSeconds:0,feverCharge:0,openingCash:650,drinkIncome:0,xp:0,bestScore:0,bestStars:0,completedNights:0,
   resultStars:0,resultServed:0,resultXP:0,resultBonus:0,resultProfit:0,resultNewRecord:false,booking:null,bookingCareer:Booking.newCareer(),dayOpeningCash:0,hasDayOpeningCash:false,resultTicketIncome:0,resultAttendance:0,
   floorMissions:Floor.newState(),floorClosing:false,afterShow:null,musicPauseSession:0,musicPaused:false,resultFloorBonus:0,resultFloorTasks:0,resultTicketGross:0,resultArtistFee:0,campaignSecondSet:false,
-  legacyDeskPlanJson:'',deskMigrationCredit:0,deskMigrationDay:0,deskMigrationTrustedOpening:false});
+  legacyDeskPlanJson:'',deskMigrationCredit:0,deskMigrationDay:0,deskMigrationTrustedOpening:false,festival:Festival.create()});
 const messages={
   scouted:['출연진 발굴 완료. 팀을 선택하고 섭외를 진행하세요.','Lineup discovered. Select an artist and make an offer.'],
   listened:['데모 검토 완료. 제안 수락 확률이 올랐어요.','Demo reviewed. This artist is more likely to accept.'],
@@ -43,6 +46,7 @@ const messages={
   track_not_booked:['오늘 섭외한 밴드의 곡만 재생할 수 있어요.','Only tonight’s booked artists can play this show.'],
   show_selected:['출연진을 선택했어요. 티켓과 예상 정산을 확인해 주세요.','Lineup selected. Review tickets and the forecast.'],
   show_locked:['아직 섭외 조건을 충족하지 못했어요.','This show’s booking requirements are not met yet.'],
+  venue_locked:['진행 중인 공연을 마친 뒤 사장과 베뉴를 바꿀 수 있어요.','Finish the current show before changing owner and venue.'],
 };
 
 /** A complete small web player. Rules keep the authored save schema and stable catalog IDs. */
@@ -71,6 +75,12 @@ export class SimBarGame{
   get availableWorkers(){return 2+this.state.staff.reduce((n,v)=>n+(v&&this.state.wageDebt===0?1:0),0);}
   get payroll(){return this.state.staff.reduce((n,v,i)=>n+v*catalog.staff[i].wage,0);}
   get playing(){return this.phase==='playing'&&this.journey.inProgress;}
+  get festival(){
+    const state=this.journey.festival||Festival.create(),liveAttendance=this.actors.filter(a=>(Audience.isAudience(a)||a.role==='assisted')&&a.visible!==false).length;
+    return{...state,...Festival.modifiers(state,this.state.satisfaction,this.state.performance),liveAttendance,
+      bookedAttendance:Booking.forecast(this.journey.booking).attendance,capacity:Audience.capacity(this.owner),
+      canAct:this.playing&&!this.paused&&liveAttendance>0&&state.remaining<=0&&state.globalRemaining<=0};
+  }
   get closing(){return this.phase==='closing'&&this.journey.inProgress;}
   get staffReturnPending(){return this.closing&&this.floor.cleanupComplete&&this.crew.some((id,i)=>{const a=this.actors.find(a=>a.id===id);return a?.visible&&a.id!==this.escort?.worker&&distance(a,this._parkGoal(i))>.05;});}
   get floorTasksPending(){return Floor.remaining(this.floor)>0||this.floor.guestActive||!this.guestExitFinished||this.staffReturnPending;}
@@ -79,7 +89,9 @@ export class SimBarGame{
   get showFarewell(){return this.farewellPending;}
   goalTargets(){const p=this.journey.booking;return Booking.isCampaign(p)?Campaign.targets(p.campaignStage,this.journey.challenge):this.journey.challenge?[20,7,8]:[12,4,5];}
   purchaseGate(type,index){return Booking.isCampaign(this.journey.booking)?Campaign.purchaseGate(type,index,this.state.upgrades[index]+1,this.journey.completedNights):{allowed:true,requiredNights:0};}
-  _campaignContext(){return{completedNights:this.journey.completedNights,fans:this.state.fans,upgrades:this.state.upgrades,career:this.journey.bookingCareer};}
+  _campaignContext(){return{venueOwner:this.owner,completedNights:this.journey.completedNights,fans:this.state.fans,upgrades:this.state.upgrades,career:this.journey.bookingCareer};}
+  _usesAudience(){return Booking.isCampaign(this.journey.booking)&&this.journey.booking.lockedMetrics?.audienceVersion===Audience.version;}
+  _orderGuest(a){return a.visible!==false&&!a.festivalLead&&!a.festivalSupport&&!['arrive','to-stage'].includes(a.action)&&(a.id.startsWith('patron-')||a.audienceVersion===Audience.version&&a.role==='guest');}
   goals(){return[this.journey.orders,this.journey.manualPerfects,this.journey.bestCombo];}
   bookingChance(band,premium=0){return Booking.isDesk(this.journey.booking)?0:Booking.chance(this.journey.booking,this.journey.bookingCareer,+band,+premium);}
   bookingFee(band,premium=0){return Booking.isDesk(this.journey.booking)?0:Booking.fee(+band,+premium);}
@@ -94,7 +106,7 @@ export class SimBarGame{
         artistFee:m.artistFee??m.fee??0,netTicketIncome:m.netIncome??0,ticketIncomeMin:Math.floor(m.ticketIncome*.8),
         netTicketIncomeMin:Math.floor(m.ticketIncome*.8)-(m.artistFee??m.fee??0),allowedTracks:show?show.tracks:[],
         canLaunch:!p.locked&&!p.completed&&!!show&&p.deskDoneMask===3,hour:Booking.hour(p),
-        lineup:show?show.bandIndices.map(i=>catalog.bands[i]):[],ticketTier:p.ticketTier,venue:catalog.venues[p.venue]};
+        lineup:show?show.bandIndices.map(i=>catalog.bands[i]):[],ticketTier:p.ticketTier,venue:Number.isInteger(m.venueOwner)?ownerVenue(m.venueOwner):catalog.venues[p.venue]};
     }
     if(Booking.isDesk(p))return{...m,deskVersion:1,freewillSelected:p.freewillSelected,deskDoneMask:p.deskDoneMask,
       canLaunch:!p.locked&&!p.completed&&p.freewillSelected&&p.deskDoneMask===3,hour:Booking.hour(p),
@@ -128,10 +140,27 @@ export class SimBarGame{
       this.state.activeEvent=int(data.activeEvent,-1,2);this.state.eventRemaining=clamp(data.eventRemaining,0,this.state.activeEvent<0?0:catalog.events[this.state.activeEvent].duration);if(!this.state.eventRemaining)this.state.activeEvent=-1;
       for(const key of ['pours','eventStartPours','completedEvents','eventFanTimer'])this.state[key]=int(data[key]);this.state.playlist=int(data.playlist,0,catalog.playlists.length-1);
       let j={};try{j=JSON.parse(data.journeyJson||'{}');}catch{}
-      this.journey={...newJourney(),...j};this._sanitizeJourney();this._buildActors();this.orders=[];this.crew=[];this.escort=null;this.pour=null;this.effects=[];
+      this.journey={...newJourney(),...j};this._sanitizeJourney();
+      if(this.journey.inProgress&&this._usesAudience())this.owner=this.journey.booking.lockedMetrics.venueOwner;
+      else if(this.journey.inProgress&&this.journey.festival.actionsUsed>0&&Number.isInteger(this.journey.festival.venueOwner))this.owner=this.journey.festival.venueOwner;
+      this._buildActors(data.native?.version===1&&Array.isArray(data.native.actors)&&data.native.actors.length<100?data.native.actors:null);this.orders=[];this.crew=[];this.escort=null;this.pour=null;this.effects=[];
       if(Booking.isCampaign(this.journey.booking)&&this.journey.booking.locked){const tracks=this.metrics().allowedTracks;if(!tracks.includes(this.state.playlist))this.state.playlist=tracks[0]??0;}
       const n=data.native;let restoredEmptyQueue=false;
-      if(n?.version===1&&this.journey.inProgress&&Array.isArray(n.actors)&&n.actors.length<100){
+      const restoreCast=this.journey.inProgress||this.journey.session>0&&this.journey.settledSession===this.journey.session
+        &&(!this._usesAudience()||this.journey.booking.lockedMetrics.venueOwner===this.owner);
+      if(n?.version===1&&restoreCast&&Array.isArray(n.actors)&&n.actors.length<100){
+        // An active audience contract keeps its original cast when a later
+        // room revision adds authored chairs with different IDs. New nights
+        // use those chairs; only newly blocked saved positions migrate below.
+        if(this._usesAudience()&&this.owner===0){
+          const saved=n.actors.filter(a=>Audience.isAudience(a)&&a.audienceVersion===Audience.version
+            &&/^(?:patron-\d+|audience-\d+|support-[0-2]|crowd-surfer|arrival-\d+-\d+)$/.test(a.id)
+            &&Number.isFinite(a.x)&&Number.isFinite(a.z)&&Math.abs(a.x)<20&&Math.abs(a.z)<20);
+          const current=this.actors.filter(Audience.isAudience);
+          if(saved.length===current.length&&new Set(saved.map(a=>a.id)).size===saved.length
+            &&saved.some(a=>a.layout==='freebird'&&a.layoutVersion<FREEBIRD_LAYOUT.version))
+            this.actors=[...this.actors.filter(a=>!Audience.isAudience(a)),...saved];
+        }
         const allowed=new Set(this.actors.map(a=>a.id));allowed.add('assisted-guest');
         const restored=n.actors.filter(a=>allowed.has(a.id)&&Number.isFinite(a.x)&&Number.isFinite(a.z)&&Math.abs(a.x)<20&&Math.abs(a.z)<20).map(a=>({...a,_path:Array.isArray(a._path)?a._path.filter(p=>Number.isFinite(p.x)&&Number.isFinite(p.z)).slice(0,300):[],_pathAt:int(a._pathAt,0,300)}));
         if(restored.length>=this.actors.length-3){const byId=new Map(restored.map(a=>[a.id,a]));this.actors=this.actors.map(a=>byId.get(a.id)||a);if(byId.has('assisted-guest'))this.actors.push(byId.get('assisted-guest'));}
@@ -146,7 +175,7 @@ export class SimBarGame{
       restoreAfterShow(this.journey.afterShow,this.actors);
       if(this._applyOwnerLayout()){this._routeOrders();syncAfterShow(this.journey.afterShow,this.actors);}
       if(!this.orders.length&&!restoredEmptyQueue&&this.journey.inProgress&&!this.journey.floorClosing)this._seedOrders();
-      if(this.floor.guestSpawned&&!this.floor.guestComplete)this._ensureGuest();
+      if(this.floor.guestSpawned&&(!this.floor.guestComplete||this.actors.some(a=>a.id==='assisted-guest'&&a.visible!==false)))this._ensureGuest();
       this.phase='lobby';this.paused=true;this.pauseReason='lobby';if(save)this.save();this._notify();return true;
     }catch{return false;}
   }
@@ -159,6 +188,7 @@ export class SimBarGame{
     if(!j.session||j.settledSession>0&&j.session===j.settledSession){j.inProgress=false;j.settlementPending=false;j.floorClosing=false;}
     j.musicPauseSession=int(j.musicPauseSession,0,j.session);j.musicPaused=j.musicPaused===true;
     j.campaignSecondSet=j.campaignSecondSet===true;
+    j.festival=Festival.sanitize(j.festival);
     j.afterShow=sanitizeAfterShow(j.afterShow,j.session,{settled:j.session>0&&j.session===j.settledSession&&!j.inProgress});
     if(j.settlementPending&&(Floor.remaining(j.floorMissions)||j.floorMissions.guestActive||j.afterShow&&(!j.afterShow.completed||!j.afterShow.noticeAcknowledged))){j.settlementPending=false;j.inProgress=true;j.floorClosing=true;}
     if(j.floorClosing&&j.inProgress){j.secondsLeft=0;j.guidePending=false;j.settlementPending=false;}else j.floorClosing=false;
@@ -175,8 +205,12 @@ export class SimBarGame{
     switch(type){
       case'owner':{
         if(this.phase!=='lobby'||!Number.isInteger(idx)||idx<0||idx>2)return this._done(false);
+        if(j.inProgress&&(this._usesAudience()||j.festival.actionsUsed>0)&&idx!==this.owner)return this._done(false,'venue_locked');
         const previous=this.owner;this.owner=idx;this._put(OWNER_KEY,catalog.owners[idx].id);
-        if(previous!==idx){this._applyOwnerLayout({reset:true});this._routeOrders();}
+        if(previous!==idx){
+          if(this._activePlan()&&Booking.isCampaign(j.booking))Booking.refreshCampaignContext(j.booking,this._campaignContext());
+          this._applyOwnerLayout({reset:true});this._routeOrders();
+        }
         break;
       }
       case'language':this.language=p.language==='en'?'en':'ko';this._put(LANGUAGE_KEY,this.language);break;
@@ -227,6 +261,7 @@ export class SimBarGame{
       case'pourStop':r=this._stopPour();break;
       case'hire':case'upgrade':case'event':case'payDebt':r=this._manage(type,idx);if(!r.success)this._say(...(messages[r.code]||messages.unavailable));break;
       case'quick':r=this._quick(+p.kind);break;
+      case'festival':r=this._festivalAction(p.id);break;
       case'playlist':
         if(!Number.isInteger(idx)||idx<0||idx>=catalog.playlists.length)return this._done(false);
         if(Booking.isCampaign(j.booking)&&j.booking.showId&&!this.metrics().allowedTracks.includes(idx))return this._done(false,'track_not_booked');
@@ -256,13 +291,93 @@ export class SimBarGame{
   _newNight(){
     const j=this.journey;j.session=j.session>=1e9?1:j.session+1;if(j.session===1)j.settledSession=0;j.inProgress=true;j.settlementPending=false;j.floorClosing=false;j.afterShow=null;j.musicPauseSession=0;j.musicPaused=false;j.secondsLeft=180;
     for(const k of ['score','combo','bestCombo','manualPerfects','orders','mistakes','successfulEvents','manualStreak','feverSeconds','feverCharge','drinkIncome','resultStars','resultServed','resultXP','resultBonus','resultProfit','resultTicketIncome','resultAttendance','resultFloorBonus','resultFloorTasks','resultTicketGross','resultArtistFee'])j[k]=0;
-    j.resultNewRecord=false;j.campaignSecondSet=false;j.openingCash=j.hasDayOpeningCash?j.dayOpeningCash:this.state.money;j.guideStep=0;j.guidePending=!j.tutorialComplete;j.floorMissions=Floor.newState();this._ensureReaction();
+    j.resultNewRecord=false;j.campaignSecondSet=false;j.festival=Festival.create();j.openingCash=j.hasDayOpeningCash?j.dayOpeningCash:this.state.money;j.guideStep=0;j.guidePending=!j.tutorialComplete;j.floorMissions=Floor.newState();this._ensureReaction();
     this.state.clock=18;this.state.satisfaction=Math.max(this.state.satisfaction,j.challenge?.85:.94);this.state.performance=Math.max(this.state.performance,.92);
     if(Booking.isCampaign(j.booking)){const tracks=this.metrics().allowedTracks;if(j.booking.showId==='double'||!tracks.includes(this.state.playlist))this.state.playlist=tracks[0]??0;}
     this._buildActors();this.crew=[];this.escort=null;this.effects=[];this.pour=null;this._seedOrders();this._requestTimer=3*(j.challenge?.72:1.18)*this.metrics().orderIntervalMultiplier;
     this.phase=j.guidePending?'guide':'playing';this.paused=j.guidePending;this.pauseReason=this.paused?'guide':'';this._say('영업 시작! 주문과 공연을 멋지게 운영해 보세요.','The show is open! Serve guests and keep the crowd glowing.');
   }
   _ensureReaction(){if(!this.floor.reaction)this.floor.reaction=Challenges.newState(Math.floor(this._random()*0x7fffffff)||1,180-this.journey.secondsLeft);}
+  _festivalAction(id){
+    if(!this.playing||this.paused||!this.festival.liveAttendance)return{success:false,code:'unavailable'};
+    const state=this.journey.festival,result=Festival.begin(state,id);if(!result.success)return result;
+    state.venueOwner=this.owner;
+    const definition=result.action,s=this.state,response=Festival.response(s.satisfaction,s.performance);
+    s.satisfaction=clamp(s.satisfaction+definition.satisfaction,.3,1);
+    s.performance=clamp(s.performance+definition.performance,.35,1);
+    state.arrivalCredit=Math.min(1,state.arrivalCredit+.6*response);
+    this._requestTimer=Math.min(this._requestTimer,2.2*this.festival.orderMultiplier);
+    const eligible=this.actors.filter(a=>['guest','seated'].includes(a.role)&&a.visible!==false&&!a.moving&&!['queue','return','arrive','to-stage','exit','escorted'].includes(a.action));
+    for(const actor of eligible){actor.festivalAction=id;actor.festivalSerial=state.serial;actor.festivalRemaining=state.remaining;actor.festivalDuration=state.duration;}
+    if(id==='surf')this._formFestivalSurf(eligible);
+    this._say(definition.ko+'! 호응이 높을수록 칵테일 주문과 현장 관객이 늘어나요.',definition.en+'! A responsive crowd brings more cocktail orders and walk-in guests.');
+    return{success:true,code:'festival_started',id};
+  }
+  _clearFestivalActors(){
+    for(const actor of this.actors){
+      if(actor.festivalLead){actor.y=0;if(actor.action==='surf')actor.action='listen';}
+      if(actor.festivalSupport&&['support','walk'].includes(actor.action)){
+        actor.action=this.playing?'return':'listen';
+        if(this.playing)setRoute(actor,point(actor.homeX,actor.homeZ),this.actors,false);
+      }
+      for(const key of ['festivalAction','festivalSerial','festivalRemaining','festivalDuration','festivalLead','festivalSupport','festivalTarget','festivalLiftReady','festivalLiftElapsed','_festivalRouteRetry'])delete actor[key];
+    }
+  }
+  _formFestivalSurf(eligible){
+    const floor=eligible.filter(a=>a.role==='guest'&&!a.seat&&this._walkable(a,false,true));let best=null;
+    for(const lead of floor){
+      const nearest=floor.filter(a=>a!==lead).sort((a,b)=>distance(a,lead)-distance(b,lead)).slice(0,3);
+      if(nearest.length<3||nearest.some(a=>distance(a,lead)>2.1))continue;
+      const team=[lead,...nearest];
+      for(let turn=0;turn<8;turn++){
+        const angle=turn*Math.PI/4,slots=[[-.55,-.15],[.55,-.15],[0,.57]].map(([x,z])=>point(lead.x+x*Math.cos(angle)-z*Math.sin(angle),lead.z+x*Math.sin(angle)+z*Math.cos(angle)));
+        if(slots.some(p=>!this._walkable(p,false,true)||this.actors.some(a=>a.visible&&a.role!=='band'&&!team.includes(a)&&distance(a,p)<.43)))continue;
+        const available=nearest.slice(),supporters=slots.map(target=>{
+          available.sort((a,b)=>distance(a,target)-distance(b,target));return{actor:available.shift(),target};
+        });
+        const score=supporters.reduce((sum,member)=>sum+distance(member.actor,member.target),0)+distance(lead,point(5,-2))*.02;
+        if(!best||score<best.score)best={lead,supporters,score};
+      }
+    }
+    if(!best)return;
+    best.lead.festivalLead=true;best.lead.festivalLiftReady=false;best.lead.festivalLiftElapsed=0;
+    for(const {actor,target}of best.supporters){actor.festivalSupport=true;actor.festivalTarget=target;setRoute(actor,target,this.actors,false);}
+  }
+  _festivalTick(dt){
+    const state=this.journey.festival;
+    Festival.tick(state,dt,this.state.satisfaction,this.state.performance);
+    if(!state.activeId)this._clearFestivalActors();
+    else for(const actor of this.actors)if(actor.festivalSerial===state.serial)actor.festivalRemaining=state.remaining;
+    if(state.arrivalCredit<1||state.arrivalRetry>0||this.festival.liveAttendance>=Audience.capacity(this.owner))return;
+    state.arrivalRetry=.8;
+    const serial=state.arrivalSerial+1,actor=Audience.arrival({owner:this.owner,showId:this.journey.booking?.showId,day:this.journey.day,session:this.journey.session,serial,actors:this.actors});
+    if(!actor)return;
+    const entry=Audience.profile(this.owner).entry||point(8.7,-5.4);
+    if(!this._walkable(entry,false,false)||this.actors.some(a=>a.visible&&a.role!=='band'&&distance(a,entry)<.5))return;
+    actor.x=entry.x;actor.z=entry.z;actor.action='arrive';
+    if(!setRoute(actor,point(actor.homeX,actor.homeZ),this.actors,false))return;
+    this.actors.push(actor);state.arrivalSerial=serial;state.arrivals++;state.arrivalCredit=0;
+  }
+  _restoreFestivalArrivals(savedActors){
+    const state=this.journey.festival,restoreCast=this.journey.inProgress||this.journey.session>0&&this.journey.settledSession===this.journey.session
+      &&(!this._usesAudience()||this.journey.booking.lockedMetrics.venueOwner===this.owner);
+    if(!restoreCast||!state?.arrivals)return;
+    const base=this.actors.filter(Audience.isAudience),savedBase=savedActors?.filter(a=>Audience.isAudience(a)&&!a.audienceArrival
+      &&/^(?:patron-\d+|audience-\d+|support-[0-2]|crowd-surfer|bar-seat-[0-3]|lounge-[0-6]|freebird-wall-[0-5]|ff-table-[0-4]-guest-[01])$/.test(a.id));
+    const validBase=savedBase?.length===base.length&&new Set(savedBase.map(a=>a.id)).size===savedBase.length;
+    const occupied=validBase?savedBase.filter(a=>a.visible!==false).length:base.filter(a=>a.visible!==false).length;
+    const visitor=savedActors?.some(a=>a.id==='assisted-guest'&&a.role==='assisted'&&a.visible!==false)?1:0;
+    const hiddenArrivals=savedActors?.filter(a=>a.audienceArrival&&a.visible===false&&a.audienceVersion===Audience.version).length||0;
+    const available=Math.max(0,Audience.capacity(this.owner)-occupied-visitor),requested=Math.min(state.arrivals,available+hiddenArrivals);
+    let restored=0;
+    for(let serial=1;serial<=requested;serial++){
+      const id=`arrival-${this.journey.session}-${serial}`,saved=savedActors?.find(a=>a.id===id&&a.audienceArrival===true&&a.audienceVersion===Audience.version&&a.role==='guest'
+        &&Number.isFinite(a.x)&&Number.isFinite(a.z)&&Math.abs(a.x)<20&&Math.abs(a.z)<20);
+      const actor=saved?{...saved}:Audience.arrival({owner:this.owner,showId:this.journey.booking?.showId,day:this.journey.day,session:this.journey.session,serial,actors:this.actors});
+      if(!actor)break;this.actors.push(actor);restored++;
+    }
+    state.arrivals=restored;state.arrivalSerial=restored;
+  }
   _manage(type,index){
     const s=this.state;if(!this.playing&&this.phase!=='planning'||this.phase==='planning'&&type==='event')return{success:false,code:'unavailable'};
     if(type==='payDebt'){if(!s.wageDebt||s.money<s.wageDebt)return{success:false,code:'insufficient_cash'};s.money-=s.wageDebt;s.wageDebt=0;s.wageTimer=60;return{success:true,code:'wages_paid'};}
@@ -292,20 +407,28 @@ export class SimBarGame{
   }
   _completeEvent(){const s=this.state;if(s.activeEvent<0)return;const e=catalog.events[s.activeEvent],success=s.pours-s.eventStartPours>=e.target;s.money+=success?e.reward:50;s.fans+=success?e.fans:3;if(success){s.completedEvents++;s.satisfaction=Math.min(1,s.satisfaction+.04);this.journey.successfulEvents++;this.journey.score+=250;}s.cooldowns[s.activeEvent]=Math.min(s.cooldowns[s.activeEvent],e.cooldown);s.activeEvent=-1;s.eventRemaining=0;this._say(success?'이벤트 성공! 보상과 팬을 획득했어요.':'이벤트가 종료됐어요. 다음 목표에 도전해 보세요.',success?'Event success! Cash and fans awarded.':'Event ended. Try the next target.');}
   _orderItem(){
+    const festival=this.journey.festival;
+    if(festival?.actionsUsed&&this._random()<Festival.modifiers(festival,this.state.satisfaction,this.state.performance).cocktailBoost)return this._random()<.5?0:1;
     const show=Booking.isCampaign(this.journey.booking)?Campaign.show(this.journey.booking.showId):null;
     if(show&&this._random()<.72)return show.preferredItems[Math.floor(this._random()*show.preferredItems.length)];
     return Math.floor(this._random()*catalog.drinks.length);
   }
-  _seedOrders(){this.orders=[];for(const [id,item]of[[1,0],[4,1],[8,2]])this._assignOrder('patron-'+id,Booking.isCampaign(this.journey.booking)?this._orderItem():item);}
+  _seedOrders(){
+    this.orders=[];
+    if(this._usesAudience()){
+      const pool=this.actors.filter(a=>this._orderGuest(a));for(let i=0;i<Math.min(3,pool.length);i++)this._assignOrder(pool[i].id,this._orderItem());return;
+    }
+    for(const [id,item]of[[1,0],[4,1],[8,2]])this._assignOrder('patron-'+id,Booking.isCampaign(this.journey.booking)?this._orderItem():item);
+  }
   _assignOrder(id,item){
-    const a=this.actors.find(a=>a.id===id);if(!a||this.orders.some(o=>o.id===id))return;
+    const a=this.actors.find(a=>a.id===id);if(!a||a.visible===false||this.orders.some(o=>o.id===id))return;
     const s=this.state,patience=52+this._random()*16+(this._onDuty(1)?18:0)+s.upgrades[2]*6+(s.activeEvent===0?8:0)+(this.journey.challenge?-12:18);
     this.orders.push({id,name:a.name,item,patience,maxPatience:patience});this._routeOrders();
   }
-  _createOrder(excludeId){if(this.orders.length>=4+this.state.upgrades[2])return;const pool=this.actors.filter(a=>a.id.startsWith('patron-')&&a.id!==excludeId&&!this.orders.some(o=>o.id===a.id));if(!pool.length)return;const a=pool[Math.floor(this._random()*pool.length)];this._assignOrder(a.id,this._orderItem());}
+  _createOrder(excludeId){if(this.orders.length>=4+this.state.upgrades[2])return;const pool=this.actors.filter(a=>this._orderGuest(a)&&a.id!==excludeId&&!this.orders.some(o=>o.id===a.id));if(!pool.length)return;const a=pool[Math.floor(this._random()*pool.length)];this._assignOrder(a.id,this._orderItem());}
   _routeOrders(){
     const slots=layoutForOwner(this.owner)?.orderSlots||orderSlots;
-    for(const a of this.actors.filter(a=>a.id.startsWith('patron-'))){const i=this.orders.findIndex(o=>o.id===a.id);if(i>=0){const goal=slots[Math.min(i,6)];if(a.action!=='queue'||Math.hypot(a.targetX-goal.x,a.targetZ-goal.z)>.1){a.action='queue';setRoute(a,goal,this.actors);}}
+    for(const a of this.actors.filter(a=>this._orderGuest(a))){const i=this.orders.findIndex(o=>o.id===a.id);if(i>=0){const goal=slots[Math.min(i,6)];if(a.action!=='queue'||Math.hypot(a.targetX-goal.x,a.targetZ-goal.z)>.1||!a._path?.length&&distance(a,goal)>.2){a.action='queue';setRoute(a,goal,this.actors);}}
       else if(a.action==='queue'){a.action='return';setRoute(a,point(a.homeX,a.homeZ),this.actors);}}
   }
   _startPour(item){
@@ -324,7 +447,7 @@ export class SimBarGame{
     const tip=round(catalog.drinks[item].price*clamp(o.patience/30,0,1)*.45*tips*showTips*(j.feverSeconds>0?1.75:1)*qualityTip),sale=round(catalog.drinks[item].price*revenue),income=tip+sale;
     s.money=clamp(s.money+income,0,1e9);s.fans+=automatic||quality>=.5?1+(!automatic&&quality>=.9?1:0):0;s.pours++;s.satisfaction=clamp(s.satisfaction+(automatic?.012:quality>=.5?.01+quality*.015:-.025),.3,1);s.performance=clamp(s.performance+(automatic||quality>=.5?.014:-.008),0,1);
     j.orders++;j.drinkIncome+=income;if(!automatic){if(quality<.5)this._mistake();else{j.combo++;j.bestCombo=Math.max(j.bestCombo,j.combo);if(quality>=.9)j.manualPerfects++;j.manualStreak++;let multiplier=1+Math.min(20,j.combo-1)*.05;if(j.feverSeconds>0)multiplier*=1.3;j.score+=round((70+130*quality)*multiplier);j.feverCharge=clamp(j.manualStreak/5,0,1);if(!j.feverSeconds&&j.manualStreak>=5&&s.performance>=.72){j.feverSeconds=12;j.manualStreak=0;j.feverCharge=0;}}}
-    this._routeOrders();if(!show)this._createOrder(o.id);else if(!this.orders.length)this._requestTimer=Math.min(this._requestTimer,2);
+    this._routeOrders();if(!show)this._createOrder(o.id);else if(!this.orders.length)this._requestTimer=Math.min(this._requestTimer,2*this.festival.orderMultiplier);
     this._say((automatic?'바 보조 서빙':quality>=.9?'완벽한 서빙!':quality>=.5?'잘 서빙했어요!':'타이밍을 놓쳤어요 — 팁 없음')+' +'+this.formatMoney(income),(automatic?'Barback served':quality>=.9?'Perfect service!':quality>=.5?'Good service!':'Missed service — no tip')+' +'+this.formatMoney(income));return{success:true,code:automatic?'auto_served':quality>=.9?'perfect':quality>=.5?'good':'miss',quality,income};
   }
   tick(dt){
@@ -339,8 +462,9 @@ export class SimBarGame{
       if(Booking.isCampaign(j.booking)&&j.booking.showId==='double'&&!j.campaignSecondSet&&j.secondsLeft<=90){
         j.campaignSecondSet=true;s.playlist=1;this._say('2부 시작! 줄라이원츠모어가 무대에 오릅니다.','Second set! JulyWantsMore takes the stage.');
       }
+      this._festivalTick(dt);
       if(this.pour){this.pour.elapsed+=dt;this.pour.remaining=Math.max(0,3-this.pour.elapsed);const v=(.04+this.pour.elapsed*.82)%2;this.pour.marker=v<=1?v:2-v;if(!this.pour.remaining)this._finishPour(.2);}
-      this._opsTick(dt);s.clock=18+6*(1-j.secondsLeft/180);this._requestTimer-=dt;if(this._requestTimer<=0){this._createOrder();this._requestTimer=(4.5+this._random()*3)*(this._onDuty(2)?.9:1)*(s.activeEvent===2?.7:1)*(j.challenge?.72:1.18)*this.metrics().orderIntervalMultiplier;}
+      this._opsTick(dt);s.clock=18+6*(1-j.secondsLeft/180);this._requestTimer-=dt;if(this._requestTimer<=0){this._createOrder();this._requestTimer=(4.5+this._random()*3)*(this._onDuty(2)?.9:1)*(s.activeEvent===2?.7:1)*(j.challenge?.72:1.18)*this.metrics().orderIntervalMultiplier*this.festival.orderMultiplier;}
       for(const o of this.orders)if(!this.pour||o.id!==this.pour.orderId)o.patience-=dt;
       if(this.orders[0]?.patience<=0&&!this.pour){this.orders.shift();s.satisfaction=Math.max(.35,s.satisfaction-.07);s.performance=Math.max(.35,s.performance-.04);s.fans=Math.max(0,s.fans-3);this._mistake();this._routeOrders();this._say('손님이 주문을 받지 못하고 떠났어요.','A guest left without their order.');}
       s.performance=clamp(s.performance-dt*(.0015-this.metrics().energyBonus*.006),0,1);
@@ -373,6 +497,7 @@ export class SimBarGame{
   }
   _beginClosing(){
     const j=this.journey;this.phase='closing';j.floorClosing=true;j.inProgress=true;j.settlementPending=false;j.guidePending=false;
+    this._clearFestivalActors();j.festival.activeId='';j.festival.remaining=0;j.festival.globalRemaining=0;
     if(j.musicPauseSession!==j.session){j.musicPauseSession=j.session;j.musicPaused=true;}
     this._beginAfterShow();this.orders=[];this._routeOrders();this._ensureReaction();
     // The random mid-set schedule remains random; the final bow supplies only
@@ -398,7 +523,7 @@ export class SimBarGame{
     this.state.money=clamp(this.state.money,0,1e9);this.state.fans=int(this.state.fans,0,1e7);
     this.phase='results';this.paused=true;this.pauseReason='results';this.orders=[];this.pour=null;this.save();
   }
-  _buildActors(){
+  _buildActors(savedActors=null){
     const make=(id,name,role,x,z,y=0)=>({id,name,role,x,z,y,homeX:x,homeZ:z,targetX:x,targetZ:z,moving:false,action:role==='band'?'perform':'idle',visible:true,facing:0,_path:[],_pathAt:0,_wait:2});
     this.actors=[make('bartender','Jessy Bartender','bartender',-7.3,-.565),make('server','Server','server',-4.2,-.565),make('singer','DP Singer / Dragon Pony','band',5.7,3.5),make('guitarist','RUX Guitarist','band',3.8,4.25),make('bassist','FW Bassist / freewill','band',7.7,4.25),make('drummer','JW Drummer / Julywantsmore','band',5.75,5.55)];
     const bandFacing={singer:-Math.PI/2,guitarist:-Math.PI*.38,bassist:Math.PI*.38,drummer:-Math.PI/2};
@@ -412,19 +537,43 @@ export class SimBarGame{
     for(let i=0;i<3;i++){const a=make('hired-'+i,catalog.staff[i].nameEnglish,'hired-'+i,...[[-5.8,-.565],[-.4,-4.9],[8.75,-3.5]][i]);a.visible=!!this.state.staff[i]&&!this.state.wageDebt;this.actors.push(a);}
     for(let i=0;i<3;i++)this.actors.push(make('support-'+i,'Crowd Supporter '+i,'support',6+(i===0?-.65:i===1?.65:0),-4.25+(i===2?-.65:0)));
     this.actors.push(make('crowd-surfer','Crowd Surfer','surfer',6,-4.25));
+    if(this._usesAudience()){
+      const p=this.journey.booking,m=Booking.forecast(p);
+      this.actors=this.actors.filter(a=>!Audience.isAudience(a));
+      this.actors.push(...Audience.build({owner:m.venueOwner,attendance:m.attendance,showId:p.showId,day:p.day,session:this.journey.session}));
+    }
+    this._restoreFestivalArrivals(savedActors);
     if(layoutForOwner(this.owner))this._applyOwnerLayout({reset:true});
   }
   _walkable(p,staff=false,floor=false){return walkable(p,staff,floor,layoutForOwner(this.owner)?.id);}
   _applyOwnerLayout({reset=false}={}){
     const layout=layoutForOwner(this.owner);let changed=false;
     for(const a of this.actors){
+      // Campaign audiences already occupy safe, venue-specific homes. Applying
+      // the former eleven fixed standing positions would stack the new crowd.
+      if(a.audienceVersion===Audience.version){
+        if(layout&&(a.layout!==layout.id||a.layoutVersion!==layout.version)){
+          const currentBlocked=!this._walkable(a,false,false),homeBlocked=!this._walkable(point(a.homeX,a.homeZ),false,false);
+          if(currentBlocked||homeBlocked){
+            const safe=Audience.safePoint({owner:this.owner,actor:a,actors:this.actors,day:this.journey.day,session:this.journey.session});
+            if(safe){
+              if(homeBlocked){a.homeX=safe.x;a.homeZ=safe.z;}
+              if(currentBlocked){a.x=safe.x;a.z=safe.z;a.y=0;a.moving=false;}
+            }
+          }
+          a.layout=layout.id;a.layoutVersion=layout.version;a._path=[];a._pathAt=0;a._blocked=0;
+          if(a.action==='return'){a.targetX=a.homeX;a.targetZ=a.homeZ;}
+          changed=true;
+        }
+        continue;
+      }
       const migrated=layout?(a.layout!==layout.id||a.layoutVersion!==layout.version):a.layout==='ff'||a.layout==='freebird';
       if(layout){a.layout=layout.id;a.layoutVersion=layout.version;}else{delete a.layout;delete a.layoutVersion;}
       if(migrated||reset){changed=true;a._path=[];a._pathAt=0;a._blocked=0;a.moving=false;delete a._cleanupGoal;delete a._cleanupGoalSegment;delete a._cleanupParkGoal;delete a._cleanupParkSession;}
       let home=null;
       if(a.id.startsWith('bar-seat-')||a.id.startsWith('lounge-')){
         const index=a.id.startsWith('bar-seat-')?+a.id.slice(9):4+(+a.id.slice(7));
-        home=layout?layout.standing[index]:seatedHome(a.id);a.role=layout?'guest':'seated';
+        home=layout?layout.standing[index]:seatedHome(a.id);a.role=layout||a.seatReleased?'guest':'seated';
       }else if(a.id==='bartender')home=layout?layout.bartender:point(-7.3,-.565);
       else if(a.id==='server')home=layout?layout.server:point(-4.2,-.565);
       else if(a.id==='hired-0')home=layout?layout.barback:point(-5.8,-.565);
@@ -478,7 +627,28 @@ export class SimBarGame{
     return worker._cleanupParkGoal;
   }
   _readyWorkers(){if(!this.floor.cleanupActive||this.floor.cleanupComplete)return[];return this.crew.map((id,i)=>({a:this.actors.find(a=>a.id===id),i})).filter(({a,i})=>a&&a.visible&&a.id!==this.escort?.worker&&(!a.id.startsWith('hired-')||this._onDuty(+a.id.slice(-1)))&&distance(a,this._cleanGoal(i))<=.22).map(x=>x.a);}
-  _ensureGuest(){let a=this.actors.find(a=>a.id==='assisted-guest');if(!a){a={id:'assisted-guest',name:catalog.guestNames[this.floor.guestIndex%10]||'Guest',role:'assisted',x:-.65,z:-.25,y:0,homeX:-.65,homeZ:-.25,targetX:-.65,targetZ:-.25,moving:false,action:'needs-help',visible:true,_path:[],_pathAt:0};const layout=layoutForOwner(this.owner);if(layout){a.layout=layout.id;a.layoutVersion=layout.version;}this.actors.push(a);}return a;}
+  _ensureGuest(){
+    let actor=this.actors.find(a=>a.id==='assisted-guest');
+    const created=!actor;
+    if(!actor){
+      actor={id:'assisted-guest',name:catalog.guestNames[this.floor.guestIndex%10]||'Guest',role:'assisted',x:-.65,z:-.25,y:0,homeX:-.65,homeZ:-.25,targetX:-.65,targetZ:-.25,moving:false,action:'needs-help',visible:true,_path:[],_pathAt:0};
+      const layout=layoutForOwner(this.owner);if(layout){actor.layout=layout.id;actor.layoutVersion=layout.version;}
+      this.actors.push(actor);
+    }
+    if(actor.visible!==false&&!actor.assistedSourceId){
+      const candidates=this.actors.filter(a=>a.role==='guest'&&a.visible!==false&&!a.festivalLead&&!a.festivalSupport
+        &&!['queue','return','arrive','to-stage'].includes(a.action)&&!this.orders.some(order=>order.id===a.id));
+      candidates.sort((a,b)=>(a.id.startsWith('audience-')?0:1)-(b.id.startsWith('audience-')?0:1)||distance(a,point(-.65,-.25))-distance(b,point(-.65,-.25)));
+      const source=candidates[0];
+      if(source){
+        actor.assistedSourceId=source.id;actor.styleKey=Audience.wardrobe(source);actor.slot=source.slot;
+        actor.name=source.name;
+        if(created){actor.x=actor.homeX=actor.targetX=source.x;actor.z=actor.homeZ=actor.targetZ=source.z;}
+        source.visible=false;source.moving=false;source.reservedForAssistance=true;source._path=[];source._pathAt=0;
+      }
+    }
+    return actor;
+  }
   _beginEscort(){const guest=this._ensureGuest(),worker=this.actors.find(a=>a.id==='server');this.escort={worker:worker.id,phase:'join',homeX:worker.homeX,homeZ:worker.homeZ};worker.action='escort';worker._partner=guest.id;guest._partner=worker.id;setRoute(worker,point(guest.x-.5,guest.z-.3),this.actors,true);}
   _tickBartender(a,dt){
     if(!this.playing){a.moving=false;a.action='idle';return;}
@@ -504,10 +674,31 @@ export class SimBarGame{
         if(this.playing){a.action='perform';a.moving=false;continue;}
         a.action='idle';a.moving=false;
         continue;
-      }if(a.role==='seated')continue;
+      }if(a.role==='seated'){
+        if(a.waitingSeat&&this.playing){
+          a.waitRemaining=Math.max(0,(a.waitRemaining||0)-dt);
+          if(a.waitRemaining<=0){
+            a._seatRouteRetry=Math.max(0,(a._seatRouteRetry||0)-dt);
+            if(!a._seatRouteRetry){
+              const goal=Audience.frontTarget({owner:this.owner,actor:a,actors:this.actors,day:this.journey.day,session:this.journey.session});
+              if(goal&&setRoute(a,goal,this.actors,false)){a.role='guest';a.seat=false;a.waitingSeat=false;a.seatReleased=true;a.homeX=goal.x;a.homeZ=goal.z;a.behavior='cheer';a.action='to-stage';continue;}
+              a._seatRouteRetry=1.2;
+            }
+          }
+        }
+        if(a.audienceVersion===Audience.version){a.action=this.playing?a.behavior:'idle';a.moving=false;}
+        continue;
+      }
       if(a.id==='bartender'){this._tickBartender(a,dt);continue;}
       if(!this.playing&&(a.action==='mosh'||a.action==='slam')){a.action='idle';a.moving=false;}
-      if(a.action==='queue'||a.action==='return'){if(move(a,dt,1.45,this.actors)){a.moving=false;if(a.action==='return')a.action='idle';}continue;}
+      if(['queue','return','arrive','to-stage'].includes(a.action)){
+        if(['return','arrive','to-stage'].includes(a.action)&&(!a._path?.length||a._pathAt>=a._path.length)&&distance(a,point(a.targetX,a.targetZ))>.2){
+          a._crowdRetry=Math.max(0,(a._crowdRetry||0)-dt);if(!a._crowdRetry){setRoute(a,point(a.targetX,a.targetZ),this.actors,false);a._crowdRetry=.8;}
+        }
+        if(move(a,dt,1.45,this.actors)){a.moving=false;if(a.action==='to-stage')a.seatStageReached=true;if(a.action!=='queue')a.action=a.behavior||'idle';}
+        continue;
+      }
+      if(a.audienceVersion===Audience.version){this._tickAudience(a,dt);continue;}
       if(a.role==='guest'&&a.slot<6&&this.playing){
         // A patron returning from the bar rejoins at their current angle. The
         // shared clock has advanced while they queued, so its old phase would
@@ -530,6 +721,48 @@ export class SimBarGame{
         else{a.moving=false;a._wait-=dt;if(a._wait<=0){const goal=point(1+this._random()*7,-5+this._random()*5.5);if(this._walkable(goal,false,true)&&this._walkable(a,false,true)){a.action='wander';setRoute(a,goal,this.actors,true);}a._wait=3+this._random()*5;}}
       }else{a.moving=false;a.action=this.playing?'serve':'idle';}
     }
+  }
+  _tickAudience(a,dt){
+    if(!this.playing){a.action='idle';a.moving=false;a.y=0;return;}
+    if(a.festivalAction==='surf'&&a.festivalRemaining>0){
+      if(a.festivalSupport){
+        const target=a.festivalTarget;
+        if(target&&distance(a,target)>.18){
+          a._festivalRouteRetry=Math.max(0,(a._festivalRouteRetry||0)-dt);
+          if((!a._path?.length||a._pathAt>=a._path.length)&&!a._festivalRouteRetry){setRoute(a,target,this.actors,false);a._festivalRouteRetry=.4;}
+          move(a,dt,1.65,this.actors);a.action='walk';return;
+        }
+        a.action='support';a.moving=false;return;
+      }
+      if(a.festivalLead){
+        const supporters=this.actors.filter(other=>other.festivalSupport&&other.festivalSerial===a.festivalSerial);
+        a.festivalLiftReady=supporters.length===3&&supporters.every(other=>other.visible!==false&&other.action==='support'&&other.festivalTarget&&distance(other,other.festivalTarget)<=.22&&distance(other,a)<.85);
+        a.festivalLiftElapsed=clamp((a.festivalLiftElapsed||0)+(a.festivalLiftReady?dt:-dt*2),0,1.2);
+        a.y=Math.min(a.festivalLiftElapsed/1.2,a.festivalRemaining/1.2)*1.35;
+        a.action=a.festivalLiftReady&&a.y>.05?'surf':'listen';a.moving=false;return;
+      }
+    }
+    if(a.behavior==='mosh'){
+      const spacing=Math.PI*2/Math.max(1,a.pitCount),base=(a.pitIndex||0)*spacing,speed=this.owner===1?.31:.21;
+      if(a.action!=='mosh'||!Number.isFinite(a._pitPhaseOffset))a._pitPhaseOffset=Math.atan2(a.z+1.25,a.x-5.75)-base-this.elapsed*speed;
+      const angle=base+this.elapsed*speed+a._pitPhaseOffset,current=Math.hypot(a.x-5.75,a.z+1.25),radius=current+clamp((a.pitRadius||1.58)-current,-dt*.65,dt*.65);
+      a.x=5.75+Math.cos(angle)*radius;a.z=-1.25+Math.sin(angle)*radius;a.action='mosh';a.moving=true;a.facing=angle+Math.PI/2;return;
+    }
+    if(a.behavior==='slam'){
+      const side=a.slamSide||1,separation=.44+Math.abs(Math.sin(this.elapsed*1.85))*.24,goal=point(5.75+side*separation,-1.25),d=distance(a,goal),step=Math.min(d,dt*.65);
+      if(d>0){a.x+=(goal.x-a.x)*step/d;a.z+=(goal.z-a.z)*step/d;}
+      a.action='slam';a.moving=step>.001;a.facing=side<0?Math.PI/2:-Math.PI/2;return;
+    }
+    if(a.behavior==='surf'){
+      const cycle=this.owner===1?22:31,t=(this.elapsed+this.journey.day*3)%cycle;
+      a.y=t>=3&&t<=15?Math.min(1,(t-3)/2,(15-t)/2)*1.85:0;a.action=a.y>0?'surf':'listen';a.moving=false;return;
+    }
+    if(a.behavior==='support'){
+      const surfer=this.actors.find(v=>v.id==='crowd-surfer');a.action=surfer?.y>.1?'support':'listen';a.moving=false;
+      if(surfer)a.facing=Math.atan2(surfer.z-a.z,surfer.x-a.x);return;
+    }
+    a.action=a.behavior||'listen';a.moving=false;
+    a.facing=Math.atan2(5.75-a.x,3.5-a.z);
   }
   _tickFloorActors(dt){
     for(let i=0;i<this.crew.length;i++){

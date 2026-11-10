@@ -32,11 +32,15 @@ def prepare_owner_venues(output=OUTPUT):
     for owner, filename in [('ff', 'ClubFF.layout.json'), ('freebird', 'ClubFreebird.layout.json')]:
         layout = SOURCE / filename
         metadata = json.loads(layout.read_text(encoding='utf-8'))
-        if metadata.get('seatedActors') or metadata.get('layout', {}).get('id') != owner:
-            raise ValueError(f'{owner} has a standing floor and requires its own layout metadata.')
+        if metadata.get('layout', {}).get('id') != owner:
+            raise ValueError(f'{owner} requires its own layout metadata.')
+        if owner == 'ff' and metadata.get('seatedActors'):
+            raise ValueError('FF uses standing audience spots rather than seated actors.')
         shutil.copy2(layout, output / ('venue-' + owner + '.json'))
     from prepare_ff_tables import prepare_ff_tables
     prepare_ff_tables(output)
+    from prepare_social_venue_props import prepare_social_venue_props
+    prepare_social_venue_props(output)
 
 
 if __name__ == '__main__':

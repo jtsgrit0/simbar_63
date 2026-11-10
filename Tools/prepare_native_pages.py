@@ -12,7 +12,7 @@ import json
 from pathlib import Path
 import re
 import shutil
-import tempfile
+import uuid
 from prepare_streaming_playlist import PLAYLIST, prepare_streaming_playlist
 
 
@@ -20,9 +20,9 @@ PROJECT = Path(__file__).resolve().parent.parent
 TEMPLATE = PROJECT / "Tools/WebGLTemplate"
 SOURCE = TEMPLATE / "FastGame"
 MODULES = ("boot.js", "game.js", "core.js", "world.js", "booking.js", "floor.js",
-           "navigation.js", "catalog.js", "playlist.js", "legacy-save.js", "daily-poster.js", "music.js", "aftershow.js", "album-art.js", "daydesk.js", "owner-venues.js", "band-models.js", "campaign.js")
-ESSENTIAL_IMAGES = ("owner-female.png", "owner-ff.png", "owner-pet.png", "seoul.png", "venue.png", "venue-freebird.png", "venue-ff.png", "standing-table.png", "standing-stool.png", "band-freewill.png", "band-july.png")
-ESSENTIAL_METADATA = ("venue.json", "sprites.json", "venue-ff.json", "venue-freebird.json", "band-models.json")
+           "navigation.js", "catalog.js", "playlist.js", "legacy-save.js", "daily-poster.js", "music.js", "aftershow.js", "album-art.js", "daydesk.js", "owner-venues.js", "band-models.js", "campaign.js", "audience.js", "festival.js")
+ESSENTIAL_IMAGES = ("owner-female.png", "owner-ff.png", "owner-pet.png", "seoul.png", "venue.png", "venue-freebird.png", "venue-ff.png", "standing-table.png", "standing-stool.png", "band-freewill.png", "band-july.png", "festival-gestures.png", "festival-vocals.png", "festival-surf.png", "freebird-arch.png", "freebird-wall-table.png", "cocktail-glass.png")
+ESSENTIAL_METADATA = ("venue.json", "sprites.json", "venue-ff.json", "venue-freebird.json", "band-models.json", "festival-models.json")
 DEFERRED_IMAGES = ("office/desk-jessy.png", "office/desk-edison.png", "office/desk-jaiden.png")
 ICONS = ("setup", "cash", "fans", "time", "staff", "guestsati", "perrform", "upgrades", "guest", "events")
 EXCLUDED = {"index.html", "runtime-manifest.json", "package.json", "package-lock.json",
@@ -124,9 +124,12 @@ def prepare_native_pages(source=SOURCE, output=PROJECT / "docs", *, template=TEM
     release = releases / version
     # Assemble a complete immutable release before making the HTML reference it.
     if not release.exists():
-        with tempfile.TemporaryDirectory(prefix=".native-stage-", dir=releases) as temporary:
-            stage = Path(temporary) / version
-            stage.mkdir()
+        # These are public game assets. On Windows, TemporaryDirectory's private
+        # ACL survives a rename and prevents the desktop builder from reading
+        # the release under the user's account. Inherit the output folder ACL.
+        stage = releases / (".native-stage-" + uuid.uuid4().hex)
+        stage.mkdir(mode=0o755)
+        try:
             for path in files:
                 target = stage / path.relative_to(source)
                 target.parent.mkdir(parents=True, exist_ok=True)
@@ -137,6 +140,11 @@ def prepare_native_pages(source=SOURCE, output=PROJECT / "docs", *, template=TEM
                 if digest(stage / entry["path"]) != entry["sha256"]:
                     raise RuntimeError("Source changed while packaging; run packaging again.")
             stage.rename(release)
+        finally:
+            if stage.exists():
+                if stage.resolve().parent != releases.resolve() or not stage.name.startswith(".native-stage-"):
+                    raise RuntimeError("Refusing to remove staging outside the native output folder.")
+                shutil.rmtree(stage)
     else:
         for entry in manifest["files"]:
             if not (release / entry["path"]).is_file() or digest(release / entry["path"]) != entry["sha256"]:
