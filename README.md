@@ -116,7 +116,7 @@ python Tools/prepare_github_pages.py --source Builds/Pages/SimBarPlayerWebGL
 
 반응형 웹 템플릿은 `Tools/WebGLTemplate/`에 보관합니다. 웹 페이지의 HTML·CSS만 바꿀 때는 `python Tools/prepare_github_pages.py --host-only`로 게시 파일을 갱신할 수 있습니다. 릴리스 빌드는 파일 내용의 해시를 파일명에 사용해 새 빌드와 이전 캐시가 섞이지 않도록 하며, 같은 버전의 데이터와 WebAssembly 응답은 브라우저의 Cache Storage에서 재사용합니다. 캐시를 읽어도 WebAssembly 스트리밍 컴파일을 유지하며, 캐시 쓰기 완료를 기다리지 않고 게임을 시작합니다.
 
-`docs/` 변경 사항을 커밋하여 `main`에 푸시하면 GitHub Pages가 갱신됩니다. Unity 캐시, 로컬 빌드, 임시 복구 파일은 Git에 포함하지 않습니다.
+`docs/` 변경 사항을 커밋하여 `main`에 푸시하면 `.github/workflows/publish-pages.yml`이 검증된 정적 파일을 GitHub Pages에 게시합니다. Actions 탭의 `Publish SimBar Pages`에서 수동 재배포도 가능합니다. Unity 캐시, 로컬 빌드, 임시 복구 파일은 Git에 포함하지 않습니다.
 
 실제 웹 접속 성능은 `uv run --with playwright python Tools/benchmark_web_loading.py --url https://jtsgrit0.github.io/simbar_63/ --require-game-ready --samples 3`으로 확인합니다. 새 브라우저 컨텍스트에서 첫 접속과 재접속을 측정하며, 기본값은 네트워크 제한 없음입니다. `simbarGameReadyAt`은 실제 게임 UI를 그린 뒤 기록하므로 Unity 로고나 로딩 HTML을 실행 완료로 세지 않습니다. 세부 결과와 화면은 `Temp/perf/`에 저장합니다.
 
