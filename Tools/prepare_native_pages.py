@@ -20,7 +20,7 @@ PROJECT = Path(__file__).resolve().parent.parent
 TEMPLATE = PROJECT / "Tools/WebGLTemplate"
 SOURCE = TEMPLATE / "FastGame"
 MODULES = ("boot.js", "game.js", "core.js", "world.js", "booking.js", "floor.js",
-           "navigation.js", "catalog.js", "playlist.js", "legacy-save.js", "daily-poster.js", "music.js", "aftershow.js", "album-art.js", "daydesk.js", "owner-venues.js", "band-models.js")
+           "navigation.js", "catalog.js", "playlist.js", "legacy-save.js", "daily-poster.js", "music.js", "aftershow.js", "album-art.js", "daydesk.js", "owner-venues.js", "band-models.js", "campaign.js")
 ESSENTIAL_IMAGES = ("owner-female.png", "owner-ff.png", "owner-pet.png", "seoul.png", "venue.png", "venue-freebird.png", "venue-ff.png", "standing-table.png", "standing-stool.png", "band-freewill.png", "band-july.png")
 ESSENTIAL_METADATA = ("venue.json", "sprites.json", "venue-ff.json", "venue-freebird.json", "band-models.json")
 DEFERRED_IMAGES = ("office/desk-jessy.png", "office/desk-edison.png", "office/desk-jaiden.png")
@@ -33,6 +33,14 @@ VERSION = re.compile(r"[0-9a-f]{16}")
 
 def digest(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def runtime_bytes(path):
+    data = path.read_bytes()
+    # Match Git's text checkout on every OS before assigning immutable URLs.
+    if path.suffix in {".js", ".css", ".json", ".txt"}:
+        data = data.replace(b"\r\n", b"\n")
+    return data
 
 
 def essential_images(source):
@@ -85,8 +93,11 @@ def runtime_files(source):
 
 def snapshot(source):
     files = runtime_files(source)
-    entries = [{"path": path.relative_to(source).as_posix(), "bytes": path.stat().st_size,
-                "sha256": digest(path)} for path in files]
+    entries = []
+    for path in files:
+        data = runtime_bytes(path)
+        entries.append({"path": path.relative_to(source).as_posix(), "bytes": len(data),
+                        "sha256": hashlib.sha256(data).hexdigest()})
     encoded = json.dumps(entries, separators=(",", ":"), ensure_ascii=True).encode()
     version = hashlib.sha256(encoded).hexdigest()[:16]
     return files, {"version": version, "algorithm": "sha256", "files": entries}
@@ -119,7 +130,7 @@ def prepare_native_pages(source=SOURCE, output=PROJECT / "docs", *, template=TEM
             for path in files:
                 target = stage / path.relative_to(source)
                 target.parent.mkdir(parents=True, exist_ok=True)
-                shutil.copy2(path, target)
+                target.write_bytes(runtime_bytes(path))
             (stage / "runtime-manifest.json").write_text(
                 json.dumps(manifest, indent=2) + "\n", encoding="utf-8", newline="\n")
             for entry in manifest["files"]:
@@ -167,10 +178,17 @@ def prepare_native_pages(source=SOURCE, output=PROJECT / "docs", *, template=TEM
     # Preserve unrelated project mockups, the Unity fallback and prior release.
     (output / "index.html").write_text(index, encoding="utf-8", newline="\n")
     (output / ".nojekyll").touch()
-    previous = sorted((path for path in releases.iterdir() if path.is_dir()
-                       and VERSION.fullmatch(path.name) and path != release
-                       and (path / "runtime-manifest.json").is_file()),
-                      key=lambda path: path.stat().st_mtime_ns, reverse=True)
+    previous = []
+    for path in releases.iterdir():
+        if not VERSION.fullmatch(path.name) or path == release:
+            continue
+        try:
+            if path.is_dir() and (path / "runtime-manifest.json").is_file():
+                previous.append((path.stat().st_mtime_ns, path))
+        except PermissionError:
+            # An unreadable historical artifact must not block a new release.
+            continue
+    previous = [path for _, path in sorted(previous, key=lambda entry: entry[0], reverse=True)]
     for old in previous[max(0, retain - 1):]:
         resolved = old.resolve()
         if resolved.parent != releases.resolve() or not VERSION.fullmatch(resolved.name):

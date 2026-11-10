@@ -73,7 +73,7 @@ assert.deepEqual(race.pauseChanges,[]);assert.equal(raceGame.journey.musicPaused
 first.plays[1].reject(new Error('Current playback failure'));await flush();
 assert.deepEqual(race.pauseChanges,[true]);assert.equal(raceGame.journey.musicPaused,true);assert.equal(race.music.paused,true);
 raceGame.act('musicState',{paused:false});race.music.sync();const oldTrackPlay=first.plays.at(-1);
-raceGame.act('playlist',{index:1});race.music.select();const second=race.audios[1];assert.equal(second.plays.length,1);
+assert.equal(raceGame.act('playlist',{index:3}).success,true);race.music.select();const second=race.audios[1];assert.equal(second.plays.length,1);
 assert(first.pauseCount>=2);assert.equal(first.src,undefined);assert.equal(first.loadCount,1);
 oldTrackPlay.reject(new Error('Old track failed after replacement'));await flush();
 assert.deepEqual(race.pauseChanges,[true]);assert.equal(race.music.paused,false);assert.equal(raceGame.journey.musicPaused,false);

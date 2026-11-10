@@ -6,7 +6,7 @@ import {pixelPendingOrders} from './WebGLTemplate/FastGame/world.js';
 const storage=()=>{const data=new Map();return{getItem:k=>data.get(k)||null,setItem:(k,v)=>data.set(k,String(v)),removeItem:k=>data.delete(k)};};
 const open=(seed=1)=>{const g=new SimBarGame({seed,storage:storage()});g.act('start');launchPreparedDesk(g);while(g.phase==='guide')g.act('guide');return g;};
 const bubbles=g=>pixelPendingOrders({phase:g.phase,actors:g.actors,orders:g.orders});
-function awaitChicken(g){const randomItems=[];for(let n=0;n<200;n++){const front=g.orders[0];assert(front);randomItems.push(front.item);if(front.item===5)return randomItems;assert.equal(g._serve(front.item,true,.7).success,true);}assert.fail('Chicken never occurred through normal replacement-order RNG.');}
+function awaitChicken(g){const randomItems=[];for(let n=0;n<2000&&g.playing;n++){const front=g.orders[0];if(!front){g.tick(.1);if(g.reaction?.activeKind)g.act('quick',{kind:g.reaction.activeKind});continue;}randomItems.push(front.item);if(front.item===5)return randomItems;assert.equal(g._serve(front.item,true,.7).success,true);}assert.fail('Chicken never occurred through normal order-arrival RNG.');}
 
 assert.equal(catalog.drinks.length,6);
 assert.deepEqual(catalog.drinks.slice(0,5).map(d=>[d.nameEnglish,d.price,d.isFood]),[

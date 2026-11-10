@@ -84,3 +84,6 @@ Desktop.ini
 /Assets/Temp/FFLayout-20261110/
 /Assets/Temp/FreebirdLayout-20261110.meta
 /Assets/Temp/FreebirdLayout-20261110/
+
+# Abandoned unreadable local release; the active release is rebuilt from source.
+/docs/FastGame/42261ee708987da0/

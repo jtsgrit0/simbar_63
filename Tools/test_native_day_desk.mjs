@@ -5,14 +5,17 @@ import {createAfterShow} from './WebGLTemplate/FastGame/aftershow.js';
 import {launchPreparedDesk} from './native_test_workflow.mjs';
 
 const memory=()=>{const data=new Map();return{getItem:key=>data.get(key)??null,setItem:(key,value)=>data.set(key,String(value))};};
-const game=()=>new SimBarGame({storage:memory(),seed:11});
+// These checks cover retained v1 contracts. New-game campaign behavior is
+// exercised separately in test_native_campaign.mjs.
+const game=()=>{const g=new SimBarGame({storage:memory(),seed:11});g.journey.booking=Booking.newDeskPlan(1,0);return g;};
 const freewillMask=1<<24;
 const legacyIds=['amp-sprout-17','lamp-rabbit-quartet','paper-siren-09','rooftop-syllable','pixel-tide-27','pocket-orchard','tin-meteor-06','velvet-rain-check','honey-voltage-32','slow-bridge-11','odd-spoon-orbit','lime-lantern-04','poster-elliword','poster-sign-of-elma','poster-quinzel','poster-birthday-syndrome','poster-signal-intrusion','poster-long-time-no-shit','poster-alone-wolf-elegy-club','poster-rux','poster-yeastrio','poster-oklp-group','poster-lagrangian','poster-newsboy-men'];
 assert.deepEqual(catalog.bands.slice(0,24).map(band=>band.id),legacyIds);
-assert.equal(catalog.bands.length,25);assert.equal(FREEWILL_INDEX,24);
+assert.equal(catalog.bands.length,26);assert.equal(FREEWILL_INDEX,24);
 assert.equal(catalog.bands[24].id,'freewill');assert.equal(catalog.bands[24].isReal,true);
 assert.equal(catalog.bands[24].sourceUrl,'https://music.bugs.co.kr/album/20850049');
-assert.deepEqual(catalog.availableBandIndices,[24]);
+assert.equal(catalog.bands[25].id,'julywantsmore');
+assert(catalog.availableBandIndices.includes(24));
 
 // Old plan factories and pure booking rules remain available for saved contracts.
 {
@@ -158,4 +161,4 @@ for(const locked of [false,true]){
   assert.equal(g.journey.booking.venue,2);assert.equal(g.journey.booking.freewillSelected,false);assert.equal(g.cash,cash);
 }
 
-console.log('PASS: append-only25band catalog, Freewill-only desk, ordered/idempotent zero-cost actions,4save checkpoints, once-only launch/receipt, trusted migration credit+fallback, active/locked legacy settlement');
+console.log('PASS: append-only26band catalog, retained v1 desk, ordered/idempotent zero-cost actions,4save checkpoints, once-only launch/receipt, trusted migration credit+fallback, active/locked legacy settlement');

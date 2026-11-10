@@ -5,7 +5,8 @@ import {walkable} from './WebGLTemplate/FastGame/navigation.js';
 
 const night=seed=>{
   const mem=new Map(),storage={getItem:k=>mem.get(k)||null,setItem:(k,v)=>mem.set(k,String(v))};
-  const g=new SimBarGame({storage,seed});g.act('start');launchPreparedDesk(g);while(g.phase==='guide')g.act('guide');return g;
+  // This patrol fixture uses the original venue's aisle coordinates.
+  const g=new SimBarGame({storage,seed});g.act('owner',{index:2});g.act('start');launchPreparedDesk(g);while(g.phase==='guide')g.act('guide');return g;
 };
 const actor=g=>g.actors.find(a=>a.id==='bartender');
 const g=night(17),baseline=night(17);

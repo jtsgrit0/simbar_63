@@ -64,6 +64,19 @@ class NativeDeliveryTests(unittest.TestCase):
         self.assertIn(second["version"], (self.output / "index.html").read_text())
         self.assertTrue((self.output / "FastGame" / first["version"] / "core.js").is_file())
 
+    def test_text_line_endings_are_canonical_before_hashing_binary_stays_exact(self):
+        text = self.source / "core.js"
+        text.write_bytes(b"export const fixture = 1;\r\n")
+        image = self.source / "art" / native.ESSENTIAL_IMAGES[0]
+        binary = b"\x89PNG\r\n\x1a\nfixture"
+        image.write_bytes(binary)
+        first = self.package()
+        release = self.output / "FastGame" / first["version"]
+        self.assertEqual((release / "core.js").read_bytes(), b"export const fixture = 1;\n")
+        self.assertEqual((release / "art" / image.name).read_bytes(), binary)
+        text.write_bytes(b"export const fixture = 1;\n")
+        self.assertEqual(self.package(), first)
+
     def test_package_is_reproducible_and_excludes_development_files(self):
         (self.source / "fixtures").mkdir()
         (self.source / "fixtures/legacy.json").write_text("{}")
