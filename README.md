@@ -82,6 +82,16 @@ Unity 6000.6.3f1로 만든 라이브 음악 펍 운영 게임입니다.
 
 무작위로 나타난 만취 손님은 `F` 또는 안내 버튼을 **6초 안에 8회씩** 눌러 추가 주문 중단·물 안내, 차분한 퇴점 요청, 소지품 확인·직원 동행 순서로 응대합니다. 키를 누른 채 유지하면 연타로 세지 않습니다. 시간 초과 시 잠시 뒤 같은 단계를 재도전하며, 완료 보상은 중복 지급하지 않습니다. 현황 창에서도 공연과 제한 시간은 계속 흐릅니다. 일시정지·탭 이탈 시에는 시간이 멈추며, 저장·이어하기 시 무작위 일정과 연타 진행도를 복원합니다.
 
+## Windows PC 빌드
+
+최신 공연 선택·성장 시스템을 포함하는 Windows x64 실행 파일은 웹과 동일한 게임 코드·아트를 로컬에 묶습니다. 음원과 원격 아트에는 인터넷 연결이 필요합니다. 실행 파일은 [PC 빌드 도구와 사용법](Tools/SteamDesktop/README.md)에 따라 생성합니다.
+
+```powershell
+python Tools/prepare_steam_desktop.py --content docs
+```
+
+`Builds/Steam/Windows/`에 실행 폴더·ZIP·빌드 기록을 저장합니다. `SimBar.exe`와 DLL·resources 폴더 전체를 함께 배포해야 합니다. SteamPipe에는 검증한 실행 폴더를 Windows Depot 콘텐츠로 사용하고 `SimBar.exe`를 시작 실행 파일로 지정합니다. 실제 업로드에는 해당 게임의 AppID·Depot ID와 Steamworks 계정이 필요합니다.
+
 ## 프로젝트 실행
 
 Unity Hub에서 이 폴더를 Unity **6000.6.3f1**로 열고 `Assets/Scenes/SimBar_Reference.unity`를 실행합니다. 게임 구성과 검증 방법은 [Assets/README_SIMBAR.md](Assets/README_SIMBAR.md)에 있습니다.
