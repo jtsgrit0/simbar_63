@@ -225,7 +225,7 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
   const originalVenue=assets.venue,originalVenueMeta=assets.venueMeta;
   const selectVenue=state=>{const key=ownerVenue(state.owner).key;assets.venue=assets.venues?.[key]||originalVenue;assets.venueMeta=assets.venueMetas?.[key]||originalVenueMeta;};
   const particles=[],seenEffects=new Set();
-  let width=960,height=558,offsetX=0,cssW=960,cssH=558,last=null,seconds=0,night=null,observedFloor,city=null,occluders=[],propLayers=[],plate=null,layerMeta=null,destroyed=false;
+  let width=960,height=558,offsetX=0,cssW=960,cssH=558,last=null,seconds=0,night=null,observedFloor,city=null,citySource=null,occluders=[],propLayers=[],plate=null,layerMeta=null,destroyed=false;
   const project=(x,z,y=0)=>{
     const calibration=assets.venueMeta?.projection;
     if(calibration){const {origin,xAxis,zAxis,yAxis}=calibration;return{x:origin[0]+x*xAxis[0]+z*zAxis[0]+y*yAxis[0],y:origin[1]+x*xAxis[1]+z*zAxis[1]+y*yAxis[1]};}
@@ -270,7 +270,7 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
   function resize(){const b=canvas.getBoundingClientRect();cssW=Math.max(1,b.width);cssH=Math.max(1,b.height);width=Math.max(160,Math.min(2304,Math.round(REF_H*cssW/cssH)));height=REF_H;offsetX=(width-REF_W)/2;if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.height=height;city=null;}ctx.imageSmoothingEnabled=false;}
   const observer=new ResizeObserver(resize);observer.observe(canvas);resize();
   canvas.style.imageRendering='pixelated';
-  function background(){if(!city){city=surface(width,height);const c=city.getContext('2d');c.imageSmoothingEnabled=false;c.fillStyle='#10121e';c.fillRect(0,0,width,height);if(ready(assets.seoul)){const s=Math.max(width/assets.seoul.width,height/assets.seoul.height);c.drawImage(assets.seoul,Math.round((width-assets.seoul.width*s)/2),Math.round((height-assets.seoul.height*s)/2),Math.round(assets.seoul.width*s),Math.round(assets.seoul.height*s));}}ctx.drawImage(city,0,0);}
+  function background(state){const image=assets.backdrops?.[ownerVenue(state.owner).key]||assets.seoul;if(!city||citySource!==image){citySource=image;city=surface(width,height);const c=city.getContext('2d');c.imageSmoothingEnabled=false;c.fillStyle='#10121e';c.fillRect(0,0,width,height);if(ready(image)){const s=Math.max(width/image.width,height/image.height);c.drawImage(image,Math.round((width-image.width*s)/2),Math.round((height-image.height*s)/2),Math.round(image.width*s),Math.round(image.height*s));}}ctx.drawImage(city,0,0);}
   function boxMask(x0,x1,z0,z1,h){return hull([project(x0,z0),project(x1,z0),project(x1,z1),project(x0,z1),project(x0,z0,h),project(x1,z0,h),project(x1,z1,h),project(x0,z1,h)]);}
   function roomLayers(){
     if(plate===assets.venue&&layerMeta===assets.venueMeta)return;plate=assets.venue;layerMeta=assets.venueMeta;occluders=[];propLayers=[];
@@ -470,7 +470,7 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
   }
   function render(timestamp,state=getState()){
     if(destroyed)return;state=state||{};const now=finite(timestamp,performance.now()),dt=last==null?0:clamp((now-last)/1000,0,.1);last=now;const running=['playing','closing'].includes(state.phase)&&!state.paused;if(running)seconds+=dt;
-    selectVenue(state);background();roomLayers();ctx.save();ctx.translate(Math.round(offsetX),0);ctx.imageSmoothingEnabled=false;ctx.drawImage(assets.venue,0,0,REF_W,REF_H);albumCover(ctx,state);endedStage(ctx,state);stageLights(state);const airborne=paper(state,running?dt:0);
+    selectVenue(state);background(state);roomLayers();ctx.save();ctx.translate(Math.round(offsetX),0);ctx.imageSmoothingEnabled=false;ctx.drawImage(assets.venue,0,0,REF_W,REF_H);albumCover(ctx,state);endedStage(ctx,state);stageLights(state);const airborne=paper(state,running?dt:0);
     const drawables=occluders.filter(layer=>!layer.actors?.length).map(layer=>({depth:layer.depth,draw:()=>drawLayer(layer,state)}));
     for(const prop of propLayers)drawables.push({depth:prop.depth,draw:()=>drawProp(ctx,prop)});
     const models=modelRoster(state);

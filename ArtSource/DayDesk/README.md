@@ -1,5 +1,10 @@
 # Day-desk owner scenes
 
+The current production scenes use the separate owner-specific environments in
+[V2](V2/README.md), based on each owner's approved room illustration. The
+original shared-office sources and provenance below are retained as history;
+`manifest.json` points to the current V2 sources and runtime assets.
+
 These three production scenes were generated with the built-in
 `image_gen.imagegen` tool. The current approved owner portraits were the
 authoritative identity references. Jessy established the daytime office;

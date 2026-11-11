@@ -41,6 +41,8 @@ def prepare_owner_venues(output=OUTPUT):
     prepare_ff_tables(output)
     from prepare_social_venue_props import prepare_social_venue_props
     prepare_social_venue_props(output)
+    from prepare_owner_backdrops import prepare_owner_backdrops
+    prepare_owner_backdrops(output)
 
 
 if __name__ == '__main__':

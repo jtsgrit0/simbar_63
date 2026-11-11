@@ -1,0 +1,20 @@
+{
+  "tool": "built-in image_gen",
+  "created": "2026-11-11",
+  "intent": "Jaiden-only green Pet Sounds neon sign; retain existing room geometry",
+  "references": [
+    {
+      "url": "https://www.youtube.com/watch?v=pahySNL9S9Y&t=10s",
+      "type": "actual video frame at 00:10"
+    },
+    {
+      "url": "https://mindtrip.ai/restaurant/seoul-south-korea/pet-sounds/re-ENueCYMf",
+      "type": "interior photo"
+    },
+    {
+      "url": "https://english.visitseoul.net/itaewon/PetsSoundsMusicPub/ENP041790",
+      "type": "venue identity"
+    }
+  ],
+  "prompt": "Use case: stylized-concept\nAsset type: one isolated transparent pixel-art wall-mounted neon wordmark sprite, for an existing isometric music bar game.\nPrimary request: reproduce the recognizable lowercase green petsounds neon lettering from the provided real Pet Sounds, Gyeongnidan-gil Seoul stage reference, translated into clean pixel art matching the provided game venue.\nInput images: Image 1 is the real venue neon identity reference (actual video frame); Image 2 is game style and wall-angle reference only, NOT an edit target. Generate ONLY the sign sprite, not a room or a mockup.\nText (verbatim): \"petsounds\". All lowercase, exactly p e t s o u n d s, one line. Follow reference's smooth rounded narrow tubular strokes, tall t and d, distinctive looping p and final s, no separate icon.\nComposition: isolated freestanding luminous letters with true transparent alpha all around, wide compact wordmark centered, no wall, no rectangular plaque, no border, no cord, no floor, no people. The wordmark is on the SAME wall plane as the back wall running from top-left down to bottom-right in game reference: baseline descends by approximately 0.25 pixels per horizontal pixel (14 degrees). Keep vertical letter stems vertical, parallel projection, no vanishing point.\nStyle: deliberate crisp stepped pixel edges and chunky clusters, suitable for reducing to about 175 pixels wide and 70 pixels high. Not vector smooth, not photo, not 3D bevel. Solid readable rounded neon tubes with a pale mint-white inner core, bright emerald/lime-green rim, restrained soft transparent green glow near letters only. Preserve separation of all nine letters at small scale.\nConstraints: one sprite only. No background, no checkerboard painted into image. No other text, no added logos, no sign surround, no surrounding objects. Do not reproduce venue or musicians."
+}

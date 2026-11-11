@@ -75,6 +75,29 @@ args=draw({id:'bar-seat-0',role:'seated',x:-7,z:-3,action:'idle'});assert.equal(
 args=draw({id:'patron-0',slot:0,role:'guest',x:1,z:1,action:'dance'});assert.equal(args[0],atlases.wardrobe,'An unsupported action style keeps the original outfit.');
 args=draw({id:'crowd-surfer',role:'surfer',x:6,z:-4.25,y:1.85,action:'surf'});assert.equal(args[0],atlases.poses);assert.equal(args[2],7*64);assert.equal(args[6],-27);assert.equal(target.ctx.rotations.length,0,'A drawn horizontal surf pose is not a rotated standing person.');
 world.destroy();
+// Switching owners must repaint the actual street pixels without a resize.
+// A second render for the same owner reuses its cached surface; canvas resizing
+// and a different owner's source both invalidate that cache.
+const streets=Object.fromEntries(['original','freebird','ff'].map(id=>[id,{id:'street-'+id,width:640,height:360}]));
+const streetAssets={...assets,seoul:streets.original,backdrops:{freebird:streets.freebird,ff:streets.ff}};
+const streetCanvas=canvas(),streetWorld=createWorld(streetCanvas,{assets:streetAssets});
+const streetFrame=owner=>{streetCanvas.ctx.draws=[];streetWorld.render(0,{owner,phase:'lobby',actors:[]});return streetCanvas.ctx.draws[0][0];};
+const freebirdStreet=streetFrame(0);
+assert.equal(freebirdStreet.ctx.draws[0][0],streets.freebird);
+assert.equal(streetFrame(0),freebirdStreet,'The same street should reuse its cached surface');
+const ffStreet=streetFrame(1);
+assert.notEqual(ffStreet,freebirdStreet,'Changing owners repaints the backdrop immediately');
+assert.equal(ffStreet.ctx.draws[0][0],streets.ff);
+assert.equal(streetFrame(2).ctx.draws[0][0],streets.original,'Jaiden keeps the original street');
+const returnedStreet=streetFrame(0);
+assert.equal(returnedStreet.ctx.draws[0][0],streets.freebird,'Returning to an owner restores its own street');
+streetCanvas.getBoundingClientRect=()=>({width:1400,height:558});streetWorld.resize();
+const widerStreet=streetFrame(0);
+assert.notEqual(widerStreet,returnedStreet,'Resizing repaints the street to the current canvas dimensions');
+assert.equal(widerStreet.width,1400);assert.equal(widerStreet.ctx.draws[0][0],streets.freebird);
+delete streetAssets.backdrops.ff;
+assert.equal(streetFrame(1).ctx.draws[0][0],streets.original,'A renderer without an owner street can use the retained original');
+streetWorld.destroy();
 const barCanvas=canvas(),barWorld=createWorld(barCanvas,{assets:{...assets,venueMeta:{occluders:[],barRegion:{xMax:-1.35,zMin:-1.5,zMax:.5,offset:[0,25],xFade:1.5}}}});
 const bartender={id:'bartender',role:'bartender',x:-8,z:-.565,moving:false,action:'serve'};
 const barDraw=time=>{barCanvas.ctx.draws=[];barWorld.render(time,{phase:'playing',actors:[bartender]});return barCanvas.ctx.draws.find(args=>Object.values(atlases).includes(args[0]));};

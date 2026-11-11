@@ -13,6 +13,7 @@ public sealed partial class SimBarExperience
     private Text deskSceneCaption,deskPhysicalSpeech,deskMonitorText,deskPhoneText,deskConversation,deskComputerHint,deskPhoneHint,deskProgress;
     private Toggle deskFreewillToggle;
     private Button deskComputerWork,deskPhoneWork;
+    private RectTransform deskMonitorHotspot,deskPhoneHotspot;
     private readonly Button[] deskChannels=new Button[4];
     private readonly RectTransform[] deskPanes=new RectTransform[3];
     private int deskManualChannel=-1,deskPresentedChannel=-1,deskArtOwner=-1;
@@ -40,8 +41,8 @@ public sealed partial class SimBarExperience
         deskMonitorText=BookingText("Physical Monitor Work",deskArtFrame,"","",13,Color.white,true);deskMonitorText.alignment=TextAnchor.MiddleCenter;BookingPlace(deskMonitorText.rectTransform,32,182,166,82);
         deskPhoneText=BookingText("Physical Phone Messages",deskArtFrame,"","",12,Color.white,true);deskPhoneText.alignment=TextAnchor.MiddleCenter;BookingPlace(deskPhoneText.rectTransform,505,296,34,22);
         deskCursor=PixelSolid("Physical Monitor Cursor",deskArtFrame);deskCursor.color=new Color(.65f,1f,.78f);BookingPlace(deskCursor.rectTransform,181,257,2,9);
-        var monitor=BookingButton("Office Computer Hotspot",deskArtFrame,"","",1,Color.clear,Color.clear);BookingPlace(monitor.GetComponent<RectTransform>(),30,176,170,99);monitor.onClick.AddListener(()=>SetDeskChannel(1));
-        var phone=BookingButton("Office Phone Hotspot",deskArtFrame,"","",1,Color.clear,Color.clear);BookingPlace(phone.GetComponent<RectTransform>(),485,285,81,59);phone.onClick.AddListener(()=>SetDeskChannel(2));
+        var monitor=BookingButton("Office Computer Hotspot",deskArtFrame,"","",1,Color.clear,Color.clear);deskMonitorHotspot=monitor.GetComponent<RectTransform>();BookingPlace(deskMonitorHotspot,30,176,170,99);monitor.onClick.AddListener(()=>SetDeskChannel(1));
+        var phone=BookingButton("Office Phone Hotspot",deskArtFrame,"","",1,Color.clear,Color.clear);deskPhoneHotspot=phone.GetComponent<RectTransform>();BookingPlace(deskPhoneHotspot,485,285,81,59);phone.onClick.AddListener(()=>SetDeskChannel(2));
         var speech=BookingPanel("Owner Speech Bubble",deskArtFrame,new Color(1f,.98f,.90f));deskSpeechBackground=speech.GetComponent<Image>();deskSpeechBackground.raycastTarget=false;BookingPlace(speech,19,14,198,90);
         var outline=speech.gameObject.AddComponent<Outline>();outline.effectColor=new Color(.16f,.22f,.24f,.7f);outline.effectDistance=new Vector2(1f,-1f);
         deskSpeechTail=DeskPolygon("Owner Speech Bubble Tail",new[]{new Vector2(188,102),new Vector2(207,102),new Vector2(230,123)},new Color(1f,.98f,.90f));
@@ -104,6 +105,16 @@ public sealed partial class SimBarExperience
         Texture2D texture=LoadPixelTexture("SimBarOffice/desk-"+DeskArtNames[owner]);deskOfficeReady=texture!=null;
         if(texture==null)texture=SimBarWebTextures.Load("SimBarArt/Owners/"+OwnerPortraits[owner]);
         deskArtOwner=owner;deskArtImage.texture=texture;if(texture!=null)texture.filterMode=FilterMode.Point;
+        // The V2 Jessy illustration has its own lower monitor and phone screens.
+        // Keep the other owners' approved screen calibration when switching back.
+        bool jessy=owner==0;
+        deskMonitorGlow.Initialize(null,jessy?new[]{new Vector2(23,188),new Vector2(202,188),new Vector2(207,287),new Vector2(30,287)}:new[]{new Vector2(23,175),new Vector2(202,175),new Vector2(207,276),new Vector2(30,276)});
+        deskPhoneGlow.Initialize(null,jessy?new[]{new Vector2(493,301),new Vector2(532,301),new Vector2(555,342),new Vector2(511,342)}:new[]{new Vector2(493,293),new Vector2(532,293),new Vector2(555,326),new Vector2(511,326)});
+        BookingPlace(deskMonitorText.rectTransform,32,jessy?194:182,166,82);
+        BookingPlace(deskPhoneText.rectTransform,505,jessy?307:296,34,22);
+        BookingPlace(deskCursor.rectTransform,181,jessy?269:257,2,9);
+        BookingPlace(deskMonitorHotspot,30,jessy?188:176,170,jessy?96:99);
+        BookingPlace(deskPhoneHotspot,485,jessy?297:285,81,jessy?57:59);
         deskMonitorGlow.gameObject.SetActive(deskOfficeReady);deskPhoneGlow.gameObject.SetActive(deskOfficeReady);deskMonitorText.gameObject.SetActive(deskOfficeReady);deskPhoneText.gameObject.SetActive(deskOfficeReady);deskCursor.gameObject.SetActive(deskOfficeReady);
         if(bookingUiSize.x>0f)LayoutDayDeskUI(bookingUiSize);
     }

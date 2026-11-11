@@ -112,6 +112,9 @@ def main():
         image = Image.open(no_plants).convert('RGBA').resize((960, 558), Image.Resampling.NEAREST)
         image.quantize(colors=256, method=Image.Quantize.FASTOCTREE,
                        dither=Image.Dither.NONE).save(OUTPUT / 'venue.png', optimize=True)
+    # Apply the retained, owner-specific neon after the last original-room write.
+    from prepare_petsounds_neon import prepare_petsounds_neon
+    prepare_petsounds_neon(OUTPUT)
     for name, target in [('BandPerformance.png', 'band-performance.png'),
                          ('BandWalk.png', 'band-walk.png'),
                          ('BandSocial.png', 'band-social.png'),

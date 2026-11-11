@@ -1,7 +1,8 @@
 # Owner-specific interiors
 
 Jessy (owner 0) uses **Club Freebird**, Edison (owner 1) uses **Hongdae FF**,
-and Jaiden (owner 2) retains the original `venue.png` unchanged.
+and Jaiden (owner 2) retains the original room with the green
+[Pet Sounds neon wordmark](PetSounds/README.md) added to `venue.png`.
 
 These are original pixel-art interpretations adapted to the existing game
 footprint, rather than surveyed venue replicas. FF's latest user-directed
@@ -75,8 +76,10 @@ two runtime files and copies FF's reviewed calibration to `venue-ff.json`.
 Resources as `VenueFreebird.bytes` and `VenueFF.bytes`, and converts the FF
 calibration to `PresentationFF.json`.
 
-Do not replace `venue.png` or the original `Venue.bytes`: they are the Jaiden
-baseline. All texture-backed foreground masks must switch with the room plate.
+Keep Jaiden's original V4 room source and geometric calibration. Its native
+`venue.png` and Unity `Venue.bytes` include the separately authored Pet Sounds
+neon layer; `Tools/prepare_petsounds_neon.py` rebuilds it from the untouched V4
+source. All texture-backed foreground masks must switch with the room plate.
 
 ## Verification
 
