@@ -292,6 +292,14 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
   function resize(){const b=canvas.getBoundingClientRect();cssW=Math.max(1,b.width);cssH=Math.max(1,b.height);const portrait=cssW<760&&cssH>cssW;
     width=portrait?REF_W:Math.max(160,Math.min(2304,Math.round(REF_H*cssW/cssH)));height=portrait?Math.round(REF_W*cssH/cssW):REF_H;
     offsetX=(width-REF_W)/2;offsetY=portrait?Math.round(Math.min(125,cssH*.16)*height/cssH):0;
+    // Keep the stage beside the right-hand card on narrower landscapes. The
+    // wide reference composition retains its original camera and pixel scale.
+    const console=canvas.parentElement?.querySelector('.live-console'),consoleBox=console?.getBoundingClientRect();
+    if(!portrait&&cssW>=cssH&&consoleBox?.width>0){
+      const right=consoleBox.left-b.left-16,currentRight=(932+offsetX)*cssW/width;
+      if(currentRight>right){const roomWidth=904*cssH/REF_H,available=Math.max(200,right-24),fit=Math.min(1,available/roomWidth);
+        height=Math.round(REF_H/fit);width=Math.round(height*cssW/cssH);offsetX=(right-Math.min(roomWidth,available)/2)*width/cssW-480;offsetY=(height-REF_H)/2;}
+    }
     if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.height=height;city=null;}ctx.imageSmoothingEnabled=false;}
   const observer=new ResizeObserver(resize);observer.observe(canvas);resize();
   canvas.style.imageRendering='pixelated';

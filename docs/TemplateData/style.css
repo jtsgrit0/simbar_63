@@ -35,6 +35,7 @@ button { font: inherit; }
 }
 
 .game-toolbar h1 { margin: 0; font-size: 19px; font-weight: 700; letter-spacing: .02em; }
+#game-shell[data-player-state="ready"] > .game-toolbar { display: none; }
 #toolbar-status { flex: 1; min-width: 0; margin: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 13px; color: #e7c896; }
 button {
   min-height: 38px;
@@ -52,6 +53,12 @@ button:disabled { opacity: .5; cursor: wait; }
 #fullscreen-button span[aria-hidden] { margin-right: 3px; font-size: 19px; vertical-align: -1px; }
 
 #game-stage { position: relative; flex: 1 1 0; min-width: 0; min-height: 0; overflow: hidden; }
+.orientation-gate { position: absolute; inset: 0; z-index: 1000; display: grid; place-content: center; justify-items: center; gap: 18px; padding: 32px; text-align: center; background: #0d1522; color: #f4edda; }
+.orientation-gate .rotate-device { width: 88px; height: 52px; border: 3px solid #ddc58a; border-radius: 10px; transform: rotate(-25deg); font-size: 27px; line-height: 44px; color: #a5e1ce; }
+.orientation-gate h1 { margin: 6px 0 0; font-size: 25px; color: #f0dca8; }
+.orientation-gate p { margin: 0; font-size: 15px; line-height: 1.8; color: #bfd0df; }
+.orientation-gate button { min-height: 44px; margin-top: 8px; background: #26473e; border-color: #7ab7a3; }
+.fast-game[data-orientation="portrait"] > :not(.orientation-gate) { visibility: hidden; pointer-events: none; }
 #unity-canvas { display: block; width: 100%; height: 100%; background: #101417; touch-action: none; }
 #loading-panel, #error-panel { position: absolute; inset: 0; display: grid; place-items: center; padding: 24px; }
 #loading-panel { pointer-events: none; background: #101417; }
