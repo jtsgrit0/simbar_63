@@ -13,6 +13,7 @@ const clamp=(n,a,b)=>Math.max(a,Math.min(b,Number.isFinite(+n)?+n:a));
 const finite=(n,f=0)=>Number.isFinite(+n)?+n:f;
 const ready=i=>i&&((i.complete&&i.naturalWidth>0)||(i.width>0&&i.height>0&&!('complete'in i)));
 const hash=v=>{let n=2166136261;for(const c of String(v))n=Math.imul(n^c.charCodeAt(0),16777619);return n>>>0;};
+const frozenPerformer=(actor,state)=>!!state.inspection?.freezePerformers&&['guest','seated','support','surfer','assisted','band'].includes(actor.role);
 const rng=seed=>{let n=seed>>>0;return()=>((n=(Math.imul(n,1664525)+1013904223)>>>0)/4294967296);};
 const surface=(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c;};
 const polygon=(c,points,color)=>{c.fillStyle=color;c.beginPath();points.forEach((p,i)=>i?c.lineTo(Math.round(p.x),Math.round(p.y)):c.moveTo(Math.round(p.x),Math.round(p.y)));c.closePath();c.fill();};
@@ -49,7 +50,22 @@ export function pixelStageLightingProfile(state={}){
     {speed:.48,intensity:.52,colors:['#e9b675','#e89b7a','#a2c6c5','#f2d9a5']}
   ];
   const profile=profiles[state.owner],gentle=performance.energy/[.95,1.2,.65][state.owner];
-  return{...profile,speed:profile.speed*gentle,intensity:profile.intensity*(gentle<1?.86:1),energy:performance.energy};
+  const level=clamp(state.visualPreview?.type==='upgrade'&&state.visualPreview.index===1?state.visualPreview.level??finite(state.upgrades?.[1])+1:state.upgrades?.[1],0,3);
+  const event=state.visualPreview?.type==='event'?state.visualPreview.index:state.activeEvent;
+  const colors=event===0?['#ffc877','#e994b8','#8ed6ce','#ffd9a2']:event===1?['#f456be','#8b82ff','#4ce7fc','#fa826b']:event===2?['#76f6c3','#d57dff','#ffce69','#7cdfff']:profile.colors;
+  return{...profile,colors,speed:profile.speed*gentle,intensity:profile.intensity*(gentle<1?.86:1)*(1+level*.13),energy:performance.energy};
+}
+
+// Decorative fixtures follow the authored counter/stage/wall pixels. They do
+// not introduce invisible navigation obstacles into the live audience floor.
+export function pixelVenueFeatures(state={}){
+  const owner=clamp(state.owner,0,2),upgrades=Array.from({length:3},(_,i)=>clamp(state.upgrades?.[i],0,3)),preview=state.visualPreview;
+  if(preview?.type==='upgrade'&&Number.isInteger(preview.index)&&preview.index>=0&&preview.index<3)upgrades[preview.index]=clamp(preview.level??upgrades[preview.index]+1,1,3);
+  const anchors=[[[402,211,66,263],[892,308,76,308],[259,244,76,244]],[[252,213,64,308],[896,307,76,307],[111,351,76,351]],[[286,273,70,359],[859,304,76,304],[122,285,76,285]]][owner];
+  const result=upgrades.flatMap((level,index)=>level?[{id:['draught','sound','vip'][index]+'-'+level,type:'upgrade',index,level,x:anchors[index][0],y:anchors[index][1],size:anchors[index][2],depth:anchors[index][3],preview:preview?.type==='upgrade'&&preview.index===index}]:[]);
+  const event=preview?.type==='event'?preview.index:state.activeEvent;
+  if(Number.isInteger(event)&&event>=0&&event<3)result.push({id:['open-mic','rock-showcase','fan-festival'][event],type:'event',index:event,x:owner===2?612:609,y:owner===2?314:323,size:event===2?88:76,depth:324,preview:preview?.type==='event'});
+  return result;
 }
 
 // Quiet audience moods use standing idle drawings; only an occasional cheer
@@ -57,6 +73,7 @@ export function pixelStageLightingProfile(state={}){
 // Offsets are only a
 // small body pose: collision paths, feet, orders and serving stay in core.js.
 export function pixelFestivalPose(actor={},state={},seconds=0){
+  if(frozenPerformer(actor,state))return null;
   if(state.phase!=='playing'||state.journey?.floorClosing||state.journey?.afterShow?.started||actor.visible===false||actor.moving||!['guest','seated','support','surfer'].includes(actor.role))return null;
   if(['queue','return','arrive','to-stage','exit','escorted','walk'].includes(actor.action))return null;
   let id=actor.festivalRemaining>0?actor.festivalAction:null;
@@ -92,6 +109,7 @@ export function pixelFestivalFrame(actor={},state={},seconds=0,manifest={}){
 }
 
 export function pixelAudiencePose(actor={},state={},seconds=0){
+  if(frozenPerformer(actor,state))return{kind:'inspection',action:'idle',animationSeconds:0,speed:0,phase:0,sway:0,bob:0,lean:0,lift:0,cheer:false,frameOverride:0};
   const festival=pixelFestivalPose(actor,state,seconds);if(festival)return festival;
   let action=String(actor.action||'idle');
   if(action==='idle'&&['listen','sway','cheer','headbang'].includes(actor.behavior))action=actor.behavior;
@@ -225,7 +243,7 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
   const originalVenue=assets.venue,originalVenueMeta=assets.venueMeta;
   const selectVenue=state=>{const key=ownerVenue(state.owner).key;assets.venue=assets.venues?.[key]||originalVenue;assets.venueMeta=assets.venueMetas?.[key]||originalVenueMeta;};
   const particles=[],seenEffects=new Set();
-  let width=960,height=558,offsetX=0,cssW=960,cssH=558,last=null,seconds=0,night=null,observedFloor,city=null,citySource=null,occluders=[],propLayers=[],plate=null,layerMeta=null,destroyed=false;
+  let width=960,height=558,offsetX=0,offsetY=0,cssW=960,cssH=558,last=null,seconds=0,night=null,observedFloor,city=null,citySource=null,occluders=[],propLayers=[],plate=null,layerMeta=null,destroyed=false;
   const project=(x,z,y=0)=>{
     const calibration=assets.venueMeta?.projection;
     if(calibration){const {origin,xAxis,zAxis,yAxis}=calibration;return{x:origin[0]+x*xAxis[0]+z*zAxis[0]+y*yAxis[0],y:origin[1]+x*xAxis[1]+z*zAxis[1]+y*yAxis[1]};}
@@ -261,13 +279,20 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
   function drawBandModel(entry,state){
     const manifest=assets.bandModels,sheet=assets.bandAtlases?.[entry.bandId];
     if(!ready(sheet))throw new Error('Missing performing band atlas: '+entry.bandId);
-    const {action,column}=performingFrame(entry,manifest,seconds),p=modelPoint(entry),active=['playing','closing'].includes(state.phase);
+    const {action,column}=bandFrame(entry,state),p=modelPoint(entry),active=['playing','closing'].includes(state.phase)&&!frozenPerformer(entry.actor,state);
     const jump=entry.jumpIntensity?pixelBandJump(entry.role,action,seconds*(entry.performanceSpeed||1)+(entry.performancePhase||0),active,entry.jumpIntensity):null;
     const fw=manifest.frameWidth||64,fh=manifest.frameHeight||64,dh=entry.member.drawHeight||manifest.drawHeight||54,dw=entry.member.drawWidth||manifest.drawWidth||dh;
     if(entry.role!=='drummer'||action!=='perform')ellipse(ctx,p.x,p.y+1,Math.round(4*(jump?.shadow||1)),1,'#16182360');
     ctx.drawImage(sheet,column*fw,entry.row*fh,fw,fh,Math.round(p.x-(manifest.footX??32)*dw/fw),Math.round(p.y-(manifest.footY??60)*dh/fh-(jump?.lift||0)),dw,dh);
   }
-  function resize(){const b=canvas.getBoundingClientRect();cssW=Math.max(1,b.width);cssH=Math.max(1,b.height);width=Math.max(160,Math.min(2304,Math.round(REF_H*cssW/cssH)));height=REF_H;offsetX=(width-REF_W)/2;if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.height=height;city=null;}ctx.imageSmoothingEnabled=false;}
+  function bandFrame(entry,state){
+    if(frozenPerformer(entry.actor,state))return{action:'idle',column:assets.bandModels.actions?.find(a=>a.id==='idle')?.frames?.[0]??8};
+    return performingFrame(entry,assets.bandModels,seconds);
+  }
+  function resize(){const b=canvas.getBoundingClientRect();cssW=Math.max(1,b.width);cssH=Math.max(1,b.height);const portrait=cssW<760&&cssH>cssW;
+    width=portrait?REF_W:Math.max(160,Math.min(2304,Math.round(REF_H*cssW/cssH)));height=portrait?Math.round(REF_W*cssH/cssW):REF_H;
+    offsetX=(width-REF_W)/2;offsetY=portrait?Math.round(Math.min(125,cssH*.16)*height/cssH):0;
+    if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.height=height;city=null;}ctx.imageSmoothingEnabled=false;}
   const observer=new ResizeObserver(resize);observer.observe(canvas);resize();
   canvas.style.imageRendering='pixelated';
   function background(state){const image=assets.backdrops?.[ownerVenue(state.owner).key]||assets.seoul;if(!city||citySource!==image){citySource=image;city=surface(width,height);const c=city.getContext('2d');c.imageSmoothingEnabled=false;c.fillStyle='#10121e';c.fillRect(0,0,width,height);if(ready(image)){const s=Math.max(width/image.width,height/image.height);c.drawImage(image,Math.round((width-image.width*s)/2),Math.round((height-image.height*s)/2),Math.round(image.width*s),Math.round(image.height*s));}}ctx.drawImage(city,0,0);}
@@ -324,12 +349,14 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
     return{sheet,sx:selected.column*fw,sy:selected.row*fh,sw:fw,sh:fh,flip:false,meta:layout,entry:layout,style:selected.style,atlasKey:'festival-'+selected.atlas};
   }
   function drawActor(a,state){
+    if(a.role==='inspector'){drawInspector(a);return;}
     let role=String(a.role||'guest').toLowerCase();if(role==='band')role=String(a.id||'singer');if(role==='seated'&&a.id?.startsWith('bar-seat-'))role='barseated';
     const pose=pixelAudiencePose(a,state,seconds);
-    let action=pose.action;if(pose.kind==='cheer'&&action==='highfive'&&!assets.spriteMeta.roles?.[role]?.actions?.highfive)action='idle';if(action==='sweep')action='clean';else if(a.moving&&!['mosh','slam','surf','support'].includes(action))action='walk';
+    const frozen=frozenPerformer(a,state);
+    let action=pose.action;if(pose.kind==='cheer'&&action==='highfive'&&!assets.spriteMeta.roles?.[role]?.actions?.highfive)action='idle';if(action==='sweep')action='clean';else if(a.moving&&!frozen&&!['mosh','slam','surf','support'].includes(action))action='walk';
     const bar=assets.venueMeta?.barRegion;
     if(role==='bartender'&&!a.moving&&bar&&a.x<bar.xMax&&a.z>=bar.zMin&&a.z<=bar.zMax&&['idle','serve'].includes(action))action='idle';
-    const active=['playing','closing'].includes(state.phase);
+    const active=['playing','closing'].includes(state.phase)&&!frozen;
     const band=role==='singer'||role==='guitarist'||role==='bassist'||role==='drummer';
     const performance=bandPerformanceProfile(state),bandTime=performance.legacy?seconds:seconds*performance.speed+hash(a.id)%17*.23;
     const jump=assets.spriteMeta.roles?.[role]?.actions?.jump?pixelBandJump(role,action,bandTime,active,performance.legacy?1:performance.jumpIntensity):null;
@@ -338,7 +365,7 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
     const p=actorPoint(a,finite(a.y)),ground=actorPoint(a,role==='surfer'||a.festivalLead?0:finite(a.y)),surf=(action==='surf'||role==='surfer')&&finite(a.y)>.1;
     const liftedSurfer=a.festivalLead&&a.festivalLiftReady&&finite(a.y)>.05;
     if(!seatFor(a)?.hideShadow&&(role!=='drummer'||action!=='perform'))ellipse(ctx,ground.x,ground.y+1,liftedSurfer?12:Math.round(4*(jump?.shadow||1)),liftedSurfer?2:1,liftedSurfer||jump?'#16182348':'#16182360');
-    const atlas=festivalAtlasFrame(a,state)||atlasFrame(a,a.festivalLead&&action==='surf'?'surfer':role,action,frame,state,jump?.frame??(action==='highfive'?pose.frameOverride:null),band&&action==='perform'?bandTime:pose.animationSeconds),meta=atlas?.meta||{},entry=atlas?.entry||{},size=entry.drawHeight||meta.drawHeight||40;
+    const atlas=festivalAtlasFrame(a,state)||atlasFrame(a,a.festivalLead&&action==='surf'?'surfer':role,action,frame,state,frozen?0:jump?.frame??(action==='highfive'?pose.frameOverride:null),band&&action==='perform'?bandTime:pose.animationSeconds),meta=atlas?.meta||{},entry=atlas?.entry||{},size=entry.drawHeight||meta.drawHeight||40;
     const varied=!!pose.kind,bob=!band&&active?(varied?pose.bob:['dance','mosh','slam'].includes(action)?Math.round(Math.sin(seconds*5+hash(a.id)%17)*.6):0):0;
     ctx.save();ctx.translate(Math.round(p.x+(active?pose.sway:0)),Math.round(p.y+bob-(jump?.lift||0)-(active?pose.lift||0:0)));if(active&&pose.lean)ctx.rotate(pose.lean);
     if(surf&&!entry.horizontal){ctx.rotate(-Math.PI/2);ctx.translate(0,-7);}
@@ -348,6 +375,17 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
     if(active&&pose.cheer){ctx.fillStyle='#ffe9ac';ctx.fillRect(Math.round(p.x-9),Math.round(p.y-size+6),1,3);ctx.fillRect(Math.round(p.x+8),Math.round(p.y-size+2),1,3);}
     if(action==='clean'){const swing=Math.sin(seconds*7+hash(a.id)%5)*2;polygon(ctx,[{x:p.x+4,y:p.y-16},{x:p.x+5,y:p.y-16},{x:p.x+10+swing,y:p.y+2},{x:p.x+9+swing,y:p.y+2}],'#b69061');ctx.fillStyle='#c7b27e';ctx.fillRect(Math.round(p.x+6+swing),Math.round(p.y+2),7,2);ctx.fillStyle='#857150';for(let i=0;i<3;i++)ctx.fillRect(Math.round(p.x+6+swing+i*2),Math.round(p.y+4),1,2);}
     if((a.id==='assisted-guest'||role==='assisted')&&state.floor?.guestActive){ctx.fillStyle='#f4c86e';ctx.fillRect(Math.round(p.x),Math.round(p.y-48),2,5);ctx.fillRect(Math.round(p.x),Math.round(p.y-41),2,2);}
+  }
+  function inspectorFrame(actor){
+    const meta=assets.inspectionModels||{},direction=pixelDirection(Math.sin(finite(actor.facing)),Math.cos(finite(actor.facing)));
+    const row=meta.models?.find(m=>m.id===actor.id)?.row??clamp(actor.index,0,2),frames=meta.walkFrames||[1,2];
+    return{direction,row,column:(meta.directionColumns?.[direction]||0)+(actor.moving?frames[Math.floor(seconds*(meta.walkFps||6))%frames.length]:meta.idleFrame||0),...actorPoint(actor)};
+  }
+  function drawInspector(actor){
+    const sheet=assets.inspectors,meta=assets.inspectionModels||{};if(!ready(sheet))throw new Error('Missing inspection team artwork.');
+    const p=inspectorFrame(actor),fw=meta.frameWidth||64,fh=meta.frameHeight||64,dw=meta.drawWidth||54,dh=meta.drawHeight||54;
+    ellipse(ctx,p.x,p.y+1,4,1,'#16182360');
+    ctx.drawImage(sheet,p.column*fw,p.row*fh,fw,fh,Math.round(p.x-(meta.footX??32)*dw/fw),Math.round(p.y-(meta.footY??60)*dh/fh),dw,dh);
   }
   function orderBubbles(state){
     const definition=assets.spriteMeta?.atlases?.orders,columns=definition?.columns||6;
@@ -470,37 +508,45 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
   }
   function render(timestamp,state=getState()){
     if(destroyed)return;state=state||{};const now=finite(timestamp,performance.now()),dt=last==null?0:clamp((now-last)/1000,0,.1);last=now;const running=['playing','closing'].includes(state.phase)&&!state.paused;if(running)seconds+=dt;
-    selectVenue(state);background(state);roomLayers();ctx.save();ctx.translate(Math.round(offsetX),0);ctx.imageSmoothingEnabled=false;ctx.drawImage(assets.venue,0,0,REF_W,REF_H);albumCover(ctx,state);endedStage(ctx,state);stageLights(state);const airborne=paper(state,running?dt:0);
+    selectVenue(state);background(state);roomLayers();ctx.save();ctx.translate(Math.round(offsetX),offsetY);ctx.imageSmoothingEnabled=false;ctx.drawImage(assets.venue,0,0,REF_W,REF_H);albumCover(ctx,state);endedStage(ctx,state);stageLights(state);const airborne=paper(state,running?dt:0);
     const drawables=occluders.filter(layer=>!layer.actors?.length).map(layer=>({depth:layer.depth,draw:()=>drawLayer(layer,state)}));
     for(const prop of propLayers)drawables.push({depth:prop.depth,draw:()=>drawProp(ctx,prop)});
+    for(const feature of pixelVenueFeatures(state))drawables.push({depth:feature.depth,draw:()=>drawFeature(ctx,feature)});
     const models=modelRoster(state);
     for(const actor of state.actors||[]){if(actor.visible===false||models.length&&actor.role==='band')continue;const seat=seatFor(actor);let depth=seat?.depth??actorPoint(actor).y+(actor.action==='surf'?2:0);if(actor.id==='drummer'&&actor.action==='perform'&&assets.venueMeta?.drumForegroundDepth>0)depth=Math.min(depth,assets.venueMeta.drumForegroundDepth-1);drawables.push({depth,draw:()=>{drawActor(actor,state);for(const layer of occluders)if(seat&&layer.actors?.includes(actor.id))drawLayer(layer,state);}});}
     for(const model of models){let depth=modelPoint(model).y;if(model.role==='drummer'&&model.actor.action==='perform'&&assets.venueMeta?.drumForegroundDepth>0)depth=Math.min(depth,assets.venueMeta.drumForegroundDepth-1);drawables.push({depth,draw:()=>drawBandModel(model,state)});}
     drawables.sort((a,b)=>a.depth-b.depth);for(const item of drawables)item.draw();airborne();orderBubbles(state);ctx.restore();
   }
-  function worldToScreen(x,z,y=0){const p=project(x,z,y);return{x:(p.x+offsetX)*cssW/width,y:p.y*cssH/height};}
+  function worldToScreen(x,z,y=0){const p=project(x,z,y);return{x:(p.x+offsetX)*cssW/width,y:(p.y+offsetY)*cssH/height};}
+  function getVenueBounds(){const left=Math.max(0,(28+offsetX)*cssW/width),right=Math.min(cssW,(932+offsetX)*cssW/width),top=offsetY*cssH/height,bottom=(REF_H+offsetY)*cssH/height;return{left,top,right,bottom,width:right-left,height:bottom-top};}
   function renderOverview(target,state=getState()){
     selectVenue(state);roomLayers();
     const w=target.canvas.width,h=target.canvas.height,scale=Math.min((w-8)/REF_W,(h-8)/REF_H),left=(w-REF_W*scale)/2,top=(h-REF_H*scale)/2;
     target.imageSmoothingEnabled=false;target.fillStyle='#1e2632';target.fillRect(0,0,w,h);
     target.drawImage(assets.venue,Math.round(left),Math.round(top),Math.round(REF_W*scale),Math.round(REF_H*scale));
-    target.save();target.translate(left,top);target.scale(scale,scale);for(const prop of propLayers)drawProp(target,prop);albumCover(target,state);endedStage(target,state);target.restore();
+    target.save();target.translate(left,top);target.scale(scale,scale);for(const prop of propLayers)drawProp(target,prop);for(const feature of pixelVenueFeatures(state))drawFeature(target,feature);albumCover(target,state);endedStage(target,state);target.restore();
     const models=modelRoster(state);
     for(const actor of state.actors||[]){
       if(actor.visible===false||models.length&&actor.role==='band')continue;
       const p=actorPoint(actor,finite(actor.y)),employee=['bartender','server'].includes(actor.role)||actor.id?.startsWith('hired-'),size=employee?4:3;
       const x=Math.round(left+p.x*scale-size/2),y=Math.round(top+p.y*scale-size/2);
       target.fillStyle='#111721';target.fillRect(x-1,y-1,size+2,size+2);
-      target.fillStyle=actor.id==='assisted-guest'?'#ffd36f':employee?'#6ee59a':actor.role==='band'?'#65dbef':'#f5e4c8';
+      target.fillStyle=actor.role==='inspector'?'#daff54':actor.id==='assisted-guest'?'#ffd36f':employee?'#6ee59a':actor.role==='band'?'#65dbef':'#f5e4c8';
       target.fillRect(x,y,size,size);
     }
     for(const model of models){const p=modelPoint(model),x=Math.round(left+p.x*scale-1.5),y=Math.round(top+p.y*scale-1.5);target.fillStyle='#111721';target.fillRect(x-1,y-1,5,5);target.fillStyle='#65dbef';target.fillRect(x,y,3,3);}
   }
   function drawProp(target,prop){target.drawImage(prop.image,prop.x,prop.y,prop.width,prop.height);}
+  function drawFeature(target,feature){
+    const meta=assets.venueFeatureModels,sheet=assets.venueFeatures,item=meta?.items?.[feature.id];
+    if(!item||!ready(sheet))return;
+    const fw=meta.frameWidth||96,fh=meta.frameHeight||96,size=feature.size;
+    target.drawImage(sheet,item.column*fw,item.row*fh,fw,fh,Math.round(feature.x-(meta.footX??48)*size/fw),Math.round(feature.y-(meta.footY??88)*size/fh),size,size);
+  }
   function destroy(){destroyed=true;observer.disconnect();particles.length=0;occluders=[];propLayers=[];city=null;}
   function getBandPresentation(state=getState()){
     selectVenue(state);
-    return modelRoster(state).map(entry=>({id:entry.id,bandId:entry.bandId,role:entry.role,anchor:entry.member.anchor,row:entry.row,extra:entry.extra,file:entry.band.file,...performingFrame(entry,assets.bandModels,seconds),...modelPoint(entry)}));
+    return modelRoster(state).map(entry=>({id:entry.id,bandId:entry.bandId,role:entry.role,anchor:entry.member.anchor,row:entry.row,extra:entry.extra,file:entry.band.file,...bandFrame(entry,state),...modelPoint(entry)}));
   }
   function getAudiencePresentation(state=getState()){
     selectVenue(state);
@@ -510,5 +556,6 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
         atlas:selected?.atlas||null,row:selected?.row??null,column:selected?.column??null,style:selected?.style||null,lift:pose.lift||0,...actorPoint(actor,finite(actor.y))};
     });
   }
-  return{render,resize,destroy,worldToScreen,project,renderOverview,getBandPresentation,getAudiencePresentation};
+  function getInspectorPresentation(state=getState()){selectVenue(state);return(state.actors||[]).filter(a=>a.role==='inspector'&&a.visible!==false).map(a=>({id:a.id,moving:!!a.moving,...inspectorFrame(a)}));}
+  return{render,resize,destroy,worldToScreen,project,getVenueBounds,renderOverview,getBandPresentation,getAudiencePresentation,getInspectorPresentation,getVenueFeaturePresentation:state=>pixelVenueFeatures(state||getState())};
 }

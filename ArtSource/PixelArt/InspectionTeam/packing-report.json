@@ -1,0 +1,696 @@
+{
+  "passed": true,
+  "source": "inspectors.source.png",
+  "sourceSize": [
+    1254,
+    1254
+  ],
+  "sourceSha256": "a43bf6044db95e6717aab5fe1363d723fb34f6bf0b094ce27355005988597371",
+  "sourceAlphaExtrema": [
+    0,
+    255
+  ],
+  "sourceRowBoundaries": [
+    0,
+    211,
+    419,
+    627,
+    837,
+    1046,
+    1254
+  ],
+  "size": [
+    768,
+    192
+  ],
+  "rows": [
+    {
+      "row": 0,
+      "scale": 0.3373493975903614,
+      "cells": [
+        {
+          "column": 0,
+          "sourceCell": [
+            0,
+            0,
+            222,
+            211
+          ],
+          "placedRect": [
+            19,
+            4,
+            23,
+            56
+          ]
+        },
+        {
+          "column": 1,
+          "sourceCell": [
+            222,
+            0,
+            433,
+            211
+          ],
+          "placedRect": [
+            18,
+            4,
+            29,
+            57
+          ]
+        },
+        {
+          "column": 2,
+          "sourceCell": [
+            433,
+            0,
+            631,
+            211
+          ],
+          "placedRect": [
+            20,
+            4,
+            23,
+            56
+          ]
+        },
+        {
+          "column": 3,
+          "sourceCell": [
+            631,
+            0,
+            833,
+            211
+          ],
+          "placedRect": [
+            19,
+            4,
+            24,
+            57
+          ]
+        },
+        {
+          "column": 4,
+          "sourceCell": [
+            833,
+            0,
+            1037,
+            211
+          ],
+          "placedRect": [
+            20,
+            4,
+            25,
+            57
+          ]
+        },
+        {
+          "column": 5,
+          "sourceCell": [
+            1037,
+            0,
+            1254,
+            211
+          ],
+          "placedRect": [
+            22,
+            3,
+            25,
+            57
+          ]
+        },
+        {
+          "column": 6,
+          "sourceCell": [
+            0,
+            211,
+            227,
+            419
+          ],
+          "placedRect": [
+            21,
+            4,
+            23,
+            57
+          ]
+        },
+        {
+          "column": 7,
+          "sourceCell": [
+            227,
+            211,
+            430,
+            419
+          ],
+          "placedRect": [
+            20,
+            4,
+            24,
+            57
+          ]
+        },
+        {
+          "column": 8,
+          "sourceCell": [
+            430,
+            211,
+            630,
+            419
+          ],
+          "placedRect": [
+            20,
+            4,
+            24,
+            57
+          ]
+        },
+        {
+          "column": 9,
+          "sourceCell": [
+            630,
+            211,
+            830,
+            419
+          ],
+          "placedRect": [
+            21,
+            4,
+            23,
+            56
+          ]
+        },
+        {
+          "column": 10,
+          "sourceCell": [
+            830,
+            211,
+            1036,
+            419
+          ],
+          "placedRect": [
+            26,
+            4,
+            26,
+            56
+          ]
+        },
+        {
+          "column": 11,
+          "sourceCell": [
+            1036,
+            211,
+            1254,
+            419
+          ],
+          "placedRect": [
+            23,
+            5,
+            27,
+            55
+          ]
+        }
+      ],
+      "directions": [
+        {
+          "firstColumn": 0,
+          "uniqueFrames": 3,
+          "adjacentChangedPixels": [
+            1062,
+            1003
+          ]
+        },
+        {
+          "firstColumn": 3,
+          "uniqueFrames": 3,
+          "adjacentChangedPixels": [
+            986,
+            1034
+          ]
+        },
+        {
+          "firstColumn": 6,
+          "uniqueFrames": 3,
+          "adjacentChangedPixels": [
+            986,
+            862
+          ]
+        },
+        {
+          "firstColumn": 9,
+          "uniqueFrames": 3,
+          "adjacentChangedPixels": [
+            1237,
+            1085
+          ]
+        }
+      ]
+    },
+    {
+      "row": 1,
+      "scale": 0.34355828220858897,
+      "cells": [
+        {
+          "column": 0,
+          "sourceCell": [
+            0,
+            419,
+            227,
+            627
+          ],
+          "placedRect": [
+            19,
+            4,
+            24,
+            57
+          ]
+        },
+        {
+          "column": 1,
+          "sourceCell": [
+            227,
+            419,
+            428,
+            627
+          ],
+          "placedRect": [
+            19,
+            4,
+            24,
+            56
+          ]
+        },
+        {
+          "column": 2,
+          "sourceCell": [
+            428,
+            419,
+            630,
+            627
+          ],
+          "placedRect": [
+            19,
+            4,
+            23,
+            56
+          ]
+        },
+        {
+          "column": 3,
+          "sourceCell": [
+            630,
+            419,
+            833,
+            627
+          ],
+          "placedRect": [
+            19,
+            4,
+            24,
+            56
+          ]
+        },
+        {
+          "column": 4,
+          "sourceCell": [
+            833,
+            419,
+            1035,
+            627
+          ],
+          "placedRect": [
+            19,
+            5,
+            24,
+            56
+          ]
+        },
+        {
+          "column": 5,
+          "sourceCell": [
+            1035,
+            419,
+            1254,
+            627
+          ],
+          "placedRect": [
+            22,
+            5,
+            24,
+            56
+          ]
+        },
+        {
+          "column": 6,
+          "sourceCell": [
+            0,
+            627,
+            224,
+            837
+          ],
+          "placedRect": [
+            20,
+            4,
+            23,
+            57
+          ]
+        },
+        {
+          "column": 7,
+          "sourceCell": [
+            224,
+            627,
+            427,
+            837
+          ],
+          "placedRect": [
+            19,
+            4,
+            25,
+            57
+          ]
+        },
+        {
+          "column": 8,
+          "sourceCell": [
+            427,
+            627,
+            628,
+            837
+          ],
+          "placedRect": [
+            20,
+            4,
+            23,
+            57
+          ]
+        },
+        {
+          "column": 9,
+          "sourceCell": [
+            628,
+            627,
+            830,
+            837
+          ],
+          "placedRect": [
+            22,
+            3,
+            22,
+            57
+          ]
+        },
+        {
+          "column": 10,
+          "sourceCell": [
+            830,
+            627,
+            1034,
+            837
+          ],
+          "placedRect": [
+            23,
+            3,
+            24,
+            57
+          ]
+        },
+        {
+          "column": 11,
+          "sourceCell": [
+            1034,
+            627,
+            1254,
+            837
+          ],
+          "placedRect": [
+            22,
+            4,
+            25,
+            57
+          ]
+        }
+      ],
+      "directions": [
+        {
+          "firstColumn": 0,
+          "uniqueFrames": 3,
+          "adjacentChangedPixels": [
+            1020,
+            918
+          ]
+        },
+        {
+          "firstColumn": 3,
+          "uniqueFrames": 3,
+          "adjacentChangedPixels": [
+            1006,
+            1022
+          ]
+        },
+        {
+          "firstColumn": 6,
+          "uniqueFrames": 3,
+          "adjacentChangedPixels": [
+            999,
+            931
+          ]
+        },
+        {
+          "firstColumn": 9,
+          "uniqueFrames": 3,
+          "adjacentChangedPixels": [
+            1103,
+            1006
+          ]
+        }
+      ]
+    },
+    {
+      "row": 2,
+      "scale": 0.34146341463414637,
+      "cells": [
+        {
+          "column": 0,
+          "sourceCell": [
+            0,
+            837,
+            224,
+            1046
+          ],
+          "placedRect": [
+            19,
+            4,
+            24,
+            57
+          ]
+        },
+        {
+          "column": 1,
+          "sourceCell": [
+            224,
+            837,
+            431,
+            1046
+          ],
+          "placedRect": [
+            17,
+            4,
+            28,
+            57
+          ]
+        },
+        {
+          "column": 2,
+          "sourceCell": [
+            431,
+            837,
+            632,
+            1046
+          ],
+          "placedRect": [
+            19,
+            5,
+            25,
+            56
+          ]
+        },
+        {
+          "column": 3,
+          "sourceCell": [
+            632,
+            837,
+            833,
+            1046
+          ],
+          "placedRect": [
+            19,
+            5,
+            25,
+            56
+          ]
+        },
+        {
+          "column": 4,
+          "sourceCell": [
+            833,
+            837,
+            1036,
+            1046
+          ],
+          "placedRect": [
+            20,
+            5,
+            25,
+            56
+          ]
+        },
+        {
+          "column": 5,
+          "sourceCell": [
+            1036,
+            837,
+            1254,
+            1046
+          ],
+          "placedRect": [
+            22,
+            4,
+            25,
+            57
+          ]
+        },
+        {
+          "column": 6,
+          "sourceCell": [
+            0,
+            1046,
+            227,
+            1254
+          ],
+          "placedRect": [
+            20,
+            4,
+            25,
+            57
+          ]
+        },
+        {
+          "column": 7,
+          "sourceCell": [
+            227,
+            1046,
+            428,
+            1254
+          ],
+          "placedRect": [
+            19,
+            4,
+            26,
+            57
+          ]
+        },
+        {
+          "column": 8,
+          "sourceCell": [
+            428,
+            1046,
+            628,
+            1254
+          ],
+          "placedRect": [
+            19,
+            3,
+            24,
+            57
+          ]
+        },
+        {
+          "column": 9,
+          "sourceCell": [
+            628,
+            1046,
+            828,
+            1254
+          ],
+          "placedRect": [
+            21,
+            5,
+            23,
+            56
+          ]
+        },
+        {
+          "column": 10,
+          "sourceCell": [
+            828,
+            1046,
+            1037,
+            1254
+          ],
+          "placedRect": [
+            21,
+            5,
+            27,
+            56
+          ]
+        },
+        {
+          "column": 11,
+          "sourceCell": [
+            1037,
+            1046,
+            1254,
+            1254
+          ],
+          "placedRect": [
+            22,
+            5,
+            24,
+            56
+          ]
+        }
+      ],
+      "directions": [
+        {
+          "firstColumn": 0,
+          "uniqueFrames": 3,
+          "adjacentChangedPixels": [
+            1082,
+            1056
+          ]
+        },
+        {
+          "firstColumn": 3,
+          "uniqueFrames": 3,
+          "adjacentChangedPixels": [
+            1065,
+            1044
+          ]
+        },
+        {
+          "firstColumn": 6,
+          "uniqueFrames": 3,
+          "adjacentChangedPixels": [
+            1018,
+            997
+          ]
+        },
+        {
+          "firstColumn": 9,
+          "uniqueFrames": 3,
+          "adjacentChangedPixels": [
+            1069,
+            931
+          ]
+        }
+      ]
+    }
+  ],
+  "file": "inspectors.png",
+  "bytes": 33042,
+  "sha256": "92fd953d145266b8b216e9dd4a1c6dae795700b57a2182fd2de44212dc9376ca",
+  "alphaExtrema": [
+    0,
+    252
+  ],
+  "nonEmptyCells": 36
+}

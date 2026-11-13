@@ -4,6 +4,7 @@ import {Booking,clamp,int,count} from './booking.js';
 import {Campaign} from './campaign.js';
 import {Audience} from './audience.js';
 import {Festival} from './festival.js';
+import {Inspection} from './inspection.js';
 import {SpectatorFeedback} from './spectator-feedback.js';
 import {ownerVenue} from './owner-venues.js';
 import {Floor,Challenges} from './floor.js';
@@ -27,7 +28,7 @@ const newJourney=()=>({version:1,day:1,challenge:false,tutorialComplete:false,gu
   score:0,combo:0,bestCombo:0,manualPerfects:0,orders:0,mistakes:0,successfulEvents:0,manualStreak:0,feverSeconds:0,feverCharge:0,openingCash:650,drinkIncome:0,xp:0,bestScore:0,bestStars:0,completedNights:0,
   resultStars:0,resultServed:0,resultXP:0,resultBonus:0,resultProfit:0,resultNewRecord:false,booking:null,bookingCareer:Booking.newCareer(),dayOpeningCash:0,hasDayOpeningCash:false,resultTicketIncome:0,resultAttendance:0,
   floorMissions:Floor.newState(),floorClosing:false,afterShow:null,musicPauseSession:0,musicPaused:false,resultFloorBonus:0,resultFloorTasks:0,resultTicketGross:0,resultArtistFee:0,campaignSecondSet:false,
-  legacyDeskPlanJson:'',deskMigrationCredit:0,deskMigrationDay:0,deskMigrationTrustedOpening:false,festival:Festival.create(),feedback:null});
+  legacyDeskPlanJson:'',deskMigrationCredit:0,deskMigrationDay:0,deskMigrationTrustedOpening:false,festival:Festival.create(),feedback:null,inspection:Inspection.create()});
 const messages={
   scouted:['출연진 발굴 완료. 팀을 선택하고 섭외를 진행하세요.','Lineup discovered. Select an artist and make an offer.'],
   listened:['데모 검토 완료. 제안 수락 확률이 올랐어요.','Demo reviewed. This artist is more likely to accept.'],
@@ -78,15 +79,18 @@ export class SimBarGame{
   get availableWorkers(){return 2+this.state.staff.reduce((n,v)=>n+(v&&this.state.wageDebt===0?1:0),0);}
   get payroll(){return this.state.staff.reduce((n,v,i)=>n+v*catalog.staff[i].wage,0);}
   get playing(){return this.phase==='playing'&&this.journey.inProgress;}
+  get inspection(){return Inspection.view(this.journey.inspection,this.actors);}
+  get _performanceElapsed(){return this.elapsed-(this.journey.inspection?.frozenSeconds||0);}
   get festival(){
     const state=this.journey.festival||Festival.create(),liveAttendance=this.actors.filter(a=>(Audience.isAudience(a)||a.role==='assisted')&&a.visible!==false).length;
     return{...state,...Festival.modifiers(state,this.state.satisfaction,this.state.performance),liveAttendance,
       bookedAttendance:Booking.forecast(this.journey.booking).attendance,capacity:Audience.capacity(this.owner),
-      canAct:this.playing&&!this.paused&&liveAttendance>0&&state.remaining<=0&&state.globalRemaining<=0};
+      blockedByInspection:this.inspection.freezePerformers,
+      canAct:this.playing&&!this.paused&&liveAttendance>0&&!this.inspection.freezePerformers&&state.remaining<=0&&state.globalRemaining<=0};
   }
   get closing(){return this.phase==='closing'&&this.journey.inProgress;}
   get staffReturnPending(){return this.closing&&this.floor.cleanupComplete&&this.crew.some((id,i)=>{const a=this.actors.find(a=>a.id===id);return a?.visible&&a.id!==this.escort?.worker&&distance(a,this._parkGoal(i))>.05;});}
-  get floorTasksPending(){return Floor.remaining(this.floor)>0||this.floor.guestActive||!this.guestExitFinished||this.staffReturnPending;}
+  get floorTasksPending(){return Floor.remaining(this.floor)>0||this.floor.guestActive||!this.guestExitFinished||this.staffReturnPending||this.inspection.active;}
   get afterShowPending(){return !this.journey.afterShow?.completed;}
   get farewellPending(){return this.journey.inProgress&&this.journey.floorClosing&&!!this.journey.afterShow?.completed&&!this.journey.afterShow.noticeAcknowledged;}
   get showFarewell(){return this.farewellPending;}
@@ -126,6 +130,7 @@ export class SimBarGame{
   _notify(){this.revision=(this.revision||0)+1;this.onchange?.(this);}
   save(){
     syncAfterShow(this.journey.afterShow,this.actors);
+    Inspection.sync(this.journey.inspection,this.actors);
     this.state.journeyJson=JSON.stringify(this.journey);
     this.state.native={version:1,seed:this._seed,elapsed:this.elapsed,orders:this.orders,actors:this.actors,crew:this.crew,escort:this.escort,requestTimer:this._requestTimer,selectedItem:this.selectedItem,eventSerial:this._eventSerial};
     this._put(SAVE_KEY,JSON.stringify(this.state));return!this.saveError;
@@ -178,6 +183,7 @@ export class SimBarGame{
       this.journey.feedback=SpectatorFeedback.sanitize(this.journey.feedback,{session:this.journey.session,owner:this.owner});
       restoreAfterShow(this.journey.afterShow,this.actors);
       if(this._applyOwnerLayout()){this._routeOrders();syncAfterShow(this.journey.afterShow,this.actors);}
+      Inspection.restore(this.journey.inspection,this.actors,this.owner,data.native?.actors);
       if(!this.orders.length&&!restoredEmptyQueue&&this.journey.inProgress&&!this.journey.floorClosing)this._seedOrders();
       if(this.floor.guestSpawned&&(!this.floor.guestComplete||this.actors.some(a=>a.id==='assisted-guest'&&a.visible!==false)))this._ensureGuest();
       this._refreshFeedback();
@@ -194,6 +200,8 @@ export class SimBarGame{
     j.musicPauseSession=int(j.musicPauseSession,0,j.session);j.musicPaused=j.musicPaused===true;
     j.campaignSecondSet=j.campaignSecondSet===true;
     j.festival=Festival.sanitize(j.festival);
+    j.inspection=Inspection.sanitize(j.inspection,{session:j.session,day:j.day,owner:this.owner,seed:this._seed});
+    if(!j.inProgress||j.floorClosing&&['scheduled','warning'].includes(j.inspection.phase))j.inspection.phase='done';
     j.afterShow=sanitizeAfterShow(j.afterShow,j.session,{settled:j.session>0&&j.session===j.settledSession&&!j.inProgress});
     if(j.settlementPending&&(Floor.remaining(j.floorMissions)||j.floorMissions.guestActive||j.afterShow&&(!j.afterShow.completed||!j.afterShow.noticeAcknowledged))){j.settlementPending=false;j.inProgress=true;j.floorClosing=true;}
     if(j.floorClosing&&j.inProgress){j.secondsLeft=0;j.guidePending=false;j.settlementPending=false;}else j.floorClosing=false;
@@ -267,6 +275,9 @@ export class SimBarGame{
       case'hire':case'upgrade':case'event':case'payDebt':r=this._manage(type,idx);if(!r.success)this._say(...(messages[r.code]||messages.unavailable));break;
       case'quick':r=this._quick(+p.kind);break;
       case'festival':r=this._festivalAction(p.id);break;
+      case'inspection':
+        if(!this.playing||this.paused||!Inspection.begin(j.inspection))return this._done(false);
+        this._inspectionNotice('warning');r={success:true,code:'inspection_warning'};break;
       case'playlist':
         if(!Number.isInteger(idx)||idx<0||idx>=catalog.playlists.length)return this._done(false);
         if(Booking.isCampaign(j.booking)&&j.booking.showId&&!this.metrics().allowedTracks.includes(idx))return this._done(false,'track_not_booked');
@@ -299,12 +310,14 @@ export class SimBarGame{
     j.resultNewRecord=false;j.campaignSecondSet=false;j.festival=Festival.create();j.openingCash=j.hasDayOpeningCash?j.dayOpeningCash:this.state.money;j.guideStep=0;j.guidePending=!j.tutorialComplete;j.floorMissions=Floor.newState();this._ensureReaction();
     this.state.clock=18;this.state.satisfaction=0;this.state.performance=0;
     j.feedback=SpectatorFeedback.create({session:j.session,owner:this.owner});
+    j.inspection=Inspection.create({session:j.session,day:j.day,owner:this.owner,seed:this._seed});
     if(Booking.isCampaign(j.booking)){const tracks=this.metrics().allowedTracks;if(j.booking.showId==='double'||!tracks.includes(this.state.playlist))this.state.playlist=tracks[0]??0;}
     this._buildActors();this._refreshFeedback();this.crew=[];this.escort=null;this.effects=[];this.pour=null;this._seedOrders();this._requestTimer=3*(j.challenge?.72:1.18)*this.metrics().orderIntervalMultiplier;
     this.phase=j.guidePending?'guide':'playing';this.paused=j.guidePending;this.pauseReason=this.paused?'guide':'';this._say('영업 시작! 주문과 공연을 멋지게 운영해 보세요.','The show is open! Serve guests and keep the crowd glowing.');
   }
   _ensureReaction(){if(!this.floor.reaction)this.floor.reaction=Challenges.newState(Math.floor(this._random()*0x7fffffff)||1,180-this.journey.secondsLeft);}
   _festivalAction(id){
+    if(this.playing&&!this.paused&&this.inspection.freezePerformers){this._say('단속반이 지나가면 호응 액션을 다시 사용할 수 있어요.','Crowd actions will be available after the inspectors leave.',4);return{success:false,code:'inspection_blocked'};}
     if(!this.playing||this.paused||!this.festival.liveAttendance)return{success:false,code:'unavailable'};
     const state=this.journey.festival,result=Festival.begin(state,id);if(!result.success)return result;
     state.venueOwner=this.owner;
@@ -476,29 +489,43 @@ export class SimBarGame{
     if(!Number.isFinite(dt)||dt<=0)return;dt=Math.min(dt,5);let remaining=dt;
     while(remaining>0){const step=Math.min(.05,remaining);remaining-=step;this._step(step);}this._notify();
   }
+  _inspectionNotice(kind){
+    if(kind==='warning')this._say('구청 민원 접수 · 춤추지 말라는 신고가 들어왔어요. 단속반 3명이 잠시 방문합니다.','A no-dancing complaint was reported. Three inspectors are visiting shortly.',5);
+    else if(kind==='arrived')this._say('단속반 방문 중 · 모두 잠시 멈춰 공연을 지켜봅니다.','Inspectors are here. Everyone pauses to watch the stage.',4);
+    else if(kind==='done')this._say('단속반이 지나갔어요. 다시 자유롭게 공연에 호응하세요!','The inspectors have left. Crowd actions are available again!',4);
+  }
+  _inspectionTick(dt){
+    const notices=Inspection.tick(this.journey.inspection,dt,{actors:this.actors,owner:this.owner,playing:this.playing,showElapsed:180-this.journey.secondsLeft,canEnter:!this.escort||this.escort.phase==='return'});
+    if(!this.inspection.freezePerformers)for(const actor of this.actors){
+      if(!actor._inspectionPose)continue;
+      actor.facing=actor._inspectionPose.facing;actor.y=this.playing||actor.role==='band'?actor._inspectionPose.y:0;delete actor._inspectionPose;
+    }
+    for(const notice of notices)this._inspectionNotice(notice);
+  }
   _step(dt){
     if(this.paused||(!this.playing&&!this.closing))return;this.elapsed+=dt;this._inputGuard=Math.max(0,this._inputGuard-dt);this._messageTimer-=dt;if(this._messageTimer<=0)this._message=['',''];
     const j=this.journey,s=this.state;this.effects=this.effects.filter(e=>this.elapsed-e.time<8);
+    this._inspectionTick(dt);const frozen=this.inspection.freezePerformers;
     if(this.playing){
       j.secondsLeft=Math.max(0,j.secondsLeft-dt);j.feverSeconds=Math.max(0,j.feverSeconds-dt);if(j.secondsLeft<=0){this._lastCall();return;}
       if(Booking.isCampaign(j.booking)&&j.booking.showId==='double'&&!j.campaignSecondSet&&j.secondsLeft<=90){
         j.campaignSecondSet=true;s.playlist=1;this._say('2부 시작! 줄라이원츠모어가 무대에 오릅니다.','Second set! JulyWantsMore takes the stage.');
       }
-      this._festivalTick(dt);
+      if(!frozen)this._festivalTick(dt);
       if(this.pour){this.pour.elapsed+=dt;this.pour.remaining=Math.max(0,3-this.pour.elapsed);const v=(.04+this.pour.elapsed*.82)%2;this.pour.marker=v<=1?v:2-v;if(!this.pour.remaining)this._finishPour(.2);}
-      this._opsTick(dt);s.clock=18+6*(1-j.secondsLeft/180);this._requestTimer-=dt;if(this._requestTimer<=0){this._createOrder();this._requestTimer=(4.5+this._random()*3)*(this._onDuty(2)?.9:1)*(s.activeEvent===2?.7:1)*(j.challenge?.72:1.18)*this.metrics().orderIntervalMultiplier*this.festival.orderMultiplier;}
-      for(const o of this.orders)if(!this.pour||o.id!==this.pour.orderId)o.patience-=dt;
+      this._opsTick(dt);s.clock=18+6*(1-j.secondsLeft/180);if(!frozen)this._requestTimer-=dt;if(!frozen&&this._requestTimer<=0){this._createOrder();this._requestTimer=(4.5+this._random()*3)*(this._onDuty(2)?.9:1)*(s.activeEvent===2?.7:1)*(j.challenge?.72:1.18)*this.metrics().orderIntervalMultiplier*this.festival.orderMultiplier;}
+      if(!frozen)for(const o of this.orders)if(!this.pour||o.id!==this.pour.orderId)o.patience-=dt;
       if(this.orders[0]?.patience<=0&&!this.pour){const missed=this.orders.shift();this._feedbackDisappointment(missed.id,'timeout');s.fans=Math.max(0,s.fans-3);this._mistake();this._routeOrders();this._say('손님이 주문을 받지 못하고 떠났어요.','A guest left without their order.');}
     }
-    this._tickActors(dt);if(this.playing)this._feedbackTick(dt);if(this.closing)tickAfterShow(j.afterShow,this.actors,dt);
+    this._tickActors(dt);if(this.playing&&!frozen)this._feedbackTick(dt);if(this.closing&&!frozen)tickAfterShow(j.afterShow,this.actors,dt);
     if(this.farewellPending){this.paused=true;this.pauseReason='farewell';this.save();}
     this._floorTick(dt);this._autosave+=dt;if(this._autosave>=3){this._autosave=0;this.save();}
   }
   _floorTick(dt){
     this._ensureReaction();const r=this.reaction,f=this.floor;
-    if(this.playing){const due=Challenges.advance(r,180-this.journey.secondsLeft,true);for(let i=0;i<due.confetti;i++)this._paper(0);for(let i=0;i<due.tissue;i++)this._paper(1);if(due.guest&&!f.guestSpawned){Floor.spawnGuest(f,this.journey.day%10);this._ensureGuest();this._say('손님 안내 미션! F 키나 버튼을 빠르게 연타하세요.','Guest assistance! Rapidly tap F or the button.');}}
+    if(this.playing&&!this.inspection.freezePerformers){const due=Challenges.advance(r,180-this.journey.secondsLeft,true);for(let i=0;i<due.confetti;i++)this._paper(0);for(let i=0;i<due.tissue;i++)this._paper(1);if(due.guest&&!f.guestSpawned){Floor.spawnGuest(f,this.journey.day%10);this._ensureGuest();this._say('손님 안내 미션! F 키나 버튼을 빠르게 연타하세요.','Guest assistance! Rapidly tap F or the button.');}}
     this._ensureCleanup();this._tickFloorActors(dt);
-    const timeout=Challenges.tick(r,dt,true);if(timeout.timedOut){if(f.guestActive)this._feedbackDisappointment(this.actors.find(a=>a.id==='assisted-guest')?.assistedSourceId||'assisted-guest','unsafe',.3);this._say('시간을 놓쳤어요. 잠시 뒤 다시 연타로 대응하세요!','Time ran out. A new response window will appear shortly.');}
+    const timeout=Challenges.tick(r,dt,!(this.inspection.freezePerformers&&(r.activeKind===2||f.guestActive)));if(timeout.timedOut){if(f.guestActive)this._feedbackDisappointment(this.actors.find(a=>a.id==='assisted-guest')?.assistedSourceId||'assisted-guest','unsafe',.3);this._say('시간을 놓쳤어요. 잠시 뒤 다시 연타로 대응하세요!','Time ran out. A new response window will appear shortly.');}
     if(this.closing){const ready=this.cleanupReadyWorkers,before=f.cleaned,workDt=ready?Math.min(dt,r.cleanupWorkBudget/(ready*3)):0,result=Floor.tick(f,workDt,ready,true);r.cleanupWorkBudget=Math.max(0,r.cleanupWorkBudget-(f.cleaned-before));if(r.cleanupWorkBudget<.001)r.cleanupWorkBudget=0;if(result.cleanupFinished){this.journey.score+=150;this._say('직원 청소 미션 완료!','Staff cleanup mission complete!');}}
     if(!r.activeKind&&r.cooldown<=0){if(this.closing&&f.cleanupActive&&this.cleanupReadyWorkers>0&&r.cleanupWorkBudget<=0)Challenges.start(r,1,Math.floor(f.cleaned/32));else if(f.guestActive)Challenges.start(r,2,f.guestStep);}
     if(this.closing&&!this.floorTasksPending&&!this.afterShowPending&&!this.farewellPending)this._settleNight();
@@ -507,6 +534,7 @@ export class SimBarGame{
   _emitPaper(kind,result){if(!result.success)return;this.state.fans+=result.fanGain;this.effects.push({kind,serial:++this._eventSerial,time:this.elapsed});this._say(kind===0?'밴드가 깜짝 꽃가루 퍼포먼스를 했어요!':'관객 위로 휴지가 날립니다!',kind===0?'The band unexpectedly throws confetti!':'Tissue streamers fly over the crowd!');}
   _quick(kind){
     if(this.paused||(!this.playing&&!this.closing)||!this.reaction)return{success:false,code:'unavailable'};
+    if(kind===2&&this.inspection.freezePerformers){this._say('단속반이 지나가면 손님 안내를 다시 진행할 수 있어요.','Guest assistance resumes after the inspectors leave.',4);return{success:false,code:'inspection_blocked'};}
     if(kind===2&&(!this.floor.guestActive||this.reaction.activeStage!==this.floor.guestStep))return{success:false,code:'no_guest'};
     if(kind===1&&(!this.closing||!this.floor.cleanupActive||!this.cleanupReadyWorkers))return{success:false,code:'no_workers'};
     const result=Challenges.press(this.reaction,kind,true);if(result.completed){if(kind===2){const guest=Floor.resolveGuest(this.floor,result.stage);if(guest.guestCompleted){this.state.fans+=4;this.journey.score+=150;this._beginEscort();this._say('감사합니다. 직원이 출입구까지 동행하겠습니다.','Thank you. A staff member will accompany you to the exit.');}else this._say(result.stage===0?'추가 주문을 멈추고 물을 안내했어요.':'정중한 퇴점 요청을 전했어요. 소지품을 확인하세요.',result.stage===0?'Service paused and water offered.':'A courteous exit request was understood. Check belongings.');}else this._say('빠르게 대응했어요! 직원들이 바닥을 정리합니다.','Great response! Arrived staff are clearing the paper.');}return{...result,success:result.accepted,code:result.completed?'reaction_complete':result.accepted?'reaction_press':'reaction_ignored'};
@@ -518,6 +546,7 @@ export class SimBarGame{
   }
   _beginClosing(){
     const j=this.journey;this.phase='closing';j.floorClosing=true;j.inProgress=true;j.settlementPending=false;j.guidePending=false;
+    Inspection.requestExit(j.inspection,this.actors);
     this._clearFestivalActors();j.festival.activeId='';j.festival.remaining=0;j.festival.globalRemaining=0;
     if(j.musicPauseSession!==j.session){j.musicPauseSession=j.session;j.musicPaused=true;}
     this._beginAfterShow();this.orders=[];this._routeOrders();this._ensureReaction();
@@ -703,6 +732,11 @@ export class SimBarGame{
   _tickActors(dt){
     for(const a of this.actors){
       if(a.id.startsWith('hired-'))a.visible=this._onDuty(+a.id.slice(-1));if(!a.visible)continue;
+      if(a.role==='inspector')continue;
+      if(this.inspection.freezePerformers&&(Audience.isAudience(a)||a.role==='band'||a.role==='assisted'||a.id===this.escort?.worker&&this.escort.phase!=='return')){
+        if(!a._inspectionPose)a._inspectionPose={facing:a.facing,y:a.y||0};
+        a.moving=false;if(a.role!=='band'){a.y=0;a.facing=Math.atan2(5.75-a.x,3.5-a.z);}continue;
+      }
       if(this.crew.includes(a.id)||a.id===this.escort?.worker||a.id==='assisted-guest')continue;
       if(this.closing&&ownsAfterShowActor(this.journey.afterShow,a.id))continue;
       if(a.role==='band'){
@@ -738,18 +772,18 @@ export class SimBarGame{
         // A patron returning from the bar rejoins at their current angle. The
         // shared clock has advanced while they queued, so its old phase would
         // otherwise snap them across the pit. The offset travels in native saves.
-        if(a.action!=='mosh'||!Number.isFinite(a._pitPhaseOffset))a._pitPhaseOffset=Math.atan2(a.z+1.25,a.x-5.75)-a.slot*Math.PI/3-this.elapsed*.25;
-        const angle=a.slot*Math.PI/3+this.elapsed*.25+a._pitPhaseOffset;
+        if(a.action!=='mosh'||!Number.isFinite(a._pitPhaseOffset))a._pitPhaseOffset=Math.atan2(a.z+1.25,a.x-5.75)-a.slot*Math.PI/3-this._performanceElapsed*.25;
+        const angle=a.slot*Math.PI/3+this._performanceElapsed*.25+a._pitPhaseOffset;
         const currentRadius=Math.hypot(a.x-5.75,a.z+1.25),radius=currentRadius+clamp(1.58-currentRadius,-dt*.65,dt*.65);
         a.x=5.75+Math.cos(angle)*radius;a.z=-1.25+Math.sin(angle)*radius;a.moving=true;a.action='mosh';a.facing=angle+Math.PI/2;
       }
       else if(a.role==='guest'&&a.slot<8&&this.playing){
-        const side=a.slot===6?-1:1,separation=.44+Math.abs(Math.sin(this.elapsed*1.6))*.24,goal=point(5.75+side*separation,-1.25);
+        const side=a.slot===6?-1:1,separation=.44+Math.abs(Math.sin(this._performanceElapsed*1.6))*.24,goal=point(5.75+side*separation,-1.25);
         const d=distance(a,goal),step=Math.min(d,dt*.65);
         if(d>0){a.x+=(goal.x-a.x)*step/d;a.z+=(goal.z-a.z)*step/d;}
         a.action='slam';a.moving=step>.001;a.facing=side<0?Math.PI/2:-Math.PI/2;
       }
-      else if(a.role==='surfer'){const t=this.elapsed%24;a.y=this.playing&&t>=2&&t<=18?Math.min(1,(t-2)/2,(18-t)/2)*1.85:0;a.action=a.y>0?'surf':'idle';a.facing=Math.sin(this.elapsed*.8)>.2?-Math.PI/2:Math.PI/2;}
+      else if(a.role==='surfer'){const t=this._performanceElapsed%24;a.y=this.playing&&t>=2&&t<=18?Math.min(1,(t-2)/2,(18-t)/2)*1.85:0;a.action=a.y>0?'surf':'idle';a.facing=Math.sin(this._performanceElapsed*.8)>.2?-Math.PI/2:Math.PI/2;}
       else if(a.role==='support'){a.action=this.playing?'support':'idle';const surfer=this.actors.find(v=>v.id==='crowd-surfer');if(surfer)a.facing=Math.atan2(surfer.z-a.z,surfer.x-a.x);}
       else if(a.role==='guest'&&a.action!=='queue'){
         if(a._pathAt<a._path.length){if(move(a,dt,1.1,this.actors)){a.action='idle';a._wait=2+this._random()*5;}}
@@ -779,17 +813,17 @@ export class SimBarGame{
     }
     if(a.behavior==='mosh'){
       const spacing=Math.PI*2/Math.max(1,a.pitCount),base=(a.pitIndex||0)*spacing,speed=this.owner===1?.31:.21;
-      if(a.action!=='mosh'||!Number.isFinite(a._pitPhaseOffset))a._pitPhaseOffset=Math.atan2(a.z+1.25,a.x-5.75)-base-this.elapsed*speed;
-      const angle=base+this.elapsed*speed+a._pitPhaseOffset,current=Math.hypot(a.x-5.75,a.z+1.25),radius=current+clamp((a.pitRadius||1.58)-current,-dt*.65,dt*.65);
+      if(a.action!=='mosh'||!Number.isFinite(a._pitPhaseOffset))a._pitPhaseOffset=Math.atan2(a.z+1.25,a.x-5.75)-base-this._performanceElapsed*speed;
+      const angle=base+this._performanceElapsed*speed+a._pitPhaseOffset,current=Math.hypot(a.x-5.75,a.z+1.25),radius=current+clamp((a.pitRadius||1.58)-current,-dt*.65,dt*.65);
       a.x=5.75+Math.cos(angle)*radius;a.z=-1.25+Math.sin(angle)*radius;a.action='mosh';a.moving=true;a.facing=angle+Math.PI/2;return;
     }
     if(a.behavior==='slam'){
-      const side=a.slamSide||1,separation=.44+Math.abs(Math.sin(this.elapsed*1.85))*.24,goal=point(5.75+side*separation,-1.25),d=distance(a,goal),step=Math.min(d,dt*.65);
+      const side=a.slamSide||1,separation=.44+Math.abs(Math.sin(this._performanceElapsed*1.85))*.24,goal=point(5.75+side*separation,-1.25),d=distance(a,goal),step=Math.min(d,dt*.65);
       if(d>0){a.x+=(goal.x-a.x)*step/d;a.z+=(goal.z-a.z)*step/d;}
       a.action='slam';a.moving=step>.001;a.facing=side<0?Math.PI/2:-Math.PI/2;return;
     }
     if(a.behavior==='surf'){
-      const cycle=this.owner===1?22:31,t=(this.elapsed+this.journey.day*3)%cycle;
+      const cycle=this.owner===1?22:31,t=(this._performanceElapsed+this.journey.day*3)%cycle;
       a.y=t>=3&&t<=15?Math.min(1,(t-3)/2,(15-t)/2)*1.85:0;a.action=a.y>0?'surf':'listen';a.moving=false;return;
     }
     if(a.behavior==='support'){
@@ -813,6 +847,7 @@ export class SimBarGame{
       }else{a.moving=false;a.action='idle';}
     }
     if(!this.escort)return;const e=this.escort,w=this.actors.find(a=>a.id===e.worker),g=this.actors.find(a=>a.id==='assisted-guest');if(!w||!g){this.escort=null;return;}
+    if(this.inspection.freezePerformers&&e.phase!=='return'){w.moving=false;g.moving=false;return;}
     const retryRoute=(actor,goal,floor=false)=>{
       actor._escortRetry=Math.max(0,(actor._escortRetry||0)-dt);
       const changed=Math.hypot(actor.targetX-goal.x,actor.targetZ-goal.z)>.1||this.closing&&actor._floorRoute!==floor;

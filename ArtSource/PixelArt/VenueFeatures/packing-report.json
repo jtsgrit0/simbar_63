@@ -1,0 +1,343 @@
+{
+  "passed": true,
+  "source": "venue-features.source.png",
+  "sourceSize": [
+    1448,
+    1086
+  ],
+  "sourceSha256": "8637dffbea2834280dd67182d7d9190beadf9a9b82f0d371e8e42e2859534b3a",
+  "sourceAlphaExtrema": [
+    0,
+    255
+  ],
+  "sourceRowBoundaries": [
+    0,
+    365,
+    729,
+    1086
+  ],
+  "size": [
+    384,
+    288
+  ],
+  "rows": [
+    {
+      "row": 0,
+      "groups": [
+        {
+          "name": "upgradeLevels",
+          "scale": 0.2682926829268293
+        },
+        {
+          "name": "event",
+          "scale": 0.2968197879858657
+        }
+      ],
+      "cells": [
+        {
+          "column": 0,
+          "sourceCell": [
+            0,
+            0,
+            334,
+            365
+          ],
+          "scale": 0.2682926829268293,
+          "placedRect": [
+            25,
+            24,
+            45,
+            64
+          ],
+          "packedOpaqueBounds": [
+            26,
+            25,
+            69,
+            87
+          ]
+        },
+        {
+          "column": 1,
+          "sourceCell": [
+            334,
+            0,
+            696,
+            365
+          ],
+          "scale": 0.2682926829268293,
+          "placedRect": [
+            14,
+            23,
+            69,
+            66
+          ],
+          "packedOpaqueBounds": [
+            15,
+            24,
+            82,
+            88
+          ]
+        },
+        {
+          "column": 2,
+          "sourceCell": [
+            696,
+            0,
+            1094,
+            365
+          ],
+          "scale": 0.2682926829268293,
+          "placedRect": [
+            4,
+            20,
+            88,
+            69
+          ],
+          "packedOpaqueBounds": [
+            5,
+            21,
+            91,
+            88
+          ]
+        },
+        {
+          "column": 3,
+          "sourceCell": [
+            1094,
+            0,
+            1448,
+            365
+          ],
+          "scale": 0.2968197879858657,
+          "placedRect": [
+            13,
+            5,
+            71,
+            84
+          ],
+          "packedOpaqueBounds": [
+            14,
+            6,
+            83,
+            88
+          ]
+        }
+      ]
+    },
+    {
+      "row": 1,
+      "groups": [
+        {
+          "name": "upgradeLevels",
+          "scale": 0.26498422712933756
+        },
+        {
+          "name": "event",
+          "scale": 0.2616822429906542
+        }
+      ],
+      "cells": [
+        {
+          "column": 0,
+          "sourceCell": [
+            0,
+            365,
+            326,
+            729
+          ],
+          "scale": 0.26498422712933756,
+          "placedRect": [
+            29,
+            10,
+            38,
+            78
+          ],
+          "packedOpaqueBounds": [
+            30,
+            11,
+            66,
+            87
+          ]
+        },
+        {
+          "column": 1,
+          "sourceCell": [
+            326,
+            365,
+            698,
+            729
+          ],
+          "scale": 0.26498422712933756,
+          "placedRect": [
+            12,
+            10,
+            71,
+            78
+          ],
+          "packedOpaqueBounds": [
+            13,
+            11,
+            82,
+            87
+          ]
+        },
+        {
+          "column": 2,
+          "sourceCell": [
+            698,
+            365,
+            1101,
+            729
+          ],
+          "scale": 0.26498422712933756,
+          "placedRect": [
+            4,
+            5,
+            87,
+            84
+          ],
+          "packedOpaqueBounds": [
+            5,
+            6,
+            90,
+            88
+          ]
+        },
+        {
+          "column": 3,
+          "sourceCell": [
+            1101,
+            365,
+            1448,
+            729
+          ],
+          "scale": 0.2616822429906542,
+          "placedRect": [
+            19,
+            5,
+            57,
+            84
+          ],
+          "packedOpaqueBounds": [
+            20,
+            6,
+            75,
+            88
+          ]
+        }
+      ]
+    },
+    {
+      "row": 2,
+      "groups": [
+        {
+          "name": "upgradeLevels",
+          "scale": 0.27586206896551724
+        },
+        {
+          "name": "event",
+          "scale": 0.2838709677419355
+        }
+      ],
+      "cells": [
+        {
+          "column": 0,
+          "sourceCell": [
+            0,
+            729,
+            353,
+            1086
+          ],
+          "scale": 0.27586206896551724,
+          "placedRect": [
+            15,
+            32,
+            67,
+            57
+          ],
+          "packedOpaqueBounds": [
+            16,
+            33,
+            81,
+            88
+          ]
+        },
+        {
+          "column": 1,
+          "sourceCell": [
+            353,
+            729,
+            700,
+            1086
+          ],
+          "scale": 0.27586206896551724,
+          "placedRect": [
+            11,
+            13,
+            73,
+            76
+          ],
+          "packedOpaqueBounds": [
+            12,
+            14,
+            83,
+            88
+          ]
+        },
+        {
+          "column": 2,
+          "sourceCell": [
+            700,
+            729,
+            1077,
+            1086
+          ],
+          "scale": 0.27586206896551724,
+          "placedRect": [
+            4,
+            7,
+            88,
+            81
+          ],
+          "packedOpaqueBounds": [
+            5,
+            8,
+            91,
+            87
+          ]
+        },
+        {
+          "column": 3,
+          "sourceCell": [
+            1077,
+            729,
+            1448,
+            1086
+          ],
+          "scale": 0.2838709677419355,
+          "placedRect": [
+            4,
+            14,
+            88,
+            75
+          ],
+          "packedOpaqueBounds": [
+            5,
+            15,
+            91,
+            88
+          ]
+        }
+      ]
+    }
+  ],
+  "file": "venue-features.png",
+  "bytes": 32886,
+  "sha256": "14213f06eb589f2b117e34b20f9c247c761043fce8302d278e0055fe09966156",
+  "alphaExtrema": [
+    0,
+    252
+  ],
+  "nonEmptyCells": 12,
+  "uniqueProps": 12
+}

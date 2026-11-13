@@ -88,3 +88,10 @@ Desktop.ini
 # Abandoned unreadable local release; the active release is rebuilt from source.
 /docs/FastGame/42261ee708987da0/
 /docs/FastGame/3aaec91a91c8c916/
+
+# Planning PDFs and their local build/render resources stay off Git.
+/output/pdf/
+/tmp/pdfs/
+
+# Local mobile-HUD candidate before list-scroll preservation.
+/docs/FastGame/de82339b76e05b12/

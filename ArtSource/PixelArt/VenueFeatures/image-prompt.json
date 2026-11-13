@@ -1,0 +1,35 @@
+{
+  "tool": "built-in image_gen",
+  "created": "2026-11-14",
+  "references": [
+    "Tools/WebGLTemplate/FastGame/art/venue-ff.png",
+    "Tools/WebGLTemplate/FastGame/art/venue-freebird.png"
+  ],
+  "referenceRole": "Isometric perspective, pixel art treatment, venue palette only",
+  "source": "venue-features.source.png",
+  "sourceGrid": {
+    "columns": 4,
+    "rows": 3,
+    "rowsContents": [
+      [
+        "draft-1",
+        "draft-2",
+        "draft-3",
+        "openMic"
+      ],
+      [
+        "sound-1",
+        "sound-2",
+        "sound-3",
+        "rockShowcase"
+      ],
+      [
+        "vip-1",
+        "vip-2",
+        "vip-3",
+        "fanFestival"
+      ]
+    ]
+  },
+  "prompt": "Create a production TRANSPARENT PIXEL ART PROP ATLAS for the existing isometric Korean indie rock club management game. Use the two attached club room images strictly as STYLE / isometric perspective / palette references, not as things to reproduce. This is a new sheet of TWELVE small standalone objects that can be composited into those rooms.\n\nExact layout: 4 COLUMNS by 3 ROWS, twelve equal square cells. Output roughly 4:3 landscape, preferably 1536x1152 or equivalent. Every cell has only ONE cohesive isolated prop assembly centered at the same bottom baseline, fully within its own cell with generous completely transparent gutters. NO room walls, floors, scenery, checkerboard, grid lines, cell frames, title, labels, people, text legends or background. True alpha transparency outside props. No contact shadow cast onto a background. No bleed between cells.\n\nVisual style: crisp hand-clustered PIXEL ART, strong readable silhouettes at final 96 by 96 pixel cells, low-resolution game sprite aesthetic matching the supplied richly shaded adult-scale rooms. Isometric camera from above, top and two visible sides; verticals straight, floor axes about 30 degrees, light from upper left. Warm wood and charcoal dark metal with restrained cyan/magenta neon and amber highlights. Solid objects with hard pixel edges, no blurry painterly or glossy 3D appearance, no fine unreadable ornament.\n\nROW 1 LEFT TO RIGHT: brewery/draught equipment progression for placement directly onto an EXISTING bar counter. Do NOT draw the counter.\nCell (row1,col1): compact chrome draught tower with exactly TWO clearly separated tap handles, on one short dark rectangular drip-tray base.\nCell (row1,col2): upgraded chrome draught tower with exactly THREE clearly separated tap handles, longer drip-tray base, amber temperature indicator.\nCell (row1,col3): premium chrome draught tower with exactly FOUR clearly separated tap handles, stylish chrome arch and drip tray, small cyan indicator. Make the extra taps obvious.\nCell (row1,col4): OPEN MIC EVENT decoration: one black microphone on tripod stand plus a small amber glowing music-note sign on a low connected base; a compact coherent silhouette. No performer.\n\nROW 2 LEFT TO RIGHT: upgraded sound and lighting assemblies, self-contained compact stage-side furniture. \nCell (row2,col1): ONE charcoal loudspeaker cabinet with two readable round drivers, a tiny cyan stage lamp attached at top.\nCell (row2,col2): TWO speaker cabinets on a common low base, a short attached overhead bar with cyan and magenta lamps.\nCell (row2,col3): premium wider speaker pair with subwoofer center, sturdy short attached mini-truss with FOUR bright cyan and magenta lamps. Distinctly better than previous level, still compact.\nCell (row2,col4): ROCK SHOWCASE EVENT decoration: small charcoal guitar amplifier under a bright MAGENTA LED lightning-bolt sign, in a single coherent floor-standing assembly, with a tiny electric guitar leaning at side.\n\nROW 3 LEFT TO RIGHT: VIP corner decor progression. ABSOLUTELY NO SOFAS, chairs, benches, cushions or other seating. Only barriers/signage.\nCell (row3,col1): two small dark metal stanchions and one burgundy velvet rope, a tiny warm reserved-star plaque attached to one post, compact one-section barrier.\nCell (row3,col2): two polished brass stanchions and burgundy velvet rope, one taller backlit cyan star-shaped reserved sign centered behind the rope, connected elegant small footprint.\nCell (row3,col3): premium three brass stanchions forming an isometric shallow corner, TWO burgundy velvet ropes, and a bright warm illuminated reserved-star sign behind, restrained cyan trim.\nCell (row3,col4): FAN FESTIVAL EVENT decoration: two slim dark posts connected by a string of cyan/magenta/amber triangular bunting over a small warm glowing heart-and-music-note banner. Festive flag banner with visible side supports, no crowd.\n\nThe sheet must have exactly twelve unique objects, each correctly occupying the specified cell. Maintain readable stepped progression left to right within each of first three columns, consistent isometric directions throughout. Compose each prop so it can be alpha-cropped as a whole sprite; keep any sign, lamp or flag attached to its own prop with visible support. Clear empty transparent space separates every neighboring prop. No repeated assets, no real brands."
+}

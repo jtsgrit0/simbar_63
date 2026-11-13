@@ -1,0 +1,41 @@
+{
+  "tool": "built-in image_gen",
+  "created": "2026-11-14",
+  "reference": "Tools/WebGLTemplate/FastGame/art/wardrobe.png",
+  "referenceRole": "Adult isometric pixel-art style and proportions only",
+  "source": "inspectors.source.png",
+  "sourceGrid": {
+    "columns": 6,
+    "rows": 6,
+    "identitySourceRows": [
+      [
+        0,
+        1
+      ],
+      [
+        2,
+        3
+      ],
+      [
+        4,
+        5
+      ]
+    ],
+    "directions": [
+      [
+        "FR",
+        "BR"
+      ],
+      [
+        "BL",
+        "FL"
+      ]
+    ],
+    "frames": [
+      "idle",
+      "walkA",
+      "walkB"
+    ]
+  },
+  "prompt": "Use case: stylized-concept.\nAsset type: production transparent pixel-art character sprite atlas for the existing isometric music-bar game.\nInput image role: reference for adult human proportions, pixel clusters, three-quarter camera and shading ONLY; do not copy its clothing or existing people.\nPrimary request: exactly THREE distinct ordinary municipal venue-inspection staff, each wearing a bright fluorescent lime-yellow safety vest with silver reflective strips over a navy shirt, dark navy trousers and practical dark shoes. Friendly-neutral professional inspectors, not police, not military, no weapons, no armor, no badges or text. Inspector A has a dark navy baseball cap and small radio. Inspector B is a woman with a dark brown low ponytail and a small clipboard held close to her torso. Inspector C has short gray hair, no cap, and a small clipboard. Keep each person's identity and vest identical in all of their frames.\nSheet layout is EXACTLY SIX COLUMNS by SIX ROWS = 36 complete isolated sprites. Square canvas approximately2048×2048, equally sized cells, generous fully transparent gutters, no cell lines or labels. One complete full-body adult human per cell, head to both feet visible, never touching another cell. Center every person in their cell and align their feet to a consistent floor baseline.\nROWS0–1: Inspector A ONLY.\nROWS2–3: Inspector B ONLY.\nROWS4–5: Inspector C ONLY.\nIn each even row0,2,4: columns0,1,2 are FRONT-RIGHT direction with [standing idle, walking left-foot-forward, walking right-foot-forward]; columns3,4,5 are BACK-RIGHT direction with the same three [idle, walkA, walkB] poses.\nIn each odd row1,3,5: columns0,1,2 are BACK-LEFT direction with [idle, walkA, walkB]; columns3,4,5 are FRONT-LEFT direction with [idle, walkA, walkB].\nThe front views show the face and chest; back views show the back of the head and back of the reflective vest. Directions are true drawn isometric views, NOT sideways profile and NOT merely mirrored drawings. Alternate walking feet and opposing small arm swings are clearly different in the two walking frames; idle has both feet grounded in a quiet standing posture.\nStyle: crisp coherent pixel art matching the reference's adult body proportions and small-scale lighting, subtle 2–3 shade clusters per fabric. Suitable for reducing each person to roughly50–56pixels tall in a64×64 runtime cell. Normal-sized heads, no cute chibi or huge bobble heads. Maintain uniform size across all36 cells. No shadows extending outside the cell, no scenery, no floor, no background color, no checkerboard pattern drawn into pixels, no text, no watermark. Actual transparent alpha around all sprites."
+}

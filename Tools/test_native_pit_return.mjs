@@ -10,6 +10,7 @@ const g=night(),returns=new Set(),walkedHome=new Set();
 // Let real initial orders expire. Patrons 1 and 4 must walk home and rejoin the
 // moving pit after its shared phase has advanced during their bar queue.
 for(let t=0;t<170;t+=.05){
+  const wasFrozen=g.inspection.freezePerformers;
   const before=new Map(g.actors.filter(a=>a.role==='guest'&&a.slot<8).map(a=>[a.id,{x:a.x,z:a.z,action:a.action}]));
   g.tick(.05);
   for(const a of g.actors.filter(a=>a.role==='guest'&&a.slot<8)){
@@ -17,7 +18,8 @@ for(let t=0;t<170;t+=.05){
     assert(step<=.09,`${a.id} snapped ${step}m while ${p.action} became ${a.action}`);
     if(p.action==='return'&&a.action==='idle')walkedHome.add(a.id);
     if(p.action==='idle'&&a.action==='mosh'&&walkedHome.has(a.id)){returns.add(a.id);assert(Number.isFinite(a._pitPhaseOffset));}
-    if(p.action==='mosh'&&a.action==='mosh'&&Math.abs(Math.hypot(p.x-5.75,p.z+1.25)-1.58)<1e-6){
+    if(wasFrozen&&g.inspection.freezePerformers)assert.equal(step,0,'Inspection did not stop the pit');
+    if(!wasFrozen&&!g.inspection.freezePerformers&&p.action==='mosh'&&a.action==='mosh'&&Math.abs(Math.hypot(p.x-5.75,p.z+1.25)-1.58)<1e-6){
       assert(Math.abs(step/.05-.395)<.001,'Normal orbit speed changed');
     }
   }

@@ -19,14 +19,15 @@ try{
   const venues=Promise.all(OWNER_VENUES.slice(0,2).map(async entry=>[entry.key,await image(entry.file)])).then(Object.fromEntries);
   const backdrops=Promise.all(OWNER_VENUES.slice(0,2).map(async entry=>[entry.key,await image(entry.background)])).then(Object.fromEntries);
   const props=Promise.all(Object.entries(VENUE_PROPS).map(async([key,file])=>[key,await image(file)])).then(Object.fromEntries);
-  const descriptors=Promise.all([metadata('sprites.json'),metadata('venue.json'),metadata('venue-ff.json'),metadata('venue-freebird.json'),metadata('band-models.json'),metadata('festival-models.json')]);
+  const descriptors=Promise.all([metadata('sprites.json'),metadata('venue.json'),metadata('venue-ff.json'),metadata('venue-freebird.json'),metadata('band-models.json'),metadata('festival-models.json'),metadata('inspection-models.json'),metadata('venue-features.json')]);
+  const featureImages=Promise.all([image('inspectors.png'),image('venue-features.png')]);
   const atlasImages=descriptors.then(async([meta])=>Object.fromEntries(await Promise.all(Object.entries(meta.atlases||{animation:{file:'sprites.png'}}).map(async([key,definition])=>[key,await image(definition.file)]))));
   const bandImages=descriptors.then(async descriptors=>Object.fromEntries(await Promise.all(descriptors[4].bands.map(async band=>[band.id,await image(band.file)]))));
   const festivalImages=descriptors.then(async descriptors=>Object.fromEntries(await Promise.all(Object.entries(descriptors[5].atlases).map(async([key,definition])=>[key,await image(definition.file)]))));
   const iconImages=Promise.all(icons.map(n=>image('icons/'+n+'.png')));
   const font=document.fonts.load('16px SimBarUI');
-  const [[female,ff,pet,seoul,venue],migration,,,[spriteMeta,venueMeta,ffVenueMeta,freebirdVenueMeta,bandModels,festivalModels],atlases,venueImages,propImages,bandAtlases,festivalAtlases,backdropImages]=await Promise.all([images,identity,font,iconImages,descriptors,atlasImages,venues,props,bandImages,festivalImages,backdrops]);
-  const app=await startGame({root:stage,assetsBase:new URL('art/',import.meta.url).href,assets:{female,ff,pet,seoul,venue,venues:venueImages,backdrops:backdropImages,propImages,bandModels,bandAtlases,festivalModels,festivalAtlases,venueMetas:{ff:ffVenueMeta,freebird:freebirdVenueMeta},sprites:atlases.animation,atlases,spriteMeta,venueMeta}});
+  const [[female,ff,pet,seoul,venue],migration,,,[spriteMeta,venueMeta,ffVenueMeta,freebirdVenueMeta,bandModels,festivalModels,inspectionModels,venueFeatureModels],atlases,venueImages,propImages,bandAtlases,festivalAtlases,backdropImages,[inspectors,venueFeatures]]=await Promise.all([images,identity,font,iconImages,descriptors,atlasImages,venues,props,bandImages,festivalImages,backdrops,featureImages]);
+  const app=await startGame({root:stage,assetsBase:new URL('art/',import.meta.url).href,assets:{female,ff,pet,seoul,venue,venues:venueImages,backdrops:backdropImages,propImages,bandModels,bandAtlases,festivalModels,festivalAtlases,inspectors,inspectionModels,venueFeatures,venueFeatureModels,venueMetas:{ff:ffVenueMeta,freebird:freebirdVenueMeta},sprites:atlases.animation,atlases,spriteMeta,venueMeta}});
   window.simbarApplication=app;
   migration.pending?.then(r=>{if(r.imported)app.g.importSave(localStorage.getItem(SAVE_KEY));}).catch(()=>{});
   document.getElementById('loading-panel')?.remove();
