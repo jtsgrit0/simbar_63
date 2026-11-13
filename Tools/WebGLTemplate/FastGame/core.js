@@ -27,7 +27,7 @@ const defaults=()=>({version:1,money:650,fans:0,satisfaction:0,performance:0,clo
 const newJourney=()=>({version:1,day:1,challenge:false,tutorialComplete:false,guideStep:0,guidePending:false,inProgress:false,session:0,settledSession:0,settlementPending:false,secondsLeft:180,
   score:0,combo:0,bestCombo:0,manualPerfects:0,orders:0,mistakes:0,successfulEvents:0,manualStreak:0,feverSeconds:0,feverCharge:0,openingCash:650,drinkIncome:0,xp:0,bestScore:0,bestStars:0,completedNights:0,
   resultStars:0,resultServed:0,resultXP:0,resultBonus:0,resultProfit:0,resultNewRecord:false,booking:null,bookingCareer:Booking.newCareer(),dayOpeningCash:0,hasDayOpeningCash:false,resultTicketIncome:0,resultAttendance:0,
-  floorMissions:Floor.newState(),floorClosing:false,afterShow:null,musicPauseSession:0,musicPaused:false,resultFloorBonus:0,resultFloorTasks:0,resultTicketGross:0,resultArtistFee:0,campaignSecondSet:false,
+  floorMissions:Floor.newState(),floorClosing:false,afterShow:null,musicPauseSession:0,musicPaused:false,musicPauseIntent:false,resultFloorBonus:0,resultFloorTasks:0,resultTicketGross:0,resultArtistFee:0,campaignSecondSet:false,
   legacyDeskPlanJson:'',deskMigrationCredit:0,deskMigrationDay:0,deskMigrationTrustedOpening:false,festival:Festival.create(),feedback:null,inspection:Inspection.create()});
 const messages={
   scouted:['출연진 발굴 완료. 팀을 선택하고 섭외를 진행하세요.','Lineup discovered. Select an artist and make an offer.'],
@@ -58,7 +58,7 @@ export class SimBarGame{
     this._seed=((seed??(Date.now()^Math.floor(Math.random()*0x7fffffff)))>>>0)||1;
     this.state=defaults();this.journey=newJourney();this.phase='lobby';this.paused=true;this.pauseReason='lobby';
     this.owner=0;this.language='ko';this.orders=[];this.pour=null;this.effects=[];this.actors=[];this.crew=[];this.escort=null;
-    this.selectedItem=0;this.lastQuality=null;this.lastResult={success:true,code:'ready'};this._message=['',''];this._messageTimer=0;this.elapsed=0;this._autosave=0;this._requestTimer=4;this._inputGuard=0;this._eventSerial=0;this._loading=false;
+    this.selectedItem=0;this.lastQuality=null;this.lastResult={success:true,code:'ready'};this._message=['',''];this._messageTimer=0;this.elapsed=0;this._autosave=0;this._requestTimer=4;this._inputGuard=0;this._eventSerial=0;this._loading=false;this._musicPlaybackActive=null;
     this._buildActors();
     this.owner=Math.max(0,catalog.owners.findIndex(o=>o.id===this._get(OWNER_KEY)));
     this._applyOwnerLayout({reset:true});
@@ -73,6 +73,10 @@ export class SimBarGame{
   get message(){return this._message[this.language==='en'?1:0]||'';}
   get cash(){return this.state.money;}
   get spectatorFeedback(){return this._spectatorScores||{satisfaction:0,performance:0,serviceCoverage:0,participation:0};}
+  setMusicPlaybackActive(active){
+    if(typeof active!=='boolean')return false;
+    this._musicPlaybackActive=active;return true;
+  }
   get hasSave(){return!!(this.journey.inProgress||this.journey.settledSession||this._activePlan());}
   get cleanupReadyWorkers(){return this._readyWorkers().length;}
   get guestExitFinished(){return!this.floor.guestComplete||(!this.escort&&!this.actors.find(a=>a.id==='assisted-guest'&&a.visible));}
@@ -197,7 +201,7 @@ export class SimBarGame{
     j.openingCash=finite(j.openingCash,this.state.money,0,1e9);j.resultProfit=finite(j.resultProfit,0,-1e9,1e9);j.floorMissions={...Floor.newState(),...(j.floorMissions||{})};Floor.sanitize(j.floorMissions);
     j.bookingCareer={...Booking.newCareer(),...(j.bookingCareer||{})};if(j.booking)j.booking={...Booking.newPlan(j.day,0),...j.booking};Booking.sanitize(j.booking,j.bookingCareer);if(j.booking?.day!==j.day)j.booking=null;
     if(!j.session||j.settledSession>0&&j.session===j.settledSession){j.inProgress=false;j.settlementPending=false;j.floorClosing=false;}
-    j.musicPauseSession=int(j.musicPauseSession,0,j.session);j.musicPaused=j.musicPaused===true;
+    j.musicPauseSession=int(j.musicPauseSession,0,j.session);j.musicPaused=j.musicPaused===true;j.musicPauseIntent=j.musicPauseIntent===true;
     j.campaignSecondSet=j.campaignSecondSet===true;
     j.festival=Festival.sanitize(j.festival);
     j.inspection=Inspection.sanitize(j.inspection,{session:j.session,day:j.day,owner:this.owner,seed:this._seed});
@@ -227,7 +231,7 @@ export class SimBarGame{
         break;
       }
       case'language':this.language=p.language==='en'?'en':'ko';this._put(LANGUAGE_KEY,this.language);break;
-      case'musicState':if(typeof p.paused!=='boolean')return this._done(false);j.musicPaused=p.paused;break;
+      case'musicState':if(typeof p.paused!=='boolean')return this._done(false);j.musicPaused=p.paused;j.musicPauseIntent=p.paused;break;
       case'farewellAck':
         if(!this.closing||!this.farewellPending)return this._done(false);
         j.afterShow.noticeAcknowledged=true;
@@ -238,7 +242,12 @@ export class SimBarGame{
       case'continue':
         if(j.settlementPending)this._settleNight();
         if(!j.inProgress&&this._activePlan()){this._planning(j.challenge);break;}
-        if(j.inProgress){this._ensureReaction();this.phase=j.floorClosing||j.secondsLeft<=0?'closing':j.guidePending?'guide':'playing';this.paused=this.phase==='guide';this.pauseReason=this.paused?'guide':'';if(this.closing)this._beginClosing();}
+        if(j.inProgress){
+          // Old browser playback failures were persisted as if the player had
+          // paused the music. Recover only a live show without a pause choice.
+          if(!j.floorClosing&&j.secondsLeft>0&&j.musicPaused&&!j.musicPauseIntent)j.musicPaused=false;
+          this._ensureReaction();this.phase=j.floorClosing||j.secondsLeft<=0?'closing':j.guidePending?'guide':'playing';this.paused=this.phase==='guide';this.pauseReason=this.paused?'guide':'';if(this.closing)this._beginClosing();
+        }
         else if(j.settledSession){this.phase='results';this.paused=true;this.pauseReason='results';}else this._planning(j.challenge);break;
       case'next':if(this.phase!=='results'||j.inProgress)return this._done(false);j.day=int(j.day+1,1,9999);this._planning(j.challenge);break;
       case'retry':if(this.phase!=='results'||j.inProgress)return this._done(false);this._planning(j.challenge);break;
@@ -305,7 +314,7 @@ export class SimBarGame{
     j.challenge=challenge;this.phase='planning';this.paused=true;this.pauseReason='planning';this.state.clock=Booking.hour(j.booking);
   }
   _newNight(){
-    const j=this.journey;j.session=j.session>=1e9?1:j.session+1;if(j.session===1)j.settledSession=0;j.inProgress=true;j.settlementPending=false;j.floorClosing=false;j.afterShow=null;j.musicPauseSession=0;j.musicPaused=false;j.secondsLeft=180;
+    const j=this.journey;j.session=j.session>=1e9?1:j.session+1;if(j.session===1)j.settledSession=0;j.inProgress=true;j.settlementPending=false;j.floorClosing=false;j.afterShow=null;j.musicPauseSession=0;j.musicPaused=false;j.musicPauseIntent=false;j.secondsLeft=180;
     for(const k of ['score','combo','bestCombo','manualPerfects','orders','mistakes','successfulEvents','manualStreak','feverSeconds','feverCharge','drinkIncome','resultStars','resultServed','resultXP','resultBonus','resultProfit','resultTicketIncome','resultAttendance','resultFloorBonus','resultFloorTasks','resultTicketGross','resultArtistFee'])j[k]=0;
     j.resultNewRecord=false;j.campaignSecondSet=false;j.festival=Festival.create();j.openingCash=j.hasDayOpeningCash?j.dayOpeningCash:this.state.money;j.guideStep=0;j.guidePending=!j.tutorialComplete;j.floorMissions=Floor.newState();this._ensureReaction();
     this.state.clock=18;this.state.satisfaction=0;this.state.performance=0;
@@ -386,7 +395,7 @@ export class SimBarGame{
     const j=this.journey;
     SpectatorFeedback.tick(j.feedback,dt,{actors:this.actors,actionId:j.festival.activeId,actionSerial:j.festival.serial,
       secondsLeft:j.secondsLeft,duration:180,showId:j.booking?.showId,capacity:Audience.capacity(this.owner),
-      serviceQueue:this.orders,paused:this.paused,musicPlaying:!j.musicPaused,soundLevel:this.state.upgrades[1],
+      serviceQueue:this.orders,paused:this.paused,musicPlaying:!j.musicPaused&&this._musicPlaybackActive!==false,soundLevel:this.state.upgrades[1],
       floorLitter:Floor.remaining(this.floor),guestAssistanceActive:this.floor.guestActive});
     this._refreshFeedback();
   }

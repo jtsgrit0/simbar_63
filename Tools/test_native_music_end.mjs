@@ -64,26 +64,26 @@ pausedSave.act('musicState',{paused:true});paused.music.sync();const playCount=p
 paused.music.suspend();paused.music.resumeContext();assert.equal(paused.audios[0].plays.length,playCount,'Context return ignored the user pause');
 assert.equal(pausedSave.journey.musicPaused,true);
 
-// A current failure persists a paused state. A failure from an older play,
-// another track, or a destroyed player cannot undo the newer user's choice.
+// A current failure blocks physical playback without changing the saved pause
+// choice. Older requests cannot undo a newer user gesture or track selection.
 const raceGame=night(),race=audioHarness(raceGame);race.music.wake();const first=race.audios[0];
 raceGame.act('musicState',{paused:true});race.music.sync();raceGame.act('musicState',{paused:false});race.music.sync();
 first.plays[0].reject(new Error('Stale initial playback'));await flush();
 assert.deepEqual(race.pauseChanges,[]);assert.equal(raceGame.journey.musicPaused,false);
 first.plays[1].reject(new Error('Current playback failure'));await flush();
-assert.deepEqual(race.pauseChanges,[true]);assert.equal(raceGame.journey.musicPaused,true);assert.equal(race.music.paused,true);
-raceGame.act('musicState',{paused:false});race.music.sync();const oldTrackPlay=first.plays.at(-1);
+assert.deepEqual(race.pauseChanges,[]);assert.equal(raceGame.journey.musicPaused,false);assert.equal(race.music.paused,false);assert.equal(race.music.blocked,true);assert.equal(race.music.playing,false);
+race.music.wake();const oldTrackPlay=first.plays.at(-1);assert.equal(first.plays.length,3);
 assert.equal(raceGame.act('playlist',{index:3}).success,true);race.music.select();const second=race.audios[1];assert.equal(second.plays.length,1);
 assert(first.pauseCount>=2);assert.equal(first.src,undefined);assert.equal(first.loadCount,1);
 oldTrackPlay.reject(new Error('Old track failed after replacement'));await flush();
-assert.deepEqual(race.pauseChanges,[true]);assert.equal(race.music.paused,false);assert.equal(raceGame.journey.musicPaused,false);
+assert.deepEqual(race.pauseChanges,[]);assert.equal(race.music.paused,false);assert.equal(raceGame.journey.musicPaused,false);
 race.music.destroy();second.plays[0].reject(new Error('Disposed track failed late'));await flush();
-assert.deepEqual(race.pauseChanges,[true]);assert.equal(race.music.audio,null);assert.equal(raceGame.journey.musicPaused,false);
+assert.deepEqual(race.pauseChanges,[]);assert.equal(race.music.audio,null);assert.equal(raceGame.journey.musicPaused,false);assert.equal(race.music.playing,false);
 
 // Browser engines can throw synchronously as well as return a rejected play
-// promise. Both cases must use the same current-request persistence path.
+// promise. Both stop physical playback without persisting a user pause.
 const throwing=night(),syncFailure=audioHarness(throwing);syncFailure.music.wake();syncFailure.audios[0].play=()=>{throw Error('Synchronous browser playback failure');};
-syncFailure.music.play();assert.deepEqual(syncFailure.pauseChanges,[true]);assert.equal(throwing.journey.musicPaused,true);
+syncFailure.music.play();assert.deepEqual(syncFailure.pauseChanges,[]);assert.equal(throwing.journey.musicPaused,false);assert.equal(syncFailure.music.blocked,true);assert.equal(syncFailure.music.playing,false);
 
 for(const h of [live,resumed,paused,syncFailure])h.music.destroy();
-console.log('PASS: real end-of-show pauses once, persisted manual replay, paused first gesture, context suspension, current failure persistence and stale playback rejection isolation');
+console.log('PASS: real end-of-show pauses once, persisted manual replay, paused first gesture, context suspension, blocked playback and stale rejection isolation');
