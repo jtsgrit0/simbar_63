@@ -326,7 +326,7 @@ export class SimBarGame{
   }
   _ensureReaction(){if(!this.floor.reaction)this.floor.reaction=Challenges.newState(Math.floor(this._random()*0x7fffffff)||1,180-this.journey.secondsLeft);}
   _festivalAction(id){
-    if(this.playing&&!this.paused&&this.inspection.freezePerformers){this._say('단속반이 지나가면 호응 액션을 다시 사용할 수 있어요.','Crowd actions will be available after the inspectors leave.',4);return{success:false,code:'inspection_blocked'};}
+    if(this.playing&&!this.paused&&this.inspection.freezePerformers){this._say('단속반이 지나가면 가능합니다.','Available after the inspectors leave.',4);return{success:false,code:'inspection_blocked'};}
     if(!this.playing||this.paused||!this.festival.liveAttendance)return{success:false,code:'unavailable'};
     const state=this.journey.festival,result=Festival.begin(state,id);if(!result.success)return result;
     state.venueOwner=this.owner;
@@ -499,8 +499,8 @@ export class SimBarGame{
     while(remaining>0){const step=Math.min(.05,remaining);remaining-=step;this._step(step);}this._notify();
   }
   _inspectionNotice(kind){
-    if(kind==='warning')this._say('구청 민원 접수 · 춤추지 말라는 신고가 들어왔어요. 단속반 3명이 잠시 방문합니다.','A no-dancing complaint was reported. Three inspectors are visiting shortly.',5);
-    else if(kind==='arrived')this._say('단속반 방문 중 · 모두 잠시 멈춰 공연을 지켜봅니다.','Inspectors are here. Everyone pauses to watch the stage.',4);
+    if(kind==='warning')this._say('춤추지 말라는 신고 접수 · 구청 단속반 3명 방문.','A no-dancing complaint was reported. Three inspectors are visiting shortly.',5);
+    else if(kind==='arrived')this._say('단속반 방문 중 · 관객은 잠시 멈춰 공연을 지켜봅니다.','Inspectors are here. The audience pauses to watch the show.',4);
     else if(kind==='done')this._say('단속반이 지나갔어요. 다시 자유롭게 공연에 호응하세요!','The inspectors have left. Crowd actions are available again!',4);
   }
   _inspectionTick(dt){
@@ -742,7 +742,7 @@ export class SimBarGame{
     for(const a of this.actors){
       if(a.id.startsWith('hired-'))a.visible=this._onDuty(+a.id.slice(-1));if(!a.visible)continue;
       if(a.role==='inspector')continue;
-      if(this.inspection.freezePerformers&&(Audience.isAudience(a)||a.role==='band'||a.role==='assisted'||a.id===this.escort?.worker&&this.escort.phase!=='return')){
+      if(this.inspection.freezePerformers&&(Audience.isAudience(a)||a.role==='assisted'||a.id===this.escort?.worker&&this.escort.phase!=='return')){
         if(!a._inspectionPose)a._inspectionPose={facing:a.facing,y:a.y||0};
         a.moving=false;if(a.role!=='band'){a.y=0;a.facing=Math.atan2(5.75-a.x,3.5-a.z);}continue;
       }

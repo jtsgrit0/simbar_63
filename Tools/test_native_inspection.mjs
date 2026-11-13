@@ -7,7 +7,7 @@ import {launchPreparedDesk} from './native_test_workflow.mjs';
 
 const memory=()=>{const data=new Map();return{getItem:key=>data.get(key)??null,setItem:(key,value)=>data.set(key,String(value))};};
 const inspectors=g=>g.actors.filter(a=>a.role==='inspector');
-const frozenCast=g=>g.actors.filter(a=>a.visible!==false&&(Audience.isAudience(a)||a.role==='band'||a.role==='assisted'));
+const frozenCast=g=>g.actors.filter(a=>a.visible!==false&&(Audience.isAudience(a)||a.role==='assisted'));
 const positions=g=>frozenCast(g).map(a=>({id:a.id,x:a.x,z:a.z}));
 function launch(owner=0,{seed=47,legacy=false,staff=false,full=false}={}){
   const g=new SimBarGame({storage:memory(),seed});g.act('owner',{index:owner});
@@ -36,13 +36,16 @@ for(const owner of [0,1,2]){
   assert.equal(inspectors(g).length,3);assert.equal(g.festival.liveAttendance,count);
   const before=positions(g),feedback=structuredClone(g.journey.feedback),festival=structuredClone(g.journey.festival),left=g.journey.secondsLeft;
   advance(g,.5);
-  assert.deepEqual(positions(g),before,'A guest or musician moved during the patrol');
-  assert(frozenCast(g).every(a=>!a.moving&&a.y===0),'Frozen performers must stand on the floor');
+  assert.deepEqual(positions(g),before,'An audience member moved during the patrol');
+  assert(frozenCast(g).every(a=>!a.moving&&a.y===0),'The audience must stand on the floor');
+  assert(g.actors.filter(a=>a.role==='band').every(a=>a.action==='perform'&&!a._inspectionPose),'The band must continue performing during patrol');
   assert.deepEqual(g.journey.festival,festival,'Patrol consumed an active crowd action or cooldown');
   assert.deepEqual(g.journey.feedback,feedback,'Standing still earned spectator feedback');
   assert(g.journey.secondsLeft<left,'The show clock must continue during an inspection');
+  const rewards={cash:g.state.money,fans:g.state.fans,score:g.journey.score};
   assert.equal(g.act('festival',{id:'dance'}).code,'inspection_blocked','Inspection must take priority over an existing cooldown');
-  assert.match(g.message,/단속반이 지나가면/);
+  assert.equal(g.message,'단속반이 지나가면 가능합니다.');
+  assert.deepEqual({cash:g.state.money,fans:g.state.fans,score:g.journey.score},rewards,'A blocked crowd action granted a reward');
   assert.equal(g.festival.blockedByInspection,true);assert.equal(g.festival.canAct,false);
   g.act('pause');const paused=JSON.parse(g.exportSave()),ledger=structuredClone(g.journey.inspection),cast=structuredClone(g.actors);
   g.tick(3);assert.deepEqual(g.journey.inspection,ledger);assert.deepEqual(g.actors,cast);
@@ -55,6 +58,7 @@ for(const owner of [0,1,2]){
     const still=positions(restored),wasFrozen=restored.inspection.freezePerformers;restored.tick(.05);
     maxVisible=Math.max(maxVisible,restored.inspection.officersPresent);
     if(wasFrozen&&restored.inspection.freezePerformers)assert.deepEqual(positions(restored),still);
+    assert(restored.actors.filter(a=>a.role==='band').every(a=>a.action==='perform'),'Restoring a patrol stopped the stage performance');
     for(const a of inspectors(restored)){
       const p=previous.get(a.id);assert(distance(a,p)<.1,'An inspector teleported');
       assert(walkable(a,false,false,a.layout),'Inspector crossed the venue furniture');
@@ -134,4 +138,4 @@ for(const owner of [0,1,2]){
   assert.equal(g.phase,'results','Inspection prevented closing from settling');assert.equal(g.floorTasksPending,false);
 }
 
-console.log(JSON.stringify({passed:true,owners:3,inspectors:3,checks:['warning','frozen performers','cooldown priority','no unearned feedback','show clock','pause/save','physical patrol and exit','promoter and legacy aisle','natural full-capacity patrols','guest deadline and escort freeze','authored band height','closing settlement']}));
+console.log(JSON.stringify({passed:true,owners:3,inspectors:3,checks:['warning','frozen audience and continuing band','exact blocked message','cooldown priority','no unearned feedback','show clock','pause/save','physical patrol and exit','promoter and legacy aisle','natural full-capacity patrols','guest deadline and escort freeze','authored band height','closing settlement']}));

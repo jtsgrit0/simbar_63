@@ -170,12 +170,12 @@ for(const [facing,direction] of [[0,'BR'],[Math.PI/2,'FR'],[Math.PI,'FL'],[-Math
 }
 assert.equal(staffRows.size,3);assert.equal(staffFrames.size,36,'Every identity/direction/pose should have genuine distinct pixels');
 
-// A district visit freezes the selected audience and artist drawings even as
-// presentation time advances; it must not merely hide the reaction buttons.
+// A district visit freezes audience drawings while the same authored band
+// keeps playing. Neither role may be hidden or replaced by a different model.
 const guest={id:'festival-test-guest',slot:0,role:'guest',styleKey:'Guest/Punk',x:1,z:0,y:0,moving:true,facing:0,action:'dance',festivalAction:'jump',festivalRemaining:30,behaviorPhase:0,animationSpeed:1};
 const band=[['singer',5.7,3.5],['guitarist',3.7,3.8],['bassist',7.5,3.8],['drummer',5.6,4.7]].map(([id,x,z])=>({id,role:'band',x,z,homeX:x,homeZ:z,stageLevel:1,moving:false,action:'perform'}));
 const frozenState=freeze({...base,owner:1,actors:[guest,...band],inspection:{active:true,freezePerformers:true}});
-for(const role of ['guest','seated','support','surfer','assisted','band'])for(const time of [0,1.2,9.4,19.8]){
+for(const role of ['guest','seated','support','surfer','assisted'])for(const time of [0,1.2,9.4,19.8]){
   const actor={...guest,role};assert.equal(pixelFestivalFrame(actor,frozenState,time,festivalModels),null);
   const pose=pixelAudiencePose(actor,frozenState,time);assert.equal(pose.action,'idle');
   assert.deepEqual([pose.sway,pose.bob,pose.lean,pose.lift],[0,0,0,0]);
@@ -185,21 +185,30 @@ const normalSheets=new Set(Object.values(atlases));
 const bandDraws=draws=>draws.filter(draw=>bandSheets.has(draw.args[0]));
 const normalDraws=draws=>draws.filter(draw=>normalSheets.has(draw.args[0]));
 const drawSignature=draw=>[draw.args[0].id,...draw.args.slice(1),...draw.translation,draw.rotation];
-let frozenBand,frozenAudience;
+let frozenAudience;const inspectedBandColumns=new Set(),inspectedBandDrawings=new Set();
 const frozenBefore=snapshot(frozenState);
 for(let tick=0;tick<125;tick++){
   const draws=render(frozenState),artists=bandDraws(draws),audience=normalDraws(draws);
   assert.equal(artists.length,6,'The active Freewill roster must keep all its visible members');assert.equal(audience.length,1);
-  for(const artist of artists)assert.equal(artist.args[1],8*64,'Inspection must select the authored artist idle cell');
+  for(const artist of artists){
+    assert(artist.args[1]/64>=0&&artist.args[1]/64<4,'The inspected band must keep its authored performance cells');
+    inspectedBandColumns.add(artist.args[1]/64);
+  }
   assert.equal(audience[0].args[0],atlases.wardrobe,'Inspection must suppress festival dance/jump artwork');
   assert.equal(audience[0].rotation,0,'An inspected guest must stand upright');
   const artistSignatures=artists.map(drawSignature),audienceSignature=drawSignature(audience[0]);
-  if(tick===0){frozenBand=artistSignatures;frozenAudience=audienceSignature;for(const draw of [...artists,...audience])paintedCell(draw);}
-  else{assert.deepEqual(artistSignatures,frozenBand,'Advancing time must not animate or lift the inspected band');assert.deepEqual(audienceSignature,frozenAudience,'Advancing time must not sway or jump the inspected guest');}
-  assert(world.getBandPresentation(frozenState).every(item=>item.action==='idle'&&item.column===8));
+  inspectedBandDrawings.add(JSON.stringify(artistSignatures));
+  if(tick===0){frozenAudience=audienceSignature;for(const draw of [...artists,...audience])paintedCell(draw);}
+  else assert.deepEqual(audienceSignature,frozenAudience,'Advancing time must not sway or jump the inspected guest');
+  assert(world.getBandPresentation(frozenState).every(item=>item.action==='perform'));
   const live=world.getAudiencePresentation(frozenState)[0];assert.equal(live.action,'idle');assert.equal(live.atlas,null);assert.equal(live.lift,0);
 }
+assert.equal(inspectedBandColumns.size,4,'The band must continue all four performance poses during inspection');
+assert(inspectedBandDrawings.size>1,'The band presentation clock stopped during inspection');
 assert.equal(snapshot(frozenState),frozenBefore);
+const pausedInspection={...frozenState,paused:true};
+const pausedBand=bandDraws(render(pausedInspection)).map(drawSignature);
+for(let tick=0;tick<12;tick++)assert.deepEqual(bandDraws(render(pausedInspection)).map(drawSignature),pausedBand,'Manual pause must still stop the band during inspection');
 const resumed={...frozenState,actors:[{...guest,moving:false},...band],inspection:{active:false,freezePerformers:false}},performanceColumns=new Set(),festivalColumns=new Set();
 for(let tick=0;tick<30;tick++){
   const draws=render(resumed);
@@ -210,19 +219,40 @@ for(let tick=0;tick<30;tick++){
 assert.equal(performanceColumns.size,4,'Artists resume all four authored performance poses');assert.equal(festivalColumns.size,4,'Audience reactions resume all four authored gesture poses');
 world.destroy();
 
-// Portrait mode contains the whole authored room; landscape retains its
-// existing height-scaled camera and world-to-screen relationship.
-const mobile=canvas(390,844),mobileWorld=createWorld(mobile,{assets:assets()});
-for(const owner of [0,1,2]){
-  mobile.ctx.draws=[];mobileWorld.render(0,{...base,owner});
-  const bounds=mobileWorld.getVenueBounds();assert(bounds.left>=0&&bounds.right<=390&&bounds.top>=0&&bounds.bottom<=844);
-  assert(bounds.width>360&&bounds.height>220,'The room must fit across a portrait phone instead of cropping to its center');
-  const room=mobile.ctx.draws.find(draw=>draw.args[0]===image(owner===0?'venue-freebird.png':owner===1?'venue-ff.png':'venue.png'));
-  assert(room);const [,,,roomWidth,roomHeight]=room.args;
-  const painted={left:room.translation[0]*390/mobile.width,top:room.translation[1]*844/mobile.height,right:(room.translation[0]+roomWidth)*390/mobile.width,bottom:(room.translation[1]+roomHeight)*844/mobile.height};
-  assert(painted.left>=0&&painted.top>=0&&painted.right<=390&&painted.bottom<=844,'The actual venue draw must fit inside the phone canvas');
+// The retained sprite-atlas band follows the same rule when the newer named
+// band models are absent, including its original timed guitarist jump poses.
+const legacyTarget=canvas(),legacyWorld=createWorld(legacyTarget,{assets:{...assets(),bandModels:null,bandAtlases:{}}});
+const legacyState={...frozenState,actors:[band.find(a=>a.id==='guitarist')]},legacyFrames=new Set(),legacyFeet=new Set();
+for(let tick=0;tick<125;tick++){
+  legacyTarget.ctx.draws=[];legacyWorld.render(tick*100,legacyState);
+  const drawings=normalDraws(legacyTarget.ctx.draws);assert.equal(drawings.length,1);
+  const drawing=drawings[0];paintedCell(drawing);legacyFrames.add(drawing.args.slice(0,5).map(v=>v?.id||v).join(','));legacyFeet.add(drawing.translation[1]);
+  assert.equal(pixelAudiencePose(legacyState.actors[0],legacyState,tick*.1).action,'perform');
 }
-mobileWorld.destroy();
+assert(legacyFrames.size>1,'Legacy band frames stopped during inspection');
+assert(legacyFeet.size>1,'Legacy guitarist jump stopped during inspection');
+legacyWorld.destroy();
+
+// UI dimensions must never scale the authored venue to reserve a HUD rail.
+// Portrait gameplay is blocked by the browser layer; this renderer retains the
+// same original height-scaled projection in every viewport.
+for(const [width,height]of[[390,844],[844,390],[667,375]]){
+  const target=canvas(width,height);target.parentElement={querySelector:()=>({getBoundingClientRect:()=>({left:width-226,width:226})})};
+  const roomWorld=createWorld(target,{assets:assets()});
+  for(const owner of[0,1,2]){
+    roomWorld.render(0,{...base,owner});assert.equal(target.height,558);
+    const a=roomWorld.imageToScreen(400,100),b=roomWorld.imageToScreen(400,200);
+    assert(Math.abs(b.y-a.y-100*height/558)<.01,'A HUD panel changed the scene scale');
+    const protectedRegions=roomWorld.getProtectedRegions({...base,owner});
+    assert(protectedRegions.some(region=>region.kind==='stage'));
+    assert.equal(protectedRegions.some(region=>region.kind==='sign'),owner===2);
+    for(const region of protectedRegions){const[firstX,firstY,lastX,lastY]=region.authored;
+      assert.deepEqual(roomWorld.imageToScreen(firstX,firstY),{x:region.left,y:region.top});
+      assert.deepEqual(roomWorld.imageToScreen(lastX,lastY),{x:region.right,y:region.bottom});
+    }
+  }
+  roomWorld.destroy();
+}
 const desktop=canvas(),desktopWorld=createWorld(desktop,{assets:assets()});
 for(const point of [[0,0,0],[-8,3,0],[6,4,1]])assert.deepEqual(desktopWorld.worldToScreen(...point),desktopWorld.project(...point));
 desktop.box={width:1660,height:624};desktopWorld.resize();
@@ -231,4 +261,4 @@ for(const point of [[0,0,0],[-8,3,0],[6,4,1]]){
   assert(Math.abs(screen.x-(830+(projected.x-480)*624/558))<.6);assert(Math.abs(screen.y-projected.y*624/558)<.01);
 }
 desktopWorld.destroy();
-console.log('PASS: 9 upgrade props, 3 event props, nonmutating previews, real nonempty PNG cells, 36 inspector frames, inspection freeze/resume, portrait room fit and landscape projection.');
+console.log('PASS: 9 upgrade props, 3 event props, nonmutating previews, real nonempty PNG cells, 36 inspector frames, audience-only inspection pause, unchanged camera scale and protected artwork coordinates.');

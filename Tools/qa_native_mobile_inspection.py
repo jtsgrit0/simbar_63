@@ -1,4 +1,9 @@
-"""Exercise landscape HUD, central service, orientation pause and inspection."""
+"""Compatibility CLI for the approved protected-venue UI checks.
+
+Run with uv --with playwright --with pillow. Earlier landscape helpers remain
+below for historical fixtures; the command now verifies the user's stricter
+sign/stage protection rules instead of requiring centered overlays.
+"""
 import argparse
 from functools import partial
 from http.server import ThreadingHTTPServer
@@ -239,21 +244,26 @@ def main():
                     item['inspection']=page.evaluate('''() => ({view:simbarGame.inspection,officers:simbarApplication.world.getInspectorPresentation(),band:simbarApplication.world.getBandPresentation(),audience:simbarApplication.world.getAudiencePresentation(),draws:qaDraws.filter(d=>d.file==='inspectors.png')})''')
                     assert item['inspection']['view']['officersPresent']==3,item['inspection']['view']
                     assert len(item['inspection']['draws'])==3,item['inspection']['draws']
-                    assert all(a['action']=='idle' for a in item['inspection']['band'])
+                    assert all(a['action']=='perform' for a in item['inspection']['band'])
                     assert all(a['action']=='idle' and a['festivalAction'] is None for a in item['inspection']['audience'])
                     page.locator('.festival-actions button').first.click()
                     page.wait_for_timeout(100)
                     assert page.evaluate('simbarGame.lastResult.code')=='inspection_blocked'
-                    assert '단속반이 지나가면' in page.locator('.venue-ui .toast').inner_text()
+                    assert page.locator('.venue-ui .toast').inner_text().strip()=='단속반이 지나가면 가능합니다.'
                     page.screenshot(path=str(out/f'owner-{owner}-inspection.png'))
                     page.keyboard.press('e');page.wait_for_function('!!simbarGame.pour')
                     assert page.evaluate('simbarGame.journey.festival.remaining>0&&simbarGame.inspection.active')
                     item['orientationLive']=orientation_cycle(page,out,owner,'live-festival-inspection-pour')
                     assert page.evaluate('!!simbarGame.pour&&simbarGame.inspection.active')
                     finish_pour(page)
-                    before=page.evaluate('simbarApplication.world.getBandPresentation()')
-                    page.evaluate('qaAdvance(1)');page.wait_for_timeout(200)
-                    assert page.evaluate('simbarApplication.world.getBandPresentation()')==before
+                    page.evaluate('qaAdvance(1)')
+                    band_frames=[]
+                    for _ in range(8):
+                        page.wait_for_timeout(100)
+                        band_frames.append(page.evaluate('simbarApplication.world.getBandPresentation()'))
+                    assert all(all(a['action']=='perform' for a in frame) for frame in band_frames)
+                    assert len({tuple(a['column'] for a in frame) for frame in band_frames})>1,'Inspection stopped the band animation'
+                    assert all(a['action']=='idle' and a['festivalAction'] is None for a in page.evaluate('simbarApplication.world.getAudiencePresentation()'))
                     page.evaluate('qaAdvance(45)');page.wait_for_timeout(100);close_order(page)
                     item['resumed']=page.evaluate('''() => ({view:simbarGame.inspection,band:simbarApplication.world.getBandPresentation()})''')
                     assert item['resumed']['view']['phase']=='done' and all(a['action']=='perform' for a in item['resumed']['band'])
@@ -288,4 +298,6 @@ def main():
     print(json.dumps({'passed':report['passed'],'report':str(out/'report.json'),'owners':len(report['owners']),'errors':report['errors'],'httpErrors':report['httpErrors']},ensure_ascii=False))
 
 
-if __name__=='__main__':main()
+if __name__=='__main__':
+    from qa_native_protected_ui import main as protected_main
+    protected_main()

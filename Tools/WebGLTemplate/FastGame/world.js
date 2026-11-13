@@ -4,6 +4,13 @@
 import {ownerVenue} from './owner-venues.js';
 import {performingRoster,performingFrame,bandPerformanceProfile} from './band-models.js';
 const REF_W=960,REF_H=558,ORTHO=8.4;
+// Conservative authored pixel bounds include the stage truss, LED, pillars,
+// platform and front steps. The sign bounds include its entire mounting wall.
+export const PIXEL_PROTECTED_REGIONS=Object.freeze({
+  freebird:Object.freeze([{kind:'stage',bounds:Object.freeze([500,74,950,412])}]),
+  ff:Object.freeze([{kind:'stage',bounds:Object.freeze([564,77,947,400])}]),
+  original:Object.freeze([{kind:'sign',bounds:Object.freeze([367,36,552,134])},{kind:'stage',bounds:Object.freeze([549,76,917,395])}])
+});
 const EYE=[13,21,-25],LOOK=[0,1.45,.15];
 const unit=v=>{const n=Math.hypot(...v);return v.map(x=>x/n);};
 const cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
@@ -13,7 +20,7 @@ const clamp=(n,a,b)=>Math.max(a,Math.min(b,Number.isFinite(+n)?+n:a));
 const finite=(n,f=0)=>Number.isFinite(+n)?+n:f;
 const ready=i=>i&&((i.complete&&i.naturalWidth>0)||(i.width>0&&i.height>0&&!('complete'in i)));
 const hash=v=>{let n=2166136261;for(const c of String(v))n=Math.imul(n^c.charCodeAt(0),16777619);return n>>>0;};
-const frozenPerformer=(actor,state)=>!!state.inspection?.freezePerformers&&['guest','seated','support','surfer','assisted','band'].includes(actor.role);
+const frozenPerformer=(actor,state)=>!!state.inspection?.freezePerformers&&['guest','seated','support','surfer','assisted'].includes(actor.role);
 const rng=seed=>{let n=seed>>>0;return()=>((n=(Math.imul(n,1664525)+1013904223)>>>0)/4294967296);};
 const surface=(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c;};
 const polygon=(c,points,color)=>{c.fillStyle=color;c.beginPath();points.forEach((p,i)=>i?c.lineTo(Math.round(p.x),Math.round(p.y)):c.moveTo(Math.round(p.x),Math.round(p.y)));c.closePath();c.fill();};
@@ -234,6 +241,47 @@ export function pixelOrderBubblePlacements(state,pointFor,meta={},columns=6){
   return placed;
 }
 
+const bubbleBody=b=>({left:b.x,top:b.y,right:b.x+b.width,bottom:b.y+b.height,width:b.width,height:b.height});
+const uiRegion=r=>Array.isArray(r.bounds)?{left:r.bounds[0],top:r.bounds[1],right:r.bounds[2],bottom:r.bounds[3]}:r;
+const uiIntersects=(a,b,pad=4)=>a.left<b.right+pad&&a.right>b.left-pad&&a.top<b.bottom+pad&&a.bottom>b.top-pad;
+const uiInside=(a,b)=>a.left>=b.left&&a.top>=b.top&&a.right<=b.right&&a.bottom<=b.bottom;
+function bubbleTail(b){
+  const y=b.y+b.height-1,outer=[{x:b.neckX-4,y},{x:b.neckX+4,y},{x:b.tipX,y:b.tipY}],inner=[{x:b.neckX-2,y},{x:b.neckX+2,y},{x:b.tipX,y:b.tipY-2}],points=[...outer,...inner];
+  return{outer,inner,bounds:{left:Math.min(...points.map(p=>p.x)),top:Math.min(...points.map(p=>p.y)),right:Math.max(...points.map(p=>p.x)),bottom:Math.max(...points.map(p=>p.y))}};
+}
+function nearestFreeUIRect(body,regions,bounds,occupied=[]){
+  const w=body.width,h=body.height,minX=Math.ceil(bounds.left),maxX=Math.floor(bounds.right-w),minY=Math.ceil(bounds.top),maxY=Math.floor(bounds.bottom-h);
+  const clear=r=>uiInside(r,bounds)&&![...regions,...occupied].some(o=>uiIntersects(r,o));
+  if(clear(body))return body;
+  const obstacles=[...regions,...occupied],xs=new Set([clamp(Math.round(body.left),minX,maxX),minX,maxX]),ys=new Set([clamp(Math.round(body.top),minY,maxY),minY,maxY]);
+  for(const o of obstacles){xs.add(clamp(Math.floor(o.left-4-w),minX,maxX));xs.add(clamp(Math.ceil(o.right+4),minX,maxX));ys.add(clamp(Math.floor(o.top-4-h),minY,maxY));ys.add(clamp(Math.ceil(o.bottom+4),minY,maxY));}
+  const candidates=[];
+  const add=(x,y)=>{const r={left:x,top:y,right:x+w,bottom:y+h,width:w,height:h};if(clear(r))candidates.push(r);};
+  if(maxX>=minX&&maxY>=minY)for(const x of xs)for(const y of ys)add(x,y);
+  if(!candidates.length)for(let y=minY;y<=maxY;y+=4)for(let x=minX;x<=maxX;x+=4)add(x,y);
+  candidates.sort((a,b)=>(a.left-body.left)**2+(a.top-body.top)**2-((b.left-body.left)**2+(b.top-body.top)**2)||Math.abs(a.top-body.top)-Math.abs(b.top-body.top)||a.top-b.top||a.left-b.left);
+  if(!candidates.length)throw new Error('No protected-area-safe slot for venue canvas UI.');
+  return candidates[0];
+}
+
+// Keep the real order, icon, actor and every unaffected card pixel unchanged.
+// Only unsafe canvas UI moves; a decorative pointer is omitted when its real
+// guest anchor cannot be reached without crossing protected artwork.
+export function protectOrderBubblePlacements(placements,regions,bounds){
+  const protectedRects=regions.map(uiRegion),result=Array(placements.length),occupied=[];
+  const safeTail=b=>{const r=bubbleTail(b).bounds;return uiInside(r,bounds)&&!protectedRects.some(o=>uiIntersects(r,o));};
+  for(let i=0;i<placements.length;i++){
+    const b=placements[i],body=bubbleBody(b);
+    if(uiInside(body,bounds)&&![...protectedRects,...occupied].some(o=>uiIntersects(body,o))&&safeTail(b)){result[i]=b;occupied.push(body);}
+  }
+  for(let i=0;i<placements.length;i++)if(!result[i]){
+    const old=placements[i],body=nearestFreeUIRect(bubbleBody(old),protectedRects,bounds,occupied);
+    const b={...old,x:body.left,y:body.top,neckX:clamp(old.tipX,body.left+5,body.right-5),relocated:body.left!==old.x||body.top!==old.y};
+    b.tailVisible=safeTail(b);result[i]=b;occupied.push(body);
+  }
+  return result;
+}
+
 export function createWorld(canvas,{assets={},getState=()=>({})}={}){
   const ctx=canvas.getContext('2d',{alpha:false});if(!ctx)throw new Error('A 2D game canvas is required.');
   if(!ready(assets.venue))throw new Error('The detailed room artwork must finish loading before the game starts.');
@@ -289,17 +337,9 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
     if(frozenPerformer(entry.actor,state))return{action:'idle',column:assets.bandModels.actions?.find(a=>a.id==='idle')?.frames?.[0]??8};
     return performingFrame(entry,assets.bandModels,seconds);
   }
-  function resize(){const b=canvas.getBoundingClientRect();cssW=Math.max(1,b.width);cssH=Math.max(1,b.height);const portrait=cssW<760&&cssH>cssW;
-    width=portrait?REF_W:Math.max(160,Math.min(2304,Math.round(REF_H*cssW/cssH)));height=portrait?Math.round(REF_W*cssH/cssW):REF_H;
-    offsetX=(width-REF_W)/2;offsetY=portrait?Math.round(Math.min(125,cssH*.16)*height/cssH):0;
-    // Keep the stage beside the right-hand card on narrower landscapes. The
-    // wide reference composition retains its original camera and pixel scale.
-    const console=canvas.parentElement?.querySelector('.live-console'),consoleBox=console?.getBoundingClientRect();
-    if(!portrait&&cssW>=cssH&&consoleBox?.width>0){
-      const right=consoleBox.left-b.left-16,currentRight=(932+offsetX)*cssW/width;
-      if(currentRight>right){const roomWidth=904*cssH/REF_H,available=Math.max(200,right-24),fit=Math.min(1,available/roomWidth);
-        height=Math.round(REF_H/fit);width=Math.round(height*cssW/cssH);offsetX=(right-Math.min(roomWidth,available)/2)*width/cssW-480;offsetY=(height-REF_H)/2;}
-    }
+  function resize(){const b=canvas.getBoundingClientRect();cssW=Math.max(1,b.width);cssH=Math.max(1,b.height);
+    width=Math.max(160,Math.min(2304,Math.round(REF_H*cssW/cssH)));height=REF_H;
+    offsetX=(width-REF_W)/2;offsetY=0;
     if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.height=height;city=null;}ctx.imageSmoothingEnabled=false;}
   const observer=new ResizeObserver(resize);observer.observe(canvas);resize();
   canvas.style.imageRendering='pixelated';
@@ -395,9 +435,15 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
     ellipse(ctx,p.x,p.y+1,4,1,'#16182360');
     ctx.drawImage(sheet,p.column*fw,p.row*fh,fw,fh,Math.round(p.x-(meta.footX??32)*dw/fw),Math.round(p.y-(meta.footY??60)*dh/fh),dw,dh);
   }
-  function orderBubbles(state){
+  function orderBubblePlan(state){
     const definition=assets.spriteMeta?.atlases?.orders,columns=definition?.columns||6;
-    const orders=pixelOrderBubblePlacements(state,a=>actorPoint(a,finite(a.y)),assets.spriteMeta,columns);if(!orders.length)return;
+    const orders=pixelOrderBubblePlacements(state,a=>actorPoint(a,finite(a.y)),assets.spriteMeta,columns);
+    const regions=PIXEL_PROTECTED_REGIONS[ownerVenue(state.owner).key]||PIXEL_PROTECTED_REGIONS.original;
+    return protectOrderBubblePlacements(orders,regions,{left:-offsetX+4,right:width-offsetX-4,top:4,bottom:height-4});
+  }
+  function orderBubbles(state){
+    const orders=orderBubblePlan(state);if(!orders.length)return;
+    const definition=assets.spriteMeta?.atlases?.orders;
     const sheet=assets.atlases?.orders;
     if(!ready(sheet))throw new Error('The order icon atlas must finish loading before orders are shown.');
     const fw=definition?.frameWidth||32,fh=definition?.frameHeight||32;
@@ -405,9 +451,9 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
       if(b.x+offsetX+b.width<0||b.x+offsetX>width||b.y+b.height+b.tail<0||b.y>height)continue;
       const x=b.x,y=b.y,w=b.width,h=b.height,cx=b.neckX;
       ctx.fillStyle='#182333';ctx.fillRect(x+2,y,w-4,h);ctx.fillRect(x,y+2,w,h-4);
-      polygon(ctx,[{x:cx-4,y:y+h-1},{x:cx+4,y:y+h-1},{x:b.tipX,y:b.tipY}],'#182333');
+      if(b.tailVisible!==false)polygon(ctx,[{x:cx-4,y:y+h-1},{x:cx+4,y:y+h-1},{x:b.tipX,y:b.tipY}],'#182333');
       ctx.fillStyle='#fff5d8';ctx.fillRect(x+2,y+1,w-4,h-2);ctx.fillRect(x+1,y+2,w-2,h-4);
-      polygon(ctx,[{x:cx-2,y:y+h-1},{x:cx+2,y:y+h-1},{x:b.tipX,y:b.tipY-2}],'#fff5d8');
+      if(b.tailVisible!==false)polygon(ctx,[{x:cx-2,y:y+h-1},{x:cx+2,y:y+h-1},{x:b.tipX,y:b.tipY-2}],'#fff5d8');
       ctx.drawImage(sheet,b.item*fw,0,fw,fh,x+4,y+2,24,24);
     }
   }
@@ -526,6 +572,13 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
     drawables.sort((a,b)=>a.depth-b.depth);for(const item of drawables)item.draw();airborne();orderBubbles(state);ctx.restore();
   }
   function worldToScreen(x,z,y=0){const p=project(x,z,y);return{x:(p.x+offsetX)*cssW/width,y:(p.y+offsetY)*cssH/height};}
+  function imageToScreen(x,y){return{x:(x+offsetX)*cssW/width,y:(y+offsetY)*cssH/height};}
+  function getProtectedRegions(state=getState()){
+    return(PIXEL_PROTECTED_REGIONS[ownerVenue(state.owner).key]||PIXEL_PROTECTED_REGIONS.original).map(region=>{
+      const [left,top,right,bottom]=region.bounds,a=imageToScreen(left,top),b=imageToScreen(right,bottom);
+      return{kind:region.kind,left:a.x,top:a.y,right:b.x,bottom:b.y,width:b.x-a.x,height:b.y-a.y,authored:[...region.bounds]};
+    });
+  }
   function getVenueBounds(){const left=Math.max(0,(28+offsetX)*cssW/width),right=Math.min(cssW,(932+offsetX)*cssW/width),top=offsetY*cssH/height,bottom=(REF_H+offsetY)*cssH/height;return{left,top,right,bottom,width:right-left,height:bottom-top};}
   function renderOverview(target,state=getState()){
     selectVenue(state);roomLayers();
@@ -565,5 +618,6 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
     });
   }
   function getInspectorPresentation(state=getState()){selectVenue(state);return(state.actors||[]).filter(a=>a.role==='inspector'&&a.visible!==false).map(a=>({id:a.id,moving:!!a.moving,...inspectorFrame(a)}));}
-  return{render,resize,destroy,worldToScreen,project,getVenueBounds,renderOverview,getBandPresentation,getAudiencePresentation,getInspectorPresentation,getVenueFeaturePresentation:state=>pixelVenueFeatures(state||getState())};
+  function getOrderBubblePresentation(state=getState()){selectVenue(state);return orderBubblePlan(state).map(b=>({actorId:b.actor.id,item:b.item,body:bubbleBody(b),tailVisible:b.tailVisible!==false,tail:b.tailVisible===false?null:bubbleTail(b),relocated:!!b.relocated}));}
+  return{render,resize,destroy,worldToScreen,imageToScreen,project,getVenueBounds,getProtectedRegions,renderOverview,getBandPresentation,getAudiencePresentation,getInspectorPresentation,getOrderBubblePresentation,getVenueFeaturePresentation:state=>pixelVenueFeatures(state||getState())};
 }

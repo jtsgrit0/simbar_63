@@ -63,6 +63,8 @@ export const Inspection=Object.freeze({
   present(state,actors){return!!state&&['patrol','exiting'].includes(state.phase)&&actors.some(a=>a.role==='inspector'&&a.visible!==false);},
   view(state,actors){
     const officersPresent=actors.filter(a=>a.role==='inspector'&&a.visible!==false).length,active=this.present(state,actors);
+    // Keep the public compatibility flag; only audience activity stops.
+    // The stage performance and its presentation clock continue during patrol.
     return{phase:state?.phase||'done',active,freezePerformers:active,remaining:state?.phase==='warning'?state.warningRemaining:active?state.holdRemaining:0,
       triggerAt:state?.triggerAt||0,serial:state?.serial||0,officersPresent};
   },
