@@ -21,6 +21,24 @@ const finite=(n,f=0)=>Number.isFinite(+n)?+n:f;
 const ready=i=>i&&((i.complete&&i.naturalWidth>0)||(i.width>0&&i.height>0&&!('complete'in i)));
 const hash=v=>{let n=2166136261;for(const c of String(v))n=Math.imul(n^c.charCodeAt(0),16777619);return n>>>0;};
 const frozenPerformer=(actor,state)=>!!state.inspection?.freezePerformers&&['guest','seated','support','surfer','assisted'].includes(actor.role);
+/** Preserve the original height-fit camera unless an approved presentation frame requires fitting. */
+export function pixelPresentationGeometry(cssWidth,cssHeight,frame=null){
+  const cssW=Math.max(1,finite(cssWidth,1)),cssH=Math.max(1,finite(cssHeight,1));
+  let width=Math.max(160,Math.min(2304,Math.round(REF_H*cssW/cssH))),height=REF_H;
+  let offsetX=(width-REF_W)/2,offsetY=0;
+  if(frame){
+    const left=frame.left,right=frame.right,boundsLeft=frame.bounds?.left,boundsRight=frame.bounds?.right;
+    if(![left,right,boundsLeft,boundsRight].every(Number.isFinite)||right<=left||boundsRight<=boundsLeft)throw new TypeError('Presentation frames need positive screen and artwork bounds.');
+    const currentLeft=(boundsLeft+offsetX)*cssW/width,currentRight=(boundsRight+offsetX)*cssW/width;
+    if(currentLeft<left||currentRight>right){
+      const roomWidth=(boundsRight-boundsLeft)*cssH/REF_H,available=right-left,fit=Math.min(1,available/roomWidth);
+      height=Math.round(REF_H/fit);width=Math.round(height*cssW/cssH);
+      offsetX=(right-Math.min(roomWidth,available)/2)*width/cssW-(boundsLeft+boundsRight)/2;
+      offsetY=(height-REF_H)/2;
+    }
+  }
+  return{width,height,offsetX,offsetY};
+}
 const rng=seed=>{let n=seed>>>0;return()=>((n=(Math.imul(n,1664525)+1013904223)>>>0)/4294967296);};
 const surface=(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c;};
 const polygon=(c,points,color)=>{c.fillStyle=color;c.beginPath();points.forEach((p,i)=>i?c.lineTo(Math.round(p.x),Math.round(p.y)):c.moveTo(Math.round(p.x),Math.round(p.y)));c.closePath();c.fill();};
@@ -282,7 +300,7 @@ export function protectOrderBubblePlacements(placements,regions,bounds){
   return result;
 }
 
-export function createWorld(canvas,{assets={},getState=()=>({})}={}){
+export function createWorld(canvas,{assets={},getState=()=>({}),getPresentationFrame=()=>null}={}){
   const ctx=canvas.getContext('2d',{alpha:false});if(!ctx)throw new Error('A 2D game canvas is required.');
   if(!ready(assets.venue))throw new Error('The detailed room artwork must finish loading before the game starts.');
   if(!assets.spriteMeta?.roles?.guest)throw new Error('The pixel character atlas metadata is missing.');
@@ -338,8 +356,8 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
     return performingFrame(entry,assets.bandModels,seconds);
   }
   function resize(){const b=canvas.getBoundingClientRect();cssW=Math.max(1,b.width);cssH=Math.max(1,b.height);
-    width=Math.max(160,Math.min(2304,Math.round(REF_H*cssW/cssH)));height=REF_H;
-    offsetX=(width-REF_W)/2;offsetY=0;
+    // The presentation callback uses viewport dimensions only; game state may not exist during construction.
+    ({width,height,offsetX,offsetY}=pixelPresentationGeometry(cssW,cssH,getPresentationFrame({width:cssW,height:cssH})));
     if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.height=height;city=null;}ctx.imageSmoothingEnabled=false;}
   const observer=new ResizeObserver(resize);observer.observe(canvas);resize();
   canvas.style.imageRendering='pixelated';

@@ -56,7 +56,11 @@ export async function startGame({root,assetsBase='./FastGame/art/',assets:predec
   const dayDesk=createDayDesk({g,asset,t,name});
   const icon=(key,alt='')=>`<img class="hud-icon" src="${esc(asset('icons/'+key+'.png'))}" alt="${esc(alt)}" draggable="false">`;
   const worldState=()=>({...g.state,owner:g.owner,phase:g.phase,paused:g.paused||orientationBlocked,journey:g.journey,floor:g.floor,reaction:g.reaction,inspection:g.inspection,visualPreview:ui.menu==='operations'?ui.visualPreview:null,actors:g.actors,orders:g.orders,effects:g.effects,elapsed:g.elapsed,cleanupReadyWorkers:g.cleanupReadyWorkers,guestExitFinished:g.guestExitFinished});
-  const world=createWorld(canvas,{assets,getState:worldState});
+  const world=createWorld(canvas,{assets,getState:worldState,getPresentationFrame:({width,height})=>{
+    if(width<height)return null;
+    const reference=canUseReferenceCards(width,height),bounds=g.owner===0?{left:17,right:960}:g.owner===1?{left:27,right:960}:{left:28,right:932};
+    return{left:reference?24:4,right:reference?width-8-Math.max(226,Math.min(260,width*.151))-16:width-4,bounds};
+  }});
   let stopped=false,dirty=true,orientationBlocked=false,layoutPlan=null,layoutKey='',lastKey='',previousPhase=g.phase,raf=0,last=performance.now();
   const music=new MusicPlayer({getIndex:()=>g.state.playlist,getPaused:()=>g.journey.musicPaused,tracks:catalog.playlists,baseURL:new URL('.',document.baseURI),onchange:()=>{dirty=true;}});
   const albumArt=new AlbumArtLoader({baseURL:base,covers:assets.albumCovers});let requestedAlbumIndex=-1;
