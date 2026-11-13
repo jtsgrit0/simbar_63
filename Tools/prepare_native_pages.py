@@ -20,7 +20,7 @@ PROJECT = Path(__file__).resolve().parent.parent
 TEMPLATE = PROJECT / "Tools/WebGLTemplate"
 SOURCE = TEMPLATE / "FastGame"
 MODULES = ("boot.js", "game.js", "core.js", "world.js", "booking.js", "floor.js",
-           "navigation.js", "catalog.js", "playlist.js", "legacy-save.js", "daily-poster.js", "music.js", "aftershow.js", "album-art.js", "daydesk.js", "owner-venues.js", "band-models.js", "campaign.js", "audience.js", "festival.js")
+           "navigation.js", "catalog.js", "playlist.js", "legacy-save.js", "daily-poster.js", "music.js", "aftershow.js", "album-art.js", "daydesk.js", "owner-venues.js", "band-models.js", "campaign.js", "audience.js", "festival.js", "spectator-feedback.js")
 ESSENTIAL_IMAGES = ("owner-female.png", "owner-ff.png", "owner-pet.png", "seoul.png", "seoul-freebird.png", "seoul-ff.png", "venue.png", "venue-freebird.png", "venue-ff.png", "standing-table.png", "standing-stool.png", "band-freewill.png", "band-july.png", "festival-gestures.png", "festival-vocals.png", "festival-surf.png", "freebird-arch.png", "freebird-wall-table.png", "cocktail-glass.png")
 ESSENTIAL_METADATA = ("venue.json", "sprites.json", "venue-ff.json", "venue-freebird.json", "band-models.json", "festival-models.json")
 DEFERRED_IMAGES = ("office/desk-jessy.png", "office/desk-edison.png", "office/desk-jaiden.png")

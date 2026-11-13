@@ -39,7 +39,8 @@ for(const definition of Festival.actions){
   const g=launch(1),before={s:g.state.satisfaction,p:g.state.performance},attendance=people(g).length;
   assert.equal(g.act('festival',{id:definition.id}).success,true);
   assert.equal(g.festival.activeId,definition.id);
-  assert(g.state.satisfaction>=before.s&&g.state.performance>=before.p);
+  assert.equal(g.state.satisfaction,before.s,'Pressing a move is not a service review');
+  assert.equal(g.state.performance,before.p,'The audience must actually participate before judging a move');
   assert(g.actors.some(a=>a.festivalAction===definition.id));
   assert.equal(g.act('festival',{id:definition.id}).code,'festival_cooldown');
   assert.equal(g.act('festival',{id:'dance'}).code,'festival_cooldown');
@@ -89,10 +90,14 @@ for(const definition of Festival.actions){
 {
   const quiet=launch(1,{showId:'july',seed:71}),hyped=launch(1,{showId:'july',seed:71});
   Object.assign(hyped.journey.festival,{actionsUsed:5,hype:1});
+  assert.equal(hyped.festival.cocktailBoost,0,'Hype without any earned judgement cannot alter demand');
+  // Isolate demand conversion from the observer model, which has its own
+  // actual-service/participation scenarios below and in the feedback tests.
+  Object.assign(hyped.state,{satisfaction:.8,performance:.85});
   let baseline=0,boosted=0;
   for(let i=0;i<10000;i++){if(quiet._orderItem()<2)baseline++;if(hyped._orderItem()<2)boosted++;}
   assert(boosted>baseline+1800,JSON.stringify({baseline,boosted}));
-  const high=Festival.modifiers(hyped.journey.festival,1,1),low=Festival.modifiers(hyped.journey.festival,.35,.36);
+  const high=Festival.modifiers(hyped.journey.festival,1,1),low=Festival.modifiers(hyped.journey.festival,.02,.03);
   assert(high.orderMultiplier<.7);assert(low.orderMultiplier>.99);
   assert(high.arrivalRate>low.arrivalRate&&high.cocktailBoost>low.cocktailBoost);
 }

@@ -61,8 +61,19 @@ for(const fixture of fixtures){
   assert.equal(g.escort,null,`${fixture}: guest escort remains active`);
   assert.equal(g.floorTasksPending,false);
   assert(g.journey.afterShow.members.every(m=>m.phase==='gone'));
-  assert.equal(g.journey.afterShow.audience.length,20);
-  for(const fan of g.journey.afterShow.audience){const a=g.actors.find(a=>a.id===fan.id);assert.equal(fan.phase,'gone');assert.equal(a.visible,false);assert(Math.hypot(a.x-EXIT_POINT.x,a.z-EXIT_POINT.z)<=.181);assert.equal(a.moving,false);}
+  // The current closing roster includes the eleven real legacy bar/lounge
+  // listeners, in addition to the twenty historical front-row IDs.
+  assert.equal(g.journey.afterShow.audience.length,31);
+  for(const fan of g.journey.afterShow.audience){
+    const a=g.actors.find(a=>a.id===fan.id);assert.equal(fan.phase,'gone');assert.equal(a.visible,false);assert.equal(a.moving,false);
+    if(a.reservedForAssistance){
+      // Assistance reuses one listener's body. Its hidden source record must
+      // remain hidden while the actual escorted person reaches the doorway.
+      const escorted=g.actors.find(a=>a.id==='assisted-guest'&&a.assistedSourceId===fan.id);
+      assert(escorted&&escorted.visible===false);
+      assert(Math.hypot(escorted.x-8.7,escorted.z+5.4)<=.22);
+    }else assert(Math.hypot(a.x-EXIT_POINT.x,a.z-EXIT_POINT.z)<=.181);
+  }
   if(fixture.startsWith('aftershow-seed-')){
     for(const id of g.crew){const a=g.actors.find(a=>a.id===id);assert(Math.hypot(a.x-a._cleanupParkGoal.x,a.z-a._cleanupParkGoal.z)<=.05);assert.equal(a.moving,false);}
   }

@@ -63,11 +63,11 @@ function grid(staff,floor,layout){
     const x=i%width+dx,z=Math.floor(i/width)+dz,j=z*width+x;
     if((dx||dz)&&x>=0&&x<width&&z>=0&&z<height&&valid[j]&&segment(points[i],points[j],staff,floor,layout))neighbors[i].push(j);
   }
-  const data={points,valid,neighbors};grids.set(key,data);return data;
+  const data={points,valid,neighbors,endpoints:new Map()};grids.set(key,data);return data;
 }
 export function pathfind(start,goal,{staff=false,floor=false,people=[],layout=start?.layout}={}){
   if(!walkable(start,staff,floor,layout)||!walkable(goal,staff,floor,layout))return [];
-  const {points,valid,neighbors}=grid(staff,floor,layout);
+  const {points,valid,neighbors,endpoints}=grid(staff,floor,layout);
   const blocked=p=>people.some(body=>distance(p,body)<.39);
   const bodiesClear=(a,b)=>people.every(body=>{
     const before=distance(a,body),after=distance(b,body);
@@ -77,8 +77,32 @@ export function pathfind(start,goal,{staff=false,floor=false,people=[],layout=st
     const dx=b.x-a.x,dz=b.z-a.z,len=dx*dx+dz*dz,t=len?Math.max(0,Math.min(1,((body.x-a.x)*dx+(body.z-a.z)*dz)/len)):0;
     return Math.hypot(body.x-a.x-t*dx,body.z-a.z-t*dz)>=.38;
   });
-  const closest=p=>{let best=-1,score=Infinity;for(let i=0;i<points.length;i++){const d=distance(p,points[i]);if(valid[i]&&d<score&&segment(p,points[i],staff,floor,layout)&&!blocked(points[i])&&bodiesClear(p,points[i])){score=d;best=i;}}return best;};
-  const first=closest(start),last=closest(goal);if(first<0||last<0)return [];
+  // Try the nearest mesh points first. Row-order scanning repeatedly checked
+  // long, impossible sight lines before reaching an actor's local aisle. With
+  // a whole room leaving together those synchronous segment scans stalled the
+  // game frame. Distance ordering selects the same nearest reachable point;
+  // the index tie-break preserves the mesh's original deterministic ordering.
+  const closest=(p,staticGoal=false)=>{
+    const key=p.x+','+p.z;let cached=staticGoal&&endpoints.get(key);
+    if(!cached){
+      const candidates=[];
+      for(let i=0;i<points.length;i++)if(valid[i]){const dx=p.x-points[i].x,dz=p.z-points[i].z;candidates.push({i,d:dx*dx+dz*dz});}
+      candidates.sort((a,b)=>a.d-b.d||a.i-b.i);
+      cached={candidates,visible:new Int8Array(points.length)};
+      if(staticGoal){if(endpoints.size>=64)endpoints.delete(endpoints.keys().next().value);endpoints.set(key,cached);}
+    }
+    for(const {i}of cached.candidates){
+      // Bodies move while the venue's furniture does not. Reject blocked
+      // approaches cheaply first; never retain body clearance across routes.
+      if(blocked(points[i])||!bodiesClear(p,points[i]))continue;
+      let visible=cached.visible[i];
+      if(!visible){visible=segment(p,points[i],staff,floor,layout)?1:-1;cached.visible[i]=visible;}
+      if(visible>0)return i;
+    }
+    return -1;
+  };
+  const first=closest(start);if(first<0)return [];
+  const last=closest(goal,true);if(last<0)return [];
   const scores=new Float64Array(points.length).fill(Infinity),parents=new Int32Array(points.length).fill(-1),closed=new Uint8Array(points.length),open=[first];scores[first]=0;
   while(open.length){
     let best=0,cost=Infinity;for(let i=0;i<open.length;i++){const n=open[i],f=scores[n]+distance(points[n],points[last]);if(f<cost){cost=f;best=i;}}
@@ -93,6 +117,39 @@ export function setRoute(actor,goal,actors=[],floor=false){
   actor.targetX=goal.x;actor.targetZ=goal.z;actor._floorRoute=floor;
   actor._path=pathfind(actor,goal,{staff:actor.role==='bartender'||actor.role==='server'||actor.role.startsWith('hired'),floor,layout:actor.layout,people:actors.filter(a=>a!==actor&&a.visible&&a.role!=='band'&&(a.role!=='seated'||a.waitingSeat)&&a.id!==actor._partner).map(a=>({x:a.x,z:a.z}))});
   actor._pathAt=0;actor._blocked=0;return actor._path.length>0;
+}
+// Closing crowds can pack between the40cm mesh nodes while still leaving a
+// safe34cm movement gap. Keep the mesh route whenever one exists; otherwise
+// take a short, swept, collision-checked step until a complete route opens.
+export function setCrowdRoute(actor,goal,actors=[],floor=false){
+  if(setRoute(actor,goal,actors,floor)){actor._crowdHistory=[];return true;}
+  const staff=actor.role==='bartender'||actor.role==='server'||actor.role.startsWith('hired');
+  const people=actors.filter(a=>a!==actor&&a.visible!==false&&a.role!=='band'&&a.id!==actor._partner&&a.id!=='crowd-surfer'&&Math.abs((a.y||0)-(actor.y||0))<1);
+  const clear=next=>{
+    if(!segment(actor,next,staff,floor,actor.layout))return false;
+    const dx=next.x-actor.x,dz=next.z-actor.z,length=dx*dx+dz*dz;
+    return people.every(other=>{
+      const before=distance(actor,other),after=distance(next,other);
+      if(before<.34)return after>=before-.00001&&dx*(actor.x-other.x)+dz*(actor.z-other.z)>=-.00001;
+      const t=length?Math.max(0,Math.min(1,((other.x-actor.x)*dx+(other.z-actor.z)*dz)/length)):0;
+      return Math.hypot(other.x-actor.x-t*dx,other.z-actor.z-t*dz)>=.34;
+    });
+  };
+  const angle=Math.atan2(goal.z-actor.z,goal.x-actor.x),before=distance(actor,goal);
+  const history=Array.isArray(actor._crowdHistory)?actor._crowdHistory.slice(-6).filter(p=>p&&Number.isFinite(p.x)&&Number.isFinite(p.z)&&Math.abs(p.x)<20&&Math.abs(p.z)<20):[];
+  let best=null;
+  for(let i=0;i<32;i++){
+    const turn=i===0?0:Math.ceil(i/2)*(i%2?1:-1),theta=angle+turn*Math.PI/16;
+    const next={x:actor.x+Math.cos(theta)*.32,z:actor.z+Math.sin(theta)*.32};
+    if(!clear(next))continue;
+    const recent=history.reduce((penalty,p,index)=>penalty+Math.max(0,.25-distance(next,p))*(index+1)/Math.max(1,history.length),0);
+    const score=before-distance(next,goal)-recent*2;
+    if(!best||score>best.score)best={next,score};
+  }
+  if(!best)return false;
+  actor._path=[best.next];actor._pathAt=0;actor._blocked=0;
+  actor._crowdHistory=[...history,{x:actor.x,z:actor.z}].slice(-6);
+  return true;
 }
 export function move(actor,dt,speed,actors=[]){
   const start={x:actor.x,z:actor.z},staff=actor.role==='bartender'||actor.role==='server'||actor.role.startsWith('hired');

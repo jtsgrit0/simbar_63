@@ -1,6 +1,6 @@
 // Persisted movement and social choreography after the performance. No rewards
 // or timers outside the active game clock are owned by this module.
-import {distance,walkable,setRoute,move} from './navigation.js';
+import {distance,walkable,segment,setRoute,setCrowdRoute,move} from './navigation.js';
 
 export const BAND_MEMBERS=['singer','guitarist','bassist','drummer'];
 export const GREETING_SECONDS={highfive:1.1,hug:1.5};
@@ -42,7 +42,7 @@ export function createAfterShow(actors,session){
     const a=find(actors,id),onFloor=a&&walkable(a,false,false);
     return{id,phase:a?.visible===false?'gone':onFloor?'approach':'stage',waypoint:0,greeting:a?.visible===false?2:0,timer:0,delay:i*.7,
       x:a?.x??5.35,z:a?.z??3.5,stageLevel:onFloor?0:1,visible:a?.visible!==false,
-      approachX:null,approachZ:null,blockedTime:0,standAttempt:0};
+      approachX:null,approachZ:null,approachRetry:0,approachProbe:0,blockedTime:0,standAttempt:0};
   });
   const audience=AFTER_SHOW_AUDIENCE.map((id,i)=>audienceItem(id,i,find(actors,id)));
   const state={version:3,session,started:true,completed:false,elapsed:0,
@@ -61,6 +61,7 @@ export function sanitizeAfterShow(value,session,{settled=false}={}){
       timer:finite(m.timer,0,0,2),delay:finite(m.delay,0,0,3),x:finite(m.x,5.35),z:finite(m.z,3.5),
       stageLevel:finite(m.stageLevel,1,0,1),visible:phase!=='gone',
       approachX:Number.isFinite(m.approachX)?finite(m.approachX):null,approachZ:Number.isFinite(m.approachZ)?finite(m.approachZ):null,
+      approachRetry:finite(m.approachRetry,0,0,.12),approachProbe:integer(m.approachProbe,15),
       blockedTime:finite(m.blockedTime,0,0,3),standAttempt:integer(m.standAttempt,10000)};
   });
   const ids=[...AFTER_SHOW_AUDIENCE,...[...new Set(value.audience.map(a=>a?.id).filter(id=>customerId(id)&&!AFTER_SHOW_AUDIENCE.includes(id)))].slice(0,80)];
@@ -127,7 +128,7 @@ function route(a,goal,actors,dt,speed=1.3,arrival=.2){
   const changed=Math.hypot((a.targetX??a.x)-goal.x,(a.targetZ??a.z)-goal.z)>.04;
   if(distance(a,goal)<=arrival){a.moving=false;return true;}
   if(changed||((!a._path?.length||a._pathAt>=a._path.length)&&!a._afterShowRetry)){
-    setRoute(a,goal,local,false);a._afterShowRetry=.35;
+    setCrowdRoute(a,goal,local,false);a._afterShowRetry=.35;
   }
   move(a,dt,speed,local);
   return distance(a,goal)<=arrival;
@@ -151,9 +152,15 @@ function findApproach(a,fan,item,m,actors){
   const side=(a.x-fan.x)*.887+(a.z-fan.z)*.461<0?Math.PI:0,base=axis+side;
   a._partner=fan.id;
   for(let offset=0;offset<16;offset++){
-    const index=(offset+(m.standAttempt||0))%16,turn=index===0?0:Math.ceil(index/2)*(index%2?1:-1);
+    const index=(offset+(m.standAttempt||0)+(m.approachProbe||0))%16,turn=index===0?0:Math.ceil(index/2)*(index%2?1:-1);
     const angle=base+turn*Math.PI/8,goal=point(fan.x+Math.cos(angle)*radius,fan.z+Math.sin(angle)*radius);
-    if(walkable(goal,false,false,a.layout)&&clearStand(a,goal,actors)&&setRoute(a,goal,nearbyBodies(actors,a),false))return goal;
+    if(!walkable(goal,false,false,a.layout)||!clearStand(a,goal,actors))continue;
+    // An occupied greeting can have no valid route. Do not run sixteen full
+    // A* searches for each musician in the same animation frame. Try another
+    // reachable side on a later active tick while retaining physical contact.
+    m.approachProbe=((m.approachProbe||0)+offset+1)%16;
+    if(setRoute(a,goal,nearbyBodies(actors,a),false)){m.approachProbe=0;return goal;}
+    return null;
   }
   return null;
 }
@@ -191,6 +198,17 @@ function standCustomer(item,a){
   if(Math.abs(a.z-z)>.01)item.egress.push(point(a.x,z));
   item.egress.push(point(-1.25,z));item.egressAt=0;
 }
+function clearDoorwaySegment(a,goal,actors){
+  if(!segment(a,goal,false,false,a.layout))return false;
+  const dx=goal.x-a.x,dz=goal.z-a.z,length=dx*dx+dz*dz;
+  return actors.every(other=>{
+    if(other===a||other.visible===false||other.role==='band'||other.id===a._partner||other.id==='crowd-surfer'||Math.abs((other.y||0)-(a.y||0))>=1)return true;
+    const before=distance(a,other),after=distance(goal,other);
+    if(before<.34)return after>=before-.00001&&dx*(a.x-other.x)+dz*(a.z-other.z)>=-.00001;
+    const t=length?Math.max(0,Math.min(1,((other.x-a.x)*dx+(other.z-a.z)*dz)/length)):0;
+    return Math.hypot(other.x-a.x-t*dx,other.z-a.z-t*dz)>=.34;
+  });
+}
 function leave(item,a,actors,dt,speed){
   if(!BAND_MEMBERS.includes(item.id))standCustomer(item,a);
   if(item.egressAt<(item.egress?.length||0)){
@@ -210,7 +228,19 @@ function leave(item,a,actors,dt,speed){
   // matter to the next short step. Including every distant person in dozens
   // of simultaneous A* searches makes a full room needlessly expensive.
   const nearby=actors.filter(other=>other===a||other.visible!==false&&distance(a,other)<1.6);
-  return route(a,EXIT_POINT,nearby,dt,speed,.18);
+  // At the door, several people may surround the last 40 cm mesh cell while
+  // a real, collision-free short step still reaches the exit. Use the same
+  // 34 cm body clearance as movement, never a jump or a hidden disappearance.
+  // Requiring a mesh endpoint here can leave the whole queue waiting forever.
+  const local=nearbyBodies(nearby,a);
+  const goal=EXIT_POINT,arrival=.18;
+  if(distance(a,goal)<1.6&&clearDoorwaySegment(a,goal,local)){
+    a.targetX=goal.x;a.targetZ=goal.z;a._floorRoute=false;
+    a._path=[point(goal.x,goal.z)];a._pathAt=0;a._blocked=0;
+    move(a,dt,speed,local);
+    return distance(a,goal)<=arrival;
+  }
+  return route(a,goal,nearby,dt,speed,arrival);
 }
 function tickParallelAudience(state,actors,dt){
   for(const item of state.audience){
@@ -284,13 +314,14 @@ export function tickAfterShow(state,actors,dt){
     if(!fan||item.phase==='gone'){m.greeting++;m.phase=m.greeting>=2?'await-exit':'approach';continue;}
     a._partner=fan.id;fan._partner=a.id;item.partner=a.id;
     if(m.phase==='approach'){
+      m.approachRetry=Math.max(0,(m.approachRetry||0)-dt);
       // Gather can end slightly short of the authored mark because another
       // audience member occupies its edge. Plan around the fan's settled
       // position; a route chosen while that fan is walking becomes stale.
       if(item.phase!=='wait'){a.action='aftershow-wait';a.moving=false;continue;}
       const radius=m.greeting===0?.60:.43;
       if(m.approachX!=null&&(Math.abs(distance(point(m.approachX,m.approachZ),fan)-radius)>.1||!clearStand(a,point(m.approachX,m.approachZ),actors))){m.approachX=null;m.approachZ=null;}
-      if(m.approachX==null||m.approachZ==null){const p=findApproach(a,fan,item,m,actors);if(p){m.approachX=p.x;m.approachZ=p.z;}}
+      if((m.approachX==null||m.approachZ==null)&&!m.approachRetry){const p=findApproach(a,fan,item,m,actors);m.approachRetry=.12;if(p){m.approachX=p.x;m.approachZ=p.z;}}
       const arrived=m.approachX!=null&&route(a,point(m.approachX,m.approachZ),actors,dt,1.3,.04);
       a.action=arrived?'aftershow-wait':'walk';
       m.blockedTime=a.moving?0:(m.blockedTime||0)+dt;

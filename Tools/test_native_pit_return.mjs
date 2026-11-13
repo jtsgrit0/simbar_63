@@ -1,8 +1,11 @@
 import {launchPreparedDesk} from './native_test_workflow.mjs';
 import assert from 'node:assert/strict';
-import {SimBarGame} from './WebGLTemplate/FastGame/core.js';
+import {SimBarGame,Booking} from './WebGLTemplate/FastGame/core.js';
 
-function night(seed=12){const mem=new Map(),storage={getItem:k=>mem.get(k)||null,setItem:(k,v)=>mem.set(k,String(v))};const g=new SimBarGame({storage,seed});g.act('start');launchPreparedDesk(g);while(g.phase==='guide')g.act('guide');return g;}
+// This regression concerns the retained legacy pit's fixed .395m/s orbit.
+// Campaign crowds have venue/actor-specific motion speeds and a different
+// opening queue; test_native_audience covers that newer cast independently.
+function night(seed=12){const mem=new Map(),storage={getItem:k=>mem.get(k)||null,setItem:(k,v)=>mem.set(k,String(v))};const g=new SimBarGame({storage,seed});g.journey.booking=Booking.newDeskPlan(1,0);g.act('start');launchPreparedDesk(g);while(g.phase==='guide')g.act('guide');return g;}
 const g=night(),returns=new Set(),walkedHome=new Set();
 // Let real initial orders expire. Patrons 1 and 4 must walk home and rejoin the
 // moving pit after its shared phase has advanced during their bar queue.

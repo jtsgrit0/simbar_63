@@ -1,19 +1,19 @@
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,Number.isFinite(+value)?+value:min));
-const action=(id,ko,en,icon,duration,cooldown,hype,satisfaction,performance)=>Object.freeze({id,ko,en,icon,duration,cooldown,hype,satisfaction,performance});
+const action=(id,ko,en,icon,duration,cooldown,hype)=>Object.freeze({id,ko,en,icon,duration,cooldown,hype});
 
 export const Festival=Object.freeze({
   version:1,
   actions:Object.freeze([
-    action('slam','슬램','Slam','⚡',7,30,.15,.012,.026),
-    action('mosh','모슁','Mosh','↻',9,34,.17,.014,.03),
-    action('surf','크라우드 서핑','Crowd surf','≈',9,40,.18,.014,.032),
-    action('jump','점프','Jump','↑',7,24,.13,.016,.025),
-    action('horns','락손','Rock horns','🤘',8,22,.12,.02,.022),
-    action('airguitar','에어기타','Air guitar','♫',8,28,.14,.018,.026),
-    action('sing','떼창','Sing along','♪',10,32,.16,.025,.028),
-    action('encore','앵콜','Encore','★',10,44,.18,.024,.032),
-    action('headbang','헤드뱅','Headbang','↕',8,26,.14,.014,.028),
-    action('dance','댄스','Dance','◈',9,26,.14,.024,.022)
+    action('slam','슬램','Slam','⚡',7,30,.15),
+    action('mosh','모슁','Mosh','↻',9,34,.17),
+    action('surf','크라우드 서핑','Crowd surf','≈',9,40,.18),
+    action('jump','점프','Jump','↑',7,24,.13),
+    action('horns','락손','Rock horns','🤘',8,22,.12),
+    action('airguitar','에어기타','Air guitar','♫',8,28,.14),
+    action('sing','떼창','Sing along','♪',10,32,.16),
+    action('encore','앵콜','Encore','★',10,44,.18),
+    action('headbang','헤드뱅','Headbang','↕',8,26,.14),
+    action('dance','댄스','Dance','◈',9,26,.14)
   ]),
   create(){return{version:1,venueOwner:null,activeId:'',remaining:0,duration:0,globalRemaining:0,cooldowns:Object.fromEntries(this.actions.map(a=>[a.id,0])),hype:0,serial:0,actionsUsed:0,arrivalCredit:0,arrivalRetry:0,arrivals:0,arrivalSerial:0};},
   sanitize(value){
@@ -31,7 +31,7 @@ export const Festival=Object.freeze({
     return state;
   },
   response(satisfaction,performance){
-    return clamp((satisfaction-.3)/.7,0,1)*clamp((performance-.35)/.65,0,1);
+    return Math.sqrt(clamp(satisfaction,0,1))*clamp(performance,0,1);
   },
   modifiers(state,satisfaction,performance){
     const earned=state.actionsUsed>0?state.hype*this.response(satisfaction,performance):0;
