@@ -64,7 +64,10 @@ export function pixelVenueFeatures(state={}){
   const anchors=[[[402,211,66,263],[892,308,76,308],[259,244,76,244]],[[252,213,64,308],[896,307,76,307],[111,351,76,351]],[[286,273,70,359],[859,304,76,304],[122,285,76,285]]][owner];
   const result=upgrades.flatMap((level,index)=>level?[{id:['draught','sound','vip'][index]+'-'+level,type:'upgrade',index,level,venue:ownerVenue(owner).key,x:anchors[index][0],y:anchors[index][1],size:anchors[index][2],depth:anchors[index][3],preview:preview?.type==='upgrade'&&preview.index===index}]:[]);
   const event=preview?.type==='event'?preview.index:state.activeEvent;
-  if(Number.isInteger(event)&&event>=0&&event<3)result.push({id:['open-mic','rock-showcase','fan-festival'][event],type:'event',index:event,venue:ownerVenue(owner).key,x:owner===2?612:609,y:owner===2?314:323,size:event===2?88:76,depth:324,preview:preview?.type==='event'});
+  // Use the gap beside the vocalist, clear of the right-hand floor monitor.
+  // The wider banner sits slightly left; authored performers stay in front.
+  const eventAnchor=[[717,350,316],[728,350,324],[707,342,309]][owner];
+  if(Number.isInteger(event)&&event>=0&&event<3)result.push({id:['open-mic','rock-showcase','fan-festival'][event],type:'event',index:event,venue:ownerVenue(owner).key,x:eventAnchor[0]-(event===2?8:0),y:eventAnchor[1],size:event===2?88:76,depth:eventAnchor[2],preview:preview?.type==='event'});
   return result;
 }
 

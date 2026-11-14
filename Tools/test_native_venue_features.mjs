@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
 import {readFileSync} from 'node:fs';
 import {inflateSync} from 'node:zlib';
-import {createWorld,pixelVenueFeatures,pixelVenueFeatureStyle,pixelFestivalFrame,pixelAudiencePose} from './WebGLTemplate/FastGame/world.js';
+import {createWorld,pixelVenueFeatures,pixelVenueFeatureStyle,pixelFestivalFrame,pixelAudiencePose,PIXEL_STAGE_DECK} from './WebGLTemplate/FastGame/world.js';
 import {VENUE_PROPS} from './WebGLTemplate/FastGame/owner-venues.js';
 
 const art=new URL('./WebGLTemplate/FastGame/art/',import.meta.url);
@@ -133,7 +133,12 @@ for(const owner of [0,1,2])for(const [activeEvent,id] of eventIds.entries()){
   const cell=venueFeatureModels.items[id];assert.deepEqual(draws[0].args.slice(1,5),[cell.column*96,cell.row*96,96,96]);
   const feature=features[0],style=pixelVenueFeatureStyle(feature);
   assert.deepEqual(draws[0].translation,[feature.x,feature.y],'Events must retain their authored foot anchor');
-  assert.deepEqual([feature.x,feature.y,feature.size,feature.depth],[owner===2?612:609,owner===2?314:323,activeEvent===2?88:76,324]);
+  const room=manifest(owner===0?'venue-freebird.json':owner===1?'venue-ff.json':'venue.json'),vocal=room.bandStageFeet.singer,bass=room.bandStageFeet.bassist;
+  assert(feature.x>vocal[0]&&feature.x<vocal[0]+(bass[0]-vocal[0])*.74,'Events must fit between the vocalist and the right-hand guitar/monitor area');
+  assert(feature.depth<room.drumForegroundDepth,'The authored drum foreground must remain above the event');
+  const deck=room.stageDeck||PIXEL_STAGE_DECK,turns=deck.map(([x,y],i)=>{const [nx,ny]=deck[(i+1)%deck.length];return(nx-x)*(feature.y-y)-(ny-y)*(feature.x-x);});
+  assert(turns.every(n=>n>=0)||turns.every(n=>n<=0),'The event anchor must stand inside the stage deck');
+  assert.equal(feature.size,activeEvent===2?88:76,'Moving events must retain their original drawing size');
   assert.equal(draws[0].rotation,0);assert.deepEqual(draws[0].matrix,[1,style.shearY,0,1,0,0]);
   assert.equal(draws[0].filter,style.filter);assert.notEqual(style.filter,'none','Events must receive their venue ambient light');
   assert.notEqual(paintedCell(draws[0]).hash,paintedCell({args:[baseline,288,activeEvent*96,96,96]}).hash,'Each event must use its new genuine source drawing');

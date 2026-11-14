@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "file": "inspectors.png",
+  "frameWidth": 64,
+  "frameHeight": 64,
+  "columns": 12,
+  "rows": 3,
+  "footX": 32,
+  "footY": 60,
+  "drawWidth": 54,
+  "drawHeight": 54,
+  "directionColumns": {"FR": 0, "BR": 3, "BL": 6, "FL": 9},
+  "idleFrame": 0,
+  "walkFrames": [1, 2],
+  "walkFps": 6,
+  "models": [
+    {"id": "inspector-0", "row": 0, "appearance": "Navy cap, radio and fluorescent reflective vest"},
+    {"id": "inspector-1", "row": 1, "appearance": "Dark ponytail, clipboard and fluorescent reflective vest"},
+    {"id": "inspector-2", "row": 2, "appearance": "Short gray hair, clipboard and fluorescent reflective vest"}
+  ]
+}

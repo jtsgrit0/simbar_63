@@ -22,6 +22,18 @@ const orderSlots=[point(-1.5,-1.75),point(-.85,-2.25),point(-.15,-2.7),point(.6,
 const loungeHomes=[[-8.55,6.4],[-7,6.4],[-4.45,6.4],[-2.95,6.4],[-8.35,-6.5],[-6.85,-6.5],[-3.45,-6.5]];
 const seatedHome=id=>id.startsWith('bar-seat-')?point(-7.55+(+id.slice(9))*1.55,-3.15):point(...loungeHomes[+id.slice(7)]);
 const layoutForOwner=owner=>owner===0?FREEBIRD_LAYOUT:owner===1?FF_LAYOUT:null;
+let scheduleSerial=0;
+const freshScheduleSeed=()=>{
+  let entropy=0;
+  try{const word=new Uint32Array(1);globalThis.crypto?.getRandomValues(word);entropy=word[0];}catch{}
+  if(!entropy)entropy=(Date.now()^Math.floor(Math.random()*0xffffffff))>>>0;
+  return(entropy^Math.imul(++scheduleSerial,0x9e3779b1))>>>0;
+};
+const mixScheduleSeed=(seed,owner,day,session,kind)=>{
+  let n=(seed^Math.imul(owner+1,0x9e3779b1)^Math.imul(day,0x85ebca6b)^Math.imul(session,0xc2b2ae35)^kind)>>>0;
+  n=Math.imul(n^(n>>>16),0x7feb352d);n=Math.imul(n^(n>>>15),0x846ca68b);
+  return((n^(n>>>16))&0x7fffffff)||1;
+};
 const defaults=()=>({version:1,money:650,fans:0,satisfaction:0,performance:0,clock:18,playlist:0,pours:0,staff:[0,0,0],upgrades:[0,0,0],wageTimer:60,wageDebt:0,
   activeEvent:-1,eventRemaining:0,eventStartPours:0,eventFanTimer:0,cooldowns:[0,0,0],completedEvents:0,autoServeTimer:12,promoterTimer:0,journeyJson:''});
 const newJourney=()=>({version:1,day:1,challenge:false,tutorialComplete:false,guideStep:0,guidePending:false,inProgress:false,session:0,settledSession:0,settlementPending:false,secondsLeft:180,
@@ -55,6 +67,7 @@ const messages={
 export class SimBarGame{
   constructor({storage,seed}={}){
     try{this.storage=storage??globalThis.localStorage;}catch{this.storage=null;}
+    this._deterministicSeed=seed!=null;
     this._seed=((seed??(Date.now()^Math.floor(Math.random()*0x7fffffff)))>>>0)||1;
     this.state=defaults();this.journey=newJourney();this.phase='lobby';this.paused=true;this.pauseReason='lobby';
     this.owner=0;this.language='ko';this.orders=[];this.pour=null;this.effects=[];this.actors=[];this.crew=[];this.escort=null;
@@ -315,16 +328,20 @@ export class SimBarGame{
   }
   _newNight(){
     const j=this.journey;j.session=j.session>=1e9?1:j.session+1;if(j.session===1)j.settledSession=0;j.inProgress=true;j.settlementPending=false;j.floorClosing=false;j.afterShow=null;j.musicPauseSession=0;j.musicPaused=false;j.musicPauseIntent=false;j.secondsLeft=180;
+    // Fresh nights have an independent schedule even when the same planning
+    // save restores the gameplay RNG. The resulting journal stays stable on
+    // continue/reload; explicit test seeds retain their authored sequence.
+    const scheduleSeed=this._deterministicSeed?undefined:freshScheduleSeed();
     for(const k of ['score','combo','bestCombo','manualPerfects','orders','mistakes','successfulEvents','manualStreak','feverSeconds','feverCharge','drinkIncome','resultStars','resultServed','resultXP','resultBonus','resultProfit','resultTicketIncome','resultAttendance','resultFloorBonus','resultFloorTasks','resultTicketGross','resultArtistFee'])j[k]=0;
-    j.resultNewRecord=false;j.campaignSecondSet=false;j.festival=Festival.create();j.openingCash=j.hasDayOpeningCash?j.dayOpeningCash:this.state.money;j.guideStep=0;j.guidePending=!j.tutorialComplete;j.floorMissions=Floor.newState();this._ensureReaction();
+    j.resultNewRecord=false;j.campaignSecondSet=false;j.festival=Festival.create();j.openingCash=j.hasDayOpeningCash?j.dayOpeningCash:this.state.money;j.guideStep=0;j.guidePending=!j.tutorialComplete;j.floorMissions=Floor.newState();this._ensureReaction(scheduleSeed===undefined?undefined:mixScheduleSeed(scheduleSeed,this.owner,j.day,j.session,0x666c6f6f));
     this.state.clock=18;this.state.satisfaction=0;this.state.performance=0;
     j.feedback=SpectatorFeedback.create({session:j.session,owner:this.owner});
-    j.inspection=Inspection.create({session:j.session,day:j.day,owner:this.owner,seed:this._seed});
+    j.inspection=Inspection.create({session:j.session,day:j.day,owner:this.owner,seed:scheduleSeed===undefined?this._seed:mixScheduleSeed(scheduleSeed,this.owner,j.day,j.session,0x70617472)});
     if(Booking.isCampaign(j.booking)){const tracks=this.metrics().allowedTracks;if(j.booking.showId==='double'||!tracks.includes(this.state.playlist))this.state.playlist=tracks[0]??0;}
     this._buildActors();this._refreshFeedback();this.crew=[];this.escort=null;this.effects=[];this.pour=null;this._seedOrders();this._requestTimer=3*(j.challenge?.72:1.18)*this.metrics().orderIntervalMultiplier;
     this.phase=j.guidePending?'guide':'playing';this.paused=j.guidePending;this.pauseReason=this.paused?'guide':'';this._say('영업 시작! 주문과 공연을 멋지게 운영해 보세요.','The show is open! Serve guests and keep the crowd glowing.');
   }
-  _ensureReaction(){if(!this.floor.reaction)this.floor.reaction=Challenges.newState(Math.floor(this._random()*0x7fffffff)||1,180-this.journey.secondsLeft);}
+  _ensureReaction(scheduleSeed){if(!this.floor.reaction){const gameplaySeed=Math.floor(this._random()*0x7fffffff)||1;this.floor.reaction=Challenges.newState(scheduleSeed??gameplaySeed,180-this.journey.secondsLeft);}}
   _festivalAction(id){
     if(this.playing&&!this.paused&&this.inspection.freezePerformers){this._say('단속반이 지나가면 호응 액션을 다시 사용할 수 있어요.','Crowd actions will be available after the inspectors leave.',4);return{success:false,code:'inspection_blocked'};}
     if(!this.playing||this.paused||!this.festival.liveAttendance)return{success:false,code:'unavailable'};
