@@ -9,13 +9,6 @@ const bounds=value=>{
 const rectangle=(left,top,width,height,hidden=false)=>({left,top,width,height,right:left+width,bottom:top+height,hidden});
 const area=value=>(value.right-value.left)*(value.bottom-value.top);
 
-// Two unscaled 292px cards, their 8px gap, the collapsed quest and the
-// existing bottom tiles must all fit before the reference presentation is used.
-export function canUseReferenceCards(width,height){
-  const tiles=clamp(height*.23,78,140);
-  return width>=height&&height-tiles>=666;
-}
-
 export function rectIntersects(first,second,padding=0){
   const a=bounds(first),b=bounds(second);
   return a.left<b.right+padding&&a.right>b.left-padding&&a.top<b.bottom+padding&&a.bottom>b.top-padding;
@@ -48,7 +41,7 @@ function freeRectangles(container,obstacles,padding){
  * related controls together inside it, rather than painting parallel popups.
  * No full-screen scrim is part of this plan. A viewport that cannot fit required controls fails loudly
  * rather than silently shrinking the game or deleting a feature. */
-export function planVenueUI({width,height,regions=[],questOpen=false,liveOpen=false,hasOverlay=false,showMessage=false,referenceCards=false}={}){
+export function planVenueUI({width,height,regions=[],questOpen=false,liveOpen=false,hasOverlay=false,showMessage=false}={}){
   if(!(Number.isFinite(width)&&Number.isFinite(height)&&width>0&&height>0))throw new TypeError('Venue UI needs positive CSS viewport dimensions.');
   const protectedRegions=regions.map(region=>({...bounds(region),kind:region.kind}));
   if(protectedRegions.some(region=>region.right<=region.left||region.bottom<=region.top))throw new TypeError('Protected regions need positive area.');
@@ -77,7 +70,7 @@ export function planVenueUI({width,height,regions=[],questOpen=false,liveOpen=fa
   const tileHeight=Math.max(64,Math.min(clamp(height*.23,78,140),height-padding-stageBottom-padding));
   const tileTop=height-padding-tileHeight,toolsTop=height-padding-toolHeight;
   const rightCity=stage.length?width-padding-Math.max(...stage.map(region=>region.right))-padding:width*.3;
-  const cardWidth=Math.min(referenceCards?clamp(width*.151,226,260):260,rightCity),expandedQuestHeight=clamp(height*.24,120,164),liveHeight=referenceCards?292:260;
+  const cardWidth=Math.min(260,rightCity),expandedQuestHeight=clamp(height*.24,120,164),liveHeight=260;
   const cardLeft=width-padding-cardWidth,liveBottom=tileTop-padding;
   const fullQuest=rectangle(cardLeft,padding,cardWidth,expandedQuestHeight),fullLive=rectangle(cardLeft,liveBottom-liveHeight,cardWidth,liveHeight);
   const compact=cardWidth<226||fullLive.top<fullQuest.bottom+padding||!clear(fullQuest,[])||!clear(fullLive,[]);

@@ -8,10 +8,7 @@ const action=(type,label,payload={},disabled=false,extra='')=>`<button type="but
 
 /** A selected-owner office scene. Art is requested only when the desk is opened. */
 export function createDayDesk({g,asset,t,name}){
-  if(typeof document!=='undefined'&&!document.querySelector('link[data-daydesk-dialogue-style]')){
-    const stylesheet=document.createElement('link');stylesheet.rel='stylesheet';stylesheet.href=new URL('./daydesk-dialogue.css',import.meta.url).href;stylesheet.dataset.daydeskDialogueStyle='';document.head.append(stylesheet);
-  }
-  let manual=0,dialogueTurn=0,dialogueBand='freewill',lastShowId='',workPanel=null,workScroll=0;
+  let manual=0;
   const plan=()=>g.journey.booking;
   const owner=()=>Math.max(0,Math.min(2,g.owner|0));
   const ownerName=()=>name(catalog.owners[owner()]);
@@ -71,71 +68,21 @@ export function createDayDesk({g,asset,t,name}){
       <section class="desk-pane desk-mobile-pane" data-desk-pane="phone" hidden><div class="desk-pane-top">PHONE / ${t('ARTIST CONFIRMATION','출연진 일정 확인')}</div><h2>${esc(selectedName)}</h2><div class="desk-phone-display"><div class="desk-contact"><span>♪</span><div><strong>${esc(selectedName)}</strong><small>${t('TONIGHT’S LIVE LINEUP','오늘의 라이브 출연진')}</small></div></div><p class="desk-message mine">${selected?t('Let’s confirm tonight’s lineup and ticket plan.','오늘 출연진과 티켓 기획을 확인할게요.'):t('Choose your show on the computer first.','먼저 컴퓨터에서 공연을 선택하세요.')}</p>${isConfirmed?`<p class="desk-message reply">${t('Confirmed! See you on stage tonight.','일정 확인 완료! 오늘 무대에서 만나요.')}</p>`:`<div class="desk-message-await">${isPlanned?t('The saved plan is ready to confirm.','저장한 기획대로 일정을 확인합니다.'):t('Save the show plan before confirming.','공연 기획을 저장한 뒤 확인할 수 있습니다.')}</div>`}</div>${action('deskWork',isConfirmed?t('LINEUP CONFIRMED ✓','출연진 확인 완료 ✓'):t('CONFIRM TONIGHT’S LINEUP','오늘 출연진 일정 확인'),{task:1},!selected||!isPlanned||isConfirmed,'class="desk-main-action"')}<p class="desk-confirm-note">${t('Changing the show, ticket price or promotion clears confirmation.','공연·티켓 가격·홍보를 바꾸면 기획과 일정 확인을 다시 진행합니다.')}</p></section></aside></main>
       <footer class="desk-footer"><div><strong>${ready?t('READY · ','준비 완료 · ')+esc(selectedName):isPlanned?t('NEXT · CONFIRM THE LINEUP ON THE PHONE','다음 · 휴대폰에서 출연진 일정 확인'):t('NEXT · CHOOSE AND SAVE THE SHOW PLAN','다음 · 공연을 선택하고 기획 저장')}</strong><span>${esc(g.message||nextUnlock(stage))}</span></div>${action('launch',t('OPEN TONIGHT’S VENUE →','밤 영업 시작 →'),{},!ready,'class="desk-launch"')}</footer></section>`;
   }
-  /** Keep the authored campaign controls intact while presenting their real state as a conversation. */
-  function dialogueMarkup(){
-    const p=plan(),m=g.metrics(),o=owner(),selected=m.show,isPlanned=planned(),isConfirmed=confirmed(),stage=m.campaignStage||p.campaignStage||1;
-    if(lastShowId!==(p.showId||'')){lastShowId=p.showId||'';dialogueTurn=0;dialogueBand=p.showId==='july'?'july':'freewill';}
-    const band=p.showId==='double'?dialogueBand:p.showId==='july'?'july':'freewill';
-    const bandName=band==='july'?t('July Wants More','줄라이원츠모어'):t('Freewill','프리윌');
-    const speakingBand=!!selected&&dialogueTurn===0,speaker=speakingBand?bandName:ownerName(),ready=!!m.canLaunch;
-    const selectedName=showName(selected),tracks=(selected?.tracks||[]).map(i=>esc(name(catalog.playlists[i]))).join(' · ')||'—';
-    let copy;
-    if(!selected)copy=t('Every show brings a different crowd. Who should play tonight?\nChoose a show, check the forecast, then save the plan and confirm by phone.','공연마다 찾아오는 관객이 달라요. 오늘은 누구를 무대에 세울까요?\n공연을 선택한 뒤 예상 정산을 확인하고, 기획 저장과 전화 확인을 차례로 진행해요.');
-    else if(isConfirmed)copy=speakingBand?t('The schedule is confirmed! See you on stage tonight.\nCheck the plan once more, then open the venue when you’re ready.','공연 일정 확인 완료! 오늘 무대에서 만나요.\n선택한 기획을 한 번 더 살펴보고, 준비가 되면 영업을 시작해 주세요.'):t('The lineup and schedule are confirmed.\nLet’s open the venue and welcome tonight’s crowd.','출연진과 공연 일정까지 확인했어요.\n이제 문을 열고 오늘의 관객을 맞이해 볼까요?');
-    else if(isPlanned)copy=speakingBand?t('The show plan is saved.\nPlease confirm the artists’ schedule by phone before opening the venue.','공연 기획이 저장되었네요.\n공연을 시작하기 전에 전화로 출연진 일정을 최종 확인해 주세요.'):t('The show plan is saved.\nI’ll confirm the artists’ schedule by phone and get the venue ready.','공연 기획 저장을 마쳤어요.\n전화로 출연진 일정을 확인하고 오늘의 공연을 준비할게요.');
-    else if(speakingBand)copy=p.showId==='double'?t('Tonight’s double bill features Freewill and July Wants More.\nPlease check the combined artist fee, expected crowd and all five tracks.','오늘은 프리윌과 줄라이원츠모어의 합동 공연이에요.\n두 팀의 출연료와 예상 관객, 공연에서 재생할 다섯 곡을 확인해 주세요.'):band==='july'?t('Let’s take a look at July Wants More Live.\nOur tracks are Hey and No Matter How. Please check the fee and audience forecast.','이번에는 줄라이원츠모어 라이브를 살펴볼까요?\n공연 음원은 Hey와 No Matter How예요. 출연료와 예상 관객도 확인해 주세요.'):t('Let’s play Freewill Live tonight.\nPlease check the artist fee, expected crowd and the tracks in tonight’s show.','오늘은 프리윌 라이브로 함께해요.\n출연료와 예상 관객을 확인하고, 공연에서 재생할 곡도 살펴봐 주세요.');
-    else copy=t('The artist fee comes out of ticket settlement after the show.\nI’ll check the tracks, save the plan, then confirm the schedule by phone.','좋아요. 출연료는 공연 후 티켓 정산에서 반영되는군요.\n음원 목록까지 확인한 뒤, 기획을 저장하고 전화로 최종 확인할게요.');
-    const source=document.createElement('template');source.innerHTML=campaignMarkup();
-    const header=source.content.querySelector('.desk-header');header.className='dialogue-header';header.querySelector('h1').textContent=t('SHOW PLANNING · BOOKING','공연 기획 · 섭외');
-    const controls=source.content.querySelector('.desk-console'),forecast=source.content.querySelector('.desk-forecast'),growth=source.content.querySelector('.desk-growth');
-    controls.classList.add('dialogue-work-panel');controls.querySelector('[data-desk-pane="phone"]').prepend(forecast);controls.append(growth);
-    controls.insertAdjacentHTML('afterbegin',`<header class='dialogue-work-heading'><h2>${t('SHOW PLAN · TICKETS · FORECAST','공연 기획 · 티켓 · 예상 정산')}</h2>${action('ui:deskFocus',t('RETURN TO DIALOGUE','대화로 돌아가기'),{channel:'speech'},false,'class="dialogue-work-close"')}</header>`);
-    const feedback=g.message||(!selected?t('Choose tonight’s show first.','오늘의 공연을 먼저 선택하세요.'):isConfirmed?t('Phone confirmation complete. The show is ready.','전화 확인 완료. 공연을 시작할 수 있어요.'):isPlanned?t('Show planned. Confirm by phone.','공연 기획 완료. 전화로 최종 확인하세요.'):t('Check the artist fee, expected crowd and tracks.','출연료 · 예상 관객 · 음원을 확인하세요.'));
-    const save=()=>action('deskWork',isPlanned?t('PLAN SAVED ✓','기획 저장 완료 ✓'):t('SAVE PLAN','기획 저장'),{task:0},!selected||isPlanned,'class="dialogue-save"');
-    const confirm=()=>action('deskWork',isConfirmed?t('CONFIRMED ✓','전화 확인 완료 ✓'):t('CONFIRM BY PHONE','전화 확인'),{task:1},!selected||!isPlanned||isConfirmed,'class="dialogue-confirm"');
-    return `<section class='daydesk campaign-desk dialogue-desk' data-owner-index='${o}' data-focus='${CHANNELS[manual]}' aria-label='${esc(t('Live house booking office','라이브하우스 공연 기획실'))}'>
-      <main class='daydesk-scroll dialogue-scroll'><div class='dialogue-layout'>
-        <img class='dialogue-office-background desk-scene-image' src='${esc(asset(DESK_ART[o]))}' alt='' aria-hidden='true' draggable='false'><div class='dialogue-scene-shade' aria-hidden='true'></div>
-        ${header.outerHTML}
-        <nav class='dialogue-steps' aria-label='${t('Show preparation','공연 준비 순서')}'>${action('ui:deskFocus',t('SHOW · TICKETS','공연 선택 · 기획 설정'),{channel:'monitor'},false,'data-desk-channel="monitor"')}${save()}<i>›</i>${confirm()}<i>›</i>${action('launch',t('OPEN TONIGHT’S VENUE','공연 시작'),{},!ready,'class="dialogue-launch"')}</nav>
-        <section class='dialogue-stage' aria-label='${t('Owner and artists’ conversation','사장과 출연진 대화')}'>
-          <figure class='dialogue-owner-illustration ${speakingBand?'inactive':'active'}'><img src='${esc(asset(PORTRAITS[o]))}' alt='${esc(ownerName())}' draggable='false'><figcaption><b>${esc(ownerName())}</b><span>${t('OWNER','사장')}</span></figcaption></figure>
-          <figure class='dialogue-band-illustration ${speakingBand?'active':'inactive'}'><div class='dialogue-band-crop'>${selected?`<img class='${band==='july'?'dialogue-july-illustration':'dialogue-freewill-illustration'}' src='${esc(asset('dialogue/'+(band==='july'?'july-lineup-approved.png':'freewill-stage-approved.png')))}' alt='${esc(bandName+t(' original group illustration',' 기존 밴드 일러스트'))}' draggable='false'>`:`<div class='dialogue-empty'><strong>${t('WHO’S PLAYING TONIGHT?','오늘의 출연진은?')}</strong>${action('ui:deskFocus',t('CHOOSE TONIGHT’S SHOW','오늘의 공연 선택'),{channel:'monitor'})}</div>`}</div><figcaption><b>${selected?esc(bandName):t('SELECT THE LINEUP','출연진 선택')}</b><span>${t('ARTISTS','출연진')}</span>${p.showId==='double'?`<div class='dialogue-band-switch'>${action('ui:deskDialogue',t('FREEWILL','프리윌'),{band:'freewill'},false,`aria-pressed='${band==='freewill'}'`)}${action('ui:deskDialogue',t('JULY WANTS MORE','줄라이원츠모어'),{band:'july'},false,`aria-pressed='${band==='july'}'`)}</div>`:''}</figcaption></figure>
-        </section>
-        <section class='dialogue-facts-strip' aria-label='${t('Selected show forecast','선택한 공연 예상 정보')}'><div><span>${t('TONIGHT','오늘의 공연')}</span><strong>${esc(selectedName)}</strong></div><div><span>${t('ARTIST FEE','출연료')}</span><strong>${money(m.artistFee)}</strong></div><div><span>${t('AUDIENCE','예상 관객')}</span><strong>${m.attendance||0} / ${m.venueCapacity||'—'}${t('','명')}</strong></div><div><span>${t('NET TICKETS · MAX','티켓 순정산 · 최대')}</span><strong>${money(m.netTicketIncome)}</strong></div><div class='dialogue-tracks'><span>${t('TRACKS','공연 음원')}</span><strong>${tracks}</strong></div></section>
-        <section class='dialogue-box' aria-live='polite'><div class='dialogue-speaker-name'>${esc(speaker)}</div><div class='dialogue-topline'><span>${esc(selectedName)} · ${speakingBand?t('ARTISTS’ REPLY','출연진 응답'):t('OWNER’S REPLY','사장 응답')}</span><small>${selected?dialogueTurn+1:1} / ${selected?2:1}</small></div><p class='dialogue-copy'>${esc(copy)}</p><div class='dialogue-bottom'><span class='dialogue-feedback'>${esc(feedback)}</span><div class='dialogue-actions'>${action('ui:deskDialogue',t('PREVIOUS','이전 대사'),{step:'previous'},!selected||dialogueTurn===0)}${save()}${confirm()}${action('ui:deskDialogue',t('NEXT ▶','다음 대사 ▶'),{step:'next'},!selected||dialogueTurn===1,'class="dialogue-next"')}</div></div></section>
-        <footer class='dialogue-footer'><span>${esc(nextUnlock(stage))}</span><div>${action('ui:staff',t('HIRE STAFF','직원 고용'))}${action('ui:upgrades',t('FACILITY INVESTMENT','시설 투자'))}${action('ui:deskFocus',t('FORECAST · PHONE','정산 · 일정 확인'),{channel:'phone'},false,'data-desk-channel="phone"')}</div></footer>
-      </div></main>
-      <div class='dialogue-work-overlay' ${manual===0?'hidden':''}>${controls.outerHTML}</div>
-    </section>`;
-  }
-  function markup(){
-    if(workPanel?.isConnected)workScroll=workPanel.scrollTop;
-    return plan()?.deskVersion===2?dialogueMarkup():legacyMarkup();
-  }
+  function markup(){return plan()?.deskVersion===2?campaignMarkup():legacyMarkup();}
   function focus(channel){
     const index=CHANNELS.indexOf(channel);if(index<0)return;
-    if(manual!==index){workPanel=null;workScroll=0;}
     manual=index;
   }
-  function dialogue({step,band}={}){
-    if(plan()?.deskVersion!==2)return;
-    if(step==='next')dialogueTurn=Math.min(1,dialogueTurn+1);
-    if(step==='previous')dialogueTurn=Math.max(0,dialogueTurn-1);
-    if(plan()?.showId==='double'&&(band==='freewill'||band==='july'))dialogueBand=band;
-  }
-  function reset(){manual=0;dialogueTurn=0;dialogueBand='freewill';lastShowId='';workPanel=null;workScroll=0;}
+  function reset(){manual=0;}
   function update(root,now=performance.now()){
     const desk=root.querySelector('.daydesk');if(!desk)return;
     const index=manual,channel=CHANNELS[index];
     desk.dataset.focus=channel;
-    const work=desk.querySelector('.dialogue-work-overlay');if(work)work.hidden=manual===0;
     for(const pane of desk.querySelectorAll('[data-desk-pane]'))pane.hidden=pane.dataset.deskPane!==channel;
     for(const button of desk.querySelectorAll('[data-desk-channel]'))button.setAttribute('aria-pressed',String(button.dataset.deskChannel===channel));
-    const panel=desk.querySelector('.dialogue-work-panel');if(panel&&panel!==workPanel){workPanel=panel;panel.scrollTop=workScroll;}
     const image=desk.querySelector('.desk-scene-image');
     desk.classList.toggle('desk-image-ready',!!(image?.complete&&image.naturalWidth));
     const caption=desk.querySelector('[data-desk-caption]');if(caption)caption.textContent=[t('THINKING ABOUT TONIGHT','오늘 공연 구상 중'),t('WORKING ON THE COMPUTER','컴퓨터로 기획 중'),t('CHECKING THE PHONE','휴대폰으로 일정 확인 중')][index];
   }
-  return{markup,focus,dialogue,reset,update};
+  return{markup,focus,reset,update};
 }

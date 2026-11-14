@@ -7,8 +7,7 @@ import {OWNER_VENUES,ownerVenue,VENUE_PROPS} from './owner-venues.js';
 import {Audience} from './audience.js';
 import {Campaign} from './campaign.js';
 import {Festival} from './festival.js';
-import {planVenueUI,canUseReferenceCards} from './protected-layout.js';
-import {planPopupCard,applyPopupCardPlacement,clearPopupCardPlacement} from './popup-cards.js';
+import {planVenueUI} from './protected-layout.js';
 
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=(v,sign=false)=>(sign&&v>0?'+':'')+'₩'+Math.round((+v||0)*1000).toLocaleString('ko-KR');
@@ -56,11 +55,7 @@ export async function startGame({root,assetsBase='./FastGame/art/',assets:predec
   const dayDesk=createDayDesk({g,asset,t,name});
   const icon=(key,alt='')=>`<img class="hud-icon" src="${esc(asset('icons/'+key+'.png'))}" alt="${esc(alt)}" draggable="false">`;
   const worldState=()=>({...g.state,owner:g.owner,phase:g.phase,paused:g.paused||orientationBlocked,journey:g.journey,floor:g.floor,reaction:g.reaction,inspection:g.inspection,visualPreview:ui.menu==='operations'?ui.visualPreview:null,actors:g.actors,orders:g.orders,effects:g.effects,elapsed:g.elapsed,cleanupReadyWorkers:g.cleanupReadyWorkers,guestExitFinished:g.guestExitFinished});
-  const world=createWorld(canvas,{assets,getState:worldState,getPresentationFrame:({width,height})=>{
-    if(width<height)return null;
-    const reference=canUseReferenceCards(width,height),bounds=g.owner===0?{left:17,right:960}:g.owner===1?{left:27,right:960}:{left:28,right:932};
-    return{left:reference?24:4,right:reference?width-8-Math.max(226,Math.min(260,width*.151))-16:width-4,bounds};
-  }});
+  const world=createWorld(canvas,{assets,getState:worldState});
   let stopped=false,dirty=true,orientationBlocked=false,layoutPlan=null,layoutKey='',lastKey='',previousPhase=g.phase,raf=0,last=performance.now();
   const music=new MusicPlayer({getIndex:()=>g.state.playlist,getPaused:()=>g.journey.musicPaused,tracks:catalog.playlists,baseURL:new URL('.',document.baseURI),onchange:()=>{dirty=true;}});
   const albumArt=new AlbumArtLoader({baseURL:base,covers:assets.albumCovers});let requestedAlbumIndex=-1;
@@ -141,27 +136,13 @@ export async function startGame({root,assetsBase='./FastGame/art/',assets:predec
     if(!active||orientationBlocked)return;
     world.resize();
     const windowNode=css.querySelector('.venue-window'),regions=world.getProtectedRegions(worldState());
-    const popupKind=windowNode?.childElementCount===1?(windowNode.querySelector('.order-dialog')?'order':windowNode.querySelector('.reaction-card')?'reaction':null):null;
-    const key=JSON.stringify([box.width,box.height,g.owner,regions.map(r=>[r.kind,r.left,r.top,r.right,r.bottom]),ui.questsOpen,ui.liveOpen,!!windowNode,popupKind,!!g.message]);
-    if(key!==layoutKey){
-      const input={width:box.width,height:box.height,regions,questOpen:ui.questsOpen,liveOpen:ui.liveOpen,hasOverlay:!!windowNode&&!popupKind,showMessage:!!g.message,referenceCards:canUseReferenceCards(box.width,box.height)};
-      layoutPlan=planVenueUI(input);
-      if(popupKind){
-        const obstacles=Object.entries(layoutPlan.rects).filter(([name])=>name!=='live'&&name!=='window').map(([name,rect])=>({name,...rect}));
-        const candidate=planPopupCard({width:box.width,height:box.height,liveRect:layoutPlan.rects.live,regions,obstacles});
-        if(candidate.fits)layoutPlan={...layoutPlan,popupCard:{...candidate,kind:popupKind},rects:{...layoutPlan.rects,window:{...candidate.rect,hidden:false}}};
-        else layoutPlan=planVenueUI({...input,hasOverlay:true});
-      }
-      layoutKey=key;
-    }
+    const key=JSON.stringify([box.width,box.height,g.owner,regions.map(r=>[r.kind,r.left,r.top,r.right,r.bottom]),ui.questsOpen,ui.liveOpen,!!windowNode,!!g.message]);
+    if(key!==layoutKey){layoutPlan=planVenueUI({width:box.width,height:box.height,regions,questOpen:ui.questsOpen,liveOpen:ui.liveOpen,hasOverlay:!!windowNode,showMessage:!!g.message});layoutKey=key;}
     host.dataset.uiFocus=layoutPlan.focus||'none';host.dataset.compactHud=String(layoutPlan.compact);
     const selectors={settings:'.hud-settings',score:'.hud-score',session:'.hud-session',quest:'.quest-panel',live:'.live-console',menu:'.menu-ready',mood:'.mood',tools:'.venue-tools',badge:'.venue-show-badge',toast:'.toast'};
     const place=(node,rect)=>{if(!node||!rect)return;for(const prop of ['left','top','width','height'])node.style[prop]=rect[prop]+'px';node.style.right='auto';node.style.bottom='auto';node.style.transform='none';node.hidden=!!rect.hidden;};
     for(const [name,selector]of Object.entries(selectors))place(hudRoot.querySelector(selector),layoutPlan.rects[name]);
-    clearPopupCardPlacement(windowNode);
     place(windowNode,layoutPlan.rects.window);
-    if(layoutPlan.popupCard)applyPopupCardPlacement(windowNode,layoutPlan.popupCard,{kind:layoutPlan.popupCard.kind});
-    host.dataset.popupPresentation=layoutPlan.popupCard?'card':windowNode?'safe-window':'none';
     const live=hudRoot.querySelector('.live-console'),expanded=!layoutPlan.compact||ui.liveOpen;
     live?.classList.toggle('is-collapsed',!expanded);const toggle=live?.querySelector('.live-collapse');if(toggle){toggle.hidden=!layoutPlan.compact;toggle.setAttribute('aria-expanded',String(expanded));toggle.textContent=expanded?'⌃':'⌄';}
     const toast=hudRoot.querySelector('.toast');if(toast)toast.hidden=!!layoutPlan.rects.toast.hidden||!g.message;
@@ -226,13 +207,12 @@ export async function startGame({root,assetsBase='./FastGame/art/',assets:predec
       case'previewBack':ui.visualPreview=null;break;
       case'language':run('language',{language:g.language==='en'?'ko':'en'});break;
       case'deskFocus':dayDesk.focus(p.channel);break;
-      case'deskDialogue':dayDesk.dialogue(p);break;
       case'floor':if(ui.menu)closeMenu();if(!g.paused)ui.floorOpen=!ui.floorOpen;break;
       case'floorClose':ui.floorOpen=false;break;
     }
     dirty=true;
   }
-  function handleAction(action,p={}){if(orientationBlocked&&action!=='ui:fullscreen')return;if(action.startsWith('ui:'))uiAction(action.slice(3),p);else{if(action==='deskWork'&&g.journey.booking?.deskVersion!==2)dayDesk.focus(p.task===1?'phone':'monitor');if(['menuItem','prepare'].includes(action)&&ui.menu==='service')closeMenu();if(['lobby','next','retry','start','continue','resume'].includes(action))ui.menu=null;const result=run(action,p);if(action==='menuItem'&&!result.success&&result.code==='wrong_item')ui.pendingService=true;if(action==='playlist'&&allowedTracks().includes(p.index)){run('musicState',{paused:false});music.select();}}wakeAudio();}
+  function handleAction(action,p={}){if(orientationBlocked&&action!=='ui:fullscreen')return;if(action.startsWith('ui:'))uiAction(action.slice(3),p);else{if(action==='deskWork')dayDesk.focus(p.task===1?'phone':'monitor');if(['menuItem','prepare'].includes(action)&&ui.menu==='service')closeMenu();if(['lobby','next','retry','start','continue','resume'].includes(action))ui.menu=null;const result=run(action,p);if(action==='menuItem'&&!result.success&&result.code==='wrong_item')ui.pendingService=true;if(action==='playlist'&&allowedTracks().includes(p.index)){run('musicState',{paused:false});music.select();}}wakeAudio();}
   const clickHandler=e=>{const b=e.target.closest('[data-action]');if(!b||!host.contains(b)||b.disabled)return;handleAction(b.dataset.action,JSON.parse(b.dataset.payload||'{}'));};
   const changeHandler=e=>{if(orientationBlocked)return;if(e.target.matches('[data-desk-selected]')){dayDesk.focus('monitor');run('deskSelect',{selected:e.target.checked});}};
   const keyHandler=e=>{if(orientationBlocked)return;if(g.closing&&g.farewellPending)return;if(e.repeat||e.ctrlKey||e.metaKey||e.altKey||/^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName))return;const key=e.key.toLowerCase();if([' ','p','m','h','e','c','f','1','2','3','4','5','6','escape'].includes(key))e.preventDefault();if(key==='c'||key==='f')handleAction('quick',{kind:key==='c'?1:2});else if(key===' '){if(g.pour)handleAction('pourStop');}else if(/^[1-6]$/.test(key))handleAction('menuItem',{item:+key-1});else if(key==='e')handleAction('prepare');else if(key==='m')uiAction('service',{});else if(key==='h')uiAction('floor',{});else if(key==='p'||key==='escape'){if(ui.menu)closeMenu();else if(ui.floorOpen){ui.floorOpen=false;dirty=true;}else if(g.phase==='guide')handleAction('lobby');else handleAction(g.paused?'resume':'pause');}};
