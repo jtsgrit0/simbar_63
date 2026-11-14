@@ -1,0 +1,75 @@
+{
+  "version": 2,
+  "file": "venue-features.png",
+  "frameWidth": 96,
+  "frameHeight": 96,
+  "columns": 5,
+  "rows": 3,
+  "footX": 48,
+  "footY": 88,
+  "drawWidth": 96,
+  "drawHeight": 96,
+  "sources": {
+    "upgrades": "venue-upgrades-isometric-v2.source.png",
+    "events": "venue-features-v1.runtime.png"
+  },
+  "items": {
+    "draught-1": {
+      "row": 0,
+      "column": 0,
+      "variants": {
+        "ff": {"row": 0, "column": 4}
+      }
+    },
+    "draught-2": {
+      "row": 0,
+      "column": 1,
+      "variants": {
+        "ff": {"row": 1, "column": 4}
+      }
+    },
+    "draught-3": {
+      "row": 0,
+      "column": 2,
+      "variants": {
+        "ff": {"row": 2, "column": 4}
+      }
+    },
+    "open-mic": {
+      "row": 0,
+      "column": 3
+    },
+    "sound-1": {
+      "row": 1,
+      "column": 0
+    },
+    "sound-2": {
+      "row": 1,
+      "column": 1
+    },
+    "sound-3": {
+      "row": 1,
+      "column": 2
+    },
+    "rock-showcase": {
+      "row": 1,
+      "column": 3
+    },
+    "vip-1": {
+      "row": 2,
+      "column": 0
+    },
+    "vip-2": {
+      "row": 2,
+      "column": 1
+    },
+    "vip-3": {
+      "row": 2,
+      "column": 2
+    },
+    "fan-festival": {
+      "row": 2,
+      "column": 3
+    }
+  }
+}

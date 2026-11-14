@@ -22,7 +22,7 @@
 
 .fast-game .settings-shade{z-index:45}
 
-.fast-game.show-closing .reaction-card,.fast-game.show-closing .floor-status{left:12px;right:auto}
+.fast-game .reaction-card,.fast-game.show-closing .floor-status{left:12px;right:auto}
 .fast-game.show-closing .floor-hud{left:12px;right:auto}
 
 .fast-game .daydesk{position:absolute;inset:0;display:flex;flex-direction:column;background:#111721;color:#f7ecd9;overflow:hidden;--desk-gold:#ecc881;--desk-muted:#b4b9bd;--desk-teal:#72d7c3}
