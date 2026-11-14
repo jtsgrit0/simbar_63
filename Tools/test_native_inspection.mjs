@@ -44,7 +44,7 @@ for(const owner of [0,1,2]){
   assert(g.journey.secondsLeft<left,'The show clock must continue during an inspection');
   const rewards={cash:g.state.money,fans:g.state.fans,score:g.journey.score};
   assert.equal(g.act('festival',{id:'dance'}).code,'inspection_blocked','Inspection must take priority over an existing cooldown');
-  assert.equal(g.message,'단속반이 지나가면 가능합니다.');
+  assert.equal(g.message,'단속반이 지나가면 호응 액션을 다시 사용할 수 있어요.');
   assert.deepEqual({cash:g.state.money,fans:g.state.fans,score:g.journey.score},rewards,'A blocked crowd action granted a reward');
   assert.equal(g.festival.blockedByInspection,true);assert.equal(g.festival.canAct,false);
   g.act('pause');const paused=JSON.parse(g.exportSave()),ledger=structuredClone(g.journey.inspection),cast=structuredClone(g.actors);
