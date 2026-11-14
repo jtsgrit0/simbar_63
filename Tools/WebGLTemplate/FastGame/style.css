@@ -173,6 +173,11 @@
  .fast-game .quest-toggle {font-size:13px}.fast-game .venue-ui .night-goal {font-size:10px}.fast-game .venue-show-badge,.fast-game .venue-ui .ops-status {display:none}
  .fast-game .venue-ui .venue-tools .venue-tool {font-size:11px}.fast-game .venue-ui .live-console {--console-width:218px}.fast-game .venue-ui .mood-card img {width:38px;height:38px}
 }
+@media(max-height:500px) and (orientation:landscape) {
+ .fast-game .venue-ui .quest-panel ~ .live-console {top:calc(38px + var(--hud-gap));height:auto}
+ .fast-game .venue-ui .quest-panel.is-open ~ .live-console {top:calc(var(--quest-height) + var(--hud-gap))}
+ .fast-game .venue-ui .toast {left:calc((100% - var(--console-width) - var(--hud-gap))/2);width:min(440px,calc(100% - var(--console-width) - 3 * var(--hud-gap)))}
+}
 .fast-game .css-layer>.pause-shade {position:absolute;inset:0;z-index:45;display:flex;align-items:center;justify-content:center;padding:16px;background:#03060bd9;pointer-events:auto}
 .fast-game .css-layer .pause-ref {position:relative;left:auto;top:auto;transform:none;display:flex;flex-direction:column;gap:12px;width:min(480px,100%);height:auto;min-height:0;max-height:90dvh;padding:24px;overflow:auto;border-color:#a9a080;box-shadow:0 14px 60px #000b}
 .fast-game .css-layer .pause-ref h1 {font-size:26px;line-height:35px;margin:0}.fast-game .css-layer .pause-ref p {font-size:14px;line-height:22px;margin:0;color:#c0cfdf}.fast-game .css-layer .pause-ref button {width:100%;height:44px;min-height:44px;margin:0;padding:6px;font-size:16px}

@@ -46,7 +46,7 @@ export async function startGame({root,assetsBase='./FastGame/art/',assets:predec
   host.innerHTML='<canvas id="unity-canvas" tabindex="0" aria-label="SimBar pixel venue"></canvas><div class="venue-ui"></div><div class="reference-ui"></div><div class="css-layer"></div><section class="orientation-gate" role="dialog" aria-modal="true" aria-labelledby="orientation-title" hidden></section>';
   root.append(host);
   const canvas=host.querySelector('canvas'),hudRoot=host.querySelector('.venue-ui'),ref=host.querySelector('.reference-ui'),css=host.querySelector('.css-layer');
-  const ui={menu:null,opPage:0,mode:g.journey.challenge,floorOpen:false,wasPaused:false,liveTab:'festival',questsOpen:true,visualPreview:null,pendingService:false};
+  const ui={menu:null,opPage:0,mode:g.journey.challenge,floorOpen:false,wasPaused:false,liveTab:'festival',questsOpen:false,visualPreview:null,pendingService:false};
   const consoleScroll={festival:0,music:0};
   const announcedOrders=new WeakSet(),orientationGate=host.querySelector('.orientation-gate');
   const t=(en,ko)=>g.language==='en'?en:ko;
