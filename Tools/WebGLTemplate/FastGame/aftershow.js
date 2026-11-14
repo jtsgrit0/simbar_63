@@ -4,6 +4,9 @@ import {distance,walkable,segment,setRoute,setCrowdRoute,move} from './navigatio
 
 export const BAND_MEMBERS=['singer','guitarist','bassist','drummer'];
 export const GREETING_SECONDS={highfive:1.1,hug:1.5};
+// A waiting person can occupy the authored gather mark. Allow the same
+// 34–40 cm body/route clearance here; greetings still require real contact.
+const GATHER_ARRIVAL=.45;
 const phases=new Set(['stage','approach','highfive','hug','await-exit','exit','gone']);
 const audiencePhases=new Set(['gather','wait','greet','farewell-wait','exit','gone']);
 const spots=[[3.05,.25],[2.8,-1.65],[7.7,.35],[8,-1.65],[3.1,-3.6],[4.05,-4.65],[7.65,-3.2],[8.25,-4.65]];
@@ -300,7 +303,7 @@ export function tickAfterShow(state,actors,dt){
       continue;
     }
     if(item.phase==='gather'){
-      fan.action='walk';if(route(fan,point(item.targetX,item.targetZ),actors,dt,1.15,.30)){item.phase='wait';fan.action='aftershow-wait';fan.moving=false;}
+      fan.action='walk';if(route(fan,point(item.targetX,item.targetZ),actors,dt,1.15,GATHER_ARRIVAL)){item.phase='wait';fan.action='aftershow-wait';fan.moving=false;}
     }else if(item.phase==='wait'){fan.action='aftershow-wait';fan.moving=false;const m=state.members.find(m=>m.id===item.partner);const member=m&&find(actors,m.id);if(member)face(fan,member);}
     else if(item.phase==='farewell-wait'){fan.action='aftershow-wait';fan.moving=false;}
   }
