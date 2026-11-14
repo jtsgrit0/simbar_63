@@ -245,3 +245,24 @@
 @media(max-width:1100px),(max-height:500px) {
  .fast-game .hud-session {width:calc(100% - max(var(--gear-size),49px) - var(--score-width) - var(--quest-width) - 3 * var(--hud-gap))}
 }
+
+/* Order and preparation controls share the clear space in the bottom HUD row. */
+.fast-game .css-layer .bottom-service-dock {position:absolute;top:auto;right:auto;transform:none}
+.fast-game .css-layer .order-dialog-shade.bottom-service-dock {inset:auto;padding:0;display:block;background:transparent;pointer-events:none}
+.fast-game .css-layer .bottom-order-dialog {width:100%;height:100%;max-height:none;display:grid;grid-template-columns:minmax(0,1.4fr) repeat(2,minmax(0,1fr));gap:8px;padding:8px;pointer-events:auto}
+.fast-game .bottom-order-dialog .order-summary {min-width:0;min-height:0;margin:0;padding:1px 8px;display:flex;flex-direction:column;flex-wrap:nowrap;align-items:flex-start;justify-content:center;gap:0;overflow:auto}
+.fast-game .bottom-order-dialog .order-summary>* {margin:0;flex-shrink:0;max-width:100%}
+.fast-game .bottom-order-dialog .order-dialog-actions {display:contents}
+.fast-game .bottom-order-dialog .order-dialog-actions button {min-width:0;min-height:43px;height:100%;margin:0;flex:none}
+.fast-game .css-layer .pour-ref.bottom-service-dock {display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);align-items:center;gap:12px;max-height:none;padding:8px}
+.fast-game .bottom-service-dock .pour-details,.fast-game .bottom-service-dock .pour-controls {min-width:0;max-height:100%;overflow:auto}
+.fast-game .bottom-service-dock .pour-head {gap:8px;align-items:flex-start}
+.fast-game .bottom-service-dock .pour-head span {min-width:0}
+.fast-game .bottom-service-dock .pour-head b {flex:none;white-space:nowrap}
+.fast-game .bottom-service-dock .pour-subtitle {margin:4px 0 0}
+.fast-game .bottom-service-dock .pour-track {min-width:0}
+.fast-game .bottom-service-dock .pour-stop {flex:none}
+.fast-game .bottom-service-dock .pour-help {margin-top:4px}
+.fast-game.compact-service-dock .venue-ui .venue-tools,.fast-game.compact-service-dock .venue-ui .menu-ready,.fast-game.compact-service-dock .venue-ui .mood {visibility:hidden;pointer-events:none}
+.fast-game.compact-service-dock.preparing-service-dock .venue-ui .quest-panel ~ .live-console {top:calc(38px + var(--hud-gap));bottom:calc(var(--active-service-height) + var(--hud-gap));height:auto}
+.fast-game.compact-service-dock.preparing-service-dock .venue-ui .quest-panel.is-open ~ .live-console {top:calc(var(--quest-height) + var(--hud-gap))}
