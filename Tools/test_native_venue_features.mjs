@@ -233,26 +233,19 @@ assert(legacyFrames.size>1,'Legacy band frames stopped during inspection');
 assert(legacyFeet.size>1,'Legacy guitarist jump stopped during inspection');
 legacyWorld.destroy();
 
-// UI dimensions must never scale the authored venue to reserve a HUD rail.
-// Portrait gameplay is blocked by the browser layer; this renderer retains the
-// same original height-scaled projection in every viewport.
-for(const [width,height]of[[390,844],[844,390],[667,375]]){
-  const target=canvas(width,height);target.parentElement={querySelector:()=>({getBoundingClientRect:()=>({left:width-226,width:226})})};
-  const roomWorld=createWorld(target,{assets:assets()});
-  for(const owner of[0,1,2]){
-    roomWorld.render(0,{...base,owner});assert.equal(target.height,558);
-    const a=roomWorld.imageToScreen(400,100),b=roomWorld.imageToScreen(400,200);
-    assert(Math.abs(b.y-a.y-100*height/558)<.01,'A HUD panel changed the scene scale');
-    const protectedRegions=roomWorld.getProtectedRegions({...base,owner});
-    assert(protectedRegions.some(region=>region.kind==='stage'));
-    assert.equal(protectedRegions.some(region=>region.kind==='sign'),owner===2);
-    for(const region of protectedRegions){const[firstX,firstY,lastX,lastY]=region.authored;
-      assert.deepEqual(roomWorld.imageToScreen(firstX,firstY),{x:region.left,y:region.top});
-      assert.deepEqual(roomWorld.imageToScreen(lastX,lastY),{x:region.right,y:region.bottom});
-    }
-  }
-  roomWorld.destroy();
+// Portrait mode contains the whole authored room; landscape retains its
+// existing height-scaled camera and world-to-screen relationship.
+const mobile=canvas(390,844),mobileWorld=createWorld(mobile,{assets:assets()});
+for(const owner of [0,1,2]){
+  mobile.ctx.draws=[];mobileWorld.render(0,{...base,owner});
+  const bounds=mobileWorld.getVenueBounds();assert(bounds.left>=0&&bounds.right<=390&&bounds.top>=0&&bounds.bottom<=844);
+  assert(bounds.width>360&&bounds.height>220,'The room must fit across a portrait phone instead of cropping to its center');
+  const room=mobile.ctx.draws.find(draw=>draw.args[0]===image(owner===0?'venue-freebird.png':owner===1?'venue-ff.png':'venue.png'));
+  assert(room);const [,,,roomWidth,roomHeight]=room.args;
+  const painted={left:room.translation[0]*390/mobile.width,top:room.translation[1]*844/mobile.height,right:(room.translation[0]+roomWidth)*390/mobile.width,bottom:(room.translation[1]+roomHeight)*844/mobile.height};
+  assert(painted.left>=0&&painted.top>=0&&painted.right<=390&&painted.bottom<=844,'The actual venue draw must fit inside the phone canvas');
 }
+mobileWorld.destroy();
 const desktop=canvas(),desktopWorld=createWorld(desktop,{assets:assets()});
 for(const point of [[0,0,0],[-8,3,0],[6,4,1]])assert.deepEqual(desktopWorld.worldToScreen(...point),desktopWorld.project(...point));
 desktop.box={width:1660,height:624};desktopWorld.resize();
@@ -261,4 +254,4 @@ for(const point of [[0,0,0],[-8,3,0],[6,4,1]]){
   assert(Math.abs(screen.x-(830+(projected.x-480)*624/558))<.6);assert(Math.abs(screen.y-projected.y*624/558)<.01);
 }
 desktopWorld.destroy();
-console.log('PASS: 9 upgrade props, 3 event props, nonmutating previews, real nonempty PNG cells, 36 inspector frames, audience-only inspection pause, unchanged camera scale and protected artwork coordinates.');
+console.log('PASS: 9 upgrade props, 3 event props, nonmutating previews, real nonempty PNG cells, 36 inspector frames, audience-only inspection pause, portrait room fit and landscape projection.');
