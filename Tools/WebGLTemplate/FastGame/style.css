@@ -146,7 +146,11 @@
 .fast-game .venue-ui .track-list {display:flex;flex-direction:column;gap:4px;flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#748c9d #17212f}
 .fast-game .venue-ui .track-list button {position:static;display:flex;align-items:center;gap:6px;flex-shrink:0;width:100%;height:auto;min-height:30px;margin:0;padding:4px 6px;border:1px solid #485f7a;border-radius:6px;background:#23364e;font-size:13px;line-height:18px;text-align:left}
 .fast-game .venue-ui .track-list button.current {border-color:#82cbb1;background:#205b4b}.fast-game .venue-ui .track-list button:disabled {opacity:.6}
-.fast-game .track-number {font-size:10px;color:#a8bdce;flex-shrink:0}.fast-game .track-title {min-width:0;flex:1;overflow-wrap:anywhere}.fast-game .track-state {font-size:11px;color:#a9f5d0}
+.fast-game .track-number {font-size:10px;color:#a8bdce;flex-shrink:0}.fast-game .track-title {display:block;min-width:0;flex:1;overflow:hidden;white-space:nowrap;overflow-wrap:normal}.fast-game .track-state {font-size:11px;color:#a9f5d0;flex-shrink:0}
+.fast-game .track-title-runner {display:inline-flex;gap:24px;white-space:nowrap}.fast-game .track-title-text,.fast-game .track-title-repeat {display:block;flex:none}
+.fast-game .track-title.is-overflowing .track-title-runner {animation:track-title-scroll var(--track-marquee-duration) linear var(--track-marquee-delay,1s) infinite;will-change:transform}
+@keyframes track-title-scroll {from{transform:translateX(0)}to{transform:translateX(calc(-1 * var(--track-marquee-distance)))}}
+@media(prefers-reduced-motion:reduce){.fast-game .track-title.is-overflowing{overflow-x:auto;scrollbar-width:none}.fast-game .track-title.is-overflowing .track-title-runner{animation:none;transform:none;will-change:auto}.fast-game .track-title-repeat{display:none}}
 .fast-game .venue-ui .toast {top:calc(var(--gear-size) + 10px);left:50%;transform:translateX(-50%);width:min(580px,calc(100% - 2 * var(--quest-width)));padding:8px 12px;border:1px solid #8bafbb;background:#10202cf5;box-shadow:0 4px 15px #0008;font-size:14px;line-height:20px;pointer-events:none;z-index:20}
 @media(max-width:1100px),(max-height:500px) {
  .fast-game .venue-ui {inset:6px;--hud-gap:6px;--gear-size:38px;--score-width:clamp(156px,22vw,230px);--quest-width:206px;--quest-height:104px;--console-width:226px;--tile-width:74px;--tile-height:94px;--tool-size:68px}
