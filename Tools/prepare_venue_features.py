@@ -1,10 +1,11 @@
-"""Pack upgraded ImageGen fixtures and unchanged legacy event pixels.
+"""Pack existing upgrade fixtures and newly matched ImageGen event props.
 
 Technical operations only: transparent-gutter splitting, alpha cropping,
 whole-prop translation and proportional nearest-neighbor sizing. The three
 levels in each upgrade family share one scale, including the three genuinely
 different FF tap orientations. No drawing, recoloring, warping or mirroring
-occurs. Legacy event cells are copied losslessly at their original size.
+occurs. All twelve upgrade cells must remain RGBA-identical to the retained
+v2 runtime atlas. Three distinct event drawings are fit independently.
 """
 import argparse
 import hashlib
@@ -20,7 +21,8 @@ SOURCE = ROOT / 'ArtSource/PixelArt/VenueFeatures'
 OUTPUT = ROOT / 'Tools/WebGLTemplate/FastGame/art'
 CELL, COLUMNS, ROWS, FOOT_X, FOOT_Y = 96, 5, 3, 48, 88
 UPGRADE_SOURCE = 'venue-upgrades-isometric-v2.source.png'
-EVENT_SOURCE = 'venue-features-v1.runtime.png'
+EVENT_SOURCE = 'venue-events-isometric-v3.source.png'
+UPGRADE_BASELINE = 'venue-features-v2.runtime.png'
 
 
 def source_cells(path):
@@ -67,14 +69,45 @@ def group_scale(cells):
     return scale
 
 
+def event_cells(path):
+    """Read the three full transparent event drawings from one source row."""
+    with Image.open(path) as raw:
+        if 'A' not in raw.getbands():
+            raise ValueError(f'{path.name} needs genuine transparent alpha.')
+        original = raw.convert('RGBA')
+    if original.getchannel('A').getextrema()[0] != 0:
+        raise ValueError(f'{path.name} has no transparent background.')
+    columns = grid_boundaries(original, 3, 'x')
+    cells = []
+    for column in range(3):
+        rect = (columns[column], 0, columns[column + 1], original.height)
+        cell = original.crop(rect)
+        bounds = opaque(cell).getbbox()
+        if bounds is None:
+            raise ValueError(f'Empty event source prop: {column}')
+        x0, y0, x1, y1 = bounds
+        if x0 == 0 or y0 == 0 or x1 == cell.width or y1 == cell.height:
+            raise ValueError(f'Event artwork touches source cell boundary: {column}')
+        image = cell.crop((max(0, x0 - 2), max(0, y0 - 2),
+                           min(cell.width, x1 + 2), min(cell.height, y1 + 2)))
+        ink = opaque(image).getbbox()
+        cells.append({'image': image, 'sourceCell': list(rect),
+                      'sourceRow': 0, 'sourceColumn': column,
+                      'sourceOpaqueBounds': list(bounds),
+                      'anchor': ((ink[0] + ink[2]) / 2, ink[3])})
+    return original, cells, columns
+
+
 def prepare_venue_features(source=SOURCE, output=OUTPUT):
     source, output = Path(source), Path(output)
     path, event_path = source / UPGRADE_SOURCE, source / EVENT_SOURCE
     original, source_rows, columns, boundaries = source_cells(path)
-    with Image.open(event_path) as raw:
-        legacy = raw.convert('RGBA')
-    if legacy.size != (CELL * 4, CELL * ROWS):
-        raise ValueError('Legacy event source must be the preserved 384x288 runtime atlas.')
+    event_original, events, event_columns = event_cells(event_path)
+    baseline_path = source / UPGRADE_BASELINE
+    with Image.open(baseline_path) as raw:
+        baseline = raw.convert('RGBA')
+    if baseline.size != (CELL * COLUMNS, CELL * ROWS):
+        raise ValueError('Upgrade baseline must be the preserved 480x288 v2 runtime atlas.')
     atlas = Image.new('RGBA', (COLUMNS * CELL, ROWS * CELL))
     report = {'passed': True, 'source': path.name,
               'sourceSize': list(original.size),
@@ -83,11 +116,16 @@ def prepare_venue_features(source=SOURCE, output=OUTPUT):
               'sourceColumnBoundaries': columns,
               'sourceRowBoundariesByColumn': boundaries,
               'eventSource': event_path.name,
+              'eventSourceSize': list(event_original.size),
               'eventSourceSha256': hashlib.sha256(event_path.read_bytes()).hexdigest(),
+              'eventSourceAlphaExtrema': list(event_original.getchannel('A').getextrema()),
+              'eventSourceColumnBoundaries': event_columns,
+              'upgradeBaseline': baseline_path.name,
+              'upgradeBaselineSha256': hashlib.sha256(baseline_path.read_bytes()).hexdigest(),
               'size': list(atlas.size), 'encoding': 'lossless RGBA, no palette quantization',
               'groups': [], 'rows': [{'row': row, 'cells': []} for row in range(ROWS)]}
 
-    def pack(cell, row, column, scale):
+    def pack(cell, row, column, scale, source_path=path):
         image, (fx, fy) = cell['image'], cell['anchor']
         size = (max(1, round(image.width * scale)), max(1, round(image.height * scale)))
         x, y = round(FOOT_X - fx * scale), round(FOOT_Y - fy * scale)
@@ -96,7 +134,7 @@ def prepare_venue_features(source=SOURCE, output=OUTPUT):
         packed = image.resize(size, Image.Resampling.NEAREST)
         atlas.paste(packed, (column * CELL + x, row * CELL + y))
         report['rows'][row]['cells'].append({
-            'column': column, 'source': path.name, 'sourceCell': cell['sourceCell'],
+            'column': column, 'source': source_path.name, 'sourceCell': cell['sourceCell'],
             'sourceRow': cell['sourceRow'], 'sourceColumn': cell['sourceColumn'],
             'sourceOpaqueBounds': cell['sourceOpaqueBounds'],
             'scale': scale, 'placedRect': [x, y, *size]})
@@ -114,15 +152,19 @@ def prepare_venue_features(source=SOURCE, output=OUTPUT):
                              'runtimeCells': [[row, 4] for row in range(ROWS)]})
     for row, cell in enumerate(ff_group):
         pack(cell, row, 4, ff_scale)
+    for row, (event_id, cell) in enumerate(zip(
+            ['open-mic', 'rock-showcase', 'fan-festival'], events)):
+        scale = group_scale([cell])
+        report['groups'].append({'name': event_id, 'scale': scale,
+                                 'runtimeCells': [[row, 3]]})
+        pack(cell, row, 3, scale, source_path=event_path)
+
+    # Check the preservation contract before replacing the runtime file.
     for row in range(ROWS):
-        rect = (3 * CELL, row * CELL, 4 * CELL, (row + 1) * CELL)
-        event = legacy.crop(rect)
-        atlas.paste(event, (3 * CELL, row * CELL))
-        report['rows'][row]['cells'].append({
-            'column': 3, 'source': event_path.name, 'sourceCell': list(rect),
-            'scale': 1, 'placedRect': [0, 0, CELL, CELL],
-            'preservedEventRGBA': True,
-            'sourceCellRGBAsha256': hashlib.sha256(event.tobytes()).hexdigest()})
+        for column in [0, 1, 2, 4]:
+            rect = (column * CELL, row * CELL, (column + 1) * CELL, (row + 1) * CELL)
+            if atlas.crop(rect).tobytes() != baseline.crop(rect).tobytes():
+                raise ValueError(f'Upgrade RGBA pixels changed: {row},{column}')
 
     output.mkdir(parents=True, exist_ok=True)
     target = output / 'venue-features.png'
@@ -133,7 +175,7 @@ def prepare_venue_features(source=SOURCE, output=OUTPUT):
         encoded = raw.convert('RGBA')
     if encoded.tobytes() != atlas.tobytes():
         raise ValueError('Runtime PNG encoding changed RGBA pixels.')
-    hashes, event_checks = [], []
+    hashes, upgrade_checks, event_changes = [], [], []
     for row in report['rows']:
         row['cells'].sort(key=lambda cell: cell['column'])
         for cell in row['cells']:
@@ -147,17 +189,25 @@ def prepare_venue_features(source=SOURCE, output=OUTPUT):
             cell['packedOpaqueBounds'] = list(bounds)
             cell['packedVisibleSha256'] = hashlib.sha256(visible_bytes(frame)).hexdigest()
             hashes.append(cell['packedVisibleSha256'])
-            if column == 3:
-                same = frame.tobytes() == legacy.crop(rect).tobytes()
-                event_checks.append(same)
+            cell['packedRGBAsha256'] = hashlib.sha256(frame.tobytes()).hexdigest()
+            same = frame.tobytes() == baseline.crop(rect).tobytes()
+            if column != 3:
+                upgrade_checks.append(same)
                 if not same:
-                    raise ValueError(f'Legacy event RGBA pixels changed: row {row["row"]}')
-                cell['packedRGBAsha256'] = hashlib.sha256(frame.tobytes()).hexdigest()
+                    raise ValueError(f'Upgrade RGBA pixels changed: {row["row"]},{column}')
+                cell['preservedUpgradeRGBA'] = True
+                cell['baselineCellRGBAsha256'] = hashlib.sha256(baseline.crop(rect).tobytes()).hexdigest()
+            else:
+                event_changes.append(not same)
+                if same:
+                    raise ValueError(f'Event did not change from v2 baseline: row {row["row"]}')
     if len(set(hashes)) != ROWS * COLUMNS:
         raise ValueError('Venue features must contain fifteen unique props.')
     metadata = json.loads((source / 'venue-features.json').read_text(encoding='utf-8'))
     if metadata['columns'] != COLUMNS or metadata['rows'] != ROWS:
         raise ValueError('Runtime metadata dimensions do not match the atlas.')
+    if metadata['sources']['events'] != EVENT_SOURCE or metadata['sources']['upgradeBaseline'] != UPGRADE_BASELINE:
+        raise ValueError('Runtime metadata does not name the current event source and upgrade baseline.')
     for level in range(1, 4):
         if metadata['items'][f'draught-{level}']['variants']['ff'] != {'row': level - 1, 'column': 4}:
             raise ValueError('FF draught variant metadata does not match the packed cell.')
@@ -165,8 +215,9 @@ def prepare_venue_features(source=SOURCE, output=OUTPUT):
                   sha256=hashlib.sha256(target.read_bytes()).hexdigest(),
                   alphaExtrema=list(encoded.getchannel('A').getextrema()),
                   nonEmptyCells=15, uniqueProps=len(set(hashes)),
-                  generatedUpgradeProps=12, preservedEventProps=3,
-                  allEventPixelsUnchanged=all(event_checks))
+                  preservedUpgradeProps=12, generatedEventProps=3,
+                  allUpgradePixelsUnchanged=all(upgrade_checks),
+                  changedEventCells=sum(event_changes))
     shutil.copy2(source / 'venue-features.json', output / 'venue-features.json')
     (source / 'packing-report.json').write_text(json.dumps(report, indent=2) + '\n',
                                                encoding='utf-8', newline='\n')
@@ -181,4 +232,4 @@ if __name__ == '__main__':
     result = prepare_venue_features(args.source, args.output)
     print(json.dumps({key: result[key] for key in
                       ['passed', 'file', 'size', 'bytes', 'nonEmptyCells', 'uniqueProps',
-                       'allEventPixelsUnchanged', 'sha256']}))
+                       'allUpgradePixelsUnchanged', 'changedEventCells', 'sha256']}))

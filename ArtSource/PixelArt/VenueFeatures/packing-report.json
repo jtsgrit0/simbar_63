@@ -43,8 +43,24 @@
       1086
     ]
   ],
-  "eventSource": "venue-features-v1.runtime.png",
-  "eventSourceSha256": "14213f06eb589f2b117e34b20f9c247c761043fce8302d278e0055fe09966156",
+  "eventSource": "venue-events-isometric-v3.source.png",
+  "eventSourceSize": [
+    1774,
+    887
+  ],
+  "eventSourceSha256": "104e5d79fb0ffef9cc8e935647f99107c11db10736a075bc6da2f94cdb37a8b4",
+  "eventSourceAlphaExtrema": [
+    0,
+    255
+  ],
+  "eventSourceColumnBoundaries": [
+    0,
+    623,
+    1134,
+    1774
+  ],
+  "upgradeBaseline": "venue-features-v2.runtime.png",
+  "upgradeBaselineSha256": "4321c6f6bc321caac97928caad911f1d14a510ed571873fe09407cf4c87af574",
   "size": [
     480,
     288
@@ -122,6 +138,36 @@
           4
         ]
       ]
+    },
+    {
+      "name": "open-mic",
+      "scale": 0.15,
+      "runtimeCells": [
+        [
+          0,
+          3
+        ]
+      ]
+    },
+    {
+      "name": "rock-showcase",
+      "scale": 0.1423728813559322,
+      "runtimeCells": [
+        [
+          1,
+          3
+        ]
+      ]
+    },
+    {
+      "name": "fan-festival",
+      "scale": 0.16030534351145037,
+      "runtimeCells": [
+        [
+          2,
+          3
+        ]
+      ]
     }
   ],
   "rows": [
@@ -158,7 +204,10 @@
             71,
             87
           ],
-          "packedVisibleSha256": "fe693543463ff3558f56f848f90c11b485e08e3b9edd39a4f1780094cdc04cdd"
+          "packedVisibleSha256": "fe693543463ff3558f56f848f90c11b485e08e3b9edd39a4f1780094cdc04cdd",
+          "packedRGBAsha256": "0889e4db457875cffa9c4c94d3e23776ee211ae0b0845c9c765c8e10d3c1540c",
+          "preservedUpgradeRGBA": true,
+          "baselineCellRGBAsha256": "0889e4db457875cffa9c4c94d3e23776ee211ae0b0845c9c765c8e10d3c1540c"
         },
         {
           "column": 1,
@@ -190,7 +239,10 @@
             81,
             88
           ],
-          "packedVisibleSha256": "00691caa460cac288833fe47f47733b2dc602b0e739e10c5d2df00ae9136f0e7"
+          "packedVisibleSha256": "00691caa460cac288833fe47f47733b2dc602b0e739e10c5d2df00ae9136f0e7",
+          "packedRGBAsha256": "dd3c762e1854a2bedcf89cdebf0de8e8a2e9b138ff921a67ea941f963b62b1f1",
+          "preservedUpgradeRGBA": true,
+          "baselineCellRGBAsha256": "dd3c762e1854a2bedcf89cdebf0de8e8a2e9b138ff921a67ea941f963b62b1f1"
         },
         {
           "column": 2,
@@ -222,34 +274,43 @@
             91,
             87
           ],
-          "packedVisibleSha256": "b285c9d5a9adb5149642c6ade512c22a65595edd1c70410a1e17ab50125fd057"
+          "packedVisibleSha256": "b285c9d5a9adb5149642c6ade512c22a65595edd1c70410a1e17ab50125fd057",
+          "packedRGBAsha256": "b0948e6569f7bc1f22998058a927159a457269ca37b68759dccf54a914e7b122",
+          "preservedUpgradeRGBA": true,
+          "baselineCellRGBAsha256": "b0948e6569f7bc1f22998058a927159a457269ca37b68759dccf54a914e7b122"
         },
         {
           "column": 3,
-          "source": "venue-features-v1.runtime.png",
+          "source": "venue-events-isometric-v3.source.png",
           "sourceCell": [
-            288,
             0,
-            384,
-            96
+            0,
+            623,
+            887
           ],
-          "scale": 1,
+          "sourceRow": 0,
+          "sourceColumn": 0,
+          "sourceOpaqueBounds": [
+            122,
+            186,
+            561,
+            742
+          ],
+          "scale": 0.15,
           "placedRect": [
-            0,
-            0,
-            96,
-            96
+            15,
+            4,
+            66,
+            84
           ],
-          "preservedEventRGBA": true,
-          "sourceCellRGBAsha256": "f419091bd2c5a7cdc2f64eb8e3d9284b20a28e3b1bf81500d7492c193345bc62",
           "packedOpaqueBounds": [
-            14,
-            6,
-            83,
+            15,
+            4,
+            81,
             88
           ],
-          "packedVisibleSha256": "f419091bd2c5a7cdc2f64eb8e3d9284b20a28e3b1bf81500d7492c193345bc62",
-          "packedRGBAsha256": "f419091bd2c5a7cdc2f64eb8e3d9284b20a28e3b1bf81500d7492c193345bc62"
+          "packedVisibleSha256": "4c73b3a7ab8155bb3d0f7fca162b94a6e04d5baf41ffb84e77429b437951488a",
+          "packedRGBAsha256": "28c18ada72a2e850cbc23e35c7be99143f23578aaba173ddf63b5b4d30ae124b"
         },
         {
           "column": 4,
@@ -281,7 +342,10 @@
             74,
             87
           ],
-          "packedVisibleSha256": "0359a7cca762d331af98a3b8f1013dfb51cf3e5a31b8f7b78a4d23377b42115e"
+          "packedVisibleSha256": "0359a7cca762d331af98a3b8f1013dfb51cf3e5a31b8f7b78a4d23377b42115e",
+          "packedRGBAsha256": "601f8fbe64523e09c172bc7276ecec1fe1c885e3d549f5f6953af49b9d611fad",
+          "preservedUpgradeRGBA": true,
+          "baselineCellRGBAsha256": "601f8fbe64523e09c172bc7276ecec1fe1c885e3d549f5f6953af49b9d611fad"
         }
       ]
     },
@@ -318,7 +382,10 @@
             67,
             88
           ],
-          "packedVisibleSha256": "48f4caacf899123e0a636f2376b279c9b8eab1d4ea67fce1ac60cabc9c181940"
+          "packedVisibleSha256": "48f4caacf899123e0a636f2376b279c9b8eab1d4ea67fce1ac60cabc9c181940",
+          "packedRGBAsha256": "394504301f0336f10def4faf84db684b5b5c23840062f46d76799d84d210bd56",
+          "preservedUpgradeRGBA": true,
+          "baselineCellRGBAsha256": "394504301f0336f10def4faf84db684b5b5c23840062f46d76799d84d210bd56"
         },
         {
           "column": 1,
@@ -350,7 +417,10 @@
             81,
             88
           ],
-          "packedVisibleSha256": "68511ff42c1cc28ffa7517f2f252ee78508e0e5baf9eb0d49aa261eb0385f820"
+          "packedVisibleSha256": "68511ff42c1cc28ffa7517f2f252ee78508e0e5baf9eb0d49aa261eb0385f820",
+          "packedRGBAsha256": "89d34a3044ec255169ffaac63c2249a70560ae06cdc17c23853d7ea71d691c00",
+          "preservedUpgradeRGBA": true,
+          "baselineCellRGBAsha256": "89d34a3044ec255169ffaac63c2249a70560ae06cdc17c23853d7ea71d691c00"
         },
         {
           "column": 2,
@@ -382,34 +452,43 @@
             90,
             88
           ],
-          "packedVisibleSha256": "f377206ecb7b5d3f1649d6ca450c6fd605c180c1ae46f701a45f1b067594be5e"
+          "packedVisibleSha256": "f377206ecb7b5d3f1649d6ca450c6fd605c180c1ae46f701a45f1b067594be5e",
+          "packedRGBAsha256": "30bd6981e23cac1f8872697406f580f12f42bfb83e8146cfcfe4feb80e83a416",
+          "preservedUpgradeRGBA": true,
+          "baselineCellRGBAsha256": "30bd6981e23cac1f8872697406f580f12f42bfb83e8146cfcfe4feb80e83a416"
         },
         {
           "column": 3,
-          "source": "venue-features-v1.runtime.png",
+          "source": "venue-events-isometric-v3.source.png",
           "sourceCell": [
-            288,
-            96,
-            384,
-            192
+            623,
+            0,
+            1134,
+            887
           ],
-          "scale": 1,
+          "sourceRow": 0,
+          "sourceColumn": 1,
+          "sourceOpaqueBounds": [
+            62,
+            131,
+            452,
+            717
+          ],
+          "scale": 0.1423728813559322,
           "placedRect": [
-            0,
-            0,
-            96,
-            96
+            20,
+            4,
+            56,
+            84
           ],
-          "preservedEventRGBA": true,
-          "sourceCellRGBAsha256": "85ad9926589704f70670410eaf4b1191f5ee07820a8f45d7fcd01eb6cd505374",
           "packedOpaqueBounds": [
             20,
-            6,
-            75,
+            4,
+            76,
             88
           ],
-          "packedVisibleSha256": "85ad9926589704f70670410eaf4b1191f5ee07820a8f45d7fcd01eb6cd505374",
-          "packedRGBAsha256": "85ad9926589704f70670410eaf4b1191f5ee07820a8f45d7fcd01eb6cd505374"
+          "packedVisibleSha256": "1931754c48fe89e28242788056271c0de9302fff596ce27b43f91d56dd774bf1",
+          "packedRGBAsha256": "c229811bc88b70ddd80e61ae3d097ec3a0bdbc72259185ac5ebd349c08f47f6c"
         },
         {
           "column": 4,
@@ -441,7 +520,10 @@
             77,
             88
           ],
-          "packedVisibleSha256": "3fdda95f49544534ed29b09556277a18e5f7c6edd2ea81cbb339a9637cfbddb7"
+          "packedVisibleSha256": "3fdda95f49544534ed29b09556277a18e5f7c6edd2ea81cbb339a9637cfbddb7",
+          "packedRGBAsha256": "be77c9ccf1093cc0b3bfb79939a4ef3a68bcc78cab1f522f17933932e877ae37",
+          "preservedUpgradeRGBA": true,
+          "baselineCellRGBAsha256": "be77c9ccf1093cc0b3bfb79939a4ef3a68bcc78cab1f522f17933932e877ae37"
         }
       ]
     },
@@ -478,7 +560,10 @@
             79,
             87
           ],
-          "packedVisibleSha256": "24efea3fe222520a212bcf0e3160f013508e59c7880e9ee80a89d85daac4c1c8"
+          "packedVisibleSha256": "24efea3fe222520a212bcf0e3160f013508e59c7880e9ee80a89d85daac4c1c8",
+          "packedRGBAsha256": "373a38273b1aa800919c0402dbb9994dc671249d6d2f229f42681e862bb002c9",
+          "preservedUpgradeRGBA": true,
+          "baselineCellRGBAsha256": "373a38273b1aa800919c0402dbb9994dc671249d6d2f229f42681e862bb002c9"
         },
         {
           "column": 1,
@@ -510,7 +595,10 @@
             82,
             87
           ],
-          "packedVisibleSha256": "505f59019327ec12b451f0bc99e386bb3e7b35cd65068ac0502b25fa463a124c"
+          "packedVisibleSha256": "505f59019327ec12b451f0bc99e386bb3e7b35cd65068ac0502b25fa463a124c",
+          "packedRGBAsha256": "fb1e424f59c8e2a635f71b003343abbb10dda7149b9c420dd6ad37d602223a34",
+          "preservedUpgradeRGBA": true,
+          "baselineCellRGBAsha256": "fb1e424f59c8e2a635f71b003343abbb10dda7149b9c420dd6ad37d602223a34"
         },
         {
           "column": 2,
@@ -542,34 +630,43 @@
             91,
             87
           ],
-          "packedVisibleSha256": "065035cf43f980581366294ae68b2b2c8de18c75ba95c4bf20f0133272e144ff"
+          "packedVisibleSha256": "065035cf43f980581366294ae68b2b2c8de18c75ba95c4bf20f0133272e144ff",
+          "packedRGBAsha256": "8832302db220b9812ae29b01c1db017e8089c5a508695c7e7d4ea3d20107a68c",
+          "preservedUpgradeRGBA": true,
+          "baselineCellRGBAsha256": "8832302db220b9812ae29b01c1db017e8089c5a508695c7e7d4ea3d20107a68c"
         },
         {
           "column": 3,
-          "source": "venue-features-v1.runtime.png",
+          "source": "venue-events-isometric-v3.source.png",
           "sourceCell": [
-            288,
-            192,
-            384,
-            288
+            1134,
+            0,
+            1774,
+            887
           ],
-          "scale": 1,
+          "sourceRow": 0,
+          "sourceColumn": 2,
+          "sourceOpaqueBounds": [
+            59,
+            191,
+            554,
+            711
+          ],
+          "scale": 0.16030534351145037,
           "placedRect": [
-            0,
-            0,
-            96,
-            96
+            8,
+            4,
+            80,
+            84
           ],
-          "preservedEventRGBA": true,
-          "sourceCellRGBAsha256": "a6a2682318063468c7ddbb3c7c6a05a95baaab75491bf7a99c8d47a93d87727f",
           "packedOpaqueBounds": [
-            5,
-            15,
-            91,
+            8,
+            4,
+            88,
             88
           ],
-          "packedVisibleSha256": "a6a2682318063468c7ddbb3c7c6a05a95baaab75491bf7a99c8d47a93d87727f",
-          "packedRGBAsha256": "a6a2682318063468c7ddbb3c7c6a05a95baaab75491bf7a99c8d47a93d87727f"
+          "packedVisibleSha256": "c900b929b9f85c2067655615f22f695fec0385b726b8f882c48a6c2aea7f0e1e",
+          "packedRGBAsha256": "1ca8a2657afa105d868035b29c8a38c4f54707ce6cb5ba0bd29d105434b0644d"
         },
         {
           "column": 4,
@@ -601,21 +698,25 @@
             82,
             88
           ],
-          "packedVisibleSha256": "89768af9582245320f456e3c637df626c2be7e1a0cf56e2d2de6dcc51598c89b"
+          "packedVisibleSha256": "89768af9582245320f456e3c637df626c2be7e1a0cf56e2d2de6dcc51598c89b",
+          "packedRGBAsha256": "02ddca4caa70627c2261694697a688e07b0c59fa470b01afa54f71d733e50975",
+          "preservedUpgradeRGBA": true,
+          "baselineCellRGBAsha256": "02ddca4caa70627c2261694697a688e07b0c59fa470b01afa54f71d733e50975"
         }
       ]
     }
   ],
   "file": "venue-features.png",
-  "bytes": 149675,
-  "sha256": "4321c6f6bc321caac97928caad911f1d14a510ed571873fe09407cf4c87af574",
+  "bytes": 152282,
+  "sha256": "8825dcedf380d138cd7f193ef65b12ddcf83a02f6d170f08d96ffbfa4515181f",
   "alphaExtrema": [
     0,
     255
   ],
   "nonEmptyCells": 15,
   "uniqueProps": 15,
-  "generatedUpgradeProps": 12,
-  "preservedEventProps": 3,
-  "allEventPixelsUnchanged": true
+  "preservedUpgradeProps": 12,
+  "generatedEventProps": 3,
+  "allUpgradePixelsUnchanged": true,
+  "changedEventCells": 3
 }

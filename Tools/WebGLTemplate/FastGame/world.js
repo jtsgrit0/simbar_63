@@ -64,7 +64,7 @@ export function pixelVenueFeatures(state={}){
   const anchors=[[[402,211,66,263],[892,308,76,308],[259,244,76,244]],[[252,213,64,308],[896,307,76,307],[111,351,76,351]],[[286,273,70,359],[859,304,76,304],[122,285,76,285]]][owner];
   const result=upgrades.flatMap((level,index)=>level?[{id:['draught','sound','vip'][index]+'-'+level,type:'upgrade',index,level,venue:ownerVenue(owner).key,x:anchors[index][0],y:anchors[index][1],size:anchors[index][2],depth:anchors[index][3],preview:preview?.type==='upgrade'&&preview.index===index}]:[]);
   const event=preview?.type==='event'?preview.index:state.activeEvent;
-  if(Number.isInteger(event)&&event>=0&&event<3)result.push({id:['open-mic','rock-showcase','fan-festival'][event],type:'event',index:event,x:owner===2?612:609,y:owner===2?314:323,size:event===2?88:76,depth:324,preview:preview?.type==='event'});
+  if(Number.isInteger(event)&&event>=0&&event<3)result.push({id:['open-mic','rock-showcase','fan-festival'][event],type:'event',index:event,venue:ownerVenue(owner).key,x:owner===2?612:609,y:owner===2?314:323,size:event===2?88:76,depth:324,preview:preview?.type==='event'});
   return result;
 }
 
@@ -72,10 +72,11 @@ export function pixelVenueFeatures(state={}){
 // Small Y shears retain vertical stems and cabinet edges; FF uses real
 // opposite-facing draught artwork rather than severely skewing the front view.
 export function pixelVenueFeatureStyle(feature={}){
-  if(feature.type!=='upgrade')return null;
+  if(feature.type!=='upgrade'&&feature.type!=='event')return null;
   const venue=feature.venue||'original';
   const palettes={freebird:'brightness(0.88) saturate(0.72) sepia(0.08)',ff:'brightness(0.80) saturate(0.68)',original:'brightness(0.86) saturate(0.76) sepia(0.04)'};
-  return{shearY:feature.index===0?(venue==='ff'?-.12:.10):feature.index===1?.12:.22,filter:palettes[venue]||palettes.original};
+  const shearY=feature.type==='event'?[.12,.12,.16][feature.index]||0:feature.index===0?(venue==='ff'?-.12:.10):feature.index===1?.12:.22;
+  return{shearY,filter:palettes[venue]||palettes.original};
 }
 
 // Quiet audience moods use standing idle drawings; only an occasional cheer
@@ -562,7 +563,7 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
     const cell=item.variants?.[feature.venue]||item,style=pixelVenueFeatureStyle(feature);
     if(!style){target.drawImage(sheet,cell.column*fw,cell.row*fh,fw,fh,Math.round(feature.x-(meta.footX??48)*size/fw),Math.round(feature.y-(meta.footY??88)*size/fh),size,size);return;}
     target.save();target.translate(feature.x,feature.y);target.transform(1,style.shearY,0,1,0,0);
-    if(feature.index!==0)ellipse(target,0,-1,Math.round(size*.24),Math.max(1,Math.round(size*.035)),'rgba(9,8,13,0.22)');
+    if(feature.type==='event'||feature.index!==0)ellipse(target,0,-1,Math.round(size*.24),Math.max(1,Math.round(size*.035)),'rgba(9,8,13,0.22)');
     target.filter=style.filter;
     target.drawImage(sheet,cell.column*fw,cell.row*fh,fw,fh,Math.round(-(meta.footX??48)*size/fw),Math.round(-(meta.footY??88)*size/fh),size,size);
     target.restore();

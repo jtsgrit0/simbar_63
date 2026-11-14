@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "file": "venue-features.png",
   "frameWidth": 96,
   "frameHeight": 96,
@@ -11,7 +11,8 @@
   "drawHeight": 96,
   "sources": {
     "upgrades": "venue-upgrades-isometric-v2.source.png",
-    "events": "venue-features-v1.runtime.png"
+    "events": "venue-events-isometric-v3.source.png",
+    "upgradeBaseline": "venue-features-v2.runtime.png"
   },
   "items": {
     "draught-1": {

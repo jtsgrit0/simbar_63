@@ -103,6 +103,8 @@ const freeze=value=>{for(const nested of Object.values(value))if(nested&&typeof 
 // A purchase at every category/level changes the actual selected drawing, not
 // just a stat label. All owners must retain the same saved upgrade identities.
 const expectedLevels=[['draught-1','sound-1','vip-1'],['draught-2','sound-2','vip-2'],['draught-3','sound-3','vip-3']];
+const baselineBytes=readFileSync(new URL('../ArtSource/PixelArt/VenueFeatures/venue-features-v2.runtime.png',import.meta.url));
+const baseline={id:'v2-upgrade-atlas',width:baselineBytes.readUInt32BE(16),height:baselineBytes.readUInt32BE(20),bytes:baselineBytes};
 const distinctFeatures=new Set();
 for(const owner of [0,1,2])for(const level of [1,2,3]){
   const state=freeze({...base,owner,upgrades:[level,level,level]}),before=snapshot(state);
@@ -113,6 +115,7 @@ for(const owner of [0,1,2])for(const level of [1,2,3]){
   assert.deepEqual(draws.map(draw=>draw.args.slice(1,3).join(',')).sort(),expectedCells);
   for(const draw of draws){
     assert.deepEqual(draw.args.slice(3,5),[96,96]);distinctFeatures.add(paintedCell(draw).hash);
+    assert.equal(paintedCell(draw).hash,paintedCell({args:[baseline,...draw.args.slice(1,5)]}).hash,'Existing upgrade pixels must stay unchanged');
     const feature=pixelVenueFeatures(state).find(feature=>{const item=venueFeatureModels.items[feature.id],cell=item.variants?.[venue]||item;return draw.args[1]===cell.column*96&&draw.args[2]===cell.row*96;});
     const style=pixelVenueFeatureStyle(feature);
     assert.deepEqual(draw.translation,[feature.x,feature.y],'An upgrade must retain its authored foot anchor');
@@ -123,15 +126,17 @@ for(const owner of [0,1,2])for(const level of [1,2,3]){
   assert.equal(snapshot(state),before,'Rendering a purchased upgrade must preserve saved state');
 }
 assert.equal(distinctFeatures.size,12,'Nine shared upgrades and three genuine FF draught views must be distinct');
-const legacyBytes=readFileSync(new URL('../ArtSource/PixelArt/VenueFeatures/venue-features-v1.runtime.png',import.meta.url));
-const legacy={id:'legacy-event-atlas',width:legacyBytes.readUInt32BE(16),height:legacyBytes.readUInt32BE(20),bytes:legacyBytes};
 const eventIds=['open-mic','rock-showcase','fan-festival'];
-for(const [activeEvent,id] of eventIds.entries()){
-  const state=freeze({...base,activeEvent}),before=snapshot(state),features=pixelVenueFeatures(state),draws=featureDraws(render(state));
+for(const owner of [0,1,2])for(const [activeEvent,id] of eventIds.entries()){
+  const state=freeze({...base,owner,activeEvent}),before=snapshot(state),features=pixelVenueFeatures(state),draws=featureDraws(render(state));
   assert.deepEqual(features.map(item=>item.id),[id]);assert.equal(draws.length,1);
   const cell=venueFeatureModels.items[id];assert.deepEqual(draws[0].args.slice(1,5),[cell.column*96,cell.row*96,96,96]);
-  assert.deepEqual(draws[0].matrix,[1,0,0,1,0,0]);assert.equal(draws[0].filter,'none','Event decoration must retain its original lighting');
-  assert.equal(paintedCell(draws[0]).hash,paintedCell({args:[legacy,288,activeEvent*96,96,96]}).hash,'Event pixels must remain identical');
+  const feature=features[0],style=pixelVenueFeatureStyle(feature);
+  assert.deepEqual(draws[0].translation,[feature.x,feature.y],'Events must retain their authored foot anchor');
+  assert.deepEqual([feature.x,feature.y,feature.size,feature.depth],[owner===2?612:609,owner===2?314:323,activeEvent===2?88:76,324]);
+  assert.equal(draws[0].rotation,0);assert.deepEqual(draws[0].matrix,[1,style.shearY,0,1,0,0]);
+  assert.equal(draws[0].filter,style.filter);assert.notEqual(style.filter,'none','Events must receive their venue ambient light');
+  assert.notEqual(paintedCell(draws[0]).hash,paintedCell({args:[baseline,288,activeEvent*96,96,96]}).hash,'Each event must use its new genuine source drawing');
   distinctFeatures.add(paintedCell(draws[0]).hash);assert.equal(snapshot(state),before);
 }
 assert.equal(distinctFeatures.size,15);
@@ -268,4 +273,4 @@ for(const point of [[0,0,0],[-8,3,0],[6,4,1]]){
   assert(Math.abs(screen.x-(830+(projected.x-480)*624/558))<.6);assert(Math.abs(screen.y-projected.y*624/558)<.01);
 }
 desktopWorld.destroy();
-console.log('PASS: 9 upgrade props + 3 FF draught views, anchored upright perspective and room lighting, 3 pixel-identical events, nonmutating previews, real PNG cells, 36 inspector frames, audience-only inspection pause, portrait room fit and landscape projection.');
+console.log('PASS: 12 unchanged upgrade views, 3 genuine event drawings across all venues, anchored upright perspective and ambient light, nonmutating previews, real PNG cells, 36 inspector frames, audience-only inspection pause, portrait room fit and landscape projection.');
