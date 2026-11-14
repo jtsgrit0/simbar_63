@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import {createHash} from 'node:crypto';
 import {readFileSync} from 'node:fs';
 import {inflateSync} from 'node:zlib';
-import {createWorld,pixelVenueFeatures,pixelFestivalFrame,pixelAudiencePose} from './WebGLTemplate/FastGame/world.js';
+import {createWorld,pixelVenueFeatures,pixelVenueFeatureStyle,pixelFestivalFrame,pixelAudiencePose} from './WebGLTemplate/FastGame/world.js';
 import {VENUE_PROPS} from './WebGLTemplate/FastGame/owner-venues.js';
 
 const art=new URL('./WebGLTemplate/FastGame/art/',import.meta.url);
@@ -71,11 +71,12 @@ function paintedCell(draw){
 }
 
 function context(){
-  let translation=[0,0],rotation=0;const stack=[];
-  return new Proxy({draws:[],createLinearGradient(){return{addColorStop(){}};},
-    save(){stack.push({translation:[...translation],rotation});},restore(){const last=stack.pop();if(last){translation=last.translation;rotation=last.rotation;}},
+  let translation=[0,0],rotation=0,matrix=[1,0,0,1,0,0];const stack=[];
+  return new Proxy({draws:[],filter:'none',createLinearGradient(){return{addColorStop(){}};},
+    save(){stack.push({translation:[...translation],rotation,matrix:[...matrix],filter:this.filter});},restore(){const last=stack.pop();if(last){translation=last.translation;rotation=last.rotation;matrix=last.matrix;this.filter=last.filter;}},
     translate(x,y){translation=[translation[0]+x,translation[1]+y];},rotate(value){rotation+=value;},
-    drawImage(...args){this.draws.push({args,translation:[...translation],rotation});}
+    transform(a,b,c,d,e,f){const [aa,ab,ac,ad,ae,af]=matrix;matrix=[aa*a+ac*b,ab*a+ad*b,aa*c+ac*d,ab*c+ad*d,aa*e+ac*f+ae,ab*e+ad*f+af];},
+    drawImage(...args){this.draws.push({args,translation:[...translation],rotation,matrix:[...matrix],filter:this.filter});}
   },{get:(value,key)=>key in value?value[key]:()=>{}});
 }
 function canvas(width=960,height=558){
@@ -107,20 +108,33 @@ for(const owner of [0,1,2])for(const level of [1,2,3]){
   const state=freeze({...base,owner,upgrades:[level,level,level]}),before=snapshot(state);
   assert.deepEqual(pixelVenueFeatures(state).map(item=>item.id),expectedLevels[level-1]);
   const draws=featureDraws(render(state));assert.equal(draws.length,3);
-  const expectedCells=expectedLevels[level-1].map(id=>venueFeatureModels.items[id]).map(cell=>`${cell.column*96},${cell.row*96}`).sort();
+  const venue=['freebird','ff','original'][owner];
+  const expectedCells=expectedLevels[level-1].map(id=>{const item=venueFeatureModels.items[id];return item.variants?.[venue]||item;}).map(cell=>`${cell.column*96},${cell.row*96}`).sort();
   assert.deepEqual(draws.map(draw=>draw.args.slice(1,3).join(',')).sort(),expectedCells);
-  for(const draw of draws){assert.deepEqual(draw.args.slice(3,5),[96,96]);distinctFeatures.add(paintedCell(draw).hash);}
+  for(const draw of draws){
+    assert.deepEqual(draw.args.slice(3,5),[96,96]);distinctFeatures.add(paintedCell(draw).hash);
+    const feature=pixelVenueFeatures(state).find(feature=>{const item=venueFeatureModels.items[feature.id],cell=item.variants?.[venue]||item;return draw.args[1]===cell.column*96&&draw.args[2]===cell.row*96;});
+    const style=pixelVenueFeatureStyle(feature);
+    assert.deepEqual(draw.translation,[feature.x,feature.y],'An upgrade must retain its authored foot anchor');
+    assert.equal(draw.rotation,0,'Upright equipment must not rotate');
+    assert.deepEqual(draw.matrix,[1,style.shearY,0,1,0,0],'Final alignment must retain vertical stems and cabinet edges');
+    assert.equal(draw.filter,style.filter);assert(+draw.filter.match(/brightness\(([\d.]+)\)/)[1]<1);assert(+draw.filter.match(/saturate\(([\d.]+)\)/)[1]<1);
+  }
   assert.equal(snapshot(state),before,'Rendering a purchased upgrade must preserve saved state');
 }
-assert.equal(distinctFeatures.size,9,'Each upgrade level must have a visibly distinct exported prop');
+assert.equal(distinctFeatures.size,12,'Nine shared upgrades and three genuine FF draught views must be distinct');
+const legacyBytes=readFileSync(new URL('../ArtSource/PixelArt/VenueFeatures/venue-features-v1.runtime.png',import.meta.url));
+const legacy={id:'legacy-event-atlas',width:legacyBytes.readUInt32BE(16),height:legacyBytes.readUInt32BE(20),bytes:legacyBytes};
 const eventIds=['open-mic','rock-showcase','fan-festival'];
 for(const [activeEvent,id] of eventIds.entries()){
   const state=freeze({...base,activeEvent}),before=snapshot(state),features=pixelVenueFeatures(state),draws=featureDraws(render(state));
   assert.deepEqual(features.map(item=>item.id),[id]);assert.equal(draws.length,1);
   const cell=venueFeatureModels.items[id];assert.deepEqual(draws[0].args.slice(1,5),[cell.column*96,cell.row*96,96,96]);
+  assert.deepEqual(draws[0].matrix,[1,0,0,1,0,0]);assert.equal(draws[0].filter,'none','Event decoration must retain its original lighting');
+  assert.equal(paintedCell(draws[0]).hash,paintedCell({args:[legacy,288,activeEvent*96,96,96]}).hash,'Event pixels must remain identical');
   distinctFeatures.add(paintedCell(draws[0]).hash);assert.equal(snapshot(state),before);
 }
-assert.equal(distinctFeatures.size,12);
+assert.equal(distinctFeatures.size,15);
 for(const index of [0,1,2]){
   const saved=freeze({...base,upgrades:[1,1,1],activeEvent:0}),before=snapshot(saved);
   const preview=freeze({...saved,visualPreview:{type:'upgrade',index}}),previewBefore=snapshot(preview);
@@ -254,4 +268,4 @@ for(const point of [[0,0,0],[-8,3,0],[6,4,1]]){
   assert(Math.abs(screen.x-(830+(projected.x-480)*624/558))<.6);assert(Math.abs(screen.y-projected.y*624/558)<.01);
 }
 desktopWorld.destroy();
-console.log('PASS: 9 upgrade props, 3 event props, nonmutating previews, real nonempty PNG cells, 36 inspector frames, audience-only inspection pause, portrait room fit and landscape projection.');
+console.log('PASS: 9 upgrade props + 3 FF draught views, anchored upright perspective and room lighting, 3 pixel-identical events, nonmutating previews, real PNG cells, 36 inspector frames, audience-only inspection pause, portrait room fit and landscape projection.');

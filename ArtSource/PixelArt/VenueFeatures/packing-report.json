@@ -1,199 +1,379 @@
 {
   "passed": true,
-  "source": "venue-features.source.png",
+  "source": "venue-upgrades-isometric-v2.source.png",
   "sourceSize": [
     1448,
     1086
   ],
-  "sourceSha256": "8637dffbea2834280dd67182d7d9190beadf9a9b82f0d371e8e42e2859534b3a",
+  "sourceSha256": "c57ae3b2bd4e5fd0a4b495b3eebef087e54ae00b547b5592523b17ed9d7cbd95",
   "sourceAlphaExtrema": [
     0,
     255
   ],
-  "sourceRowBoundaries": [
+  "sourceColumnBoundaries": [
     0,
-    365,
-    729,
-    1086
+    343,
+    686,
+    1087,
+    1448
   ],
+  "sourceRowBoundariesByColumn": [
+    [
+      0,
+      364,
+      759,
+      1086
+    ],
+    [
+      0,
+      377,
+      736,
+      1086
+    ],
+    [
+      0,
+      373,
+      736,
+      1086
+    ],
+    [
+      0,
+      360,
+      697,
+      1086
+    ]
+  ],
+  "eventSource": "venue-features-v1.runtime.png",
+  "eventSourceSha256": "14213f06eb589f2b117e34b20f9c247c761043fce8302d278e0055fe09966156",
   "size": [
-    384,
+    480,
     288
+  ],
+  "encoding": "lossless RGBA, no palette quantization",
+  "groups": [
+    {
+      "name": "draught",
+      "scale": 0.26506024096385544,
+      "runtimeCells": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          2
+        ]
+      ]
+    },
+    {
+      "name": "sound",
+      "scale": 0.2507462686567164,
+      "runtimeCells": [
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          1,
+          2
+        ]
+      ]
+    },
+    {
+      "name": "vip",
+      "scale": 0.27936507936507937,
+      "runtimeCells": [
+        [
+          2,
+          0
+        ],
+        [
+          2,
+          1
+        ],
+        [
+          2,
+          2
+        ]
+      ]
+    },
+    {
+      "name": "ff-draught",
+      "scale": 0.25149700598802394,
+      "runtimeCells": [
+        [
+          0,
+          4
+        ],
+        [
+          1,
+          4
+        ],
+        [
+          2,
+          4
+        ]
+      ]
+    }
   ],
   "rows": [
     {
       "row": 0,
-      "groups": [
-        {
-          "name": "upgradeLevels",
-          "scale": 0.2682926829268293
-        },
-        {
-          "name": "event",
-          "scale": 0.2968197879858657
-        }
-      ],
       "cells": [
         {
           "column": 0,
+          "source": "venue-upgrades-isometric-v2.source.png",
           "sourceCell": [
             0,
             0,
-            334,
-            365
+            343,
+            364
           ],
-          "scale": 0.2682926829268293,
+          "sourceRow": 0,
+          "sourceColumn": 0,
+          "sourceOpaqueBounds": [
+            88,
+            84,
+            261,
+            338
+          ],
+          "scale": 0.26506024096385544,
           "placedRect": [
             25,
-            24,
-            45,
-            64
+            20,
+            47,
+            68
           ],
           "packedOpaqueBounds": [
             26,
-            25,
-            69,
+            21,
+            71,
             87
-          ]
+          ],
+          "packedVisibleSha256": "fe693543463ff3558f56f848f90c11b485e08e3b9edd39a4f1780094cdc04cdd"
         },
         {
           "column": 1,
+          "source": "venue-upgrades-isometric-v2.source.png",
           "sourceCell": [
-            334,
+            343,
             0,
-            696,
-            365
+            686,
+            377
           ],
-          "scale": 0.2682926829268293,
+          "sourceRow": 0,
+          "sourceColumn": 1,
+          "sourceOpaqueBounds": [
+            53,
+            85,
+            301,
+            347
+          ],
+          "scale": 0.26506024096385544,
           "placedRect": [
-            14,
-            23,
-            69,
-            66
+            15,
+            18,
+            67,
+            71
           ],
           "packedOpaqueBounds": [
-            15,
-            24,
-            82,
+            16,
+            19,
+            81,
             88
-          ]
+          ],
+          "packedVisibleSha256": "00691caa460cac288833fe47f47733b2dc602b0e739e10c5d2df00ae9136f0e7"
         },
         {
           "column": 2,
+          "source": "venue-upgrades-isometric-v2.source.png",
           "sourceCell": [
-            696,
+            686,
             0,
-            1094,
-            365
+            1087,
+            373
           ],
-          "scale": 0.2682926829268293,
+          "sourceRow": 0,
+          "sourceColumn": 2,
+          "sourceOpaqueBounds": [
+            42,
+            83,
+            370,
+            359
+          ],
+          "scale": 0.26506024096385544,
           "placedRect": [
             4,
-            20,
+            14,
             88,
-            69
+            74
           ],
           "packedOpaqueBounds": [
             5,
-            21,
+            15,
             91,
-            88
-          ]
+            87
+          ],
+          "packedVisibleSha256": "b285c9d5a9adb5149642c6ade512c22a65595edd1c70410a1e17ab50125fd057"
         },
         {
           "column": 3,
+          "source": "venue-features-v1.runtime.png",
           "sourceCell": [
-            1094,
+            288,
             0,
-            1448,
-            365
+            384,
+            96
           ],
-          "scale": 0.2968197879858657,
+          "scale": 1,
           "placedRect": [
-            13,
-            5,
-            71,
-            84
+            0,
+            0,
+            96,
+            96
           ],
+          "preservedEventRGBA": true,
+          "sourceCellRGBAsha256": "f419091bd2c5a7cdc2f64eb8e3d9284b20a28e3b1bf81500d7492c193345bc62",
           "packedOpaqueBounds": [
             14,
             6,
             83,
             88
-          ]
+          ],
+          "packedVisibleSha256": "f419091bd2c5a7cdc2f64eb8e3d9284b20a28e3b1bf81500d7492c193345bc62",
+          "packedRGBAsha256": "f419091bd2c5a7cdc2f64eb8e3d9284b20a28e3b1bf81500d7492c193345bc62"
+        },
+        {
+          "column": 4,
+          "source": "venue-upgrades-isometric-v2.source.png",
+          "sourceCell": [
+            1087,
+            0,
+            1448,
+            360
+          ],
+          "sourceRow": 0,
+          "sourceColumn": 3,
+          "sourceOpaqueBounds": [
+            70,
+            63,
+            275,
+            339
+          ],
+          "scale": 0.25149700598802394,
+          "placedRect": [
+            22,
+            18,
+            53,
+            70
+          ],
+          "packedOpaqueBounds": [
+            23,
+            18,
+            74,
+            87
+          ],
+          "packedVisibleSha256": "0359a7cca762d331af98a3b8f1013dfb51cf3e5a31b8f7b78a4d23377b42115e"
         }
       ]
     },
     {
       "row": 1,
-      "groups": [
-        {
-          "name": "upgradeLevels",
-          "scale": 0.26498422712933756
-        },
-        {
-          "name": "event",
-          "scale": 0.2616822429906542
-        }
-      ],
       "cells": [
         {
           "column": 0,
+          "source": "venue-upgrades-isometric-v2.source.png",
           "sourceCell": [
             0,
-            365,
-            326,
-            729
+            364,
+            343,
+            759
           ],
-          "scale": 0.26498422712933756,
+          "sourceRow": 1,
+          "sourceColumn": 0,
+          "sourceOpaqueBounds": [
+            109,
+            27,
+            260,
+            330
+          ],
+          "scale": 0.2507462686567164,
           "placedRect": [
             29,
-            10,
-            38,
-            78
+            12,
+            39,
+            77
           ],
           "packedOpaqueBounds": [
             30,
-            11,
-            66,
-            87
-          ]
+            13,
+            67,
+            88
+          ],
+          "packedVisibleSha256": "48f4caacf899123e0a636f2376b279c9b8eab1d4ea67fce1ac60cabc9c181940"
         },
         {
           "column": 1,
+          "source": "venue-upgrades-isometric-v2.source.png",
           "sourceCell": [
-            326,
-            365,
-            698,
-            729
+            343,
+            377,
+            686,
+            736
           ],
-          "scale": 0.26498422712933756,
+          "sourceRow": 1,
+          "sourceColumn": 1,
+          "sourceOpaqueBounds": [
+            45,
+            30,
+            317,
+            329
+          ],
+          "scale": 0.2507462686567164,
           "placedRect": [
-            12,
-            10,
-            71,
-            78
+            13,
+            13,
+            69,
+            76
           ],
           "packedOpaqueBounds": [
             13,
-            11,
-            82,
-            87
-          ]
+            14,
+            81,
+            88
+          ],
+          "packedVisibleSha256": "68511ff42c1cc28ffa7517f2f252ee78508e0e5baf9eb0d49aa261eb0385f820"
         },
         {
           "column": 2,
+          "source": "venue-upgrades-isometric-v2.source.png",
           "sourceCell": [
-            698,
-            365,
-            1101,
-            729
+            686,
+            373,
+            1087,
+            736
           ],
-          "scale": 0.26498422712933756,
+          "sourceRow": 1,
+          "sourceColumn": 2,
+          "sourceOpaqueBounds": [
+            26,
+            15,
+            366,
+            346
+          ],
+          "scale": 0.2507462686567164,
           "placedRect": [
-            4,
             5,
-            87,
+            5,
+            86,
             84
           ],
           "packedOpaqueBounds": [
@@ -201,143 +381,241 @@
             6,
             90,
             88
-          ]
+          ],
+          "packedVisibleSha256": "f377206ecb7b5d3f1649d6ca450c6fd605c180c1ae46f701a45f1b067594be5e"
         },
         {
           "column": 3,
+          "source": "venue-features-v1.runtime.png",
           "sourceCell": [
-            1101,
-            365,
-            1448,
-            729
+            288,
+            96,
+            384,
+            192
           ],
-          "scale": 0.2616822429906542,
+          "scale": 1,
           "placedRect": [
-            19,
-            5,
-            57,
-            84
+            0,
+            0,
+            96,
+            96
           ],
+          "preservedEventRGBA": true,
+          "sourceCellRGBAsha256": "85ad9926589704f70670410eaf4b1191f5ee07820a8f45d7fcd01eb6cd505374",
           "packedOpaqueBounds": [
             20,
             6,
             75,
             88
-          ]
+          ],
+          "packedVisibleSha256": "85ad9926589704f70670410eaf4b1191f5ee07820a8f45d7fcd01eb6cd505374",
+          "packedRGBAsha256": "85ad9926589704f70670410eaf4b1191f5ee07820a8f45d7fcd01eb6cd505374"
+        },
+        {
+          "column": 4,
+          "source": "venue-upgrades-isometric-v2.source.png",
+          "sourceCell": [
+            1087,
+            360,
+            1448,
+            697
+          ],
+          "sourceRow": 1,
+          "sourceColumn": 3,
+          "sourceOpaqueBounds": [
+            48,
+            22,
+            283,
+            324
+          ],
+          "scale": 0.25149700598802394,
+          "placedRect": [
+            18,
+            12,
+            60,
+            77
+          ],
+          "packedOpaqueBounds": [
+            19,
+            13,
+            77,
+            88
+          ],
+          "packedVisibleSha256": "3fdda95f49544534ed29b09556277a18e5f7c6edd2ea81cbb339a9637cfbddb7"
         }
       ]
     },
     {
       "row": 2,
-      "groups": [
-        {
-          "name": "upgradeLevels",
-          "scale": 0.27586206896551724
-        },
-        {
-          "name": "event",
-          "scale": 0.2838709677419355
-        }
-      ],
       "cells": [
         {
           "column": 0,
+          "source": "venue-upgrades-isometric-v2.source.png",
           "sourceCell": [
             0,
-            729,
-            353,
+            759,
+            343,
             1086
           ],
-          "scale": 0.27586206896551724,
+          "sourceRow": 2,
+          "sourceColumn": 0,
+          "sourceOpaqueBounds": [
+            69,
+            65,
+            298,
+            280
+          ],
+          "scale": 0.27936507936507937,
           "placedRect": [
             15,
-            32,
-            67,
-            57
+            27,
+            65,
+            61
           ],
           "packedOpaqueBounds": [
             16,
-            33,
-            81,
-            88
-          ]
+            28,
+            79,
+            87
+          ],
+          "packedVisibleSha256": "24efea3fe222520a212bcf0e3160f013508e59c7880e9ee80a89d85daac4c1c8"
         },
         {
           "column": 1,
+          "source": "venue-upgrades-isometric-v2.source.png",
           "sourceCell": [
-            353,
-            729,
-            700,
+            343,
+            736,
+            686,
             1086
           ],
-          "scale": 0.27586206896551724,
+          "sourceRow": 2,
+          "sourceColumn": 1,
+          "sourceOpaqueBounds": [
+            54,
+            31,
+            305,
+            303
+          ],
+          "scale": 0.27936507936507937,
           "placedRect": [
+            12,
             11,
-            13,
-            73,
-            76
+            71,
+            77
           ],
           "packedOpaqueBounds": [
+            13,
             12,
-            14,
-            83,
-            88
-          ]
+            82,
+            87
+          ],
+          "packedVisibleSha256": "505f59019327ec12b451f0bc99e386bb3e7b35cd65068ac0502b25fa463a124c"
         },
         {
           "column": 2,
+          "source": "venue-upgrades-isometric-v2.source.png",
           "sourceCell": [
-            700,
-            729,
-            1077,
+            686,
+            736,
+            1087,
             1086
           ],
-          "scale": 0.27586206896551724,
+          "sourceRow": 2,
+          "sourceColumn": 2,
+          "sourceOpaqueBounds": [
+            47,
+            18,
+            358,
+            312
+          ],
+          "scale": 0.27936507936507937,
           "placedRect": [
             4,
-            7,
+            5,
             88,
-            81
+            83
           ],
           "packedOpaqueBounds": [
             5,
-            8,
+            6,
             91,
             87
-          ]
+          ],
+          "packedVisibleSha256": "065035cf43f980581366294ae68b2b2c8de18c75ba95c4bf20f0133272e144ff"
         },
         {
           "column": 3,
+          "source": "venue-features-v1.runtime.png",
           "sourceCell": [
-            1077,
-            729,
-            1448,
-            1086
+            288,
+            192,
+            384,
+            288
           ],
-          "scale": 0.2838709677419355,
+          "scale": 1,
           "placedRect": [
-            4,
-            14,
-            88,
-            75
+            0,
+            0,
+            96,
+            96
           ],
+          "preservedEventRGBA": true,
+          "sourceCellRGBAsha256": "a6a2682318063468c7ddbb3c7c6a05a95baaab75491bf7a99c8d47a93d87727f",
           "packedOpaqueBounds": [
             5,
             15,
             91,
             88
-          ]
+          ],
+          "packedVisibleSha256": "a6a2682318063468c7ddbb3c7c6a05a95baaab75491bf7a99c8d47a93d87727f",
+          "packedRGBAsha256": "a6a2682318063468c7ddbb3c7c6a05a95baaab75491bf7a99c8d47a93d87727f"
+        },
+        {
+          "column": 4,
+          "source": "venue-upgrades-isometric-v2.source.png",
+          "sourceCell": [
+            1087,
+            697,
+            1448,
+            1086
+          ],
+          "sourceRow": 2,
+          "sourceColumn": 3,
+          "sourceOpaqueBounds": [
+            31,
+            14,
+            311,
+            344
+          ],
+          "scale": 0.25149700598802394,
+          "placedRect": [
+            12,
+            5,
+            71,
+            84
+          ],
+          "packedOpaqueBounds": [
+            12,
+            6,
+            82,
+            88
+          ],
+          "packedVisibleSha256": "89768af9582245320f456e3c637df626c2be7e1a0cf56e2d2de6dcc51598c89b"
         }
       ]
     }
   ],
   "file": "venue-features.png",
-  "bytes": 32886,
-  "sha256": "14213f06eb589f2b117e34b20f9c247c761043fce8302d278e0055fe09966156",
+  "bytes": 149675,
+  "sha256": "4321c6f6bc321caac97928caad911f1d14a510ed571873fe09407cf4c87af574",
   "alphaExtrema": [
     0,
-    252
+    255
   ],
-  "nonEmptyCells": 12,
-  "uniqueProps": 12
+  "nonEmptyCells": 15,
+  "uniqueProps": 15,
+  "generatedUpgradeProps": 12,
+  "preservedEventProps": 3,
+  "allEventPixelsUnchanged": true
 }

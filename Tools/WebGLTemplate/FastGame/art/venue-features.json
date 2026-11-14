@@ -1,26 +1,39 @@
 {
-  "version": 1,
+  "version": 2,
   "file": "venue-features.png",
   "frameWidth": 96,
   "frameHeight": 96,
-  "columns": 4,
+  "columns": 5,
   "rows": 3,
   "footX": 48,
   "footY": 88,
   "drawWidth": 96,
   "drawHeight": 96,
+  "sources": {
+    "upgrades": "venue-upgrades-isometric-v2.source.png",
+    "events": "venue-features-v1.runtime.png"
+  },
   "items": {
     "draught-1": {
       "row": 0,
-      "column": 0
+      "column": 0,
+      "variants": {
+        "ff": {"row": 0, "column": 4}
+      }
     },
     "draught-2": {
       "row": 0,
-      "column": 1
+      "column": 1,
+      "variants": {
+        "ff": {"row": 1, "column": 4}
+      }
     },
     "draught-3": {
       "row": 0,
-      "column": 2
+      "column": 2,
+      "variants": {
+        "ff": {"row": 2, "column": 4}
+      }
     },
     "open-mic": {
       "row": 0,

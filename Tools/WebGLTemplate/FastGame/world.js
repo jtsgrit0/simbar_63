@@ -62,10 +62,20 @@ export function pixelVenueFeatures(state={}){
   const owner=clamp(state.owner,0,2),upgrades=Array.from({length:3},(_,i)=>clamp(state.upgrades?.[i],0,3)),preview=state.visualPreview;
   if(preview?.type==='upgrade'&&Number.isInteger(preview.index)&&preview.index>=0&&preview.index<3)upgrades[preview.index]=clamp(preview.level??upgrades[preview.index]+1,1,3);
   const anchors=[[[402,211,66,263],[892,308,76,308],[259,244,76,244]],[[252,213,64,308],[896,307,76,307],[111,351,76,351]],[[286,273,70,359],[859,304,76,304],[122,285,76,285]]][owner];
-  const result=upgrades.flatMap((level,index)=>level?[{id:['draught','sound','vip'][index]+'-'+level,type:'upgrade',index,level,x:anchors[index][0],y:anchors[index][1],size:anchors[index][2],depth:anchors[index][3],preview:preview?.type==='upgrade'&&preview.index===index}]:[]);
+  const result=upgrades.flatMap((level,index)=>level?[{id:['draught','sound','vip'][index]+'-'+level,type:'upgrade',index,level,venue:ownerVenue(owner).key,x:anchors[index][0],y:anchors[index][1],size:anchors[index][2],depth:anchors[index][3],preview:preview?.type==='upgrade'&&preview.index===index}]:[]);
   const event=preview?.type==='event'?preview.index:state.activeEvent;
   if(Number.isInteger(event)&&event>=0&&event<3)result.push({id:['open-mic','rock-showcase','fan-festival'][event],type:'event',index:event,x:owner===2?612:609,y:owner===2?314:323,size:event===2?88:76,depth:324,preview:preview?.type==='event'});
   return result;
+}
+
+// Final alignment/ambient light belongs to the room, not the saved purchase.
+// Small Y shears retain vertical stems and cabinet edges; FF uses real
+// opposite-facing draught artwork rather than severely skewing the front view.
+export function pixelVenueFeatureStyle(feature={}){
+  if(feature.type!=='upgrade')return null;
+  const venue=feature.venue||'original';
+  const palettes={freebird:'brightness(0.88) saturate(0.72) sepia(0.08)',ff:'brightness(0.80) saturate(0.68)',original:'brightness(0.86) saturate(0.76) sepia(0.04)'};
+  return{shearY:feature.index===0?(venue==='ff'?-.12:.10):feature.index===1?.12:.22,filter:palettes[venue]||palettes.original};
 }
 
 // Quiet audience moods use standing idle drawings; only an occasional cheer
@@ -549,7 +559,13 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
     const meta=assets.venueFeatureModels,sheet=assets.venueFeatures,item=meta?.items?.[feature.id];
     if(!item||!ready(sheet))return;
     const fw=meta.frameWidth||96,fh=meta.frameHeight||96,size=feature.size;
-    target.drawImage(sheet,item.column*fw,item.row*fh,fw,fh,Math.round(feature.x-(meta.footX??48)*size/fw),Math.round(feature.y-(meta.footY??88)*size/fh),size,size);
+    const cell=item.variants?.[feature.venue]||item,style=pixelVenueFeatureStyle(feature);
+    if(!style){target.drawImage(sheet,cell.column*fw,cell.row*fh,fw,fh,Math.round(feature.x-(meta.footX??48)*size/fw),Math.round(feature.y-(meta.footY??88)*size/fh),size,size);return;}
+    target.save();target.translate(feature.x,feature.y);target.transform(1,style.shearY,0,1,0,0);
+    if(feature.index!==0)ellipse(target,0,-1,Math.round(size*.24),Math.max(1,Math.round(size*.035)),'rgba(9,8,13,0.22)');
+    target.filter=style.filter;
+    target.drawImage(sheet,cell.column*fw,cell.row*fh,fw,fh,Math.round(-(meta.footX??48)*size/fw),Math.round(-(meta.footY??88)*size/fh),size,size);
+    target.restore();
   }
   function destroy(){destroyed=true;observer.disconnect();particles.length=0;occluders=[];propLayers=[];city=null;}
   function getBandPresentation(state=getState()){
