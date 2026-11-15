@@ -10,6 +10,7 @@ import {ownerVenue,PETSOUNDS_STANDING_SPOTS} from './owner-venues.js';
 import {Floor,Challenges} from './floor.js';
 import {distance,walkable,reserved,setRoute,setCrowdRoute,move,FF_LAYOUT,FREEBIRD_LAYOUT} from './navigation.js';
 import {createAfterShow,sanitizeAfterShow,syncAfterShow,restoreAfterShow,ownsAfterShowActor,tickAfterShow} from './aftershow.js';
+import {createDrunkIncident,sanitizeDrunkIncident,syncDrunkIncident,restoreDrunkIncident,tickDrunkIncident} from './drunk-incident.js';
 export {catalog,Booking,Floor,Challenges};
 export const SAVE_KEY='SimBar.Operations.v1';
 const OWNER_KEY='SimBar.Owner',LANGUAGE_KEY='SimBar.Language';
@@ -115,15 +116,16 @@ export class SimBarGame{
   get viewClosingActive(){return this._viewClosingActive===true&&this.closing;}
   setViewClosingActive(active){this._viewClosingActive=active===true&&this.closing;return this._viewClosingActive;}
   get staffReturnPending(){return this.closing&&this.floor.cleanupComplete&&this.crew.some((id,i)=>{const a=this.actors.find(a=>a.id===id);return a?.visible&&a.id!==this.escort?.worker&&distance(a,this._parkGoal(i))>.05;});}
-  get floorTasksPending(){return Floor.remaining(this.floor)>0||this.floor.guestActive||!this.guestExitFinished||this.staffReturnPending||this.inspection.active;}
+  get drunkIncidentPending(){return!!this.floor.guestIncident&&this.floor.guestIncident.phase!=='done';}
+  get floorTasksPending(){return Floor.remaining(this.floor)>0||this.floor.guestActive||!this.guestExitFinished||this.staffReturnPending||this.inspection.active||this.drunkIncidentPending;}
   get afterShowPending(){return !this.journey.afterShow?.completed;}
-  get farewellPending(){return this.journey.inProgress&&this.journey.floorClosing&&!!this.journey.afterShow?.completed&&!this.journey.afterShow.noticeAcknowledged;}
+  get farewellPending(){return this.journey.inProgress&&this.journey.floorClosing&&!!this.journey.afterShow?.completed&&!this.journey.afterShow.noticeAcknowledged&&!this.drunkIncidentPending;}
   get showFarewell(){return this.farewellPending;}
   goalTargets(){const p=this.journey.booking;return Booking.isCampaign(p)?Campaign.targets(p.campaignStage,this.journey.challenge):this.journey.challenge?[20,7,8]:[12,4,5];}
   purchaseGate(type,index){return Booking.isCampaign(this.journey.booking)?Campaign.purchaseGate(type,index,this.state.upgrades[index]+1,this.journey.completedNights):{allowed:true,requiredNights:0};}
   _campaignContext(){return{venueOwner:this.owner,completedNights:this.journey.completedNights,fans:this.state.fans,upgrades:this.state.upgrades,career:this.journey.bookingCareer};}
   _usesAudience(){return Booking.isCampaign(this.journey.booking)&&this.journey.booking.lockedMetrics?.audienceVersion===Audience.version;}
-  _orderGuest(a){return a.visible!==false&&!a.festivalLead&&!a.festivalSupport&&!['arrive','to-stage'].includes(a.action)&&(a.id.startsWith('patron-')||a.audienceVersion===Audience.version&&a.role==='guest');}
+  _orderGuest(a){return a.visible!==false&&!a.drunkIncident&&!a.festivalLead&&!a.festivalSupport&&!['arrive','to-stage'].includes(a.action)&&(a.id.startsWith('patron-')||a.audienceVersion===Audience.version&&a.role==='guest');}
   goals(){return[this.journey.orders,this.journey.manualPerfects,this.journey.bestCombo];}
   bookingChance(band,premium=0){return Booking.isDesk(this.journey.booking)?0:Booking.chance(this.journey.booking,this.journey.bookingCareer,+band,+premium);}
   bookingFee(band,premium=0){return Booking.isDesk(this.journey.booking)?0:Booking.fee(+band,+premium);}
@@ -154,6 +156,7 @@ export class SimBarGame{
   _say(ko,en,seconds=3){this._message=[ko,en];this._messageTimer=seconds;}
   _notify(){this.revision=(this.revision||0)+1;this.onchange?.(this);}
   save(){
+    syncDrunkIncident(this.floor.guestIncident,this.actors);
     syncAfterShow(this.journey.afterShow,this.actors);
     Inspection.sync(this.journey.inspection,this.actors);
     this.state.journeyJson=JSON.stringify(this.journey);
@@ -207,8 +210,10 @@ export class SimBarGame{
         this._seed=(n.seed>>>0)||this._seed;this.elapsed=clamp(n.elapsed,0,1e8);this._requestTimer=finite(n.requestTimer,3,0,10);this.selectedItem=int(n.selectedItem,0,catalog.drinks.length-1);this._eventSerial=int(n.eventSerial);
       }
       this.journey.feedback=SpectatorFeedback.sanitize(this.journey.feedback,{session:this.journey.session,owner:this.owner});
+      restoreDrunkIncident(this.floor.guestIncident,this.actors);
       restoreAfterShow(this.journey.afterShow,this.actors);
       if(this._applyOwnerLayout()){this._routeOrders();syncAfterShow(this.journey.afterShow,this.actors);}
+      restoreDrunkIncident(this.floor.guestIncident,this.actors);
       Inspection.restore(this.journey.inspection,this.actors,this.owner,data.native?.actors);
       if(!this.orders.length&&!restoredEmptyQueue&&this.journey.inProgress&&!this.journey.floorClosing)this._seedOrders();
       if(this.floor.guestSpawned&&(!this.floor.guestComplete||this.actors.some(a=>a.id==='assisted-guest'&&a.visible!==false)))this._ensureGuest();
@@ -221,6 +226,7 @@ export class SimBarGame{
     for(const key of ['score','combo','bestCombo','manualPerfects','orders','mistakes','successfulEvents','manualStreak','xp','bestScore','completedNights','resultServed','resultXP','resultBonus','resultTicketGross','resultArtistFee'])j[key]=int(j[key],0,1e8);
     j.bestCombo=Math.max(j.bestCombo,j.combo);j.orders=Math.max(j.orders,j.manualPerfects);j.guideStep=int(j.guideStep,0,2);j.feverSeconds=clamp(j.feverSeconds,0,12);j.feverCharge=clamp(j.feverCharge,0,1);j.resultStars=int(j.resultStars,0,3);j.bestStars=int(j.bestStars,0,3);
     j.openingCash=finite(j.openingCash,this.state.money,0,1e9);j.resultProfit=finite(j.resultProfit,0,-1e9,1e9);j.floorMissions={...Floor.newState(),...(j.floorMissions||{})};Floor.sanitize(j.floorMissions);
+    j.floorMissions.guestIncident=sanitizeDrunkIncident(j.floorMissions.guestIncident);
     j.bookingCareer={...Booking.newCareer(),...(j.bookingCareer||{})};if(j.booking)j.booking={...Booking.newPlan(j.day,0),...j.booking};Booking.sanitize(j.booking,j.bookingCareer);if(j.booking?.day!==j.day)j.booking=null;
     if(!j.session||j.settledSession>0&&j.session===j.settledSession){j.inProgress=false;j.settlementPending=false;j.floorClosing=false;}
     j.musicPauseSession=int(j.musicPauseSession,0,j.session);j.musicPaused=j.musicPaused===true;j.musicPauseIntent=j.musicPauseIntent===true;
@@ -362,7 +368,7 @@ export class SimBarGame{
     const definition=result.action,s=this.state,response=Festival.response(s.satisfaction,s.performance);
     state.arrivalCredit=Math.min(1,state.arrivalCredit+.6*response);
     this._requestTimer=Math.min(this._requestTimer,2.2*this.festival.orderMultiplier);
-    const eligible=this.actors.filter(a=>['guest','seated'].includes(a.role)&&a.visible!==false&&!a.moving&&!['queue','return','arrive','to-stage','exit','escorted'].includes(a.action));
+    const eligible=this.actors.filter(a=>['guest','seated'].includes(a.role)&&a.visible!==false&&!a.drunkIncident&&!a.moving&&!['queue','return','arrive','to-stage','exit','escorted'].includes(a.action));
     for(const actor of eligible){actor.festivalAction=id;actor.festivalSerial=state.serial;actor.festivalRemaining=state.remaining;actor.festivalDuration=state.duration;}
     if(id==='surf')this._formFestivalSurf(eligible);
     this._say(definition.ko+'! 호응이 높을수록 칵테일 주문과 현장 관객이 늘어나요.',definition.en+'! A responsive crowd brings more cocktail orders and walk-in guests.');
@@ -505,7 +511,7 @@ export class SimBarGame{
     for(const [id,item]of[[1,0],[4,1],[8,2]])this._assignOrder('patron-'+id,Booking.isCampaign(this.journey.booking)?this._orderItem():item);
   }
   _assignOrder(id,item){
-    const a=this.actors.find(a=>a.id===id);if(!a||a.visible===false||this.orders.some(o=>o.id===id))return;
+    const a=this.actors.find(a=>a.id===id);if(!a||a.visible===false||a.drunkIncident||this.orders.some(o=>o.id===id))return;
     const s=this.state,patience=52+this._random()*16+(this._onDuty(1)?18:0)+s.upgrades[2]*6+(s.activeEvent===0?8:0)+(this.journey.challenge?-12:18);
     this.orders.push({id,name:a.name,item,patience,maxPatience:patience});this._routeOrders();
   }
@@ -574,7 +580,7 @@ export class SimBarGame{
       if(!frozen)for(const o of this.orders)if(!this.pour||o.id!==this.pour.orderId)o.patience-=dt;
       if(this.orders[0]?.patience<=0&&!this.pour){const missed=this.orders.shift();this._feedbackDisappointment(missed.id,'timeout');s.fans=Math.max(0,s.fans-3);this._mistake();this._routeOrders();this._say('손님이 주문을 받지 못하고 떠났어요.','A guest left without their order.');}
     }
-    this._tickActors(dt);if(this.playing&&!frozen)this._feedbackTick(dt);if(this.closing&&!frozen)tickAfterShow(j.afterShow,this.actors,dt);
+    this._tickActors(dt);if(!frozen)tickDrunkIncident(this.floor.guestIncident,this.actors,dt);if(this.playing&&!frozen)this._feedbackTick(dt);if(this.closing&&!frozen)tickAfterShow(j.afterShow,this.actors,dt);
     if(this.farewellPending){if(this.viewClosingActive)this.act('farewellAck');else{this.paused=true;this.pauseReason='farewell';this.save();}}
     if(!this.playing&&!this.closing)return;
     this._floorTick(dt);this._autosave+=dt;if(this._autosave>=3){this._autosave=0;this.save();}
@@ -583,7 +589,7 @@ export class SimBarGame{
     this._ensureReaction();const r=this.reaction,f=this.floor;
     if(this.playing&&!this.inspection.freezePerformers){const due=Challenges.advance(r,180-this.journey.secondsLeft,true);for(let i=0;i<due.confetti;i++)this._paper(0);for(let i=0;i<due.tissue;i++)this._paper(1);if(due.guest&&!f.guestSpawned){Floor.spawnGuest(f,this.journey.day%10);this._ensureGuest();this._say('손님 안내 미션! F 키나 버튼을 빠르게 연타하세요.','Guest assistance! Rapidly tap F or the button.');}}
     this._ensureCleanup();this._tickFloorActors(dt);
-    const timeout=Challenges.tick(r,dt,!(this.inspection.freezePerformers&&(r.activeKind===2||f.guestActive)));if(timeout.timedOut){if(f.guestActive)this._feedbackDisappointment(this.actors.find(a=>a.id==='assisted-guest')?.assistedSourceId||'assisted-guest','unsafe',.3);this._say('시간을 놓쳤어요. 잠시 뒤 다시 연타로 대응하세요!','Time ran out. A new response window will appear shortly.');}
+    const timeout=Challenges.tick(r,dt,!(this.inspection.freezePerformers&&(r.activeKind===2||f.guestActive)));if(timeout.timedOut){if(f.guestActive)this._feedbackDisappointment(this.actors.find(a=>a.id==='assisted-guest')?.assistedSourceId||'assisted-guest','unsafe',.3);this._say('시간을 놓쳤어요. 잠시 뒤 다시 연타로 대응하세요!','Time ran out. A new response window will appear shortly.');if(timeout.kind===Challenges.Guest&&Floor.missGuest(f))this._startDrunkIncident();}
     if(this.closing){const ready=this.cleanupReadyWorkers,before=f.cleaned,workDt=ready?Math.min(dt,r.cleanupWorkBudget/(ready*3)):0,result=Floor.tick(f,workDt,ready,true);r.cleanupWorkBudget=Math.max(0,r.cleanupWorkBudget-(f.cleaned-before));if(r.cleanupWorkBudget<.001)r.cleanupWorkBudget=0;if(result.cleanupFinished){this.journey.score+=150;this._say('직원 청소 미션 완료!','Staff cleanup mission complete!');}}
     if(!r.activeKind&&r.cooldown<=0){if(this.closing&&f.cleanupActive&&this.cleanupReadyWorkers>0&&r.cleanupWorkBudget<=0)Challenges.start(r,1,Math.floor(f.cleaned/32));else if(f.guestActive)Challenges.start(r,2,f.guestStep);}
     // Reuse the manual response path, including its press interval, stage and
@@ -592,6 +598,16 @@ export class SimBarGame{
     if(this.closing&&!this.floorTasksPending&&!this.afterShowPending&&!this.farewellPending)this._settleNight();
   }
   _paper(kind){this._emitPaper(kind,Floor.throw(this.floor,kind,this.playing));}
+  _startDrunkIncident(){
+    if(this.floor.guestIncident)return;
+    this.floor.guestIncident=createDrunkIncident(this.actors,this.actors.find(a=>a.id==='assisted-guest'&&a.visible!==false));
+    const ids=new Set(this.floor.guestIncident.participants.map(item=>item.id));
+    this.orders=this.orders.filter(order=>!ids.has(order.id));if(this.pour&&ids.has(this.pour.orderId))this.pour=null;
+    if(this._viewServiceOrder&&ids.has(this._viewServiceOrder.id)){this._viewServiceOrder=null;this._viewServiceTimer=3;}
+    this._routeOrders();syncAfterShow(this.journey.afterShow,this.actors);
+    // A newly started incident must finish before the farewell confirmation.
+    if(this.drunkIncidentPending&&this.paused&&this.pauseReason==='farewell'){this.paused=false;this.pauseReason='';}
+  }
   _emitPaper(kind,result){if(!result.success)return;this.state.fans+=result.fanGain;this.effects.push({kind,serial:++this._eventSerial,time:this.elapsed});this._say(kind===0?'밴드가 깜짝 꽃가루 퍼포먼스를 했어요!':'관객 위로 휴지가 날립니다!',kind===0?'The band unexpectedly throws confetti!':'Tissue streamers fly over the crowd!');}
   _quick(kind){
     if(this.paused||(!this.playing&&!this.closing)||!this.reaction)return{success:false,code:'unavailable'};
@@ -776,7 +792,7 @@ export class SimBarGame{
       this.actors.push(actor);
     }
     if(actor.visible!==false&&!actor.assistedSourceId){
-      const candidates=this.actors.filter(a=>a.role==='guest'&&a.visible!==false&&!a.festivalLead&&!a.festivalSupport
+      const candidates=this.actors.filter(a=>a.role==='guest'&&a.visible!==false&&!a.drunkIncident&&!a.festivalLead&&!a.festivalSupport
         &&!['queue','return','arrive','to-stage'].includes(a.action)&&!this.orders.some(order=>order.id===a.id));
       candidates.sort((a,b)=>(a.id.startsWith('audience-')?0:1)-(b.id.startsWith('audience-')?0:1)||distance(a,point(-.65,-.25))-distance(b,point(-.65,-.25)));
       const source=candidates[0];
@@ -827,6 +843,7 @@ export class SimBarGame{
         if(!a._inspectionPose)a._inspectionPose={facing:a.facing,y:a.y||0};
         a.moving=false;if(a.role!=='band'){a.y=0;a.facing=Math.atan2(5.75-a.x,3.5-a.z);}continue;
       }
+      if(a.drunkIncident)continue;
       if(this.crew.includes(a.id)||a.id===this.escort?.worker||a.id==='assisted-guest')continue;
       if(this.closing&&ownsAfterShowActor(this.journey.afterShow,a.id))continue;
       if(a.role==='band'){

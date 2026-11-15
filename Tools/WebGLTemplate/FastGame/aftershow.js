@@ -29,14 +29,14 @@ const customerId=id=>typeof id==='string'&&/^(?:patron-\d+|audience-\d+|arrival-
 const customer=a=>a&&customerId(a.id)&&['guest','seated','support','surfer'].includes(a.role);
 function audienceItem(id,index,a,{gone=false,departing=false}={}){
   const exitOnly=!greeter(id),[targetX,targetZ]=spots[index]||[a?.x??6,a?.z??-4.25],parallel=exitOnly;
-  return{id,phase:gone||!a||a.visible===false?'gone':departing||parallel?'exit':exitOnly?'farewell-wait':'gather',exitOnly,parallel,
+  return{id,phase:gone||!a||a.visible===false||a.drunkIncident?'gone':departing||parallel?'exit':exitOnly?'farewell-wait':'gather',exitOnly,parallel,
     exitDelay:parallel?parallelDelay(index):0,
     homeX:a?.x??targetX,homeZ:a?.z??targetZ,homeFacing:a?.facing||0,x:a?.x??targetX,z:a?.z??targetZ,y:a?.y||0,
     targetX,targetZ,partner:'',visible:!!a&&a.visible!==false&&!gone,capture:false,standingReleased:false,egressPrepared:false,egress:[],egressAt:0};
 }
 function appendActualAudience(state,actors){
   const ids=new Set(state.audience.map(item=>item.id));
-  const additional=actors.filter(a=>customer(a)&&a.visible!==false&&!ids.has(a.id)).sort((a,b)=>distance(a,EXIT_POINT)-distance(b,EXIT_POINT)||a.id.localeCompare(b.id));
+  const additional=actors.filter(a=>customer(a)&&a.visible!==false&&!a.drunkIncident&&!ids.has(a.id)).sort((a,b)=>distance(a,EXIT_POINT)-distance(b,EXIT_POINT)||a.id.localeCompare(b.id));
   for(const a of additional)state.audience.push(audienceItem(a.id,state.audience.length,a,{gone:state.completed,departing:state.departureStarted}));
 }
 function stageRoute(id){
@@ -96,6 +96,7 @@ export function syncAfterShow(state,actors){
   if(!state)return;
   for(const item of [...state.members,...state.audience]){
     const a=find(actors,item.id);if(!a)continue;item.x=a.x;item.z=a.z;item.y=a.y||0;item.visible=a.visible!==false;
+    if(a.drunkIncident){item.phase='gone';item.visible=false;item.partner='';continue;}
     if(BAND_MEMBERS.includes(item.id)){item.stageLevel=a.stageLevel??item.stageLevel;item.visible=a.visible!==false;}
   }
 }
@@ -105,6 +106,7 @@ export function restoreAfterShow(state,actors){
   appendActualAudience(state,actors);
   for(const item of [...state.members,...state.audience]){
     const a=find(actors,item.id);if(!a)continue;
+    if(a.drunkIncident){item.phase='gone';item.visible=false;item.partner='';continue;}
     if(!BAND_MEMBERS.includes(item.id)&&a.reservedForAssistance&&a.visible===false){item.phase='gone';item.visible=false;}
     // New departure-only participants in a v1 save retain their actual saved
     // positions and surfing height; import must not snap them to default spots.
@@ -132,15 +134,15 @@ export function ownsAfterShowActor(state,id){
 function bodies(actors,actor){return actors.map(a=>a!==actor&&a.role==='band'&&(a.stageLevel||0)<.05?{...a,role:'aftershow-band'}:a);}
 function nearbyBodies(actors,actor){return bodies(actors,actor).filter(other=>other===actor||other.visible!==false&&distance(actor,other)<1.6);}
 function clearStand(a,goal,actors){return bodies(actors,a).every(other=>other.id===a.id||other.visible===false||other.role==='band'||other.role==='seated'||other.id===a._partner||other.id==='crowd-surfer'||Math.abs((other.y||0)-(a.y||0))>=1||distance(other,goal)>=.4);}
-function route(a,goal,actors,dt,speed=1.3,arrival=.2){
+function route(a,goal,actors,dt,speed=1.3,arrival=.2,fullCrowd=false){
   const local=nearbyBodies(actors,a);
   a._afterShowRetry=Math.max(0,(a._afterShowRetry||0)-dt);
   const changed=Math.hypot((a.targetX??a.x)-goal.x,(a.targetZ??a.z)-goal.z)>.04;
   if(distance(a,goal)<=arrival){a.moving=false;return true;}
   if(changed||((!a._path?.length||a._pathAt>=a._path.length)&&!a._afterShowRetry)){
-    setCrowdRoute(a,goal,local,false);a._afterShowRetry=.35;
+    setCrowdRoute(a,goal,fullCrowd?bodies(actors,a):local,false);a._afterShowRetry=.35;
   }
-  move(a,dt,speed,local);
+  move(a,dt,speed,fullCrowd?bodies(actors,a):local);
   return distance(a,goal)<=arrival;
 }
 function walkStage(a,m,dt){
@@ -219,7 +221,7 @@ function clearDoorwaySegment(a,goal,actors){
     return Math.hypot(other.x-a.x-t*dx,other.z-a.z-t*dz)>=.34;
   });
 }
-function leave(item,a,actors,dt,speed){
+function leave(item,a,actors,dt,speed,fullCrowd=false){
   if(!BAND_MEMBERS.includes(item.id))standCustomer(item,a);
   if(item.egressAt<(item.egress?.length||0)){
     let budget=dt*speed;a.moving=false;
@@ -250,12 +252,17 @@ function leave(item,a,actors,dt,speed){
     move(a,dt,speed,local);
     return distance(a,goal)<=arrival;
   }
-  return route(a,goal,nearby,dt,speed,arrival);
+  return route(a,goal,fullCrowd?actors:nearby,dt,speed,arrival,fullCrowd);
 }
+// Incidents share the exact authored chair egress, body clearance and physical
+// doorway checks without enrolling those people in the band's farewell.
+export const prepareCustomerExit=(item,actor)=>standCustomer(item,actor);
+export const tickCustomerExit=(item,actor,actors,dt,speed=PARALLEL_EXIT_SPEED)=>leave(item,actor,actors,dt,speed,true);
 function tickParallelAudience(state,actors,dt){
   for(const item of state.audience){
     if(!item.parallel||item.phase==='gone')continue;
     const a=find(actors,item.id);
+    if(a?.drunkIncident){item.phase='gone';item.visible=false;continue;}
     if(!a||a.visible===false){item.phase='gone';item.visible=false;continue;}
     item.phase='exit';a._partner=null;a.actionProgress=0;
     if(waitForSurfer(a,actors))continue;
@@ -281,6 +288,7 @@ function tickDepartures(state,actors,dt){
   }
   for(const item of items){
     const a=find(actors,item.id);if(!a){item.phase='gone';continue;}
+    if(a.drunkIncident){item.phase='gone';item.visible=false;if(state.departingActor===item.id)state.departingActor=null;continue;}
     if(a.visible===false){item.phase='gone';item.visible=false;if(state.departingActor===item.id)state.departingActor=null;continue;}
     a._partner=null;a.actionProgress=0;
     if(item.phase==='gone'){a.visible=false;a.moving=false;continue;}
@@ -311,6 +319,7 @@ export function tickAfterShow(state,actors,dt){
   tickParallelAudience(state,actors,dt);
   for(const item of state.audience){
     const fan=find(actors,item.id);if(!fan)continue;
+    if(fan.drunkIncident){item.phase='gone';item.visible=false;continue;}
     if(fan.visible===false){item.phase='gone';item.visible=false;continue;}
     if(item.phase==='gone'){fan.visible=false;fan.moving=false;continue;}
     if(item.parallel)continue;

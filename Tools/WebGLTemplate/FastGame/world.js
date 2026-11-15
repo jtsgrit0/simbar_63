@@ -88,6 +88,7 @@ export function pixelVenueFeatureStyle(feature={}){
 // small body pose: collision paths, feet, orders and serving stay in core.js.
 export function pixelFestivalPose(actor={},state={},seconds=0){
   if(frozenPerformer(actor,state))return null;
+  if(actor.drunkIncident)return null;
   if(state.phase!=='playing'||state.journey?.floorClosing||state.journey?.afterShow?.started||actor.visible===false||actor.moving||!['guest','seated','support','surfer'].includes(actor.role))return null;
   if(['queue','return','arrive','to-stage','exit','escorted','walk'].includes(actor.action))return null;
   let id=actor.festivalRemaining>0?actor.festivalAction:null;
@@ -122,8 +123,22 @@ export function pixelFestivalFrame(actor={},state={},seconds=0,manifest={}){
   return{action,atlas:definition.atlas,column:frames[at],row:styles[style]??0,style,pose};
 }
 
+// Reuse the same wardrobe and four directional, hand-forward drawings. Quick
+// guard/jab/recoil poses distinguish a scuffle from the slow social greeting;
+// this changes presentation only, never saved feet or navigation coordinates.
+export function pixelDrunkFightPose(actor={},state={},seconds=0){
+  if(!['playing','closing'].includes(state.phase)||actor.visible===false||actor.drunkIncident!=='fight'||actor.action!=='fight'||frozenPerformer(actor,state))return null;
+  const age=Number.isFinite(actor.fightElapsed)?Math.max(0,actor.fightElapsed):Math.max(0,finite(seconds));
+  const phase=clamp(actor.fightIndex,0,4)*.73,time=age+phase,step=Math.floor(time*9)%6;
+  return{kind:'fight',action:'highfive',animationSeconds:time,speed:1,phase,
+    frameOverride:[0,1,2,1,0,2][step],sway:Math.sin(time*13)*1.3,
+    bob:-Math.max(0,Math.sin(time*13))*.7,lean:Math.sin(time*13)*.055,lift:0,
+    cheer:false,strike:step===1||step===5};
+}
+
 export function pixelAudiencePose(actor={},state={},seconds=0){
   if(frozenPerformer(actor,state))return{kind:'inspection',action:'idle',animationSeconds:0,speed:0,phase:0,sway:0,bob:0,lean:0,lift:0,cheer:false,frameOverride:0};
+  const fight=pixelDrunkFightPose(actor,state,seconds);if(fight)return fight;
   const festival=pixelFestivalPose(actor,state,seconds);if(festival)return festival;
   let action=String(actor.action||'idle');
   if(action==='idle'&&['listen','sway','cheer','headbang'].includes(actor.behavior))action=actor.behavior;
@@ -163,6 +178,10 @@ export function pixelDirection(dx,dz){
   return(back>=0?'B':'F')+(right>=0?'R':'L');
 }
 export function pixelFacing(actor,role,action,state={}){
+  if(actor.drunkIncident==='fight'){
+    const partner=state.actors?.find(a=>a.id===actor.fightPartner);
+    if(partner)return pixelDirection(partner.x-finite(actor.x),partner.z-finite(actor.z));
+  }
   if(role==='barseated')return'BR';
   if(role==='seated'&&actor.waitingSeat)return pixelDirection(Math.sin(finite(actor.facing)),Math.cos(finite(actor.facing)));
   if(role==='seated')return Number(String(actor.id).split('-').at(-1))<4?'FL':'BR';
@@ -373,6 +392,7 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
   function drawActor(a,state){
     if(a.role==='inspector'){drawInspector(a);return;}
     let role=String(a.role||'guest').toLowerCase();if(role==='band')role=String(a.id||'singer');if(role==='seated'&&a.id?.startsWith('bar-seat-'))role='barseated';
+    if(a.drunkIncident==='fight'||a.drunkIncident==='exit')role='guest';
     const pose=pixelAudiencePose(a,state,seconds);
     const frozen=frozenPerformer(a,state);
     let action=pose.action;if(pose.kind==='cheer'&&action==='highfive'&&!assets.spriteMeta.roles?.[role]?.actions?.highfive)action='idle';if(action==='sweep')action='clean';else if(a.moving&&!frozen&&!['mosh','slam','surf','support'].includes(action))action='walk';
@@ -395,6 +415,11 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
     else throw new Error('No pixel character atlas entry for '+role);
     ctx.restore();
     if(active&&pose.cheer){ctx.fillStyle='#ffe9ac';ctx.fillRect(Math.round(p.x-9),Math.round(p.y-size+6),1,3);ctx.fillRect(Math.round(p.x+8),Math.round(p.y-size+2),1,3);}
+    if(active&&pose.kind==='fight'&&pose.strike){
+      const side=pixelFacing(a,role,action,state).endsWith('R')?1:-1,x=Math.round(p.x+side*11),y=Math.round(p.y-size*.51);
+      ctx.fillStyle='#edb778';ctx.fillRect(x,y,2,1);ctx.fillRect(x+side*3,y-3,1,2);
+      ctx.fillStyle='#f4dfbd';ctx.fillRect(x+side*3,y+2,1,2);
+    }
     if(action==='clean'){const swing=Math.sin(seconds*7+hash(a.id)%5)*2;polygon(ctx,[{x:p.x+4,y:p.y-16},{x:p.x+5,y:p.y-16},{x:p.x+10+swing,y:p.y+2},{x:p.x+9+swing,y:p.y+2}],'#b69061');ctx.fillStyle='#c7b27e';ctx.fillRect(Math.round(p.x+6+swing),Math.round(p.y+2),7,2);ctx.fillStyle='#857150';for(let i=0;i<3;i++)ctx.fillRect(Math.round(p.x+6+swing+i*2),Math.round(p.y+4),1,2);}
     if((a.id==='assisted-guest'||role==='assisted')&&state.floor?.guestActive){ctx.fillStyle='#f4c86e';ctx.fillRect(Math.round(p.x),Math.round(p.y-48),2,5);ctx.fillRect(Math.round(p.x),Math.round(p.y-41),2,2);}
   }

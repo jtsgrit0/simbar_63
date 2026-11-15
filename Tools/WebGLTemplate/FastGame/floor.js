@@ -50,7 +50,7 @@ const fail=code=>({success:false,code,fanGain:0,cashDelta:0,energyGain:0});
 const ok=(code,more={})=>({success:true,code,fanGain:0,cashDelta:0,energyGain:0,...more});
 export const Floor={
   newState:()=>({version:1,confettiThrows:0,tissueThrows:0,litter:0,cleaned:0,finaleEnsured:false,cleanupStarted:false,cleanupActive:false,cleanupComplete:false,cleanupWorkers:0,cleanupRewardClaimed:false,
-    guestSpawned:false,guestActive:false,guestComplete:false,guestStep:0,guestIndex:-1,guestSetbacks:0,reaction:null}),
+    guestSpawned:false,guestActive:false,guestComplete:false,guestStep:0,guestIndex:-1,guestSetbacks:0,guestMisses:0,guestIncident:null,reaction:null}),
   remaining:s=>s?int(Math.ceil(s.litter-s.cleaned),0,112):0,
   progress:s=>s?.litter>0?clamp(s.cleaned/s.litter,0,1):0,
   sanitize(s){
@@ -63,6 +63,7 @@ export const Floor={
     if(!s.cleanupStarted||s.litter===0){s.cleanupStarted=false;s.cleaned=0;s.cleanupComplete=false;s.cleanupActive=false;s.cleanupWorkers=0;}
     else{s.cleanupComplete=s.cleaned>=s.litter;s.cleanupActive=!s.cleanupComplete&&s.cleanupWorkers>0;}
     s.guestSetbacks=int(s.guestSetbacks,0,1000);
+    s.guestMisses=int(s.guestMisses,0,3);if(!s.guestSpawned){s.guestMisses=0;s.guestIncident=null;}
     if(s.guestComplete){s.guestSpawned=true;s.guestActive=false;s.guestStep=3;s.guestIndex=int(s.guestIndex,0,127);}
     else if(!s.guestSpawned){s.guestActive=false;s.guestStep=0;s.guestIndex=-1;}
     else{s.guestActive=true;s.guestStep=int(s.guestStep,0,2);s.guestIndex=int(s.guestIndex,0,127);}
@@ -91,5 +92,6 @@ export const Floor={
   },
   settle(s){if(s.cleanupRewardClaimed)return fail('already_settled');if(!s.cleanupStarted||!s.litter||!s.cleanupComplete||s.cleaned<s.litter)return fail('incomplete_cleanup');s.cleanupRewardClaimed=true;return ok('cleanup_reward',{cashDelta:70,fanGain:3});},
   spawnGuest(s,index,eligible=true){if(!eligible)return fail('guest_not_eligible');if(s.guestSpawned)return fail('guest_already_spawned');if(index<0||index>127)return fail('invalid_guest');s.guestSpawned=true;s.guestActive=true;s.guestStep=0;s.guestIndex=index;return ok('guest_arrived');},
+  missGuest(s){if(!s?.guestActive)return false;s.guestMisses=int(s.guestMisses+1,0,3);return s.guestMisses===3&&!s.guestIncident;},
   resolveGuest(s,choice){if(s.guestComplete)return fail('guest_already_complete');if(!s.guestActive)return fail('no_guest');if(choice<0||choice>3)return fail('invalid_choice');if(choice===3){s.guestStep=Math.max(0,s.guestStep-1);s.guestSetbacks=int(s.guestSetbacks+1,0,1000);return ok('deescalate');}if(choice!==s.guestStep)return fail('sequence_needed');s.guestStep++;if(s.guestStep<3)return ok(s.guestStep===1?'water_offered':'escort_offered');s.guestComplete=true;s.guestActive=false;return ok('guest_complete',{guestCompleted:true,fanGain:4});}
 };
