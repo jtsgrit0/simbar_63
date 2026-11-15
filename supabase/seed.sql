@@ -33,6 +33,13 @@ on conflict (id) do update set
   band_id = excluded.band_id, title = excluded.title, audio_asset_id = excluded.audio_asset_id,
   duration_seconds = excluded.duration_seconds, sort_order = excluded.sort_order, active = excluded.active;
 
+-- Fresh databases run migrations before this catalogue exists. Add missing
+-- zero totals after seeding tracks, preserving every existing global count.
+insert into public.track_play_counts (track_id)
+select id from public.tracks
+where id in ('track_001', 'track_002', 'track_003', 'track_004', 'track_005')
+on conflict (track_id) do nothing;
+
 insert into public.room_templates (id, name, version, definition, active) values
   ('starter_club', '작은 공연장', 1,
     '{"bounds":{"min_x":0,"max_x":100,"min_y":0,"max_y":100},"zones":["stage","wall","floor"],"max_placements":64}'::jsonb,

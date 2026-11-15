@@ -1,6 +1,6 @@
 // Executes the real migrations in disposable PostgreSQL WASM, with Supabase's
 // auth roles mocked locally. No remote connection or project credentials used.
-// Install @electric-sql/pglite, or set SIMBAR_PGLITE_MODULE to its index.js path.
+// Install @electric-sql/pglite@0.5.16, or set SIMBAR_PGLITE_MODULE to its index.js path.
 import assert from 'node:assert/strict';
 import {readFile, readdir, mkdir, writeFile} from 'node:fs/promises';
 import {fileURLToPath, pathToFileURL} from 'node:url';
@@ -48,6 +48,7 @@ export async function runSupabaseDatabaseTests({modulePath = process.env.SIMBAR_
   const alice = action => asRole('authenticated', ALICE, action);
   const bob = action => asRole('authenticated', BOB, action);
   const anon = action => asRole('anon', null, action);
+  const service = action => asRole('service_role', null, action);
   const denied = async (name, action, code = '42501') => {
     await assert.rejects(action, error => error.code === code,
       `${name}: expected PostgreSQL SQLSTATE ${code}`);
@@ -92,8 +93,57 @@ export async function runSupabaseDatabaseTests({modulePath = process.env.SIMBAR_
       from public.tracks t join public.media_assets m on m.id=t.audio_asset_id order by t.sort_order`));
     check('Seed preserves all five canonical R2 track IDs and URLs', tracks.rows,
       playlist.tracks.map(({id,title,audio_url}) => ({id,title,audio_url})));
-    check('All 13 application tables have RLS', Number(await scalar(`select count(*) from pg_class c
-      join pg_namespace n on n.oid=c.relnamespace where n.nspname='public' and c.relkind='r' and c.relrowsecurity`)), 13);
+    check('All 14 public application tables have RLS', Number(await scalar(`select count(*) from pg_class c
+      join pg_namespace n on n.oid=c.relnamespace where n.nspname='public' and c.relkind='r' and c.relrowsecurity`)), 14);
+    check('Private music play ledger has RLS', Number(await scalar(`select count(*) from pg_class c
+      join pg_namespace n on n.oid=c.relnamespace where n.nspname='simbar_private' and c.relkind='r' and c.relrowsecurity`)), 1);
+
+    // Global totals are public, but only the server's service role may submit
+    // qualified plays. Each denied role transaction is rolled back by asRole.
+    const publicCounts = () => db.query('select * from public.track_play_counts order by track_id');
+    const initialCounts = (await anon(publicCounts)).rows;
+    check('Anonymous can read exactly five canonical play totals', initialCounts.map(row => ({track_id:row.track_id,play_count:String(row.play_count)})),
+      playlist.tracks.map(track => ({track_id:track.id,play_count:'0'})));
+    check('Public play totals contain no listener or play identities', Object.keys(initialCounts[0]).sort(), ['play_count','track_id','updated_at']);
+    check('Authenticated clients see the same public play totals', (await alice(publicCounts)).rows, initialCounts);
+    for (const [label, role] of [['Anonymous',anon],['Authenticated',alice]]) {
+      await denied(`${label} cannot read raw music plays`, () => role(() => db.query('select * from simbar_private.music_play_events')));
+      await denied(`${label} cannot insert play totals`, () => role(() => db.query("insert into public.track_play_counts(track_id) values('track_001')")));
+      await denied(`${label} cannot update play totals`, () => role(() => db.query("update public.track_play_counts set play_count=999 where track_id='track_001'")));
+      await denied(`${label} cannot delete play totals`, () => role(() => db.query("delete from public.track_play_counts where track_id='track_001'")));
+      await denied(`${label} cannot write raw music plays`, () => role(() => db.query("delete from simbar_private.music_play_events")));
+      await denied(`${label} cannot call the play recording RPC`, () => role(() => db.query(`select * from public.record_music_play(
+        'a1234567-1234-4567-8123-123456789012','track_001','web',30,clock_timestamp()-interval '31 seconds')`)));
+    }
+    const playId = 'a1234567-1234-4567-8123-123456789012';
+    const oldTicket = await scalar("select (clock_timestamp()-interval '31 seconds')::text");
+    const recordPlay = (id, track='track_001', seconds=30, ticket=oldTicket, source='web') => service(() => db.query(
+      'select * from public.record_music_play($1::uuid,$2::text,$3::text,$4::numeric,$5::timestamptz)', [id,track,source,seconds,ticket]));
+    await denied('Server rejects less than thirty heard seconds', () => recordPlay(playId,'track_001',29.999), '22023');
+    await denied('Server rejects a ticket younger than thirty seconds', () => recordPlay(playId,'track_001',30,new Date().toISOString()), '22023');
+    await denied('Server rejects an expired play ticket', () => recordPlay(playId,'track_001',30,new Date(Date.now()-25*60*60*1000).toISOString()), '22023');
+    check('Rejected plays leave the private ledger empty', Number(await scalar('select count(*) from simbar_private.music_play_events')), 0);
+    check('Exactly thirty heard seconds records one global play', (await recordPlay(playId)).rows,
+      [{track_id:'track_001',play_count:'1',counted:true}]);
+    check('Retrying the same play UUID is idempotent', (await recordPlay(playId)).rows,
+      [{track_id:'track_001',play_count:'1',counted:false}]);
+    await denied('Same play UUID cannot be reused for another track', () => recordPlay(playId,'track_002'), '23505');
+    check('Conflicting UUID cannot increment another track', String(await anon(() => scalar("select play_count from public.track_play_counts where track_id='track_002'"))), '0');
+    check('Duplicate and conflicting requests retain exactly one raw play', Number(await scalar('select count(*) from simbar_private.music_play_events')), 1);
+    check('A separate Windows playback increments the same aggregate', (await recordPlay('b1234567-1234-4567-8123-123456789012','track_001',30,oldTicket,'windows')).rows,
+      [{track_id:'track_001',play_count:'2',counted:true}]);
+    check('Public readers receive the updated aggregate only', String(await anon(() => scalar("select play_count from public.track_play_counts where track_id='track_001'"))), '2');
+    check('Private ledger retains original source and heard duration', (await db.query(
+      'select source,heard_seconds::text from simbar_private.music_play_events where play_id=$1',[playId])).rows,
+      [{source:'web',heard_seconds:'30.000'}]);
+    await db.exec(seed);
+    check('Repeated catalogue seed preserves existing global play counts', String(await anon(() => scalar("select play_count from public.track_play_counts where track_id='track_001'"))), '2');
+    check('Repeated catalogue seed preserves the private deduplication ledger', Number(await scalar('select count(*) from simbar_private.music_play_events')), 2);
+    // This is a disposable engine. Reset the analytics fixtures before running
+    // the existing room/auth/publication regression checks below.
+    await db.exec('truncate simbar_private.music_play_events; update public.track_play_counts set play_count=0');
+    check('Music test fixtures reset all aggregate totals', Number(await scalar('select sum(play_count) from public.track_play_counts')), 0);
+    check('Music test fixtures reset the raw ledger', Number(await scalar('select count(*) from simbar_private.music_play_events')), 0);
     const room = await alice(() => scalar("select public.create_room('starter_club','Alice club','freewill')"));
     const layout = await alice(() => scalar('select id from public.room_layouts where room_id=$1', [room]));
     check('Creator can read their room', Number(await alice(() => scalar('select count(*) from public.rooms'))), 1);

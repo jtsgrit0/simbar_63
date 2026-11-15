@@ -37,3 +37,7 @@ enable_signup = true
 enable_confirmations = true
 
 # No audio bucket: the five tracks remain on the existing Cloudflare R2 host.
+
+[functions.track-play]
+# This API validates the publishable apikey in its handler; it accepts no user JWT.
+verify_jwt = false
