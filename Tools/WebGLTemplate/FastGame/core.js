@@ -72,6 +72,7 @@ export class SimBarGame{
     this.state=defaults();this.journey=newJourney();this.phase='lobby';this.paused=true;this.pauseReason='lobby';
     this.owner=0;this.language='ko';this.orders=[];this.pour=null;this.effects=[];this.actors=[];this.crew=[];this.escort=null;
     this.selectedItem=0;this.lastQuality=null;this.lastResult={success:true,code:'ready'};this._message=['',''];this._messageTimer=0;this.elapsed=0;this._autosave=0;this._requestTimer=4;this._inputGuard=0;this._eventSerial=0;this._loading=false;this._musicPlaybackActive=null;
+    this._viewServiceActive=false;this._viewServiceTimer=3;this._viewServiceOrder=null;
     this._buildActors();
     this.owner=Math.max(0,catalog.owners.findIndex(o=>o.id===this._get(OWNER_KEY)));
     this._applyOwnerLayout({reset:true});
@@ -96,6 +97,11 @@ export class SimBarGame{
   get availableWorkers(){return 2+this.state.staff.reduce((n,v)=>n+(v&&this.state.wageDebt===0?1:0),0);}
   get payroll(){return this.state.staff.reduce((n,v,i)=>n+v*catalog.staff[i].wage,0);}
   get playing(){return this.phase==='playing'&&this.journey.inProgress;}
+  get viewServiceActive(){return this._viewServiceActive===true&&this.playing;}
+  setViewServiceActive(active){
+    const next=active===true&&this.playing;if(next===this._viewServiceActive)return next;
+    this._viewServiceActive=next;this._viewServiceTimer=3;this._viewServiceOrder=next?this.orders[0]||null:null;return next;
+  }
   get inspection(){return Inspection.view(this.journey.inspection,this.actors);}
   get _performanceElapsed(){return this.elapsed-(this.journey.inspection?.frozenSeconds||0);}
   get festival(){
@@ -156,6 +162,7 @@ export class SimBarGame{
   importSave(raw,{save=true}={}){
     try{
       const data=typeof raw==='string'?JSON.parse(raw):clone(raw);if(!data||data.version!==1)return false;
+      this.setViewServiceActive(false);
       const ownerId=this._get(OWNER_KEY),savedOwner=catalog.owners.findIndex(o=>o.id===ownerId);if(savedOwner>=0)this.owner=savedOwner;
       const savedLanguage=this._get(LANGUAGE_KEY);if(savedLanguage==='en'||savedLanguage==='ko')this.language=savedLanguage;
       const base=defaults();this.state={...base,...data};
@@ -307,12 +314,13 @@ export class SimBarGame{
         this._say('재생 중: '+catalog.playlists[idx].name,'Now playing: '+catalog.playlists[idx].nameEnglish);break;
       default:return this._done(false,'unknown_action');
     }
+    if(!this.playing)this.setViewServiceActive(false);
     this.lastResult=r;this.save();this._notify();return r;
   }
   _done(success,code='unavailable'){const r={success,code};this.lastResult=r;if(!success)this._say(...(messages[code]||messages.unavailable));this._notify();return r;}
   _activePlan(){const p=this.journey.booking;return!!(p&&!p.locked&&!p.completed&&p.day===this.journey.day);}
   _planning(challenge){
-    const j=this.journey;if(j.inProgress||j.booking?.locked&&!j.booking.completed)return;this.pour=null;
+    const j=this.journey;if(j.inProgress||j.booking?.locked&&!j.booking.completed)return;this.setViewServiceActive(false);this.pour=null;
     if(this._activePlan()&&!Booking.isDesk(j.booking)){
       const previous=j.booking,opening=j.dayOpeningCash;
       const trusted=j.hasDayOpeningCash===true&&Number.isFinite(opening)&&opening>=this.state.money&&opening>=0&&opening<=1e9;
@@ -327,6 +335,7 @@ export class SimBarGame{
     j.challenge=challenge;this.phase='planning';this.paused=true;this.pauseReason='planning';this.state.clock=Booking.hour(j.booking);
   }
   _newNight(){
+    this.setViewServiceActive(false);
     const j=this.journey;j.session=j.session>=1e9?1:j.session+1;if(j.session===1)j.settledSession=0;j.inProgress=true;j.settlementPending=false;j.floorClosing=false;j.afterShow=null;j.musicPauseSession=0;j.musicPaused=false;j.musicPauseIntent=false;j.secondsLeft=180;
     // Fresh nights have an independent schedule even when the same planning
     // save restores the gameplay RNG. The resulting journal stays stable on
@@ -461,11 +470,23 @@ export class SimBarGame{
   _opsTick(dt){
     const s=this.state;s.cooldowns=s.cooldowns.map(x=>Math.max(0,x-dt));s.wageTimer-=dt;
     if(s.wageTimer<=0){if(!this.payroll){s.wageDebt=0;s.wageTimer=60;}else{if(!s.wageDebt)s.wageDebt=this.payroll;if(s.money>=s.wageDebt){s.money-=s.wageDebt;s.wageDebt=0;s.wageTimer=60;this._say('직원 급여를 지급했습니다.','Staff payroll paid.');}else{s.wageTimer=10;this._say('급여 미지급으로 고용 직원의 근무가 중단됐어요.','Wages are due. Hired staff are off duty.');}}}
-    if(this._onDuty(0)){s.autoServeTimer-=dt;if(s.autoServeTimer<=0&&!this.pour){s.autoServeTimer=Math.max(6,12*(1-s.upgrades[0]*.12));if(this.orders.length)this._serve(this.orders[0].item,true,.7);}}
+    if(this.viewServiceActive)this._viewServiceTick(dt);
+    else if(this._onDuty(0)){s.autoServeTimer-=dt;if(s.autoServeTimer<=0&&!this.pour){s.autoServeTimer=Math.max(6,12*(1-s.upgrades[0]*.12));if(this.orders.length)this._serve(this.orders[0].item,true,.7);}}
     if(this._onDuty(2)){s.promoterTimer+=dt;if(s.promoterTimer>=20){const n=Math.floor(s.promoterTimer/20);s.promoterTimer-=n*20;s.fans+=n;}}
     if(s.activeEvent>=0){const d=Math.min(dt,s.eventRemaining);s.eventRemaining=Math.max(0,s.eventRemaining-dt);if(s.activeEvent===2){s.eventFanTimer+=d;if(s.eventFanTimer>=10){s.fans+=Math.floor(s.eventFanTimer/10)*2;s.eventFanTimer%=10;}}if(s.eventRemaining<=0)this._completeEvent();}
   }
   _completeEvent(){const s=this.state;if(s.activeEvent<0)return;const e=catalog.events[s.activeEvent],success=s.pours-s.eventStartPours>=e.target;s.money+=success?e.reward:50;s.fans+=success?e.fans:3;if(success){s.completedEvents++;this.journey.successfulEvents++;this.journey.score+=250;}s.cooldowns[s.activeEvent]=Math.min(s.cooldowns[s.activeEvent],e.cooldown);s.activeEvent=-1;s.eventRemaining=0;this._say(success?'이벤트 성공! 보상과 팬을 획득했어요.':'이벤트가 종료됐어요. 다음 목표에 도전해 보세요.',success?'Event success! Cash and fans awarded.':'Event ended. Try the next target.');}
+  _viewServiceTick(dt){
+    const front=this.orders[0];
+    // Empty time cannot prepay a future order, and a manual preparation owns
+    // its front order until it completes. Actor IDs can repeat across orders.
+    if(!front||this.pour){this._viewServiceTimer=3;this._viewServiceOrder=null;return;}
+    if(this._viewServiceOrder!==front){this._viewServiceOrder=front;this._viewServiceTimer=3;}
+    this._viewServiceTimer=Math.max(0,this._viewServiceTimer-dt);
+    if(this._viewServiceTimer>1e-9)return;
+    this._serve(front.item,true,.7,{viewService:true,order:front});
+    this._viewServiceTimer=3;this._viewServiceOrder=this.orders[0]||null;
+  }
   _orderItem(){
     const festival=this.journey.festival;
     if(festival?.actionsUsed&&this._random()<Festival.modifiers(festival,this.state.satisfaction,this.state.performance).cocktailBoost)return this._random()<.5?0:1;
@@ -500,16 +521,18 @@ export class SimBarGame{
   _stopPour(){if(!this.pour||!this.playing||this.paused||this._inputGuard>0)return{success:false,code:'unavailable'};const d=Math.abs(this.pour.marker-this.pour.target),q=d<=this.pour.perfectWidth*.5?1:d<=this.pour.goodWidth*.5?.65:.2;return this._finishPour(q);}
   _finishPour(quality){const p=this.pour;if(!p||this.orders[0]?.id!==p.orderId){this.pour=null;return{success:false,code:'stale_order'};}this.pour=null;this._inputGuard=.15;this.lastQuality=quality;return this._serve(p.item,false,quality);}
   _mistake(){const j=this.journey;j.mistakes++;j.combo=0;j.manualStreak=0;j.feverSeconds=0;j.feverCharge=0;}
-  _serve(item,automatic,quality){
+  _serve(item,automatic,quality,context=null){
     const o=this.orders[0],s=this.state,j=this.journey;if(!o||o.item!==item||!this.playing||this.paused)return{success:false,code:'wrong_item'};
+    const viewService=context?.viewService===true;
+    if(viewService&&(!this.viewServiceActive||context.order!==o||!automatic||this.pour))return{success:false,code:'stale_order'};
     this.orders.shift();const qualityTip=automatic?1:quality>=.9?1.4:quality>=.5?1:0,revenue=1+s.upgrades[0]*.08+(s.activeEvent===0?.10:s.activeEvent===2?.15:0),tips=1+s.upgrades[1]*.1+(s.activeEvent===1?.4:s.activeEvent===2?.2:0);
     const show=Booking.isCampaign(j.booking)?Campaign.show(j.booking.showId):null,showTips=show?show.tipMultiplier*(show.preferredItems.includes(item)?1.2:1):1;
-    const tip=round(catalog.drinks[item].price*clamp(o.patience/30,0,1)*.45*tips*showTips*(j.feverSeconds>0?1.75:1)*qualityTip),sale=round(catalog.drinks[item].price*revenue),income=tip+sale;
+    const tip=viewService?0:round(catalog.drinks[item].price*clamp(o.patience/30,0,1)*.45*tips*showTips*(j.feverSeconds>0?1.75:1)*qualityTip),sale=round(catalog.drinks[item].price*revenue),income=tip+sale;
     s.money=clamp(s.money+income,0,1e9);s.fans+=automatic||quality>=.5?1+(!automatic&&quality>=.9?1:0):0;s.pours++;
     SpectatorFeedback.service(j.feedback,{guestId:o.id,item,quality,automatic,patience:o.patience,maxPatience:o.maxPatience,preferred:!!show?.preferredItems.includes(item),crowdCount:this.festival.liveAttendance,capacity:Audience.capacity(this.owner)});this._refreshFeedback();
     j.orders++;j.drinkIncome+=income;if(!automatic){if(quality<.5)this._mistake();else{j.combo++;j.bestCombo=Math.max(j.bestCombo,j.combo);if(quality>=.9)j.manualPerfects++;j.manualStreak++;let multiplier=1+Math.min(20,j.combo-1)*.05;if(j.feverSeconds>0)multiplier*=1.3;j.score+=round((70+130*quality)*multiplier);j.feverCharge=clamp(j.manualStreak/5,0,1);if(!j.feverSeconds&&j.manualStreak>=5&&s.performance>=.72){j.feverSeconds=12;j.manualStreak=0;j.feverCharge=0;}}}
     this._routeOrders();if(!show)this._createOrder(o.id);else if(!this.orders.length)this._requestTimer=Math.min(this._requestTimer,2*this.festival.orderMultiplier);
-    this._say((automatic?'바 보조 서빙':quality>=.9?'완벽한 서빙!':quality>=.5?'잘 서빙했어요!':'타이밍을 놓쳤어요 — 팁 없음')+' +'+this.formatMoney(income),(automatic?'Barback served':quality>=.9?'Perfect service!':quality>=.5?'Good service!':'Missed service — no tip')+' +'+this.formatMoney(income));return{success:true,code:automatic?'auto_served':quality>=.9?'perfect':quality>=.5?'good':'miss',quality,income};
+    this._say((viewService?'감상모드 자동 서빙 · 팁 없음':automatic?'바 보조 서빙':quality>=.9?'완벽한 서빙!':quality>=.5?'잘 서빙했어요!':'타이밍을 놓쳤어요 — 팁 없음')+' +'+this.formatMoney(income),(viewService?'View-mode service · no tip':automatic?'Barback served':quality>=.9?'Perfect service!':quality>=.5?'Good service!':'Missed service — no tip')+' +'+this.formatMoney(income));return{success:true,code:viewService?'view_served':automatic?'auto_served':quality>=.9?'perfect':quality>=.5?'good':'miss',quality,income,...(viewService?{sale,tip,orderId:o.id}:{})};
   }
   tick(dt){
     if(!Number.isFinite(dt)||dt<=0)return;dt=Math.min(dt,5);let remaining=dt;
@@ -529,6 +552,7 @@ export class SimBarGame{
     for(const notice of notices)this._inspectionNotice(notice);
   }
   _step(dt){
+    if(!this.playing)this.setViewServiceActive(false);
     if(this.paused||(!this.playing&&!this.closing))return;this.elapsed+=dt;this._inputGuard=Math.max(0,this._inputGuard-dt);this._messageTimer-=dt;if(this._messageTimer<=0)this._message=['',''];
     const j=this.journey,s=this.state;this.effects=this.effects.filter(e=>this.elapsed-e.time<8);
     this._inspectionTick(dt);const frozen=this.inspection.freezePerformers;
@@ -571,6 +595,7 @@ export class SimBarGame{
     if(!j.afterShow||j.afterShow.session!==j.session){j.afterShow=createAfterShow(this.actors,j.session);restoreAfterShow(j.afterShow,this.actors);}
   }
   _beginClosing(){
+    this.setViewServiceActive(false);
     const j=this.journey;this.phase='closing';j.floorClosing=true;j.inProgress=true;j.settlementPending=false;j.guidePending=false;
     Inspection.requestExit(j.inspection,this.actors);
     this._clearFestivalActors();j.festival.activeId='';j.festival.remaining=0;j.festival.globalRemaining=0;
@@ -588,6 +613,7 @@ export class SimBarGame{
     if(!this.crew.length){this.crew=this.actors.filter(a=>(a.id==='bartender'||a.id==='server'||a.id.startsWith('hired-')&&this._onDuty(+a.id.slice(-1)))&&a.visible).map(a=>a.id);f.cleanupWorkers=this.crew.length;for(let i=0;i<this.crew.length;i++){const a=this.actors.find(x=>x.id===this.crew[i]);a.action='cleaning';a._ready=false;setCrowdRoute(a,this._cleanGoal(i),this.actors,false);}}
   }
   _settleNight(){
+    this.setViewServiceActive(false);
     const j=this.journey;if(j.session<=0||j.session===j.settledSession){j.settlementPending=false;j.inProgress=false;j.floorClosing=false;this.phase='results';this.paused=true;this.pauseReason='results';return;}
     if(this.floorTasksPending||j.inProgress&&(this.afterShowPending||this.farewellPending)){this._beginClosing();return;}
     this._completeEvent();const targets=this.goalTargets(),values=this.goals(),goals=values.filter((v,i)=>v>=targets[i]).length,stars=goals===3?3:goals>=2?2:1;

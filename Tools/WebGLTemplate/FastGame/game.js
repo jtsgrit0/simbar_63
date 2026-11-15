@@ -226,9 +226,10 @@ export async function startGame({root,assetsBase='./FastGame/art/',assets:predec
   function toggleViewMode(){
     if(viewMode.transitioning)return;
     if(viewMode.viewing){
+      g.setViewServiceActive(false);
       const returnTab=viewReturnTab||'festival';
       void viewMode.setViewing(false).then(completed=>{
-        if(completed&&!viewMode.viewing){ui.liveTab=returnTab;viewReturnTab=null;dirty=true;}
+        if(completed&&!viewMode.viewing){g.setViewServiceActive(false);ui.liveTab=returnTab;viewReturnTab=null;dirty=true;}
       });
       return;
     }
@@ -240,6 +241,7 @@ export async function startGame({root,assetsBase='./FastGame/art/',assets:predec
     // Build the real playlist first, then animate its surrounding UI only.
     rebuild();update();lastKey=structure();
     void viewMode.setViewing(true);
+    g.setViewServiceActive(true);
     void playStats.refresh();
   }
   function uiAction(action,p){
@@ -295,7 +297,7 @@ export async function startGame({root,assetsBase='./FastGame/art/',assets:predec
   }
   function syncMusic(){if(!orientationBlocked&&['playing','closing','guide','results'].includes(g.phase)){music.sync();music.resumeContext();requestAlbum();}else music.suspend();}
   const structure=()=>{const j=g.journey,p=j.booking,r=g.reaction;return JSON.stringify([g.phase,g.language,g.owner,g.paused,ui,j.guideStep,p?.deskVersion,p?.freewillSelected,p?.deskDoneMask,p?.showId,p?.ticketTier,p?.promotions,p?.campaignStage,j.completedNights,g.state.playlist,g.orders[0]?.id,g.orders[0]?.item,p?.venue,g.phase==='planning'?g.state.money:ui.menu==='operations'?g.state.money:0,g.state.staff,g.state.upgrades,g.state.activeEvent,g.state.wageDebt>0,!!g.pour,g.pour?.item,r?.activeKind,r?.activeStage,r?.cooldown>0,g.guestExitFinished,j.musicPaused,g.farewellPending,j.afterShow?.departureStarted]);};
-  const frame=now=>{if(stopped)return;const dt=Math.min(.1,Math.max(0,(now-last)/1000));last=now;syncOrientation();g.setMusicPlaybackActive(music.playing);if(!orientationBlocked)g.tick(dt);syncMusic();if(previousPhase!==g.phase){if(g.phase==='planning')dayDesk.reset(now);if(!['playing','closing'].includes(g.phase)){viewMode.reset();viewReturnTab=null;}ui.menu=null;ui.floorOpen=false;previousPhase=g.phase;dirty=true;}if(g.closing&&g.farewellPending){ui.menu=null;ui.floorOpen=false;}maybeOrderPopup();const key=structure();if((dirty||key!==lastKey)&&!viewMode.transitioning){rebuild();lastKey=key;}update();world.render(now,worldState());raf=requestAnimationFrame(frame);};
+  const frame=now=>{if(stopped)return;const dt=Math.min(.1,Math.max(0,(now-last)/1000));last=now;syncOrientation();g.setMusicPlaybackActive(music.playing);g.setViewServiceActive(viewMode.viewing&&g.playing);if(!orientationBlocked)g.tick(dt);syncMusic();if(previousPhase!==g.phase){if(g.phase==='planning')dayDesk.reset(now);if(!['playing','closing'].includes(g.phase)){viewMode.reset();g.setViewServiceActive(false);viewReturnTab=null;}ui.menu=null;ui.floorOpen=false;previousPhase=g.phase;dirty=true;}if(g.closing&&g.farewellPending){ui.menu=null;ui.floorOpen=false;}maybeOrderPopup();const key=structure();if((dirty||key!==lastKey)&&!viewMode.transitioning){rebuild();lastKey=key;}update();world.render(now,worldState());raf=requestAnimationFrame(frame);};
   host.addEventListener('click',clickHandler);host.addEventListener('change',changeHandler);document.addEventListener('keydown',keyHandler);window.addEventListener('blur',blurHandler);const observer=new ResizeObserver(resize);observer.observe(host);g.onchange=()=>{};
   const statsResume=()=>playStats.resume(),statsVisibility=()=>{if(!document.hidden)statsResume();};
   window.addEventListener('online',statsResume);document.addEventListener('visibilitychange',statsVisibility);
@@ -305,7 +307,7 @@ export async function startGame({root,assetsBase='./FastGame/art/',assets:predec
   // Scene and interactive owner controls have both painted before the host is told ready.
   await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
 
-  const result={g,world,canvas,albumArt,viewMode,root:host,get orientationBlocked(){return orientationBlocked;},destroy(){stopped=true;cancelAnimationFrame(raf);observer.disconnect();host.removeEventListener('click',clickHandler);host.removeEventListener('change',changeHandler);document.removeEventListener('keydown',keyHandler);window.removeEventListener('blur',blurHandler);viewMode.destroy();music.destroy();playStats.destroy();clearInterval(statsRefreshTimer);window.removeEventListener('online',statsResume);document.removeEventListener('visibilitychange',statsVisibility);albumArt.destroy();g.save();world.destroy?.();host.remove();}};
+  const result={g,world,canvas,albumArt,viewMode,root:host,get orientationBlocked(){return orientationBlocked;},destroy(){stopped=true;cancelAnimationFrame(raf);observer.disconnect();host.removeEventListener('click',clickHandler);host.removeEventListener('change',changeHandler);document.removeEventListener('keydown',keyHandler);window.removeEventListener('blur',blurHandler);g.setViewServiceActive(false);viewMode.destroy();music.destroy();playStats.destroy();clearInterval(statsRefreshTimer);window.removeEventListener('online',statsResume);document.removeEventListener('visibilitychange',statsVisibility);albumArt.destroy();g.save();world.destroy?.();host.remove();}};
   window.simbarGame=g;
   return result;
 }
