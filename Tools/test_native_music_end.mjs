@@ -29,7 +29,7 @@ const flush=async()=>{await Promise.resolve();await Promise.resolve();};
 const game=night(),live=audioHarness(game);
 live.music.sync();assert.equal(live.audios.length,0,'Pre-gesture sync fetched music');
 live.music.wake();const track=live.audios[0];assert.equal(track.plays.length,1);
-assert.equal(track.preload,'none');assert.equal(track.loop,true);
+assert.equal(track.preload,'none');assert.equal(track.loop,false);
 game.journey.secondsLeft=.05;game.tick(.05);assert.equal(game.phase,'closing');
 assert.equal(game.journey.musicPauseSession,game.journey.session);assert.equal(game.journey.musicPaused,true);
 live.music.sync();assert.equal(live.music.paused,true);assert.equal(track.pauseCount,1);

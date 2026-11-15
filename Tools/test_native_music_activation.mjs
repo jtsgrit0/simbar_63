@@ -15,7 +15,7 @@ function harness(game=night()){
     load(){this.loadCount++;this.emit('emptied');}
     removeAttribute(name){delete this[name];}
     addEventListener(name,callback){this.listeners.set(name,callback);}
-    emit(name){if(name==='playing'){this.paused=false;this.readyState=4;}if(name==='waiting')this.readyState=2;if(name==='pause')this.paused=true;if(name==='ended')this.ended=true;this.listeners.get(name)?.();}
+    emit(name){if(name==='playing'){this.paused=false;this.readyState=4;}if(name==='waiting')this.readyState=2;if(name==='emptied')this.readyState=0;if(name==='pause')this.paused=true;if(name==='ended')this.ended=true;this.listeners.get(name)?.();}
   }
   const music=new MusicPlayer({getIndex:()=>game.state.playlist,getPaused:()=>game.journey.musicPaused,tracks:catalog.playlists,AudioClass:Audio,onPauseChange:paused=>pauseChanges.push(paused)});
   return{game,music,audios,pauseChanges};
