@@ -29,6 +29,23 @@ export const FREEBIRD_LAYOUT=Object.freeze({
 const ffObstacles=[FF_LAYOUT.counter,FF_LAYOUT.dj,...obstacles.slice(-2)];
 const ffRoundObstacles=[...FF_LAYOUT.tables,...FF_LAYOUT.stools];
 const freebirdObstacles=[FREEBIRD_LAYOUT.counter,FREEBIRD_LAYOUT.stage,FREEBIRD_LAYOUT.wallTable,obstacles.at(-1)];
+export const PETSOUNDS_LAYOUT=Object.freeze({
+  id:'original',version:1,
+  dj:Object.freeze([pt(-1.1005,2.5413),pt(1.1853,2.7089),pt(1.4015,3.5364),pt(-.8843,3.3688)]),
+  // Only the bases of the retained front tables occupy the cleared sofa floor.
+  tables:Object.freeze([Object.freeze({x:-6.9001,z:-7.6138,radius:.55}),Object.freeze({x:-1.8907,z:-7.4699,radius:.55})])
+});
+const petsoundsObstacles=[...obstacles.slice(0,3),...obstacles.slice(5)];
+const nearPolygon=(point,polygon,padding=.23)=>{
+  let positive=false,negative=false,near=false;
+  for(let i=0;i<polygon.length;i++){
+    const a=polygon[i],b=polygon[(i+1)%polygon.length],dx=b.x-a.x,dz=b.z-a.z;
+    const cross=dx*(point.z-a.z)-dz*(point.x-a.x);positive||=cross>0;negative||=cross<0;
+    const t=Math.max(0,Math.min(1,((point.x-a.x)*dx+(point.z-a.z)*dz)/(dx*dx+dz*dz)));
+    near||=Math.hypot(point.x-a.x-t*dx,point.z-a.z-t*dz)<padding;
+  }
+  return !(positive&&negative)||near;
+};
 export const distance=(a,b)=>Math.hypot(a.x-b.x,a.z-b.z);
 export const reserved=p=>Math.hypot(p.x-5.75,p.z+1.25)<2.05||(p.x>4.3&&p.x<7.8&&p.z>-5.25&&p.z<-3.15);
 export function walkable(p,staff=false,floor=false,layout=p?.layout){
@@ -45,9 +62,11 @@ export function walkable(p,staff=false,floor=false,layout=p?.layout){
     if(ffRoundObstacles.some(circle=>Math.hypot(p.x-circle.x,p.z-circle.z)<circle.radius+.23))return false;
     return !floor||!reserved(p);
   }
-  if(p.x>9.1||p.z< -5.85||p.z>3.45)return false;
-  if(p.x< -1.65&&(!staff||p.x< -9.4||p.z< -.62||p.z>1.2))return false;
-  if(obstacles.some(([x0,z0,x1,z1])=>p.x>x0-.23&&p.x<x1+.23&&p.z>z0-.23&&p.z<z1+.23))return false;
+  const clearedFront=p.x>=-9.4&&p.x<=1&&p.z>=-7.3&&p.z<=-5.5;
+  if(p.x>9.1||p.z<(clearedFront?-7.3:-5.85)||p.z>3.45)return false;
+  if(!clearedFront&&p.x< -1.65&&(!staff||p.x< -9.4||p.z< -.62||p.z>1.2))return false;
+  if(petsoundsObstacles.some(([x0,z0,x1,z1])=>p.x>x0-.23&&p.x<x1+.23&&p.z>z0-.23&&p.z<z1+.23))return false;
+  if(PETSOUNDS_LAYOUT.tables.some(circle=>Math.hypot(p.x-circle.x,p.z-circle.z)<circle.radius+.23)||nearPolygon(p,PETSOUNDS_LAYOUT.dj))return false;
   return !floor||!reserved(p);
 }
 export function segment(a,b,staff=false,floor=false,layout=a?.layout){
@@ -57,7 +76,7 @@ const grids=new Map();
 function grid(staff,floor,layout){
   const custom=layout==='ff'||layout==='freebird';
   const key=(custom?layout+':':'')+staff+':'+floor;if(grids.has(key))return grids.get(key);
-  const width=custom||staff?48:28,height=custom?30:24,x0=custom||staff?-9.6:-1.6,points=Array.from({length:width*height},(_,i)=>({x:x0+(i%width)*.4,z:-5.8+Math.floor(i/width)*.4}));
+  const width=48,height=custom?30:34,x0=-9.6,z0=custom?-5.8:-7.4,points=Array.from({length:width*height},(_,i)=>({x:x0+(i%width)*.4,z:z0+Math.floor(i/width)*.4}));
   const valid=points.map(p=>walkable(p,staff,floor,layout)),neighbors=points.map(()=>[]);
   for(let i=0;i<points.length;i++)if(valid[i])for(let dz=-1;dz<=1;dz++)for(let dx=-1;dx<=1;dx++){
     const x=i%width+dx,z=Math.floor(i/width)+dz,j=z*width+x;

@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "tracks": [
+    {
+      "index": 0,
+      "filename": "Electric Shocker.mp3",
+      "title": "Electric Shocker",
+      "artist": "프리윌(freewill)",
+      "release": "Electric Shocker",
+      "cover": "album-covers/freewill-electric-shocker.png",
+      "sourceUrl": "https://music.bugs.co.kr/album/20850049",
+      "sourceImageUrl": "https://image.bugsm.co.kr/album/images/1200/208500/20850049.jpg",
+      "width": 224,
+      "height": 224
+    },
+    {
+      "index": 1,
+      "filename": "Hey_spotdown.mp3",
+      "title": "Hey",
+      "artist": "Julywantsmore",
+      "release": "Hey",
+      "cover": "album-covers/julywantsmore-hey.png",
+      "sourceUrl": "https://music.bugs.co.kr/album/20845764",
+      "sourceImageUrl": "https://image.bugsm.co.kr/album/images/1200/208457/20845764.jpg",
+      "width": 224,
+      "height": 224
+    },
+    {
+      "index": 2,
+      "filename": "No Matter How.mp3",
+      "title": "No Matter How",
+      "artist": "Julywantsmore",
+      "release": "No Matter How",
+      "cover": "album-covers/julywantsmore-no-matter-how.png",
+      "sourceUrl": "https://music.bugs.co.kr/album/20817216",
+      "sourceImageUrl": "https://image.bugsm.co.kr/album/images/1200/208172/20817216.jpg",
+      "width": 224,
+      "height": 224
+    },
+    {
+      "index": 3,
+      "filename": "Bedroom Manifesto.mp3",
+      "title": "Bedroom Manifesto",
+      "artist": "프리윌(freewill)",
+      "release": "Electric Shocker",
+      "cover": "album-covers/freewill-electric-shocker.png",
+      "sourceUrl": "https://music.bugs.co.kr/album/20850049",
+      "sourceImageUrl": "https://image.bugsm.co.kr/album/images/1200/208500/20850049.jpg",
+      "width": 224,
+      "height": 224
+    },
+    {
+      "index": 4,
+      "filename": "Electric Shocker - Korean Version.mp3",
+      "title": "Electric Shocker (Korean Version)",
+      "artist": "프리윌(freewill)",
+      "release": "Electric Shocker",
+      "cover": "album-covers/freewill-electric-shocker.png",
+      "sourceUrl": "https://music.bugs.co.kr/album/20850049",
+      "sourceImageUrl": "https://image.bugsm.co.kr/album/images/1200/208500/20850049.jpg",
+      "width": 224,
+      "height": 224
+    }
+  ]
+}

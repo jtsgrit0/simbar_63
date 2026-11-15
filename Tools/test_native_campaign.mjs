@@ -21,6 +21,36 @@ function open(g,id){
   assert.equal(g.phase,'playing');
 }
 
+// The planning card, forecast and final booking receipt share the authored
+// show fee. Contracts already locked at an older price retain that snapshot.
+{
+  const expectedName='프리윌 X 줄라이원츠모어 합동 공연';
+  assert.equal(Campaign.show('double').ko,expectedName);
+  assert.equal(Campaign.show('double').en,'Freewill × JulyWantsMore Double Bill');
+  assert.equal(Campaign.show('double').fee,360);
+  for(const id of ['freewill','july'])assert.equal(Campaign.show(id).fee,180);
+  const plan=Booking.newCampaignPlan(3,0,{completedNights:2,upgrades:[0,1,0]});
+  const selected=Booking.campaignOptions(plan).find(show=>show.id==='double');
+  assert.equal(selected.ko,expectedName);assert.equal(selected.fee,360);assert.equal(selected.locked,false);
+  const career=Booking.newCareer();
+  assert.equal(Booking.selectShow(plan,'double').success,true);
+  assert.equal(Booking.deskWork(plan,0).success,true);assert.equal(Booking.deskWork(plan,1).success,true);
+  const forecast=Booking.forecast(plan);
+  assert.equal(forecast.fee,360);assert.equal(forecast.artistFee,360);
+  assert.equal(forecast.netIncome,forecast.ticketIncome-360);
+  assert.equal(Booking.lockDesk(plan,career).success,true);
+  const oldContract=structuredClone(plan);
+  Object.assign(oldContract.lockedMetrics,{fee:320,artistFee:320,netIncome:forecast.ticketIncome-320});
+  const receipt=Booking.complete(plan,career,3),after=structuredClone(career);
+  assert.equal(receipt.success,true);assert.equal(receipt.fee,360);
+  assert.equal(receipt.income,receipt.grossIncome-360);assert.equal(receipt.cashDelta,receipt.income);
+  assert.equal(Booking.complete(plan,career,3).code,'already_completed');assert.deepEqual(career,after);
+  Booking.sanitize(oldContract,career);
+  assert.equal(Booking.forecast(oldContract).fee,320);
+  const restored=JSON.parse(JSON.stringify(oldContract));Booking.sanitize(restored,career);
+  assert.equal(Booking.complete(restored,career,3).fee,320,'An older locked fee must remain unchanged after loading');
+}
+
 // Play the actual service timer, random floor prompts, closing choreography and
 // confirmation. No result fields, positions, secondsLeft or settlement guards
 // are changed by this driver. The player serves roughly once per eight seconds

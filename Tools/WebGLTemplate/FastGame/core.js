@@ -6,7 +6,7 @@ import {Audience} from './audience.js';
 import {Festival} from './festival.js';
 import {Inspection} from './inspection.js';
 import {SpectatorFeedback} from './spectator-feedback.js';
-import {ownerVenue} from './owner-venues.js';
+import {ownerVenue,PETSOUNDS_STANDING_SPOTS} from './owner-venues.js';
 import {Floor,Challenges} from './floor.js';
 import {distance,walkable,reserved,setRoute,setCrowdRoute,move,FF_LAYOUT,FREEBIRD_LAYOUT} from './navigation.js';
 import {createAfterShow,sanitizeAfterShow,syncAfterShow,restoreAfterShow,ownsAfterShowActor,tickAfterShow} from './aftershow.js';
@@ -619,15 +619,41 @@ export class SimBarGame{
       this.actors.push(...Audience.build({owner:m.venueOwner,attendance:m.attendance,showId:p.showId,day:p.day,session:this.journey.session}));
     }
     this._restoreFestivalArrivals(savedActors);
-    if(layoutForOwner(this.owner))this._applyOwnerLayout({reset:true});
+    if(layoutForOwner(this.owner)||this.owner===2)this._applyOwnerLayout({reset:true});
   }
   _walkable(p,staff=false,floor=false){return walkable(p,staff,floor,layoutForOwner(this.owner)?.id);}
   _applyOwnerLayout({reset=false}={}){
     const layout=layoutForOwner(this.owner);let changed=false;
     for(const a of this.actors){
+      const standing=this.owner===2&&PETSOUNDS_STANDING_SPOTS.find(spot=>spot.id===a.id);
+      if(standing){
+        const seated=a.role==='seated',homeChanged=a.homeX!==standing.x||a.homeZ!==standing.z;
+        a.role='guest';a.seat=false;a.waitingSeat=false;a.seatReleased=true;delete a.seatId;
+        a.homeX=standing.x;a.homeZ=standing.z;a.behavior=a.behavior||'listen';
+        // A seated sprite previously used this same authored pixel foot point.
+        // Returning/exiting saved guests retain their actual current position.
+        if(reset||seated&&a.visible!==false&&!a.moving){
+          a.x=a.targetX=standing.x;a.z=a.targetZ=standing.z;a.y=0;a.action=a.behavior;a.moving=false;
+          a._path=[];a._pathAt=0;a._blocked=0;
+          const item=this.journey.afterShow?.audience?.find(item=>item.id===a.id);
+          if(item){item.standingReleased=true;item.egressPrepared=false;item.egress=[];item.egressAt=0;}
+        }
+        if(seated||homeChanged||reset)changed=true;
+      }
       // Campaign audiences already occupy safe, venue-specific homes. Applying
       // the former eleven fixed standing positions would stack the new crowd.
       if(a.audienceVersion===Audience.version){
+        if(this.owner===2&&a.role!=='seated'&&!/^(?:bar-seat-[0-3]|lounge-[0-3])$/.test(a.id)){
+          const currentBlocked=a.visible!==false&&!this._walkable(a,false,false),homeBlocked=!this._walkable(point(a.homeX,a.homeZ),false,false);
+          if(currentBlocked||homeBlocked){
+            const safe=Audience.safePoint({owner:this.owner,actor:a,actors:this.actors,day:this.journey.day,session:this.journey.session});
+            if(safe){
+              if(homeBlocked){a.homeX=safe.x;a.homeZ=safe.z;if(a.action==='return'){a.targetX=safe.x;a.targetZ=safe.z;}}
+              if(currentBlocked){a.x=safe.x;a.z=safe.z;a.y=0;a.moving=false;}
+              a._path=[];a._pathAt=0;a._blocked=0;changed=true;
+            }
+          }
+        }
         if(layout&&(a.layout!==layout.id||a.layoutVersion!==layout.version)){
           const currentBlocked=!this._walkable(a,false,false),homeBlocked=!this._walkable(point(a.homeX,a.homeZ),false,false);
           if(currentBlocked||homeBlocked){
@@ -649,7 +675,7 @@ export class SimBarGame{
       let home=null;
       if(a.id.startsWith('bar-seat-')||a.id.startsWith('lounge-')){
         const index=a.id.startsWith('bar-seat-')?+a.id.slice(9):4+(+a.id.slice(7));
-        home=layout?layout.standing[index]:seatedHome(a.id);a.role=layout||a.seatReleased?'guest':'seated';
+        home=layout?layout.standing[index]:standing||seatedHome(a.id);a.role=layout||standing||a.seatReleased?'guest':'seated';
       }else if(a.id==='bartender')home=layout?layout.bartender:point(-7.3,-.565);
       else if(a.id==='server')home=layout?layout.server:point(-4.2,-.565);
       else if(a.id==='hired-0')home=layout?layout.barback:point(-5.8,-.565);

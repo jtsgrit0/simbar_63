@@ -1,0 +1,37 @@
+{
+  "tool": "built-in image_gen",
+  "booths": [
+    {
+      "name": "02-flight-case",
+      "files": "Art/02-flight-case.png",
+      "referenced_image_paths": [
+        "Tools/WebGLTemplate/FastGame/art/venue-ff.png",
+        "Tools/WebGLTemplate/FastGame/art/venue.png"
+      ],
+      "transparent_background": true,
+      "prompt": "Create ONE isolated pixel-art DJ booth asset for an existing isometric game concept screenshot. Image 1 is the reference for the existing DJ console's perspective and crisp native pixel clustering. Image 2 is the Petsounds room style and palette reference. Derive the booth alone, no room/background or people. Design variant: Compact charcoal equipment flight-case cabinet with narrow aged silver corner protectors and a restrained dark front panel. Same rectangular proportions and footprint. Keep two turntable platters and a small central mixer as part of the tabletop, subtle tiny equipment indicator pixels. Match the shallow original perspective: the long front edge slopes down to the right about 16 degrees, and the short receding edges go up-right at the same angle as the existing FF console. Vertical front face, visible tabletop. Compact waist-height cabinet, long-to-deep footprint about 2.4:1. Crisp original-game pixel art with deliberate tiny square clusters and limited shading, no antialiasing, no photorealism, no giant black stroke, no exaggerated glowing effects. Object centered on a genuinely transparent canvas, no floor slab, no cast shadow extending beyond the feet, no extra speakers/props/cables, no DJ character, no text/logo, no UI. Output a single booth, not a sprite sheet. This is a preview-only asset, preserving the reference room geometry and existing game UI will be handled by the preview renderer."
+    }
+  ],
+  "floorPatches": [
+    {
+      "name": "sofa-A-corridor",
+      "usedInFinal": true,
+      "file": "Art/sofa-A-corridor.png",
+      "referenced_image_paths": [
+        "Tools/WebGLTemplate/FastGame/art/venue.png"
+      ],
+      "transparent_background": true,
+      "prompt": "Edit the provided original Petsounds isometric pixel-art room as a PREVIEW FLOOR-CLEANUP PLATE. Remove ONLY the small forward-facing/return sofa in the upper seating area behind the tall bar shelf: it is the little red sofa visible approximately at original x=435..485, y=210..263, immediately in front of the right rear-wall orange table. Preserve both red sofas whose backs touch the upper wall, preserve the entire upper orange tabletop and candle, preserve both large foreground red sofas at bottom left and bottom center. Restore just the small freed patch as the original mottled gray/brown concrete floor. No DJ booth yet. Keep the SAME original 960x558 framing, SAME pixel-art camera and shallow isometric angles, the whole floor platform footprint, all walls, green Petsounds sign and exact lettering, stage/equipment, orange bar/bottle shelf/stools, all painted band names, windows/posters/lights exactly unchanged. Do not redesign, resize, shift or add any object. No people, no labels, no UI. Preserve original genuine transparency outside the venue. The edit is solely furniture removal with matching original floor texture in the specifically named area. Output the complete original room view with no crop and no zoom so it can be aligned back to the source. Pixels outside the named removal area must remain identical in composition; a renderer will protect those untouched areas."
+    },
+    {
+      "name": "sofa-B-foreground",
+      "usedInFinal": false,
+      "file": "Art/sofa-B-foreground.png",
+      "referenced_image_paths": [
+        "Tools/WebGLTemplate/FastGame/art/venue.png"
+      ],
+      "transparent_background": true,
+      "prompt": "Edit the provided original Petsounds isometric pixel-art room as a PREVIEW FLOOR-CLEANUP PLATE. Remove ONLY the two red foreground sofas: sofa one approximately x=70..215,y=332..425, sofa two approximately x=218..378,y=375..470 in the original 960x558 image. Keep the separate orange cocktail tables and their candles in place with naturally visible existing table supports. Preserve ALL red rear-wall upper seating behind the bar, including both back-wall sofas. Restore the removed sofa footprints as the original mottled gray/brown floor. No DJ booth yet. Keep the SAME original 960x558 framing, SAME pixel-art camera and shallow isometric angles, the whole floor platform footprint, all walls, green Petsounds sign and exact lettering, stage/equipment, orange bar/bottle shelf/stools, all painted band names, windows/posters/lights exactly unchanged. Do not redesign, resize, shift or add any object. No people, no labels, no UI. Preserve original genuine transparency outside the venue. The edit is solely furniture removal with matching original floor texture in the specifically named area. Output the complete original room view with no crop and no zoom so it can be aligned back to the source. Pixels outside the named removal area must remain identical in composition; a renderer will protect those untouched areas."
+    }
+  ]
+}

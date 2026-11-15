@@ -81,6 +81,12 @@ Keep Jaiden's original V4 room source and geometric calibration. Its native
 neon layer; `Tools/prepare_petsounds_neon.py` rebuilds it from the untouched V4
 source. All texture-backed foreground masks must switch with the room plate.
 
+The current native Pet Sounds room adds the approved flight-case DJ booth and
+sofa removal in `PetSounds/DJFlightCase-v1/`. Rebuild its active `venue.png` with
+`Tools/prepare_petsounds_dj.py`; the earlier neon-only helper retains the old
+baseline. Its companion native layout preserves the wall seating and tables,
+provides three standing spots on the cleared floor and keeps the 44-guest cap.
+
 ## Verification
 
 - `Tools/qa_native_owner_venues.py --package docs` exercises the real owner

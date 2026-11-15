@@ -35,4 +35,21 @@ The helper's `--sync-unity` option copies only the resulting PNG stream into
 
 The composition is part of `venue.png`, so the same sign appears in the owner
 preview, main world and minimap. Freebird and FF use their independent plates.
-Room layout, audience capacity, furniture masks and walking routes are unchanged.
+The neon-only baseline keeps its room layout and walking routes. The active
+room also includes the approved DJ renovation described below.
+
+The 2026-11-15 renovation is retained in `DJFlightCase-v1/`: the selected
+flight-case DJ cabinet sits beside the stage's left speaker, the small corridor
+sofa and two foreground sofas are removed, and the wall sofas and cocktail
+tables remain. The former sofa shadows and jagged edges are included in the
+floor cleanup masks. The source PNGs, exact ImageGen prompts, approved placement
+and pre-renovation native baseline are retained with the layout.
+
+`Tools/prepare_petsounds_dj.py` is the active native-room builder. It renders
+the authored SVG composition and uses `Tools/petsounds_png_composite.mjs` to
+retain the original raw RGBA for every untouched pixel. This preserves the
+original platform silhouette, neon, stage, bar and rear-wall furniture. Run
+this builder when rebuilding the current room; the neon-only helper above
+reconstructs the earlier baseline. The game metadata retains eight chairs,
+converts the three removed sofa seats to standing guests, and provides DJ/table
+collision and foreground masks. The room capacity remains 44.

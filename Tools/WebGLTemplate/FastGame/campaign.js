@@ -4,7 +4,7 @@ const shows=[
     descriptionKo:'칵테일을 즐기는 관객과 여유 있는 주문. 작은 무대의 첫 공연에 어울립니다.',descriptionEn:'A cocktail crowd and a gentler service pace. A welcoming first show for a small venue.'},
   {id:'july',ko:'줄라이원츠모어 라이브',en:'JulyWantsMore Live',bandIndices:[25],tracks:[1,2],fee:180,draw:28,tipMultiplier:1.18,orderIntervalMultiplier:.94,preferredItems:[2,3,5],
     descriptionKo:'안주를 찾는 관객과 팁 +18%. 첫 영업을 마치면 섭외할 수 있습니다.',descriptionEn:'A food-loving crowd with 18% better tips. Available after completing your first night.'},
-  {id:'double',ko:'프리윌 × 줄라이 합동 공연',en:'Freewill × July Double Bill',bandIndices:[24,25],tracks:[0,1,2,3,4],fee:320,draw:40,tipMultiplier:1.12,orderIntervalMultiplier:.82,preferredItems:[0,5],
+  {id:'double',ko:'프리윌 X 줄라이원츠모어 합동 공연',en:'Freewill × JulyWantsMore Double Bill',bandIndices:[24,25],tracks:[0,1,2,3,4],fee:360,draw:40,tipMultiplier:1.12,orderIntervalMultiplier:.82,preferredItems:[0,5],
     descriptionKo:'두 팀의 팬이 모이는 빠른 영업. 영업 2회 완료와 음향·조명 1단계가 필요합니다.',descriptionEn:'A busier night for both bands’ fans. Requires two completed nights and level-one sound and lights.'}
 ].map(show=>Object.freeze({...show,bandIndices:Object.freeze(show.bandIndices),tracks:Object.freeze(show.tracks),preferredItems:Object.freeze(show.preferredItems)}));
 

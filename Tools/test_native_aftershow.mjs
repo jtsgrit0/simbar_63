@@ -124,11 +124,11 @@ const v2RoundTrip=new SimBarGame({storage:upgradedV2.storage});assert.deepEqual(
 v2RoundTrip.act('continue');finish(v2RoundTrip);assert.equal(v2RoundTrip.phase,'results');
 assert(v2RoundTrip.actors.filter(Audience.isAudience).every(a=>a.visible===false),'A migrated v2 listener remained after the farewell');
 
-// The original room's eleven authored chairs are outside its walking mesh.
+// The original room's eight remaining authored chairs are outside its walking mesh.
 // Their listeners stand, take the authored short aisle handoff and physically
 // reach the same doorway; they do not teleport or remain seated at results.
 const seatedRoom=openNight(14,2),chairIds=seatedRoom.actors.filter(a=>a.role==='seated').map(a=>a.id);
-assert.equal(chairIds.length,11);endPerformance(seatedRoom);let oldPositions=new Map(seatedRoom.actors.map(a=>[a.id,{x:a.x,z:a.z}]));
+assert.equal(chairIds.length,8);endPerformance(seatedRoom);let oldPositions=new Map(seatedRoom.actors.map(a=>[a.id,{x:a.x,z:a.z}]));
 for(let time=0;time<240&&seatedRoom.phase!=='results';time+=.05){
   seatedRoom.tick(.05);if(seatedRoom.farewellPending)seatedRoom.act('farewellAck');if(seatedRoom.reaction.activeKind)seatedRoom.act('quick',{kind:seatedRoom.reaction.activeKind});
   for(const id of chairIds){const a=seatedRoom.actors.find(a=>a.id===id),old=oldPositions.get(id);assert(Math.hypot(a.x-old.x,a.z-old.z)<.19,'A seated listener teleported during the aisle handoff');}

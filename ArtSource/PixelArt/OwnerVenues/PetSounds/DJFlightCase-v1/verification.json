@@ -1,0 +1,30 @@
+{
+  "sha256": "33254e39228b1638f6711038fa4734ad1e7b01479f35d2d829b3b1b1375e1da5",
+  "bytes": 304335,
+  "dimensions": [
+    960,
+    558
+  ],
+  "protectedChangedPixels": {
+    "bar": 0,
+    "stageDeck": 0,
+    "sign": 0,
+    "leftSpeaker": 0,
+    "rearWallLeft": 0,
+    "rearWallRight": 0,
+    "tableOrCandle0": 0,
+    "tableOrCandle1": 0,
+    "tableOrCandle2": 0,
+    "tableOrCandle3": 0
+  },
+  "silhouetteAlphaPresenceChanged": 0,
+  "transparentAndAntialiasedOuterPixelsChanged": 0,
+  "rawRgbaProtected": true,
+  "inputHashes": {
+    "flight-case.source.png": "712dd52a2217cdd2b571b812c44919209370865b280fd1160249b22eac4fba88",
+    "sofa-A-corridor.source.png": "1884f61f95a4fdee879d232a3681332efa22c9a3d85515fe97438693f215785c",
+    "sofa-B-foreground.source.png": "ac1fb687a32c928ed8bede851c254a9592aca0a58a9e2f2d8f893717e3a5451e",
+    "venue.pre-dj.source.png": "309faa2194691aea6a949c2da51faa0cfd4c764f863d49e7d10dce2d50cf4ead"
+  },
+  "twoBuildsByteIdentical": true
+}

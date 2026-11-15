@@ -17,6 +17,10 @@ const waitingSeats=Object.freeze([-3.7,-2.7,-1.7,-.7,.3,1.3].map((z,index)=>
 const ffStandingSpots=Object.freeze([[-6.7,3.6],[-4,4.75],[-3.6,.15],[-5.9,-4.8],[-1.7,-5]].flatMap(([x,z],index)=>
   [-.95,.95].map((offset,side)=>Object.freeze({id:'ff-table-'+index+'-guest-'+side,x:x+offset,z:z+.55,
     facing:Math.atan2(5.75-x-offset,3.5-z-.55),behavior:side?'dance':'horns',tableId:'ff-table-'+index}))));
+// Retain actor IDs and their former screen-space feet while the removed front
+// sofas become standing floor. Wall sofas and their four seats stay authored.
+export const PETSOUNDS_STANDING_SPOTS=Object.freeze([[-8.228,-6.7495],[-6.7349,-6.7531],[-3.328,-6.7218]]
+  .map(([x,z],index)=>Object.freeze({id:'lounge-'+(index+4),x,z,facing:Math.atan2(5.75-x,3.5-z),behavior:'listen'})));
 export const AUDIENCE_VENUES=Object.freeze([
   Object.freeze({key:'freebird',capacity:64,demandMultiplier:1,energy:.75,style:'open-floor',
     entry:Object.freeze({x:-1.12,z:3.6}),
@@ -27,7 +31,6 @@ export const AUDIENCE_VENUES=Object.freeze([
     zones:Object.freeze([zone('listening-floor',-.95,-5.25,8.7,1.45)]),
     seats:Object.freeze([
       seat('bar-seat-0',-7.55,-3.15,Math.PI/2),seat('bar-seat-1',-6,-3.15,-Math.PI/2),seat('bar-seat-2',-4.45,-3.15,Math.PI*.2),seat('bar-seat-3',-2.9,-3.15,-Math.PI*.2),
-      seat('lounge-0',-8.55,6.4,-Math.PI/2),seat('lounge-1',-7,6.4,Math.PI/2),seat('lounge-2',-4.45,6.4,0),seat('lounge-3',-2.95,6.4,Math.PI/2),
-      seat('lounge-4',-8.35,-6.5,-Math.PI/2),seat('lounge-5',-6.85,-6.5,Math.PI*.25),seat('lounge-6',-3.45,-6.5,-Math.PI*.25)
-    ])})
+      seat('lounge-0',-8.55,6.4,-Math.PI/2),seat('lounge-1',-7,6.4,Math.PI/2),seat('lounge-2',-4.45,6.4,0),seat('lounge-3',-2.95,6.4,Math.PI/2)
+    ]),standingSpots:PETSOUNDS_STANDING_SPOTS})
 ]);
