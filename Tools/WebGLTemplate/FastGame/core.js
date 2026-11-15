@@ -72,7 +72,7 @@ export class SimBarGame{
     this.state=defaults();this.journey=newJourney();this.phase='lobby';this.paused=true;this.pauseReason='lobby';
     this.owner=0;this.language='ko';this.orders=[];this.pour=null;this.effects=[];this.actors=[];this.crew=[];this.escort=null;
     this.selectedItem=0;this.lastQuality=null;this.lastResult={success:true,code:'ready'};this._message=['',''];this._messageTimer=0;this.elapsed=0;this._autosave=0;this._requestTimer=4;this._inputGuard=0;this._eventSerial=0;this._loading=false;this._musicPlaybackActive=null;
-    this._viewServiceActive=false;this._viewServiceTimer=3;this._viewServiceOrder=null;
+    this._viewServiceActive=false;this._viewServiceTimer=3;this._viewServiceOrder=null;this._viewClosingActive=false;
     this._buildActors();
     this.owner=Math.max(0,catalog.owners.findIndex(o=>o.id===this._get(OWNER_KEY)));
     this._applyOwnerLayout({reset:true});
@@ -112,6 +112,8 @@ export class SimBarGame{
       canAct:this.playing&&!this.paused&&liveAttendance>0&&!this.inspection.freezePerformers&&state.remaining<=0&&state.globalRemaining<=0};
   }
   get closing(){return this.phase==='closing'&&this.journey.inProgress;}
+  get viewClosingActive(){return this._viewClosingActive===true&&this.closing;}
+  setViewClosingActive(active){this._viewClosingActive=active===true&&this.closing;return this._viewClosingActive;}
   get staffReturnPending(){return this.closing&&this.floor.cleanupComplete&&this.crew.some((id,i)=>{const a=this.actors.find(a=>a.id===id);return a?.visible&&a.id!==this.escort?.worker&&distance(a,this._parkGoal(i))>.05;});}
   get floorTasksPending(){return Floor.remaining(this.floor)>0||this.floor.guestActive||!this.guestExitFinished||this.staffReturnPending||this.inspection.active;}
   get afterShowPending(){return !this.journey.afterShow?.completed;}
@@ -162,7 +164,7 @@ export class SimBarGame{
   importSave(raw,{save=true}={}){
     try{
       const data=typeof raw==='string'?JSON.parse(raw):clone(raw);if(!data||data.version!==1)return false;
-      this.setViewServiceActive(false);
+      this.setViewServiceActive(false);this.setViewClosingActive(false);
       const ownerId=this._get(OWNER_KEY),savedOwner=catalog.owners.findIndex(o=>o.id===ownerId);if(savedOwner>=0)this.owner=savedOwner;
       const savedLanguage=this._get(LANGUAGE_KEY);if(savedLanguage==='en'||savedLanguage==='ko')this.language=savedLanguage;
       const base=defaults();this.state={...base,...data};
@@ -272,7 +274,7 @@ export class SimBarGame{
       case'next':if(this.phase!=='results'||j.inProgress)return this._done(false);j.day=int(j.day+1,1,9999);this._planning(j.challenge);break;
       case'retry':if(this.phase!=='results'||j.inProgress)return this._done(false);this._planning(j.challenge);break;
       case'lobby':this.pour=null;this.phase='lobby';this.paused=true;this.pauseReason='lobby';break;
-      case'pause':if(this.playing||this.closing){this.paused=true;this.pauseReason=this.farewellPending?'farewell':p.reason||'pause';}break;
+      case'pause':if(this.playing||this.closing){this.paused=true;this.pauseReason=this.farewellPending&&!this.viewClosingActive?'farewell':p.reason||'pause';}break;
       case'resume':if(this.playing||this.closing){this.paused=this.farewellPending;this.pauseReason=this.paused?'farewell':'';}break;
       case'guide':if(this.phase!=='guide')return this._done(false);if(j.guideStep<2)j.guideStep++;else{j.tutorialComplete=true;j.guidePending=false;this.phase='playing';this.paused=false;this.pauseReason='';}break;
       case'deskSelect':case'deskWork':
@@ -315,12 +317,13 @@ export class SimBarGame{
       default:return this._done(false,'unknown_action');
     }
     if(!this.playing)this.setViewServiceActive(false);
+    if(!this.closing)this.setViewClosingActive(false);
     this.lastResult=r;this.save();this._notify();return r;
   }
   _done(success,code='unavailable'){const r={success,code};this.lastResult=r;if(!success)this._say(...(messages[code]||messages.unavailable));this._notify();return r;}
   _activePlan(){const p=this.journey.booking;return!!(p&&!p.locked&&!p.completed&&p.day===this.journey.day);}
   _planning(challenge){
-    const j=this.journey;if(j.inProgress||j.booking?.locked&&!j.booking.completed)return;this.setViewServiceActive(false);this.pour=null;
+    const j=this.journey;if(j.inProgress||j.booking?.locked&&!j.booking.completed)return;this.setViewServiceActive(false);this.setViewClosingActive(false);this.pour=null;
     if(this._activePlan()&&!Booking.isDesk(j.booking)){
       const previous=j.booking,opening=j.dayOpeningCash;
       const trusted=j.hasDayOpeningCash===true&&Number.isFinite(opening)&&opening>=this.state.money&&opening>=0&&opening<=1e9;
@@ -335,7 +338,7 @@ export class SimBarGame{
     j.challenge=challenge;this.phase='planning';this.paused=true;this.pauseReason='planning';this.state.clock=Booking.hour(j.booking);
   }
   _newNight(){
-    this.setViewServiceActive(false);
+    this.setViewServiceActive(false);this.setViewClosingActive(false);
     const j=this.journey;j.session=j.session>=1e9?1:j.session+1;if(j.session===1)j.settledSession=0;j.inProgress=true;j.settlementPending=false;j.floorClosing=false;j.afterShow=null;j.musicPauseSession=0;j.musicPaused=false;j.musicPauseIntent=false;j.secondsLeft=180;
     // Fresh nights have an independent schedule even when the same planning
     // save restores the gameplay RNG. The resulting journal stays stable on
@@ -553,6 +556,10 @@ export class SimBarGame{
   }
   _step(dt){
     if(!this.playing)this.setViewServiceActive(false);
+    if(!this.closing)this.setViewClosingActive(false);
+    // Only the automatic farewell pause belongs to unattended closing. Focus,
+    // menu and explicit pauses must still stop the same game-time work.
+    if(this.viewClosingActive&&this.farewellPending&&(!this.paused||this.pauseReason==='farewell'))this.act('farewellAck');
     if(this.paused||(!this.playing&&!this.closing))return;this.elapsed+=dt;this._inputGuard=Math.max(0,this._inputGuard-dt);this._messageTimer-=dt;if(this._messageTimer<=0)this._message=['',''];
     const j=this.journey,s=this.state;this.effects=this.effects.filter(e=>this.elapsed-e.time<8);
     this._inspectionTick(dt);const frozen=this.inspection.freezePerformers;
@@ -568,7 +575,8 @@ export class SimBarGame{
       if(this.orders[0]?.patience<=0&&!this.pour){const missed=this.orders.shift();this._feedbackDisappointment(missed.id,'timeout');s.fans=Math.max(0,s.fans-3);this._mistake();this._routeOrders();this._say('손님이 주문을 받지 못하고 떠났어요.','A guest left without their order.');}
     }
     this._tickActors(dt);if(this.playing&&!frozen)this._feedbackTick(dt);if(this.closing&&!frozen)tickAfterShow(j.afterShow,this.actors,dt);
-    if(this.farewellPending){this.paused=true;this.pauseReason='farewell';this.save();}
+    if(this.farewellPending){if(this.viewClosingActive)this.act('farewellAck');else{this.paused=true;this.pauseReason='farewell';this.save();}}
+    if(!this.playing&&!this.closing)return;
     this._floorTick(dt);this._autosave+=dt;if(this._autosave>=3){this._autosave=0;this.save();}
   }
   _floorTick(dt){
@@ -578,6 +586,9 @@ export class SimBarGame{
     const timeout=Challenges.tick(r,dt,!(this.inspection.freezePerformers&&(r.activeKind===2||f.guestActive)));if(timeout.timedOut){if(f.guestActive)this._feedbackDisappointment(this.actors.find(a=>a.id==='assisted-guest')?.assistedSourceId||'assisted-guest','unsafe',.3);this._say('시간을 놓쳤어요. 잠시 뒤 다시 연타로 대응하세요!','Time ran out. A new response window will appear shortly.');}
     if(this.closing){const ready=this.cleanupReadyWorkers,before=f.cleaned,workDt=ready?Math.min(dt,r.cleanupWorkBudget/(ready*3)):0,result=Floor.tick(f,workDt,ready,true);r.cleanupWorkBudget=Math.max(0,r.cleanupWorkBudget-(f.cleaned-before));if(r.cleanupWorkBudget<.001)r.cleanupWorkBudget=0;if(result.cleanupFinished){this.journey.score+=150;this._say('직원 청소 미션 완료!','Staff cleanup mission complete!');}}
     if(!r.activeKind&&r.cooldown<=0){if(this.closing&&f.cleanupActive&&this.cleanupReadyWorkers>0&&r.cleanupWorkBudget<=0)Challenges.start(r,1,Math.floor(f.cleaned/32));else if(f.guestActive)Challenges.start(r,2,f.guestStep);}
+    // Reuse the manual response path, including its press interval, stage and
+    // inspection guards. Work is still performed by physically arrived staff.
+    if(this.viewClosingActive&&!this.paused&&r.activeKind&&r.cooldown<=0&&r.pressAge+.000001>=Challenges.MinimumPressInterval&&(r.activeKind!==Challenges.Guest||!this.inspection.freezePerformers))this._quick(r.activeKind);
     if(this.closing&&!this.floorTasksPending&&!this.afterShowPending&&!this.farewellPending)this._settleNight();
   }
   _paper(kind){this._emitPaper(kind,Floor.throw(this.floor,kind,this.playing));}
@@ -614,8 +625,9 @@ export class SimBarGame{
   }
   _settleNight(){
     this.setViewServiceActive(false);
-    const j=this.journey;if(j.session<=0||j.session===j.settledSession){j.settlementPending=false;j.inProgress=false;j.floorClosing=false;this.phase='results';this.paused=true;this.pauseReason='results';return;}
+    const j=this.journey;if(j.session<=0||j.session===j.settledSession){this.setViewClosingActive(false);j.settlementPending=false;j.inProgress=false;j.floorClosing=false;this.phase='results';this.paused=true;this.pauseReason='results';return;}
     if(this.floorTasksPending||j.inProgress&&(this.afterShowPending||this.farewellPending)){this._beginClosing();return;}
+    this.setViewClosingActive(false);
     this._completeEvent();const targets=this.goalTargets(),values=this.goals(),goals=values.filter((v,i)=>v>=targets[i]).length,stars=goals===3?3:goals>=2?2:1;
     const bonus=(j.challenge?130:75)+goals*(j.challenge?100:65)+stars*40,xp=25+goals*25+stars*15+(j.challenge?35:0);
     j.resultStars=stars;j.resultServed=j.orders;j.resultXP=xp;j.resultBonus=bonus;j.resultNewRecord=j.score>j.bestScore;j.bestScore=Math.max(j.bestScore,j.score);j.bestStars=Math.max(j.bestStars,stars);j.xp+=xp;j.completedNights++;this.state.money+=bonus;
