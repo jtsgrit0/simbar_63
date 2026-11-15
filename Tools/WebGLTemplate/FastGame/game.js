@@ -9,6 +9,7 @@ import {OWNER_VENUES,ownerVenue,VENUE_PROPS} from './owner-venues.js';
 import {Audience} from './audience.js';
 import {Campaign} from './campaign.js';
 import {Festival} from './festival.js';
+import {createViewMode} from './view-mode.js';
 
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=(v,sign=false)=>(sign&&v>0?'+':'')+'₩'+Math.round((+v||0)*1000).toLocaleString('ko-KR');
@@ -49,6 +50,8 @@ export async function startGame({root,assetsBase='./FastGame/art/',assets:predec
   root.append(host);
   const canvas=host.querySelector('canvas'),hudRoot=host.querySelector('.venue-ui'),ref=host.querySelector('.reference-ui'),css=host.querySelector('.css-layer');
   const ui={menu:null,opPage:0,mode:g.journey.challenge,floorOpen:false,wasPaused:false,liveTab:'festival',questsOpen:false,visualPreview:null,pendingService:false};
+  const viewMode=createViewMode({host,hudRoot,cssRoot:css});
+  let viewReturnTab=null;
   const consoleScroll={festival:0,music:0};
   const trackMarqueeStarts=new Map();
   const announcedOrders=new WeakSet(),orientationGate=host.querySelector('.orientation-gate');
@@ -64,10 +67,10 @@ export async function startGame({root,assetsBase='./FastGame/art/',assets:predec
   const albumArt=new AlbumArtLoader({baseURL:base,covers:assets.albumCovers});let requestedAlbumIndex=-1;
   const requestAlbum=(force=false)=>{const index=g.state.playlist;if(!music.awake||(!force&&index===requestedAlbumIndex))return;requestedAlbumIndex=index;albumArt.ensure(index);};
   const syncOrientation=(box=host.getBoundingClientRect())=>{orientationBlocked=box.height>box.width;host.dataset.orientation=orientationBlocked?'portrait':'landscape';orientationGate.hidden=!orientationBlocked;for(const layer of[canvas,hudRoot,ref,css])layer.inert=orientationBlocked;if(orientationBlocked)music.suspend();return box;};
-  const resize=()=>{const box=syncOrientation(),s=Math.sqrt(box.width/1920*box.height/1080);ref.style.width=box.width/s+'px';ref.style.height=box.height/s+'px';ref.style.transform=`scale(${s})`;const title=ref.querySelector('.owner-title');if(title){const fit=Math.min(1,(box.width/s-48)/1480,(box.height/s-48)/900);title.style.transform=`translate(-50%,-50%) scale(${Math.max(.1,fit)})`;}const results=ref.querySelector(".results-ref");if(results){const fit=Math.min(1,(box.width/s-24)/1080,(box.height/s-24)/800);results.style.transform=`translate(-50%,-50%) scale(${Math.max(.1,fit)})`;}world.resize?.();layoutBottomDock();layoutTrackTitles();};
+  const resize=()=>{const box=syncOrientation(),s=Math.sqrt(box.width/1920*box.height/1080);ref.style.width=box.width/s+'px';ref.style.height=box.height/s+'px';ref.style.transform=`scale(${s})`;const title=ref.querySelector('.owner-title');if(title){const fit=Math.min(1,(box.width/s-48)/1480,(box.height/s-48)/900);title.style.transform=`translate(-50%,-50%) scale(${Math.max(.1,fit)})`;}const results=ref.querySelector(".results-ref");if(results){const fit=Math.min(1,(box.width/s-24)/1080,(box.height/s-24)/800);results.style.transform=`translate(-50%,-50%) scale(${Math.max(.1,fit)})`;}viewMode.resize();world.resize?.();layoutBottomDock();layoutTrackTitles();};
   const closeMenu=(resume=true)=>{const was=ui.menu;ui.menu=null;ui.visualPreview=null;ui.pendingService=false;if(resume&&was&&was!=='service'&&!ui.wasPaused)g.act('resume');dirty=true;};
   // Guest orders stay live; management menus retain their pause behavior.
-  const openMenu=menu=>{if(g.closing&&g.farewellPending)return;if(ui.menu===menu){closeMenu();return;}if(ui.menu)closeMenu();ui.wasPaused=g.paused;ui.menu=menu;ui.floorOpen=false;if(menu==='service'&&g.orders[0])announcedOrders.add(g.orders[0]);if(menu!=='service'&&(g.playing||g.closing)&&!g.paused)g.act('pause',{reason:'menu'});dirty=true;};
+  const openMenu=menu=>{if(viewMode.viewing||viewMode.transitioning||g.closing&&g.farewellPending)return;if(ui.menu===menu){closeMenu();return;}if(ui.menu)closeMenu();ui.wasPaused=g.paused;ui.menu=menu;ui.floorOpen=false;if(menu==='service'&&g.orders[0])announcedOrders.add(g.orders[0]);if(menu!=='service'&&(g.playing||g.closing)&&!g.paused)g.act('pause',{reason:'menu'});dirty=true;};
   const run=(action,payload={})=>{const result=g.act(action,payload);dirty=true;return result;};
   function layoutTrackTitles(){
     const now=performance.now(),gap=24;
@@ -106,6 +109,10 @@ export async function startGame({root,assetsBase='./FastGame/art/',assets:predec
     const tool=(im,en,ko,action)=>g.language==='en'
       ?button(action,`<span class="nav-icon">${icon(im)}</span><span class="nav-label">${t(en,ko)}</span>`,{},'class="venue-tool"')
       :button(action,referenceImage(im),{},`class="venue-tool reference-button" data-reference-button="${im}" aria-label="${esc(ko)}"`);
+    const viewing=viewMode.viewing,viewImage=asset('ui-reference/mobile-re-v20261115-view-mode.png'),managementImage=asset('ui-reference/mobile-re-v20261115-management-mode.png');
+    const modeImage=`<img class="reference-button-image" src="${esc(viewing?managementImage:viewImage)}" width="84" height="88" alt="" aria-hidden="true" draggable="false">`;
+    const modeContent=g.language==='en'?`<span class="view-mode-icon-crop nav-icon">${modeImage}</span><span class="nav-label" data-view-mode-label>${viewing?'MANAGE':'VIEW MODE'}</span>`:modeImage;
+    const modeButton=button('ui:viewMode',modeContent,{},`class="venue-tool view-mode-tool${g.language==='en'?'':' reference-button'}" data-view-mode data-view-src="${esc(viewImage)}" data-management-src="${esc(managementImage)}" data-view-label="${t('VIEW MODE','감상모드')}" data-management-label="${t('MANAGE','경영모드')}" aria-label="${t(viewing?'MANAGE':'VIEW MODE',viewing?'경영모드':'감상모드')}" aria-pressed="${viewing}"`);
     return `<header class="venue-topbar">
       ${button('ui:settings',referenceImage('settings'),{},'class="hud-settings reference-button" data-reference-button="settings" aria-label="'+t('Settings','설정')+'"')}
       <div class="hud-score"><span>🏆 ${t('SCORE','점수')} <b data-bind="score"></b></span><span class="green">${t('COMBO','콤보')} ×<b data-bind="combo"></b></span><i class="fever-track"><i data-width="fever"></i></i></div>
@@ -115,7 +122,7 @@ export async function startGame({root,assetsBase='./FastGame/art/',assets:predec
     <div class="venue-show-badge">${esc(name(ownerVenue(g.owner)))}${show?`<strong>${esc(name(show))}</strong><span title="${esc(prefs)}">${t('FAVORITES','선호 메뉴')} · ${esc(prefs)}</span>`:''}</div>
     <div class="ops-status" data-bind="opsStatus"></div>
     <nav class="venue-tools bottom-tabs" aria-label="${t('Venue management','베뉴 운영')}">
-      ${tool('upgrades','UPGRADES','업그레이드','ui:upgrades')}${tool('events','EVENTS','이벤트','ui:events')}
+      ${tool('upgrades','UPGRADES','업그레이드','ui:upgrades')}${tool('events','EVENTS','이벤트','ui:events')}${modeButton}
     </nav>
     ${button('ui:service',`<span class="menu-ready-icon" aria-hidden="true">🍴</span><span class="menu-ready-label">${t('PREPARE MENU','메뉴 준비')}</span><small class="menu-order-count" data-bind="orderCount"></small>`,{},'class="menu-ready menu-ready-tile" aria-haspopup="dialog" aria-controls="order-dialog"')}
     ${liveConsole()}
@@ -177,10 +184,31 @@ export async function startGame({root,assetsBase='./FastGame/art/',assets:predec
   }
   function floorMarkup(){if(!g.playing&&!g.closing)return '';const r=g.reaction,f=g.floor,active=!!r?.activeKind,retry=r?.cooldown>0,show=(active||retry)&&!g.paused;let detail='';if(show){const cleanup=r.activeKind===1,target=cleanup?10:8,stage=r.activeStage||0,narrative=!active?t('Your response is being checked. Any unfinished task will receive another reaction chance.','대응 결과를 확인하고 있습니다. 끝내지 못한 미션은 잠시 뒤 다시 도전할 수 있습니다.'):cleanup?t('Paper covers the floor after the show. Tap rapidly to help your employees keep cleaning!','공연 뒤 바닥에 종이가 남았어요. 빠르게 연타해 직원들의 청소를 도와주세요!'):[t('A guest has had too much. Tap rapidly to pause additional orders and offer water politely.','술에 취한 손님이 있어요. 빠르게 연타해 추가 주문을 잠시 멈추고 물을 정중히 안내하세요.'),t('Keep your voice calm. Tap rapidly to explain and politely ask the guest to leave.','차분하게 설명할 차례예요. 빠르게 연타해 손님께 정중하게 퇴점을 요청하세요.'),t('Check belongings. Tap rapidly to arrange an employee escort to the exit.','소지품을 확인할 차례예요. 빠르게 연타해 직원의 출입구 동행을 안내하세요.')][Math.min(2,stage)];detail=`<aside class="reaction-card"><div class="reaction-title">${active?(cleanup?t('SUDDEN CLEANUP!','돌발 청소 미션!'):t('GUEST ASSISTANCE!','돌발 손님 안내!')):t('NEXT RESPONSE SHORTLY','다음 대응 준비')}</div><div class="reaction-clock" data-bind="reactionClock"></div><div class="reaction-narrative">${narrative}</div><div class="reaction-count" data-bind="reactionCount"></div><div class="reaction-progress"><i data-width="reaction"></i></div>${button('quick',active?cleanup?t('[C] TAP QUICKLY / CLEAN','[C] 빠르게 연타 / 청소'):t('[F] TAP QUICKLY / ASSIST','[F] 빠르게 연타 / 정중한 안내'):t('RETRY SHORTLY','잠시 뒤 다시 대응'),{kind:r.activeKind},`class="reaction-press ${cleanup?'cleanup':''}" ${!active?'disabled':''}`)}<div class="reaction-feedback" data-bind="reactionFeedback"></div></aside>`;}else if(ui.floorOpen&&!g.paused)detail=`<aside class="floor-status"><h2>${t('RANDOM FLOOR EVENTS','돌발 홀 미션 현황')}</h2><p>${t('Events occur on their own. The show and reaction clock keep running.','이벤트는 무작위로 발생합니다. 이 창에서도 공연과 미션 시간은 계속 흐릅니다.')}</p><div class="body" data-bind="floorDetails"></div>${button('ui:floorClose',t('CLOSE / THE SHOW CONTINUES','닫기 / 공연은 계속됩니다'))}</aside>`;return detail;}
   function rank(){const xp=g.journey.xp;return xp>=3000?t('HOUSE LEGEND','바의 전설'):xp>=1600?t('HEADLINER','최고의 스타'):xp>=850?t('CROWD FAVORITE','손님들의 인기 스타'):xp>=400?t('LOCAL HERO','동네의 영웅'):xp>=150?t('RISING STAR','떠오르는 스타'):t('OPENING ACT','새내기 바텐더');}
-  function rebuild(){host.classList.toggle('show-closing',g.closing);host.classList.toggle('previewing-venue',ui.menu==='operations'&&!!ui.visualPreview);host.classList.toggle('has-overlay-menu',ui.menu==='settings');const scroll=css.querySelector('.daydesk-scroll')?.scrollTop||0;host.dataset.phase=g.phase;const orderDialogWasOpen=!!css.querySelector('.order-dialog');const focused=hudRoot.contains(document.activeElement)?document.activeElement:null,focusAction=focused?.dataset.action,focusPayload=focused?.dataset.payload;for(const [tab,selector] of [['festival','.festival-actions'],['music','.track-list']]){const list=hudRoot.querySelector(selector);if(list)consoleScroll[tab]=list.scrollTop;}hudRoot.innerHTML=hud();for(const [tab,selector] of [['festival','.festival-actions'],['music','.track-list']]){const list=hudRoot.querySelector(selector);if(list)list.scrollTop=consoleScroll[tab];}if(focusAction){const replacement=[...hudRoot.querySelectorAll('button[data-action]')].find(node=>node.dataset.action===focusAction&&node.dataset.payload===focusPayload);replacement?.focus({preventScroll:true});}ref.innerHTML=(g.phase==='lobby'?lobby():g.phase==='guide'?guide():g.phase==='results'?results():'');css.innerHTML=(g.phase==='planning'?dayDesk.markup():ui.menu==='service'?service():'')+floorMarkup()+(ui.menu==='operations'?operations():'')+(ui.menu==='settings'?settings():'')+(g.paused&&(g.playing||g.closing)&&!g.farewellPending&&!ui.menu?pause():'')+pourMarkup()+farewellMarkup();orientationGate.innerHTML=orientationMarkup();if(css.querySelector('.daydesk-scroll'))css.querySelector('.daydesk-scroll').scrollTop=scroll;resize();if(ui.menu==='service'&&!orderDialogWasOpen&&!orientationBlocked)css.querySelector('.order-dialog-actions button:not(:disabled)')?.focus({preventScroll:true});dirty=false;}
+  function rebuild(){
+    host.classList.toggle('show-closing',g.closing);
+    host.classList.toggle('previewing-venue',ui.menu==='operations'&&!!ui.visualPreview);
+    host.classList.toggle('has-overlay-menu',ui.menu==='settings');
+    const scroll=css.querySelector('.daydesk-scroll')?.scrollTop||0;
+    host.dataset.phase=g.phase;
+    const orderDialogWasOpen=!!css.querySelector('.order-dialog');
+    const focused=hudRoot.contains(document.activeElement)?document.activeElement:null,focusAction=focused?.dataset.action,focusPayload=focused?.dataset.payload;
+    for(const [tab,selector] of [['festival','.festival-actions'],['music','.track-list']]){const list=hudRoot.querySelector(selector);if(list)consoleScroll[tab]=list.scrollTop;}
+    hudRoot.innerHTML=hud();
+    for(const [tab,selector] of [['festival','.festival-actions'],['music','.track-list']]){const list=hudRoot.querySelector(selector);if(list)list.scrollTop=consoleScroll[tab];}
+    ref.innerHTML=(g.phase==='lobby'?lobby():g.phase==='guide'?guide():g.phase==='results'?results():'');
+    css.innerHTML=(g.phase==='planning'?dayDesk.markup():ui.menu==='service'?service():'')+floorMarkup()+(ui.menu==='operations'?operations():'')+(ui.menu==='settings'?settings():'')+(g.paused&&(g.playing||g.closing)&&!g.farewellPending&&!ui.menu?pause():'')+pourMarkup()+farewellMarkup();
+    orientationGate.innerHTML=orientationMarkup();
+    if(css.querySelector('.daydesk-scroll'))css.querySelector('.daydesk-scroll').scrollTop=scroll;
+    resize();
+    viewMode.onHUDRendered();
+    if(focusAction){const replacement=[...hudRoot.querySelectorAll('button[data-action]')].find(node=>node.dataset.action===focusAction&&node.dataset.payload===focusPayload);replacement?.focus({preventScroll:true});}
+    if(ui.menu==='service'&&!orderDialogWasOpen&&!orientationBlocked)css.querySelector('.order-dialog-actions button:not(:disabled)')?.focus({preventScroll:true});
+    dirty=false;
+  }
   function update(){const s=g.state,j=g.journey,r=g.reaction,m=g.metrics(),progress=Floor.progress(g.floor),goals=g.goals(),targets=g.goalTargets(),front=g.orders[0];const values={orderCount:g.orders.length?t('ORDERS ','대기 ')+g.orders.length+t('','건'):t('NO ORDERS','주문 대기'),frontPatience:front?t('PATIENCE ','대기 시간 ')+Math.ceil(front.patience)+t('s','초'):'',cash:money(s.money),fans:s.fans.toLocaleString(),time:hour(s.clock),nightClock:clock(j.secondsLeft),score:j.score.toLocaleString(),combo:j.combo,rank:rank(),xp:j.xp.toLocaleString(),profit:money(j.inProgress?s.money-j.openingCash:j.resultProfit,true),nowPlaying:((music.blocked||music.failed)&&!j.musicPaused?t('TAP PLAY: ','\uc7ac\uc0dd\uc744 \ub20c\ub7ec\uc8fc\uc138\uc694: '):!music.awake||j.musicPaused?t('PAUSED: ','\uc77c\uc2dc\uc815\uc9c0: '):!music.playing?t('STARTING: ','\uc7ac\uc0dd \uc900\ube44: '):t('NOW PLAYING: ','재생 중: '))+name(catalog.playlists[s.playlist]),staffCaption:t('STAFF ','직원 ')+g.availableWorkers+t(' / HOUSE OPEN','명 / 영업 중'),staffTitle:t('Staff Management ','직원 관리 ')+g.availableWorkers,frontOrder:front?`${front.name} — ${name(catalog.drinks[front.item])}`:t('No open orders. Enjoy the set!','대기 중인 주문이 없어요. 공연을 즐겨 보세요!'),queue:g.orders.slice(1).map(o=>`${o.name}: ${name(catalog.drinks[o.item])}`).join(' / '),satisfactionPct:`(${percent(s.satisfaction)}%)`,performancePct:`(${percent(s.performance)}%)`,opsStatus:s.activeEvent>=0?`${name(catalog.events[s.activeEvent])} ${clock(s.eventRemaining)} | ${t('POURS','서빙')} ${s.pours-s.eventStartPours}/${catalog.events[s.activeEvent].target} | ${t('STAFF','직원')} ${g.availableWorkers}`:`${t('STAFF','직원')} ${g.availableWorkers} | ${t('FACILITIES','시설')} ${s.upgrades.reduce((n,v)=>n+v,0)}/9 | ${t('SAVED AUTOMATICALLY','자동 저장')}`,toast:g.message,pourClock:g.pour?g.pour.remaining.toFixed(1)+t('s','초'):'',reactionClock:((r?.activeKind?r.secondsLeft:r?.cooldown)||0).toFixed(1)+t('s','초'),reactionCount:r?.activeKind?t('QUICK TAPS ','빠르게 연타 ')+`${r.presses} / ${r.activeKind===1?10:8}`:t('WATCH FOR THE NEXT PROMPT','다음 안내가 뜨면 다시 도전하세요'),reactionFeedback:r?.activeKind?t('Tap repeatedly or press the displayed key within the time limit.','제한 시간 안에 버튼을 여러 번 터치하거나 표시된 키를 반복해서 누르세요.'):g.message,floorSummary:r?.activeKind?t('RESPOND NOW / TAP QUICKLY','지금 대응 / 빠르게 연타'):Floor.remaining(g.floor)>0?t('PAPER LEFT ','남은 정리량 ')+Floor.remaining(g.floor):g.floor.guestActive?t('A GUEST NEEDS HELP','도움이 필요한 손님'):t('WATCH FOR RANDOM EVENTS','무작위 돌발 상황 대기')};
     if(m.audienceVersion===Audience.version&&g.playing)values.opsStatus=t('AUDIENCE ','관객 ')+g.festival.liveAttendance+'/'+Audience.capacity(g.owner)+' · '+values.opsStatus;
     const menuReady=hudRoot.querySelector('.menu-ready');if(menuReady)menuReady.disabled=!g.playing||g.paused||!!g.pour;
+    const modeButton=hudRoot.querySelector('[data-view-mode]');if(modeButton)modeButton.disabled=!viewMode.viewing&&(!(g.playing||g.closing)||!!g.pour);
     const festival=g.festival||{},activeAction=Festival.actions.find(action=>action.id===festival.activeId),activeSeconds=Math.ceil(festival.remaining||0);
     values.festivalAudience=`${festival.liveAttendance||0} / ${festival.capacity||Audience.capacity(g.owner)}`;
     values.festivalOrders=`×${(1/(festival.orderMultiplier||1)).toFixed(2)}`;
@@ -195,8 +223,28 @@ export async function startGame({root,assetsBase='./FastGame/art/',assets:predec
     const map=host.querySelector('#mini-map');if(map)world.renderOverview(map.getContext('2d'),worldState());
     dayDesk.update(css);
   }
+  function toggleViewMode(){
+    if(viewMode.transitioning)return;
+    if(viewMode.viewing){
+      const returnTab=viewReturnTab||'festival';
+      void viewMode.setViewing(false).then(completed=>{
+        if(completed&&!viewMode.viewing){ui.liveTab=returnTab;viewReturnTab=null;dirty=true;}
+      });
+      return;
+    }
+    if(!(g.playing||g.closing)||g.pour)return;
+    if(ui.menu)closeMenu();
+    ui.floorOpen=false;
+    viewReturnTab=ui.liveTab;
+    ui.liveTab='music';
+    // Build the real playlist first, then animate its surrounding UI only.
+    rebuild();update();lastKey=structure();
+    void viewMode.setViewing(true);
+    void playStats.refresh();
+  }
   function uiAction(action,p){
     switch(action){
+    case'viewMode':toggleViewMode();return;
     case'quests':ui.questsOpen=!ui.questsOpen;break;
     case'liveTab':ui.liveTab=p.tab==='music'?'music':'festival';if(ui.liveTab==='music')void playStats.refresh();dirty=true;break;
       case'musicPrevious':stepMusic(-1);break;
@@ -222,10 +270,10 @@ export async function startGame({root,assetsBase='./FastGame/art/',assets:predec
     }
     dirty=true;
   }
-  function handleAction(action,p={}){if(orientationBlocked&&action!=='ui:fullscreen')return;if(action.startsWith('ui:'))uiAction(action.slice(3),p);else{if(action==='deskWork')dayDesk.focus(p.task===1?'phone':'monitor');if(['menuItem','prepare'].includes(action)&&ui.menu==='service')closeMenu();if(['lobby','next','retry','start','continue','resume'].includes(action))ui.menu=null;const result=run(action,p);if(action==='menuItem'&&!result.success&&result.code==='wrong_item')ui.pendingService=true;if(action==='playlist'&&allowedTracks().includes(p.index)){run('musicState',{paused:false});music.select();}}wakeAudio();}
+  function handleAction(action,p={}){if(orientationBlocked&&action!=='ui:fullscreen')return;if((viewMode.viewing||viewMode.transitioning)&&!['ui:viewMode','ui:musicPrevious','ui:musicNext','ui:musicToggle','playlist','ui:fullscreen'].includes(action)&&!(action==='ui:liveTab'&&p.tab==='music'))return;if(action.startsWith('ui:'))uiAction(action.slice(3),p);else{if(action==='deskWork')dayDesk.focus(p.task===1?'phone':'monitor');if(['menuItem','prepare'].includes(action)&&ui.menu==='service')closeMenu();if(['lobby','next','retry','start','continue','resume'].includes(action))ui.menu=null;const result=run(action,p);if(action==='menuItem'&&!result.success&&result.code==='wrong_item')ui.pendingService=true;if(action==='playlist'&&allowedTracks().includes(p.index)){run('musicState',{paused:false});music.select();}}if(action!=='ui:viewMode')wakeAudio();}
   const clickHandler=e=>{const b=e.target.closest('[data-action]');if(!b||!host.contains(b)||b.disabled)return;handleAction(b.dataset.action,JSON.parse(b.dataset.payload||'{}'));};
   const changeHandler=e=>{if(orientationBlocked)return;if(e.target.matches('[data-desk-selected]')){dayDesk.focus('monitor');run('deskSelect',{selected:e.target.checked});}};
-  const keyHandler=e=>{if(orientationBlocked)return;if(g.closing&&g.farewellPending)return;if(e.repeat||e.ctrlKey||e.metaKey||e.altKey||/^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName))return;const key=e.key.toLowerCase();if([' ','p','m','h','e','c','f','1','2','3','4','5','6','escape'].includes(key))e.preventDefault();if(key==='c'||key==='f')handleAction('quick',{kind:key==='c'?1:2});else if(key===' '){if(g.pour)handleAction('pourStop');}else if(/^[1-6]$/.test(key))handleAction('menuItem',{item:+key-1});else if(key==='e')handleAction('prepare');else if(key==='m')uiAction('service',{});else if(key==='h')uiAction('floor',{});else if(key==='p'||key==='escape'){if(ui.menu){const service=ui.menu==='service';closeMenu();if(service&&key==='p')handleAction('pause');}else if(ui.floorOpen){ui.floorOpen=false;dirty=true;}else if(g.phase==='guide')handleAction('lobby');else handleAction(g.paused?'resume':'pause');}};
+  const keyHandler=e=>{if(orientationBlocked||viewMode.viewing||viewMode.transitioning)return;if(g.closing&&g.farewellPending)return;if(e.repeat||e.ctrlKey||e.metaKey||e.altKey||/^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName))return;const key=e.key.toLowerCase();if([' ','p','m','h','e','c','f','1','2','3','4','5','6','escape'].includes(key))e.preventDefault();if(key==='c'||key==='f')handleAction('quick',{kind:key==='c'?1:2});else if(key===' '){if(g.pour)handleAction('pourStop');}else if(/^[1-6]$/.test(key))handleAction('menuItem',{item:+key-1});else if(key==='e')handleAction('prepare');else if(key==='m')uiAction('service',{});else if(key==='h')uiAction('floor',{});else if(key==='p'||key==='escape'){if(ui.menu){const service=ui.menu==='service';closeMenu();if(service&&key==='p')handleAction('pause');}else if(ui.floorOpen){ui.floorOpen=false;dirty=true;}else if(g.phase==='guide')handleAction('lobby');else handleAction(g.paused?'resume':'pause');}};
   const blurHandler=()=>{if(orientationBlocked||window.matchMedia('(orientation: portrait)').matches)return;if((g.playing||g.closing)&&!g.paused){closeMenu(false);run('pause',{reason:'focus'});}};
   function wakeAudio(){
     if(orientationBlocked){music.suspend();return;}
@@ -241,13 +289,13 @@ export async function startGame({root,assetsBase='./FastGame/art/',assets:predec
   function farewellMarkup(){if(!g.closing||!g.farewellPending)return '';return `<div class="farewell-layer"><section class="farewell-card" role="dialog" aria-modal="true" aria-labelledby="farewell-title"><h1 id="farewell-title">${t('THANK YOU FOR TONIGHT!','오늘 공연도 수고했어요!')}</h1><p class="farewell-message">${t('Tonight’s live band gave it everything! Come back for another show tomorrow!','오늘의 라이브 밴드 공연은 하얗게 불태웠어요! 내일 또 공연 보러와요!')}</p><div class="farewell-actions">${button('farewellAck',t('CONTINUE CLOSING','확인 · 영업 마무리'),{},'class="farewell-confirm"')}</div></section></div>`;}
   function orientationMarkup(){return `<div class="rotate-device" aria-hidden="true">↻</div><h1 id="orientation-title">${t('Rotate to landscape','화면을 가로로 돌려 주세요')}</h1><p>${t('SimBar can only be played in landscape.<br>Your game is waiting right here.','SimBar는 가로 화면에서만 플레이할 수 있어요.<br>화면을 돌리는 동안 게임은 진행되지 않습니다.')}</p>${button('ui:fullscreen',t('FULL SCREEN','전체 화면으로 전환'))}`;}
   function maybeOrderPopup(){
-    if(orientationBlocked||!g.playing||g.paused||g.pour||ui.menu||g.inspection.active||g._inputGuard>0)return;
+    if(orientationBlocked||viewMode.viewing||viewMode.transitioning||!g.playing||g.paused||g.pour||ui.menu||g.inspection.active||g._inputGuard>0)return;
     const front=g.orders[0];
     if(ui.pendingService||front&&!announcedOrders.has(front)){ui.pendingService=false;openMenu('service');}
   }
   function syncMusic(){if(!orientationBlocked&&['playing','closing','guide','results'].includes(g.phase)){music.sync();music.resumeContext();requestAlbum();}else music.suspend();}
   const structure=()=>{const j=g.journey,p=j.booking,r=g.reaction;return JSON.stringify([g.phase,g.language,g.owner,g.paused,ui,j.guideStep,p?.deskVersion,p?.freewillSelected,p?.deskDoneMask,p?.showId,p?.ticketTier,p?.promotions,p?.campaignStage,j.completedNights,g.state.playlist,g.orders[0]?.id,g.orders[0]?.item,p?.venue,g.phase==='planning'?g.state.money:ui.menu==='operations'?g.state.money:0,g.state.staff,g.state.upgrades,g.state.activeEvent,g.state.wageDebt>0,!!g.pour,g.pour?.item,r?.activeKind,r?.activeStage,r?.cooldown>0,g.guestExitFinished,j.musicPaused,g.farewellPending,j.afterShow?.departureStarted]);};
-  const frame=now=>{if(stopped)return;const dt=Math.min(.1,Math.max(0,(now-last)/1000));last=now;syncOrientation();g.setMusicPlaybackActive(music.playing);if(!orientationBlocked)g.tick(dt);syncMusic();if(previousPhase!==g.phase){if(g.phase==='planning')dayDesk.reset(now);ui.menu=null;ui.floorOpen=false;previousPhase=g.phase;dirty=true;}if(g.closing&&g.farewellPending){ui.menu=null;ui.floorOpen=false;}maybeOrderPopup();const key=structure();if(dirty||key!==lastKey){rebuild();lastKey=key;}update();world.render(now,worldState());raf=requestAnimationFrame(frame);};
+  const frame=now=>{if(stopped)return;const dt=Math.min(.1,Math.max(0,(now-last)/1000));last=now;syncOrientation();g.setMusicPlaybackActive(music.playing);if(!orientationBlocked)g.tick(dt);syncMusic();if(previousPhase!==g.phase){if(g.phase==='planning')dayDesk.reset(now);if(!['playing','closing'].includes(g.phase)){viewMode.reset();viewReturnTab=null;}ui.menu=null;ui.floorOpen=false;previousPhase=g.phase;dirty=true;}if(g.closing&&g.farewellPending){ui.menu=null;ui.floorOpen=false;}maybeOrderPopup();const key=structure();if((dirty||key!==lastKey)&&!viewMode.transitioning){rebuild();lastKey=key;}update();world.render(now,worldState());raf=requestAnimationFrame(frame);};
   host.addEventListener('click',clickHandler);host.addEventListener('change',changeHandler);document.addEventListener('keydown',keyHandler);window.addEventListener('blur',blurHandler);const observer=new ResizeObserver(resize);observer.observe(host);g.onchange=()=>{};
   const statsResume=()=>playStats.resume(),statsVisibility=()=>{if(!document.hidden)statsResume();};
   window.addEventListener('online',statsResume);document.addEventListener('visibilitychange',statsVisibility);
@@ -257,7 +305,7 @@ export async function startGame({root,assetsBase='./FastGame/art/',assets:predec
   // Scene and interactive owner controls have both painted before the host is told ready.
   await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
 
-  const result={g,world,canvas,albumArt,root:host,get orientationBlocked(){return orientationBlocked;},destroy(){stopped=true;cancelAnimationFrame(raf);observer.disconnect();host.removeEventListener('click',clickHandler);host.removeEventListener('change',changeHandler);document.removeEventListener('keydown',keyHandler);window.removeEventListener('blur',blurHandler);music.destroy();playStats.destroy();clearInterval(statsRefreshTimer);window.removeEventListener('online',statsResume);document.removeEventListener('visibilitychange',statsVisibility);albumArt.destroy();g.save();world.destroy?.();host.remove();}};
+  const result={g,world,canvas,albumArt,viewMode,root:host,get orientationBlocked(){return orientationBlocked;},destroy(){stopped=true;cancelAnimationFrame(raf);observer.disconnect();host.removeEventListener('click',clickHandler);host.removeEventListener('change',changeHandler);document.removeEventListener('keydown',keyHandler);window.removeEventListener('blur',blurHandler);viewMode.destroy();music.destroy();playStats.destroy();clearInterval(statsRefreshTimer);window.removeEventListener('online',statsResume);document.removeEventListener('visibilitychange',statsVisibility);albumArt.destroy();g.save();world.destroy?.();host.remove();}};
   window.simbarGame=g;
   return result;
 }

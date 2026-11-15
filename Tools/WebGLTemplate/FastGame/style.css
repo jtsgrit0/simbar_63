@@ -270,3 +270,7 @@
 .fast-game.compact-service-dock .venue-ui .venue-tools,.fast-game.compact-service-dock .venue-ui .menu-ready,.fast-game.compact-service-dock .venue-ui .mood {visibility:hidden;pointer-events:none}
 .fast-game.compact-service-dock.preparing-service-dock .venue-ui .quest-panel ~ .live-console {top:calc(38px + var(--hud-gap));bottom:calc(var(--active-service-height) + var(--hud-gap));height:auto}
 .fast-game.compact-service-dock.preparing-service-dock .venue-ui .quest-panel.is-open ~ .live-console {top:calc(var(--quest-height) + var(--hud-gap))}
+
+/* English labels reuse the selected PNG's icon within the existing tool style. */
+.fast-game .venue-ui .venue-tools .view-mode-tool .view-mode-icon-crop {position:relative;left:auto;top:auto;transform:none;display:block;width:40px;height:36px;overflow:hidden}
+.fast-game .venue-ui .venue-tools .view-mode-icon-crop .reference-button-image {position:absolute;left:-20px;top:-12px}

@@ -1,0 +1,39 @@
+{
+  "reference": "Tools\\WebGLTemplate\\FastGame\\art\\ui-reference\\mobile-re-v20261114-events.png",
+  "referenceSha256": "a1985c0f46bacee6777ad0e43d90c9217052bfaec3a4de7819d2ccce079d7290",
+  "size": [
+    84,
+    88
+  ],
+  "label": "감상모드",
+  "labelCenter": [
+    40.5,
+    70.5
+  ],
+  "font": "ArtSource\\Fonts\\NotoSansKR-Regular.full.otf",
+  "fontSize": 16,
+  "iconBox": [
+    20,
+    12,
+    40,
+    36
+  ],
+  "chrome": "Original raster pixels; alert badge removed with the matching left-corner source chrome; no product UI changed.",
+  "method": "Code-native SVG icon paths and existing-font glyph outlines; native ChromeCanvas export with untouched reference pixels preserved by technical PNG assembly. No ImageGen used.",
+  "buttons": [
+    {
+      "file": "mode-04.png",
+      "svg": "mode-04.svg",
+      "icon": "film-play",
+      "label": "감상모드",
+      "sha256": "62760cef5812867cc2d2024316794bf2cf1aa9895fed9773da590d17bcdaf308"
+    },
+    {
+      "file": "mode-management.png",
+      "svg": "mode-management.svg",
+      "icon": "briefcase-chart",
+      "label": "경영모드",
+      "sha256": "31c6fd093b50cd64ebb253d165deeaef6c79beb4dd8a9190cf387f834c7d81f4"
+    }
+  ]
+}
