@@ -5,31 +5,33 @@
       "runtime": "Tools/WebGLTemplate/FastGame/art/ui-reference/mobile-re-v20261115-view-mode.png",
       "source": "ArtSource/PixelArt/UI/ViewMode-v1/view-mode.source.png",
       "svg": "ArtSource/PixelArt/UI/ViewMode-v1/view-mode.svg",
-      "sha256": "62760cef5812867cc2d2024316794bf2cf1aa9895fed9773da590d17bcdaf308",
-      "bytes": 7834,
+      "sha256": "10e0b1ab075d6f56b9f6c08cc842e850b00b742ac5cc6f1e649b9e5a71f640bb",
+      "bytes": 7766,
       "dimensions": [
         84,
         88
       ],
       "sourceBytesIdentical": true,
       "selfContainedSvg": true,
-      "embeddedImages": 3,
-      "externalFontRequired": false
+      "embeddedImages": 4,
+      "externalFontRequired": false,
+      "originalSha256": "62760cef5812867cc2d2024316794bf2cf1aa9895fed9773da590d17bcdaf308"
     },
     {
       "runtime": "Tools/WebGLTemplate/FastGame/art/ui-reference/mobile-re-v20261115-management-mode.png",
       "source": "ArtSource/PixelArt/UI/ViewMode-v1/management-mode.source.png",
       "svg": "ArtSource/PixelArt/UI/ViewMode-v1/management-mode.svg",
-      "sha256": "31c6fd093b50cd64ebb253d165deeaef6c79beb4dd8a9190cf387f834c7d81f4",
-      "bytes": 7924,
+      "sha256": "c85ebe6798a2478b2457c5086e6a9dd38eb1326d6b85d081a43ea006abd8c1fe",
+      "bytes": 7854,
       "dimensions": [
         84,
         88
       ],
       "sourceBytesIdentical": true,
       "selfContainedSvg": true,
-      "embeddedImages": 3,
-      "externalFontRequired": false
+      "embeddedImages": 4,
+      "externalFontRequired": false,
+      "originalSha256": "31c6fd093b50cd64ebb253d165deeaef6c79beb4dd8a9190cf387f834c7d81f4"
     }
   ],
   "previewVerification": {
@@ -59,5 +61,49 @@
     ],
     "productFilesWritten": false
   },
-  "existingRuntimeAssetsChanged": false
+  "cornerCorrection": {
+    "reason": "The original badge-removal mirror used translate(80 0), placing the upper-right bright outline at x75-76 while the untouched vertical edge below row23 was at x77.",
+    "method": "Keep the original badge-removal layer unchanged; add a translate(82 0) mirror only through the corner-seam SVG clip.",
+    "roi": [
+      69,
+      0,
+      13,
+      23
+    ],
+    "rawRgbaOutsideRoiChanged": 0,
+    "iconPixelsChanged": 0,
+    "labelPixelsChanged": 0,
+    "fullSvgRawRgbaReproduction": true,
+    "buttons": [
+      {
+        "stem": "view",
+        "sha256": "10e0b1ab075d6f56b9f6c08cc842e850b00b742ac5cc6f1e649b9e5a71f640bb",
+        "changedPixels": 228,
+        "changedBounds": [
+          69,
+          0,
+          80,
+          23
+        ],
+        "continuousOutlineX77": true
+      },
+      {
+        "stem": "management",
+        "sha256": "c85ebe6798a2478b2457c5086e6a9dd38eb1326d6b85d081a43ea006abd8c1fe",
+        "changedPixels": 228,
+        "changedBounds": [
+          69,
+          0,
+          80,
+          23
+        ],
+        "continuousOutlineX77": true
+      }
+    ]
+  },
+  "otherRuntimeAssetsChanged": false,
+  "preservedReferenceButtons": {
+    "mobile-re-v20261114-events.png": "a1985c0f46bacee6777ad0e43d90c9217052bfaec3a4de7819d2ccce079d7290",
+    "mobile-re-v20261114-upgrades.png": "9c5e5515d0b821803b7103fc4f54649ca0ab7c86227589191cc8e61a41fe55b9"
+  }
 }
