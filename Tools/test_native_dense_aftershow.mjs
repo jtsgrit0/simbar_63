@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {SimBarGame} from './WebGLTemplate/FastGame/core.js';
 import {Audience} from './WebGLTemplate/FastGame/audience.js';
-import {createAfterShow,tickAfterShow,EXIT_POINT} from './WebGLTemplate/FastGame/aftershow.js';
+import {createAfterShow,tickAfterShow,EXIT_POINT,PARALLEL_EXIT_SPEED} from './WebGLTemplate/FastGame/aftershow.js';
 
 // Actual FF78 service-run export, seed2: the returning employee and outbound
 // audience surrounded the final mesh cells. Fifty patrons still remained and
@@ -46,7 +46,7 @@ for(const member of state.members){member.phase='gone';member.greeting=2;}
 for(let t=0;t<5&&!state.completed;t+=.05){
   const before=actors.map(a=>({x:a.x,z:a.z}));tickAfterShow(state,actors,.05);
   for(let i=0;i<actors.length;i++){
-    const actor=actors[i];assert(Math.hypot(actor.x-before[i].x,actor.z-before[i].z)<=1.45*.05+1e-8);
+    const actor=actors[i];assert(Math.hypot(actor.x-before[i].x,actor.z-before[i].z)<=PARALLEL_EXIT_SPEED*.05+1e-8);
     if(!actor.visible)assert(Math.hypot(actor.x-EXIT_POINT.x,actor.z-EXIT_POINT.z)<=.181);
     for(let j=i+1;j<actors.length;j++)if(actor.visible&&actors[j].visible)
       assert(Math.hypot(actor.x-actors[j].x,actor.z-actors[j].z)>=.34-1e-8,'Doorway fallback crossed another person');

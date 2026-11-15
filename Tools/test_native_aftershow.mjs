@@ -1,7 +1,7 @@
 import {launchPreparedDesk} from './native_test_workflow.mjs';
 import assert from 'node:assert/strict';
 import {SimBarGame,SAVE_KEY,Booking} from './WebGLTemplate/FastGame/core.js';
-import {BAND_MEMBERS,GREETING_SECONDS,EXIT_POINT,SURFER_LOWER_SPEED} from './WebGLTemplate/FastGame/aftershow.js';
+import {BAND_MEMBERS,GREETING_AUDIENCE,GREETING_SECONDS,EXIT_POINT,SURFER_LOWER_SPEED} from './WebGLTemplate/FastGame/aftershow.js';
 import {Audience} from './WebGLTemplate/FastGame/audience.js';
 
 function storage(){const map=new Map();return{getItem:k=>map.get(k)??null,setItem:(k,v)=>map.set(k,String(v))};}
@@ -24,7 +24,7 @@ for(let t=0;t<240&&!g.farewellPending;t+=.05){
   g.tick(.05);
   const state=g.journey.afterShow;
   if(state.departureStarted)assert(state.members.every(m=>m.greeting===2),'Departure began before all four musicians finished both greetings');
-  else assert([...state.members,...state.audience.filter(item=>!item.parallel)].every(m=>m.phase!=='gone'),'A front-row participant left before the greeting barrier');
+  else assert([...state.members,...state.audience.filter(item=>GREETING_AUDIENCE.includes(item.id))].every(m=>m.phase!=='gone'),'A greeting participant left before the greeting barrier');
   const surfer=g.actors.find(a=>a.id==='crowd-surfer'),oldSurfer=previous.get(surfer.id);
   assert(surfer.y<=oldSurfer.y&&oldSurfer.y-surfer.y<=SURFER_LOWER_SPEED*.05+1e-8,'Crowd surfer teleported to the floor');
   for(const a of g.actors){const p=previous.get(a.id);assert(Math.hypot(a.x-p.x,a.z-p.z)<=.19,`${a.id} teleported`);}
@@ -154,4 +154,4 @@ upgraded.act('next');launchPreparedDesk(upgraded);assert.equal(upgraded.journey.
 const nextAudience=upgraded.actors.filter(a=>a.audienceVersion===1);
 assert.equal(nextAudience.length,upgraded.metrics().attendance);
 assert(nextAudience.every(a=>a.visible),'A new night did not restore its newly booked audience');
-console.log('PASS: all greetings precede 35 physical exits including standing bar/lounge listeners, parallel extra departures, surfer lowering, acknowledged popup, persisted manual music resume, pause/save migration, concurrent cleanup, once-only settlement');
+console.log('PASS: eight physical greetings and four musicians retain their barrier; other listeners leave concurrently; surfer lowering, acknowledged popup, persisted music, save migration, cleanup and once-only settlement');

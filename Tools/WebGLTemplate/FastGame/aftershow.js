@@ -15,6 +15,11 @@ export const EXIT_ONLY_AUDIENCE=[...Array.from({length:8},(_,i)=>'patron-'+i),'s
 export const AFTER_SHOW_AUDIENCE=[...GREETING_AUDIENCE,...EXIT_ONLY_AUDIENCE];
 export const EXIT_POINT={x:8.8,z:-5.55};
 export const SURFER_LOWER_SPEED=1.85;
+export const PARALLEL_EXIT_SPEED=2.4;
+export const PARALLEL_EXIT_BATCH_SIZE=8;
+export const PARALLEL_EXIT_BATCH_INTERVAL=.12;
+const greeter=id=>GREETING_AUDIENCE.includes(id);
+const parallelDelay=index=>Math.floor(Math.max(0,index-GREETING_AUDIENCE.length)/PARALLEL_EXIT_BATCH_SIZE)*PARALLEL_EXIT_BATCH_INTERVAL;
 const point=(x,z)=>({x,z});
 const finite=(n,f=0,min=-20,max=20)=>Number.isFinite(+n)?Math.max(min,Math.min(max,+n)):f;
 const integer=(n,max=100)=>Math.floor(finite(n,0,0,max));
@@ -23,9 +28,9 @@ const face=(a,b)=>{a.facing=Math.atan2(b.x-a.x,b.z-a.z);};
 const customerId=id=>typeof id==='string'&&/^(?:patron-\d+|audience-\d+|arrival-\d+-\d+|freebird-wall-\d+|ff-table-\d+-guest-[01]|bar-seat-\d+|lounge-\d+|support-[0-2]|crowd-surfer)$/.test(id);
 const customer=a=>a&&customerId(a.id)&&['guest','seated','support','surfer'].includes(a.role);
 function audienceItem(id,index,a,{gone=false,departing=false}={}){
-  const exitOnly=index>=spots.length,[targetX,targetZ]=spots[index]||[a?.x??6,a?.z??-4.25],parallel=!AFTER_SHOW_AUDIENCE.includes(id);
+  const exitOnly=!greeter(id),[targetX,targetZ]=spots[index]||[a?.x??6,a?.z??-4.25],parallel=exitOnly;
   return{id,phase:gone||!a||a.visible===false?'gone':departing||parallel?'exit':exitOnly?'farewell-wait':'gather',exitOnly,parallel,
-    exitDelay:parallel?Math.floor(Math.max(0,index-AFTER_SHOW_AUDIENCE.length)/4)*.65:0,
+    exitDelay:parallel?parallelDelay(index):0,
     homeX:a?.x??targetX,homeZ:a?.z??targetZ,homeFacing:a?.facing||0,x:a?.x??targetX,z:a?.z??targetZ,y:a?.y||0,
     targetX,targetZ,partner:'',visible:!!a&&a.visible!==false&&!gone,capture:false,standingReleased:false,egressPrepared:false,egress:[],egressAt:0};
 }
@@ -69,17 +74,19 @@ export function sanitizeAfterShow(value,session,{settled=false}={}){
   });
   const ids=[...AFTER_SHOW_AUDIENCE,...[...new Set(value.audience.map(a=>a?.id).filter(id=>customerId(id)&&!AFTER_SHOW_AUDIENCE.includes(id)))].slice(0,80)];
   const audience=ids.map((id,i)=>{
-    const old=value.audience.find(a=>a?.id===id),a=old||{},exitOnly=i>=spots.length;
+    const old=value.audience.find(a=>a?.id===id),a=old||{},exitOnly=!greeter(id),parallel=exitOnly;
     const [targetX,targetZ]=spots[i]||[finite(a.targetX,finite(a.x,6)),finite(a.targetZ,finite(a.z,-4.25))];
-    const phase=settled?'gone':['return','done'].includes(a.phase)?'farewell-wait':audiencePhases.has(a.phase)?a.phase:exitOnly?'farewell-wait':'gather';
-    return {...a,id,phase,exitOnly,parallel:!AFTER_SHOW_AUDIENCE.includes(id),exitDelay:finite(a.exitDelay,Math.floor(Math.max(0,i-AFTER_SHOW_AUDIENCE.length)/4)*.65,0,30),
+    const phase=settled?'gone':parallel&&a.phase!=='gone'?'exit':['return','done'].includes(a.phase)?'farewell-wait':audiencePhases.has(a.phase)?a.phase:'gather';
+    return {...a,id,phase,exitOnly,parallel,exitDelay:parallel?parallelDelay(i):0,
       standingReleased:a.standingReleased===true,egressPrepared:a.egressPrepared===true,egress:Array.isArray(a.egress)?a.egress.slice(0,3).filter(p=>Number.isFinite(p?.x)&&Number.isFinite(p?.z)).map(p=>point(finite(p.x),finite(p.z))):[],egressAt:integer(a.egressAt,3),
       homeX:finite(a.homeX,targetX),homeZ:finite(a.homeZ,targetZ),
       homeFacing:finite(a.homeFacing,0,-Math.PI,Math.PI),x:finite(a.x,targetX),z:finite(a.z,targetZ),y:finite(a.y,0,0,3),targetX,targetZ,
       partner:BAND_MEMBERS.includes(a.partner)?a.partner:'',visible:phase!=='gone',capture:!old&&!settled||a.capture===true};
   });
   const completed=members.every(m=>m.phase==='gone')&&audience.every(a=>a.phase==='gone');
-  const departingActor=[...members,...audience].some(a=>a.id===value.departingActor&&a.phase==='exit')?value.departingActor:null;
+  // An old save can hold a serial doorway token for an ordinary listener.
+  // That listener keeps their position/route and now joins the parallel flow.
+  const departingActor=[...members,...audience].some(a=>a.id===value.departingActor&&a.phase==='exit'&&!a.parallel)?value.departingActor:null;
   return{version:3,session,started:true,completed,elapsed:finite(value.elapsed,0,0,1e6),
     departureStarted:settled||value.departureStarted===true,departureElapsed:finite(value.departureElapsed,0,0,1e6),departingActor,
     noticeAcknowledged:settled||value.noticeAcknowledged===true,members,audience};
@@ -250,10 +257,12 @@ function tickParallelAudience(state,actors,dt){
     if(!item.parallel||item.phase==='gone')continue;
     const a=find(actors,item.id);
     if(!a||a.visible===false){item.phase='gone';item.visible=false;continue;}
-    item.phase='exit';a._partner=null;a.actionProgress=0;a.y=0;
+    item.phase='exit';a._partner=null;a.actionProgress=0;
+    if(waitForSurfer(a,actors))continue;
+    a.y=0;
     if(state.elapsed<item.exitDelay){a.action='aftershow-wait';a.moving=false;continue;}
     a.action='walk';
-    if(leave(item,a,actors,dt,1.45)){
+    if(leave(item,a,actors,dt,PARALLEL_EXIT_SPEED)){
       item.phase='gone';item.visible=false;a.visible=false;a.moving=false;a._path=[];a._pathAt=0;
     }
   }
@@ -275,10 +284,11 @@ function tickDepartures(state,actors,dt){
     if(a.visible===false){item.phase='gone';item.visible=false;if(state.departingActor===item.id)state.departingActor=null;continue;}
     a._partner=null;a.actionProgress=0;
     if(item.phase==='gone'){a.visible=false;a.moving=false;continue;}
+    if(item.parallel&&waitForSurfer(a,actors))continue;
     a.y=0;a.stageLevel=0;
     if(item.parallel?state.elapsed<item.exitDelay:item.id!==state.departingActor){a.action='aftershow-wait';a.moving=false;continue;}
     a.action='walk';
-    if(leave(item,a,actors,dt,BAND_MEMBERS.includes(item.id)?1.65:1.45)){
+    if(leave(item,a,actors,dt,BAND_MEMBERS.includes(item.id)?1.65:item.parallel?PARALLEL_EXIT_SPEED:1.45)){
       item.phase='gone';item.visible=false;a.visible=false;a.moving=false;a._path=[];a._pathAt=0;
       if(BAND_MEMBERS.includes(item.id))a.afterShowPhase='gone';
       if(state.departingActor===item.id)state.departingActor=null;
@@ -286,12 +296,18 @@ function tickDepartures(state,actors,dt){
   }
 }
 
+function waitForSurfer(actor,actors){
+  if(actor.id!=='crowd-surfer'&&!actor.id.startsWith('support-'))return false;
+  const surfer=find(actors,'crowd-surfer');if(!surfer||surfer.visible===false||(surfer.y||0)<=.01)return false;
+  actor.action=actor.id==='crowd-surfer'?'surf':'support';actor.moving=false;return true;
+}
+
 export function tickAfterShow(state,actors,dt){
   if(!state)return;
   state.elapsed+=dt;
-  if(state.departureStarted){tickDepartures(state,actors,dt);state.completed=[...state.members,...state.audience].every(item=>item.phase==='gone');syncAfterShow(state,actors);return;}
   const surfer=find(actors,'crowd-surfer');
   if(surfer&&state.audience.some(item=>item.id===surfer.id&&item.phase!=='gone'))surfer.y=Math.max(0,(surfer.y||0)-dt*SURFER_LOWER_SPEED);
+  if(state.departureStarted){tickDepartures(state,actors,dt);state.completed=[...state.members,...state.audience].every(item=>item.phase==='gone');syncAfterShow(state,actors);return;}
   tickParallelAudience(state,actors,dt);
   for(const item of state.audience){
     const fan=find(actors,item.id);if(!fan)continue;
