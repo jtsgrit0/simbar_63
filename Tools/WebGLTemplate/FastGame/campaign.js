@@ -1,6 +1,6 @@
 const whole=(value,min=0,max=1e9)=>Math.trunc(Math.max(min,Math.min(max,Number.isFinite(+value)?+value:min)));
 const shows=[
-  {id:'freewill',ko:'프리윌 라이브',en:'Freewill Live',bandIndices:[24],tracks:[0,3,4],fee:120,draw:20,tipMultiplier:1,orderIntervalMultiplier:1.08,preferredItems:[0,1],
+  {id:'freewill',ko:'프리윌 라이브',en:'Freewill Live',bandIndices:[24],tracks:[0,3,4],fee:180,draw:20,tipMultiplier:1,orderIntervalMultiplier:1.08,preferredItems:[0,1],
     descriptionKo:'칵테일을 즐기는 관객과 여유 있는 주문. 작은 무대의 첫 공연에 어울립니다.',descriptionEn:'A cocktail crowd and a gentler service pace. A welcoming first show for a small venue.'},
   {id:'july',ko:'줄라이원츠모어 라이브',en:'JulyWantsMore Live',bandIndices:[25],tracks:[1,2],fee:180,draw:28,tipMultiplier:1.18,orderIntervalMultiplier:.94,preferredItems:[2,3,5],
     descriptionKo:'안주를 찾는 관객과 팁 +18%. 첫 영업을 마치면 섭외할 수 있습니다.',descriptionEn:'A food-loving crowd with 18% better tips. Available after completing your first night.'},
