@@ -178,5 +178,3 @@ try:
 except Exception:REPORT['failure']=traceback.format_exc();raise
 finally:server.shutdown();(OUT/'report.json').write_text(json.dumps(REPORT,ensure_ascii=False,indent=2)+'\n',encoding='utf8')
 print(json.dumps({'passed':REPORT['passed'],'runtime':REPORT['runtime'],'cases':len(REPORT['cases']),'errors':REPORT['errors'],'remoteDenied':len(REPORT['blockedRemote'])},ensure_ascii=False))
-
-
