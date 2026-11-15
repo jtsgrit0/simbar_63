@@ -78,7 +78,7 @@ if (!app.requestSingleInstanceLock()) {
     window = new BrowserWindow({
       title: 'SimBar', width: 1600, height: 900, minWidth: 1024, minHeight: 640,
       backgroundColor: '#101417', show: false, autoHideMenuBar: true,
-      webPreferences: {nodeIntegration: false, contextIsolation: true, sandbox: true, webSecurity: true}
+      webPreferences: {nodeIntegration: false, contextIsolation: true, sandbox: true, webSecurity: true, backgroundThrottling: false}
     });
     window.removeMenu();
     window.webContents.setWindowOpenHandler(({url}) => { externalLink(url); return {action: 'deny'}; });

@@ -33,6 +33,12 @@ and context isolation enabled. External HTTP(S) links open in the user's normal
 browser. The app serves its bundled files through Electron's official custom
 protocol API; it does not load the published site to run the game.
 
+Switching to another application or minimizing the window keeps the venue clock
+and user-started music running in both management and viewing modes. Background
+throttling is disabled in the Windows shell. The web player uses a shared clock
+with a hidden-tab timer instead of relying only on animation frames. Explicit
+pause, management menus and the portrait orientation gate keep their usual rules.
+
 For SteamPipe, use the complete application folder as the Windows depot content
 root and `SimBar.exe` as the launch executable. Real AppID, DepotID and Steamworks
 account access are required for upload. No sample AppID, Steamworks integration,

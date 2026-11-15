@@ -10,6 +10,7 @@ import {Audience} from './audience.js';
 import {Campaign} from './campaign.js';
 import {Festival} from './festival.js';
 import {createViewMode} from './view-mode.js';
+import {createBackgroundLoop} from './background-loop.js';
 
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=(v,sign=false)=>(sign&&v>0?'+':'')+'₩'+Math.round((+v||0)*1000).toLocaleString('ko-KR');
@@ -61,7 +62,7 @@ export async function startGame({root,assetsBase='./FastGame/art/',assets:predec
   const icon=(key,alt='')=>`<img class="hud-icon" src="${esc(asset('icons/'+key+'.png'))}" alt="${esc(alt)}" draggable="false">`;
   const worldState=()=>({...g.state,owner:g.owner,phase:g.phase,paused:g.paused||orientationBlocked,journey:g.journey,floor:g.floor,reaction:g.reaction,inspection:g.inspection,visualPreview:ui.menu==='operations'?ui.visualPreview:null,actors:g.actors,orders:g.orders,effects:g.effects,elapsed:g.elapsed,cleanupReadyWorkers:g.cleanupReadyWorkers,guestExitFinished:g.guestExitFinished});
   const world=createWorld(canvas,{assets,getState:worldState});
-  let stopped=false,dirty=true,orientationBlocked=false,lastKey='',previousPhase=g.phase,raf=0,last=performance.now();
+  let stopped=false,dirty=true,orientationBlocked=false,lastKey='',previousPhase=g.phase;
   const playStats=new PlayStats({...playStatsConfig,onchange:()=>{dirty=true;}});
   const music=new MusicPlayer({getIndex:()=>g.state.playlist,getPaused:()=>g.journey.musicPaused,tracks:catalog.playlists,baseURL:new URL('.',document.baseURI),onchange:()=>{dirty=true;},onplaystart:event=>playStats.start(event),onqualified:event=>playStats.qualify(event),onended:index=>{if(!orientationBlocked&&!g.journey.musicPaused&&['playing','closing','guide','results'].includes(g.phase)&&g.state.playlist===index)stepMusic(1);}});
   const albumArt=new AlbumArtLoader({baseURL:base,covers:assets.albumCovers});let requestedAlbumIndex=-1;
@@ -278,7 +279,6 @@ export async function startGame({root,assetsBase='./FastGame/art/',assets:predec
   const clickHandler=e=>{const b=e.target.closest('[data-action]');if(!b||!host.contains(b)||b.disabled)return;handleAction(b.dataset.action,JSON.parse(b.dataset.payload||'{}'));};
   const changeHandler=e=>{if(orientationBlocked)return;if(e.target.matches('[data-desk-selected]')){dayDesk.focus('monitor');run('deskSelect',{selected:e.target.checked});}};
   const keyHandler=e=>{if(orientationBlocked||viewMode.viewing||viewMode.transitioning)return;if(g.closing&&g.farewellPending)return;if(e.repeat||e.ctrlKey||e.metaKey||e.altKey||/^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName))return;const key=e.key.toLowerCase();if([' ','p','m','h','e','c','f','1','2','3','4','5','6','escape'].includes(key))e.preventDefault();if(key==='c'||key==='f')handleAction('quick',{kind:key==='c'?1:2});else if(key===' '){if(g.pour)handleAction('pourStop');}else if(/^[1-6]$/.test(key))handleAction('menuItem',{item:+key-1});else if(key==='e')handleAction('prepare');else if(key==='m')uiAction('service',{});else if(key==='h')uiAction('floor',{});else if(key==='p'||key==='escape'){if(ui.menu){const service=ui.menu==='service';closeMenu();if(service&&key==='p')handleAction('pause');}else if(ui.floorOpen){ui.floorOpen=false;dirty=true;}else if(g.phase==='guide')handleAction('lobby');else handleAction(g.paused?'resume':'pause');}};
-  const blurHandler=()=>{if(orientationBlocked||window.matchMedia('(orientation: portrait)').matches)return;if((g.playing||g.closing)&&!g.paused){closeMenu(false);run('pause',{reason:'focus'});}};
   function wakeAudio(){
     if(orientationBlocked){music.suspend();return;}
     if(!['playing','closing','guide','results'].includes(g.phase)){
@@ -299,17 +299,20 @@ export async function startGame({root,assetsBase='./FastGame/art/',assets:predec
   }
   function syncMusic(){if(!orientationBlocked&&['playing','closing','guide','results'].includes(g.phase)){music.sync();music.resumeContext();requestAlbum();}else music.suspend();}
   const structure=()=>{const j=g.journey,p=j.booking,r=g.reaction;return JSON.stringify([g.phase,g.language,g.owner,g.paused,ui,j.guideStep,p?.deskVersion,p?.freewillSelected,p?.deskDoneMask,p?.showId,p?.ticketTier,p?.promotions,p?.campaignStage,j.completedNights,g.state.playlist,g.orders[0]?.id,g.orders[0]?.item,p?.venue,g.phase==='planning'?g.state.money:ui.menu==='operations'?g.state.money:0,g.state.staff,g.state.upgrades,g.state.activeEvent,g.state.wageDebt>0,!!g.pour,g.pour?.item,r?.activeKind,r?.activeStage,r?.cooldown>0,g.guestExitFinished,j.musicPaused,g.farewellPending,j.afterShow?.departureStarted]);};
-  const frame=now=>{if(stopped)return;const dt=Math.min(.1,Math.max(0,(now-last)/1000));last=now;syncOrientation();g.setMusicPlaybackActive(music.playing);g.setViewServiceActive(viewMode.viewing&&g.playing);g.setViewClosingActive(viewMode.viewing&&g.closing);if(!orientationBlocked)g.tick(dt);syncMusic();if(previousPhase!==g.phase){if(g.phase==='planning')dayDesk.reset(now);if(!['playing','closing'].includes(g.phase)){viewMode.reset();g.setViewServiceActive(false);g.setViewClosingActive(false);viewReturnTab=null;}ui.menu=null;ui.floorOpen=false;previousPhase=g.phase;dirty=true;}if(g.closing&&g.farewellPending){ui.menu=null;ui.floorOpen=false;}maybeOrderPopup();const key=structure();if((dirty||key!==lastKey)&&!viewMode.transitioning){rebuild();lastKey=key;}update();world.render(now,worldState());raf=requestAnimationFrame(frame);};
-  host.addEventListener('click',clickHandler);host.addEventListener('change',changeHandler);document.addEventListener('keydown',keyHandler);window.addEventListener('blur',blurHandler);const observer=new ResizeObserver(resize);observer.observe(host);g.onchange=()=>{};
+  // Focus changes do not pause the venue or its music. Hidden tabs use a timer
+  // for the same game rules, while visible windows keep smooth canvas frames.
+  const frame=(now,dt,{hidden})=>{if(stopped)return;syncOrientation();g.setMusicPlaybackActive(music.playing);g.setViewServiceActive(viewMode.viewing&&g.playing);g.setViewClosingActive(viewMode.viewing&&g.closing);if(!orientationBlocked)g.tick(dt);syncMusic();if(previousPhase!==g.phase){if(g.phase==='planning')dayDesk.reset(now);if(!['playing','closing'].includes(g.phase)){viewMode.reset();g.setViewServiceActive(false);g.setViewClosingActive(false);viewReturnTab=null;}ui.menu=null;ui.floorOpen=false;previousPhase=g.phase;dirty=true;}if(g.closing&&g.farewellPending){ui.menu=null;ui.floorOpen=false;}maybeOrderPopup();const key=structure();if((dirty||key!==lastKey)&&!viewMode.transitioning){rebuild();lastKey=key;}update();if(!hidden)world.render(now,worldState());};
+  const gameLoop=createBackgroundLoop({onframe:frame});
+  host.addEventListener('click',clickHandler);host.addEventListener('change',changeHandler);document.addEventListener('keydown',keyHandler);const observer=new ResizeObserver(resize);observer.observe(host);g.onchange=()=>{};
   const statsResume=()=>playStats.resume(),statsVisibility=()=>{if(!document.hidden)statsResume();};
   window.addEventListener('online',statsResume);document.addEventListener('visibilitychange',statsVisibility);
   const statsRefreshTimer=setInterval(()=>{if(!document.hidden&&ui.liveTab==='music')void playStats.refresh();},60000);
   playStats.resume();
-  rebuild();update();world.render(0,worldState());raf=requestAnimationFrame(frame);
+  rebuild();update();world.render(0,worldState());gameLoop.start();
   // Scene and interactive owner controls have both painted before the host is told ready.
   await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
 
-  const result={g,world,canvas,albumArt,viewMode,root:host,get orientationBlocked(){return orientationBlocked;},destroy(){stopped=true;cancelAnimationFrame(raf);observer.disconnect();host.removeEventListener('click',clickHandler);host.removeEventListener('change',changeHandler);document.removeEventListener('keydown',keyHandler);window.removeEventListener('blur',blurHandler);g.setViewServiceActive(false);g.setViewClosingActive(false);viewMode.destroy();music.destroy();playStats.destroy();clearInterval(statsRefreshTimer);window.removeEventListener('online',statsResume);document.removeEventListener('visibilitychange',statsVisibility);albumArt.destroy();g.save();world.destroy?.();host.remove();}};
+  const result={g,world,canvas,albumArt,viewMode,root:host,get orientationBlocked(){return orientationBlocked;},destroy(){stopped=true;gameLoop.destroy();observer.disconnect();host.removeEventListener('click',clickHandler);host.removeEventListener('change',changeHandler);document.removeEventListener('keydown',keyHandler);g.setViewServiceActive(false);g.setViewClosingActive(false);viewMode.destroy();music.destroy();playStats.destroy();clearInterval(statsRefreshTimer);window.removeEventListener('online',statsResume);document.removeEventListener('visibilitychange',statsVisibility);albumArt.destroy();g.save();world.destroy?.();host.remove();}};
   window.simbarGame=g;
   return result;
 }
