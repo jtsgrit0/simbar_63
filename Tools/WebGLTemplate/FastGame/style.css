@@ -298,8 +298,3 @@
 
 /* Keep the new flash label readable without resizing existing controls. */
 .fast-game .venue-ui .festival-actions [data-festival-action="flash"] .festival-action-name {word-break:keep-all;line-height:14px}
-
-/* In viewing mode, keep the approved settings panel outside the stage and sign. */
-.fast-game[data-view-mode="viewing"] .css-layer>.settings-shade {display:block;padding:0;background:transparent;pointer-events:none}
-.fast-game[data-view-mode="viewing"] .view-settings-scroll {position:absolute;overflow:auto;scrollbar-width:thin;scrollbar-color:#748c9d #17212f;border-radius:12px;outline:1px solid #a9a080;pointer-events:auto}
-.fast-game[data-view-mode="viewing"] .view-settings-scroll>.settings-ref {width:540px;min-width:540px;max-height:none;overflow:visible;margin:0;left:auto;top:auto;transform:none}

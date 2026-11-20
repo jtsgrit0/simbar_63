@@ -22,6 +22,14 @@ with wave.open(data,'wb') as output:
 WAV=data.getvalue()
 INIT='''(()=>{window.qaAudio=[];const A=window.Audio;window.Audio=function(...args){const a=new A(...args);qaAudio.push(a);return a};window.Audio.prototype=A.prototype})()'''
 SNAP='''()=>({paused:simbarGame.paused,reason:simbarGame.pauseReason,elapsed:simbarGame.elapsed,remaining:simbarGame.journey.secondsLeft,language:simbarGame.language,viewing:simbarApplication.viewMode.viewing,hidden:document.hidden,settings:!!document.querySelector('.settings-ref'),pause:!!document.querySelector('.pause-ref'),audio:qaAudio.map(a=>({paused:a.paused,time:a.currentTime,ready:a.readyState}))})'''
+SETTINGS_LAYOUT='''()=>{const shade=document.querySelector('.settings-shade'),panel=shade.querySelector('.settings-ref'),host=document.querySelector('.fast-game'),rect=e=>{const r=e.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height}},style=e=>{const s=getComputedStyle(e);return Object.fromEntries(['display','backgroundColor','fontFamily','fontSize','borderRadius','borderTopWidth','borderTopColor','paddingTop','paddingLeft','gap'].map(k=>[k,s[k]]))};return{host:rect(host),panel:rect(panel),shade:rect(shade),panelStyle:style(panel),shadeStyle:style(shade)}}'''
+
+def check_center(layout):
+ h,p=layout['host'],layout['panel']
+ assert abs(p['x']+p['width']/2-(h['x']+h['width']/2))<1,layout
+ assert abs(p['y']+p['height']/2-(h['y']+h['height']/2))<1,layout
+ assert p['x']>=h['x']-1 and p['y']>=h['y']-1 and p['x']+p['width']<=h['x']+h['width']+1 and p['y']+p['height']<=h['y']+h['height']+1,layout
+ assert layout['shadeStyle']['backgroundColor'] not in ('transparent','rgba(0, 0, 0, 0)'),layout
 
 def case(browser,url,width,height):
  context=browser.new_context(viewport={'width':width,'height':height},locale='ko-KR');context.add_init_script(INIT)
@@ -37,9 +45,16 @@ def case(browser,url,width,height):
   page.evaluate('''()=>{const g=simbarGame;g.act('owner',{index:2});g.act('language',{language:'ko'});g.journey.completedNights=2;g.journey.tutorialComplete=true;g.act('start');g.act('selectShow',{showId:'freewill'});g.act('deskWork',{task:0});g.act('deskWork',{task:1});if(!g.act('launch').success)throw Error('launch failed');while(g.phase==='guide')g.act('guide');}''')
   shared.close_order(page);page.locator('[data-action="ui:liveTab"][data-payload*="music"]').click()
   page.wait_for_function('qaAudio.some(a=>!a.paused&&a.readyState>=3)')
+  page.locator('.hud-settings').click();page.locator('.settings-ref').wait_for(state='visible')
+  management_layout=page.evaluate(SETTINGS_LAYOUT);check_center(management_layout)
+  page.locator('.settings-ref [data-action="ui:close"]').click();page.wait_for_function("!document.querySelector('.settings-ref')&&!simbarGame.paused")
   page.locator('button[data-view-mode]').click();page.wait_for_function("simbarApplication.viewMode.viewing&&document.querySelector('.fast-game').dataset.viewModeTransition==='settled'")
   settings=page.locator('.hud-settings');assert settings.count()==1 and settings.is_visible();settings.click()
   page.locator('.settings-ref').wait_for(state='visible');page.wait_for_function('simbarGame.paused')
+  viewing_layout=page.evaluate(SETTINGS_LAYOUT);check_center(viewing_layout)
+  assert viewing_layout==management_layout,(management_layout,viewing_layout)
+  page.screenshot(path=str(OUT/f'center-settings-{width}x{height}.png'))
+  result['centeredLikeManagement']=True;result['settingsLayout']=viewing_layout
   before=page.evaluate(SNAP);page.wait_for_timeout(500);during=page.evaluate(SNAP)
   assert before['elapsed']==during['elapsed'] and before['remaining']==during['remaining'],(before,during)
   assert any(not a['paused'] and a['time']>0 for a in during['audio']),during
