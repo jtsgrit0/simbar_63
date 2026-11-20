@@ -4,18 +4,18 @@ const action=(id,ko,en,icon,duration,cooldown,hype)=>Object.freeze({id,ko,en,ico
 export const Festival=Object.freeze({
   version:1,
   actions:Object.freeze([
-    action('slam','슬램','Slam','⚡',7,30,.15),
-    action('mosh','모슁','Mosh','↻',9,34,.17),
-    action('surf','크라우드 서핑','Crowd surf','≈',9,40,.18),
-    action('jump','점프','Jump','↑',7,24,.13),
-    action('horns','락손','Rock horns','🤘',8,22,.12),
-    action('airguitar','에어기타','Air guitar','♫',8,28,.14),
-    action('sing','떼창','Sing along','♪',10,32,.16),
+    action('slam','슬램','SLAM','⚡',7,30,.15),
+    action('mosh','모슁','MOSH','↻',9,34,.17),
+    action('surf','서핑','SURF','≈',9,40,.18),
+    action('jump','점프','JUMP','↑',7,24,.13),
+    action('horns','락손','ROCK','🤘',8,22,.12),
+    action('airguitar','에어기타','GUITAR','♫',8,28,.14),
+    action('sing','떼창','SING','♪',10,32,.16),
     action('encore','앵콜','Encore','★',10,44,.18),
-    action('headbang','헤드뱅','Headbang','↕',8,26,.14),
+    action('headbang','헤드뱅','HEAD','↕',8,26,.14),
     action('dance','댄스','Dance','◈',9,26,.14),
-    action('skank','스캥킹','Skanking','♪',9,26,.14),
-    action('flash','플래시 이벤트','Flash event','✦',10,32,.16)
+    action('skank','스캥킹','SKANK','♪',9,26,.14),
+    action('flash','플래시 이벤트','FLASH','✦',10,32,.16)
   ]),
   create(){return{version:1,venueOwner:null,activeId:'',remaining:0,duration:0,globalRemaining:0,cooldowns:Object.fromEntries(this.actions.map(a=>[a.id,0])),hype:0,serial:0,actionsUsed:0,arrivalCredit:0,arrivalRetry:0,arrivals:0,arrivalSerial:0};},
   sanitize(value){

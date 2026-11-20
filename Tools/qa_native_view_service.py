@@ -51,7 +51,8 @@ def new_page(browser,url,viewport):
 def snap(page):shared.settle(page);return page.evaluate(SNAP)
 def mode(page,value):page.wait_for_function("value=>{const h=document.querySelector('.fast-game');return h.dataset.viewMode===value&&h.dataset.viewModeTransition==='settled'}",arg=value,timeout=7000);shared.settle(page)
 def only_view(state):
- assert all(button['mode'] or button['playlist'] for button in state['visibleButtons']),state['visibleButtons']
+ assert sum(button['action']=='ui:settings' for button in state['visibleButtons'])==1,state['visibleButtons']
+ assert all(button['mode'] or button['playlist'] or button['action']=='ui:settings' for button in state['visibleButtons']),state['visibleButtons']
  assert not state['popup'],'Automatic viewing opened a manual order popup'
 def equal_geometry(before,after):
  for key in ['card','tab','camera']:assert before[key]==after[key],(key,before[key],after[key])

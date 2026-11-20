@@ -55,7 +55,8 @@ def equal_geometry(a,b):
 def wait_mode(page,mode):
  page.wait_for_function("mode=>{const h=document.querySelector('.fast-game');return h.dataset.viewMode===mode&&h.dataset.viewModeTransition==='settled'}",arg=mode,timeout=8000);settle(page)
 def only_view_controls(state):
- assert state['visibleButtons'] and all(b['viewMode'] or b['insidePlaylist'] for b in state['visibleButtons']),state['visibleButtons']
+ assert sum(b['action']=='ui:settings' for b in state['visibleButtons'])==1,state['visibleButtons']
+ assert state['visibleButtons'] and all(b['viewMode'] or b['insidePlaylist'] or b['action']=='ui:settings' for b in state['visibleButtons']),state['visibleButtons']
  assert state['crowdVisibility']=='hidden',state
  assert not state['leakingHiddenTargets'],state['leakingHiddenTargets']
 def canvas_hash(page):return hashlib.sha256(base64.b64decode(page.eval_on_selector('#unity-canvas','c=>c.toDataURL("image/png").split(",")[1]'))).hexdigest()
@@ -70,7 +71,7 @@ def main_case(browser,url,owner,width,height):
  context,page=context_page(browser,url,width,height);item={'owner':owner,'viewport':[width,height]};report['cases'].append(item)
  try:
   prepare(page,owner);before=snapshot(page);item['before']=before
-  assert before['mode']['label']=='감상모드',before['mode'];assert before['mode']['box']['width']==84 and before['mode']['box']['height']==88
+  assert before['mode']['label']=='감상모드',before['mode'];assert before['mode']['box']['width']==84 and before['mode']['box']['height']==84
   assert [b['action'] for b in before['tools'][:2]]==['ui:upgrades','ui:events'];assert len(before['tools'])==3,before['tools']
   original_canvas=canvas_hash(page);page.locator('button[data-view-mode]').click()
   item['entryAnimations']=page.evaluate('''()=>document.getAnimations().map(a=>({duration:a.effect?.getTiming().duration,easing:a.effect?.getTiming().easing,frames:a.effect?.getKeyframes().map(k=>({easing:k.easing,translate:k.translate,transform:k.transform}))}))''')

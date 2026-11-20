@@ -38,9 +38,9 @@ export function createViewMode({host,hudRoot,referenceRoot,cssRoot,onchange=()=>
   };
   const label=active=>{
     const button=session?.button||hudRoot.querySelector('[data-view-mode]');if(!button)return;
-    const image=button.querySelector('img'),span=button.querySelector('[data-view-mode-label]');
+    const images=button.querySelectorAll('img.reference-button-image'),span=button.querySelector('[data-view-mode-label]');
     const text=active?(button.dataset.managementLabel||'경영모드'):(button.dataset.viewLabel||'감상모드');
-    if(image){const source=active?button.dataset.managementSrc:button.dataset.viewSrc;if(source&&image.getAttribute('src')!==source)image.setAttribute('src',source);}
+    const source=active?button.dataset.managementSrc:button.dataset.viewSrc;if(source)for(const image of images)if(image.getAttribute('src')!==source)image.setAttribute('src',source);
     if(span)span.textContent=text;button.setAttribute('aria-label',text);button.setAttribute('title',text);button.setAttribute('aria-pressed',String(active));
   };
   const coordinates=(element,box)=>{
@@ -73,9 +73,9 @@ export function createViewMode({host,hudRoot,referenceRoot,cssRoot,onchange=()=>
       const delta={up:[0,-(visible?r.bottom-boundary.top+24:boundary.height+24)],down:[0,visible?boundary.bottom-r.top+24:boundary.height+24],left:[-(visible?r.right-boundary.left+24:boundary.width+24),0],right:[visible?boundary.right-r.left+24:boundary.width+24,0]}[direction];
       const base=translate(element);state.targets.push({element,direction,base,off:[base[0]+delta[0],base[1]+delta[1]]});mute(state,element);remember(state,element);
     };
-    for(const [selector,direction]of [['.hud-settings,.hud-score,.hud-session','up'],['.quest-panel,.mood','right'],['.venue-show-badge,.venue-tools:not(.view-mode-slot),.ops-status','left'],['.menu-ready','down'],['.toast','up']])for(const element of hudRoot.querySelectorAll(selector))add(element,direction);
+    for(const [selector,direction]of [['.hud-score,.hud-session','up'],['.quest-panel,.mood','right'],['.venue-show-badge,.venue-tools:not(.view-mode-slot),.ops-status','left'],['.menu-ready','down'],['.toast','up']])for(const element of hudRoot.querySelectorAll(selector))add(element,direction);
     for(const element of hudRoot.children)if(!element.classList.contains('venue-topbar'))add(element,'up');
-    for(const root of [referenceRoot,cssRoot])if(root)for(const element of root.children)add(element,element.matches('.reaction-card,.floor-status')?'left':'down');
+    for(const root of [referenceRoot,cssRoot])if(root)for(const element of root.children)if(!element.matches('.settings-shade'))add(element,element.matches('.reaction-card,.floor-status')?'left':'down');
     state.targets.push({element:overlay,direction:'return-button',base:[0,0],off:state.modeDelta});
     session=state;label(true);return state;
   };
