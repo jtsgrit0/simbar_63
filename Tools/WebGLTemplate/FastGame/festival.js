@@ -13,7 +13,9 @@ export const Festival=Object.freeze({
     action('sing','떼창','Sing along','♪',10,32,.16),
     action('encore','앵콜','Encore','★',10,44,.18),
     action('headbang','헤드뱅','Headbang','↕',8,26,.14),
-    action('dance','댄스','Dance','◈',9,26,.14)
+    action('dance','댄스','Dance','◈',9,26,.14),
+    action('skank','스캥킹','Skanking','♪',9,26,.14),
+    action('flash','플래시 이벤트','Flash event','✦',10,32,.16)
   ]),
   create(){return{version:1,venueOwner:null,activeId:'',remaining:0,duration:0,globalRemaining:0,cooldowns:Object.fromEntries(this.actions.map(a=>[a.id,0])),hype:0,serial:0,actionsUsed:0,arrivalCredit:0,arrivalRetry:0,arrivals:0,arrivalSerial:0};},
   sanitize(value){

@@ -360,15 +360,24 @@ export class SimBarGame{
     this.phase=j.guidePending?'guide':'playing';this.paused=j.guidePending;this.pauseReason=this.paused?'guide':'';this._say('영업 시작! 주문과 공연을 멋지게 운영해 보세요.','The show is open! Serve guests and keep the crowd glowing.');
   }
   _ensureReaction(scheduleSeed){if(!this.floor.reaction){const gameplaySeed=Math.floor(this._random()*0x7fffffff)||1;this.floor.reaction=Challenges.newState(scheduleSeed??gameplaySeed,180-this.journey.secondsLeft);}}
+  _festivalEligible(actor,id){return ['guest','seated'].includes(actor.role)&&actor.visible!==false&&!actor.drunkIncident&&!actor.moving&&
+    !['queue','return','arrive','to-stage','exit','escorted'].includes(actor.action)&&
+    (id!=='skank'||actor.role==='guest'&&!actor.seat&&!actor.waitingSeat);}
+  // The HUD and action execution use the same physical participation test.
+  // Playback, active-phase, cooldown and inspection remain separate guards.
+  canFestivalParticipate(id){return this.actors.some(actor=>this._festivalEligible(actor,id));}
   _festivalAction(id){
     if(this.playing&&!this.paused&&this.inspection.freezePerformers){this._say('단속반이 지나가면 호응 액션을 다시 사용할 수 있어요.','Crowd actions will be available after the inspectors leave.',4);return{success:false,code:'inspection_blocked'};}
     if(!this.playing||this.paused||!this.festival.liveAttendance)return{success:false,code:'unavailable'};
+    const eligible=this.actors.filter(a=>this._festivalEligible(a,id));
+    // New moves require someone physically able to perform them. Keep the
+    // existing ten actions' historical behavior when the venue is busy.
+    if((id==='skank'||id==='flash')&&!eligible.length)return{success:false,code:'unavailable'};
     const state=this.journey.festival,result=Festival.begin(state,id);if(!result.success)return result;
     state.venueOwner=this.owner;
     const definition=result.action,s=this.state,response=Festival.response(s.satisfaction,s.performance);
     state.arrivalCredit=Math.min(1,state.arrivalCredit+.6*response);
     this._requestTimer=Math.min(this._requestTimer,2.2*this.festival.orderMultiplier);
-    const eligible=this.actors.filter(a=>['guest','seated'].includes(a.role)&&a.visible!==false&&!a.drunkIncident&&!a.moving&&!['queue','return','arrive','to-stage','exit','escorted'].includes(a.action));
     for(const actor of eligible){actor.festivalAction=id;actor.festivalSerial=state.serial;actor.festivalRemaining=state.remaining;actor.festivalDuration=state.duration;}
     if(id==='surf')this._formFestivalSurf(eligible);
     this._say(definition.ko+'! 호응이 높을수록 칵테일 주문과 현장 관객이 늘어나요.',definition.en+'! A responsive crowd brings more cocktail orders and walk-in guests.');

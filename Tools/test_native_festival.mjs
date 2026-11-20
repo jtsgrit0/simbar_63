@@ -29,7 +29,7 @@ function advance(g,seconds,{actions=false}={}){
   }
 }
 
-assert.deepEqual(Festival.actions.map(a=>a.id),['slam','mosh','surf','jump','horns','airguitar','sing','encore','headbang','dance']);
+assert.deepEqual(Festival.actions.map(a=>a.id),['slam','mosh','surf','jump','horns','airguitar','sing','encore','headbang','dance','skank','flash']);
 {
   const g=new SimBarGame({storage:memory()});
   assert.equal(g.act('festival',{id:'horns'}).success,false);
@@ -63,6 +63,65 @@ for(const definition of Festival.actions){
   advance(copy,definition.duration+1);
   assert.equal(copy.festival.activeId,'');assert(copy.festival.cooldowns[definition.id]>0);
   assert(copy.actors.every(a=>!a.festivalAction&&!a.festivalLead&&!a.festivalSupport));
+}
+
+// New moves only earn a judgement from actual audible participation. A seated
+// guest can hold a phone, while skanking requires a person standing on the floor.
+for(const id of ['skank','flash']){
+  const g=launch(2),seated=people(g).filter(a=>a.role==='seated'&&!a.moving&&!['queue','return','arrive','to-stage','exit','escorted'].includes(a.action));
+  assert(seated.length>0,'Fixture needs a real seated audience');
+  g.setMusicPlaybackActive(false);assert.equal(g.act('festival',{id}).success,true);
+  const selected=people(g).filter(a=>a.festivalAction===id);
+  assert(selected.length>0);
+  if(id==='skank')assert(selected.every(a=>a.role==='guest'&&!a.seat&&!a.waitingSeat),'Seated people cannot skank');
+  else assert(selected.some(a=>a.role==='seated'),'Seated people can join the phone lights');
+  g.tick(2);assert.equal(g.state.performance,0,'The music must actually play before participation counts');
+  g.setMusicPlaybackActive(true);g.tick(2);
+  assert(g.state.performance>0,'Real audience participation adds concert experience');
+  const scores=structuredClone(g.journey.feedback),festival=structuredClone(g.journey.festival);
+  assert(selected.some(a=>g.journey.feedback.guests[a.id]?.actions?.[id]>0));
+  g.act('pause');g.tick(3);
+  assert.deepEqual(g.journey.feedback,scores,'Pause freezes concert experience');
+  assert.deepEqual(g.journey.festival,festival,'Pause freezes the new move and cooldown');
+  const saved=g.exportSave(),copy=new SimBarGame({storage:g.storage});assert(copy.importSave(saved));copy.act('continue');
+  assert.deepEqual(copy.journey.feedback,scores,'New action judgements survive save and restore');
+  assert.equal(copy.journey.festival.activeId,id,'A saved new action remains active');
+}
+{
+  const g=launch(2);for(const actor of people(g))if(actor.role!=='seated')actor.visible=false;
+  assert(g.festival.liveAttendance>0,'Seated guests remain in the venue');
+  assert.equal(g.canFestivalParticipate('skank'),false);
+  assert.equal(g.canFestivalParticipate('flash'),true,'Available seated guests can use phone lights');
+  const before=structuredClone(g.journey.festival),timer=g._requestTimer;
+  assert.equal(g.act('festival',{id:'skank'}).code,'unavailable');
+  assert.deepEqual(g.journey.festival,before,'No dancer means no cooldown, hype or arrival credit');
+  assert.equal(g._requestTimer,timer,'No dancer cannot alter order demand');
+}
+{
+  const g=launch(2);for(const actor of people(g))actor.moving=true;
+  assert.equal(g.canFestivalParticipate('skank'),false);assert.equal(g.canFestivalParticipate('flash'),false);
+  const before=structuredClone(g.journey.festival),timer=g._requestTimer;
+  assert.equal(g.act('festival',{id:'flash'}).code,'unavailable');
+  assert.deepEqual(g.journey.festival,before,'No available audience means no cooldown, hype or arrival credit');
+  assert.equal(g._requestTimer,timer,'No available audience cannot alter order demand');
+}
+{
+  const g=launch(1);assert(g.act('inspection').success);
+  for(let i=0;i<200&&!g.inspection.freezePerformers;i++)g.tick(.05);
+  assert(g.inspection.freezePerformers,'The real patrol must reach the audience');
+  const before=structuredClone(g.journey.festival);
+  for(const id of ['skank','flash'])assert.equal(g.act('festival',{id}).code,'inspection_blocked');
+  assert.deepEqual(g.journey.festival,before,'Inspection cannot consume either new action');
+}
+{
+  const g=launch(2);assert(g.act('festival',{id:'horns'}).success);g.tick(2);
+  const raw=JSON.parse(g.exportSave()),journey=JSON.parse(raw.journeyJson);
+  delete journey.festival.cooldowns.skank;delete journey.festival.cooldowns.flash;
+  raw.journeyJson=JSON.stringify(journey);
+  const copy=new SimBarGame({storage:memory()});assert(copy.importSave(JSON.stringify(raw)));copy.act('continue');
+  assert.equal(copy.journey.festival.activeId,'horns');
+  assert.equal(copy.journey.festival.cooldowns.skank,0);assert.equal(copy.journey.festival.cooldowns.flash,0);
+  assert.equal(copy.journey.festival.cooldowns.horns,g.journey.festival.cooldowns.horns,'Existing cooldown survives an old save');
 }
 
 // A highly satisfied room alone cannot silently fill or alter order demand.

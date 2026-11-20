@@ -2,9 +2,9 @@
 // evidence, rather than two fixed rewards for the same button or order count.
 const clamp=(value,min=0,max=1)=>Math.max(min,Math.min(max,Number.isFinite(+value)?+value:min));
 const integer=(value,max=1e6)=>Math.trunc(clamp(value,0,max));
-const ACTIONS=['slam','mosh','surf','jump','horns','airguitar','sing','encore','headbang','dance'];
+const ACTIONS=['slam','mosh','surf','jump','horns','airguitar','sing','encore','headbang','dance','skank','flash'];
 const HARD=new Set(['slam','mosh','surf','headbang']);
-const SOCIAL=new Set(['sing','dance','horns','airguitar']);
+const SOCIAL=new Set(['sing','dance','horns','airguitar','skank','flash']);
 const ROLES=new Set(['guest','seated','support','surfer','assisted']);
 const BUSY=new Set(['queue','return','arrive','to-stage','exit','escorted']);
 const MAX_GUESTS=160;
@@ -44,7 +44,8 @@ function actionFit(actor,id,state,context){
     if(softSet)fit*=.62;
   }else if(SOCIAL.has(id)){
     if(state.owner===2)fit*=id==='horns'?.91:1.04;
-    if(['listen','sway'].includes(actor.behavior)&&['sing','dance'].includes(id))fit*=1.08;
+    if(['listen','sway'].includes(actor.behavior)&&['sing','dance','flash'].includes(id))fit*=1.08;
+    if(id==='skank'&&['dance','mosh','slam','headbang','cheer'].includes(actor.behavior))fit*=1.08;
   }
   if(id==='jump'&&(actor.role==='seated'||actor.waitingSeat))fit*=.45;
   if(id==='encore'){

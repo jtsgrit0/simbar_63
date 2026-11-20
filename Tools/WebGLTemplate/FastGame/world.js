@@ -93,12 +93,17 @@ export function pixelFestivalPose(actor={},state={},seconds=0){
   if(['queue','return','arrive','to-stage','exit','escorted','walk'].includes(actor.action))return null;
   let id=actor.festivalRemaining>0?actor.festivalAction:null;
   if(!id&&actor.audienceVersion&&['horns','dance'].includes(actor.behavior))id=actor.behavior;
-  if(!['slam','mosh','surf','jump','horns','airguitar','sing','encore','headbang','dance'].includes(id))return null;
+  if(!['slam','mosh','surf','jump','horns','airguitar','sing','encore','headbang','dance','skank','flash'].includes(id))return null;
+  if(id==='skank'&&(actor.role!=='guest'||actor.seat||actor.waitingSeat))return null;
   const phase=finite(actor.behaviorPhase,(hash(actor.id)%997)/997*Math.PI*2),speed=clamp(finite(actor.animationSpeed,1),.5,1.5),time=Math.max(0,finite(seconds))*speed+phase;
   const base={kind:'festival-'+id,festivalAction:id,action:'idle',animationSeconds:time,speed,phase,sway:0,bob:0,lean:0,lift:0,cheer:false};
   // A waiting spectator keeps the authored bent-knee seat drawing. A real
   // departure changes role/path in the simulation before any standing pose.
-  if(actor.role==='seated')return{...base,kind:'seated-'+id,sway:Math.sin(time*2)*.3,bob:Math.sin(time*3)*.25,lean:Math.sin(time*2)*.009};
+  if(actor.role==='seated'){
+    if(id==='skank')return null;
+    return{...base,kind:'seated-'+id,sway:Math.sin(time*2)*.3,bob:Math.sin(time*3)*.25,lean:Math.sin(time*2)*.009,
+      ...(id==='flash'?{phoneLight:true,phoneWave:Math.sin(time*2.3)}:{})};
+  }
   if(id==='surf'){
     if(actor.festivalLead)return actor.festivalLiftReady&&finite(actor.y)>.05
       ?{...base,action:'surf',atlasAction:'surf',lean:Math.sin(time*2.2)*.025}
@@ -111,6 +116,12 @@ export function pixelFestivalPose(actor={},state={},seconds=0){
   if(id==='slam')return{...base,action:'slam',sway:Math.sin(time*3.6)*2.6,bob:Math.abs(Math.sin(time*3.6))*.4,lean:Math.sin(time*3.6)*.065};
   if(id==='dance')return{...base,atlasAction:id,sway:Math.sin(time*3)*.8,bob:Math.sin(time*6)*.3};
   if(id==='airguitar')return{...base,atlasAction:id,sway:Math.sin(time*2.8)*.6};
+  if(id==='skank'){
+    const step=Math.sin(time*6.4);
+    return{...base,action:'walk',skankStep:step>=0?1:-1,skankKnee:Math.abs(step),skankArm:step,
+      sway:Math.sin(time*3.2)*.65,bob:-Math.abs(step)*.5,lean:Math.sin(time*3.2)*.025};
+  }
+  if(id==='flash')return{...base,action:'highfive',frameOverride:0,phoneLight:true,phoneWave:Math.sin(time*2.3),sway:Math.sin(time*1.4)*.35};
   return{...base,atlasAction:id,sway:Math.sin(time*1.8)*.25};
 }
 
@@ -389,6 +400,45 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
     const fw=manifest.frameWidth||64,fh=manifest.frameHeight||64;
     return{sheet,sx:selected.column*fw,sy:selected.row*fh,sw:fw,sh:fh,flip:false,meta:layout,entry:layout,style:selected.style,atlasKey:'festival-'+selected.atlas};
   }
+  // Reassemble the existing four-direction walking artwork rather than
+  // recolouring or replacing the audience. Alternate the two lower limbs and
+  // the existing bent-arm portions while the head, torso and feet stay rooted
+  // to the same projected actor position used by navigation and shadows.
+  function drawSkankFrame(atlas,dx,dy,dw,dh,pose){
+    const sw=atlas.sw,sh=atlas.sh,head=Math.round(sh*.34),hip=Math.round(sh*.66),middle=Math.round(sw/2),left=Math.round(sw*.375),right=Math.round(sw*.625);
+    const piece=(x,y,w,h,offsetX=0,offsetY=0)=>{
+      const x0=Math.round(dx+x*dw/sw)+offsetX,y0=Math.round(dy+y*dh/sh)+offsetY;
+      const x1=Math.round(dx+(x+w)*dw/sw)+offsetX,y1=Math.round(dy+(y+h)*dh/sh)+offsetY;
+      ctx.drawImage(atlas.sheet,atlas.sx+x,atlas.sy+y,w,h,x0,y0,x1-x0,y1-y0);
+    };
+    const lift=Math.round(8*pose.skankKnee),forward=Math.round(2*pose.skankKnee);
+    piece(0,hip,middle,sh-hip,pose.skankStep<0?-forward:0,pose.skankStep<0?-lift:0);
+    piece(middle,hip,sw-middle,sh-hip,pose.skankStep>0?forward:0,pose.skankStep>0?-lift:0);
+    const arm=(x,w,pivot,rotation)=>{
+      const x0=Math.round(dx+pivot*dw/sw),y0=Math.round(dy+head*dh/sh);
+      ctx.save();ctx.translate(x0,y0);ctx.rotate(rotation);ctx.translate(-x0,-y0);piece(x,head,w,hip-head);ctx.restore();
+    };
+    arm(0,left+2,left,pose.skankArm*.16);
+    arm(right-2,sw-right+2,right,-pose.skankArm*.16);
+    piece(left,head,right-left,hip-head);
+    piece(0,0,sw,head);
+  }
+  // Local, softly stepped pixel light: each actual phone stays beside its
+  // owner and participates in the same room depth ordering as that person.
+  function drawPhoneLight(actor,role,action,pose,size,state){
+    const side=pixelFacing(actor,role,action,state).endsWith('R')?1:-1;
+    const x=Math.round(side*(10+pose.phoneWave*2)),y=-Math.round(size*.72)+Math.round(pose.phoneWave);
+    if(actor.role==='seated'){
+      const sx=side*6,sy=-Math.round(size*.48),steps=Math.max(1,Math.abs(y+3-sy));
+      ctx.fillStyle='#d2a98b';
+      for(let i=0;i<=steps;i++)ctx.fillRect(Math.round(sx+(x-sx)*i/steps),Math.round(sy+(y+3-sy)*i/steps),2,2);
+    }
+    ctx.fillStyle='#eaf8ff38';ctx.fillRect(x-5,y-5,11,11);
+    ctx.fillStyle='#edf9ff68';ctx.fillRect(x-3,y-3,7,7);
+    ctx.fillStyle='#283540';ctx.fillRect(x-1,y-2,3,5);
+    ctx.fillStyle='#eaf9ff';ctx.fillRect(x,y-1,1,3);
+    ctx.fillStyle='#fffde9';ctx.fillRect(x-1,y-4,3,2);ctx.fillRect(x-4,y-2,2,1);ctx.fillRect(x+3,y-2,2,1);ctx.fillRect(x,y-6,1,2);
+  }
   function drawActor(a,state){
     if(a.role==='inspector'){drawInspector(a);return;}
     let role=String(a.role||'guest').toLowerCase();if(role==='band')role=String(a.id||'singer');if(role==='seated'&&a.id?.startsWith('bar-seat-'))role='barseated';
@@ -407,11 +457,11 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
     const p=actorPoint(a,finite(a.y)),ground=actorPoint(a,role==='surfer'||a.festivalLead?0:finite(a.y)),surf=(action==='surf'||role==='surfer')&&finite(a.y)>.1;
     const liftedSurfer=a.festivalLead&&a.festivalLiftReady&&finite(a.y)>.05;
     if(!seatFor(a)?.hideShadow&&(role!=='drummer'||action!=='perform'))ellipse(ctx,ground.x,ground.y+1,liftedSurfer?12:Math.round(4*(jump?.shadow||1)),liftedSurfer?2:1,liftedSurfer||jump?'#16182348':'#16182360');
-    const atlas=festivalAtlasFrame(a,state)||atlasFrame(a,a.festivalLead&&action==='surf'?'surfer':role,action,frame,state,frozen?0:jump?.frame??(action==='highfive'?pose.frameOverride:null),band&&action==='perform'?bandTime:pose.animationSeconds),meta=atlas?.meta||{},entry=atlas?.entry||{},size=entry.drawHeight||meta.drawHeight||40;
+    const atlas=festivalAtlasFrame(a,state)||atlasFrame(a,a.festivalLead&&action==='surf'?'surfer':role,action,frame,state,frozen?0:jump?.frame??(action==='highfive'?pose.frameOverride:pose.festivalAction==='skank'?1:null),band&&action==='perform'?bandTime:pose.animationSeconds),meta=atlas?.meta||{},entry=atlas?.entry||{},size=entry.drawHeight||meta.drawHeight||40;
     const varied=!!pose.kind,bob=!band&&active?(varied?pose.bob:['dance','mosh','slam'].includes(action)?Math.round(Math.sin(seconds*5+hash(a.id)%17)*.6):0):0;
     ctx.save();ctx.translate(Math.round(p.x+(active?pose.sway:0)),Math.round(p.y+bob-(jump?.lift||0)-(active?pose.lift||0:0)));if(active&&pose.lean)ctx.rotate(pose.lean);
     if(surf&&!entry.horizontal){ctx.rotate(-Math.PI/2);ctx.translate(0,-7);}
-    if(atlas){const scale=size/atlas.sh,dw=entry.drawWidth||meta.drawWidth||atlas.sw*scale,dh=size,footX=entry.footX??meta.footX??atlas.sw/2,footY=entry.footY??meta.footY??atlas.sh;if(atlas.flip)ctx.scale(-1,1);ctx.drawImage(atlas.sheet,atlas.sx,atlas.sy,atlas.sw,atlas.sh,Math.round(-footX*dw/atlas.sw),Math.round(-footY*dh/atlas.sh),Math.round(dw),Math.round(dh));}
+    if(atlas){const scale=size/atlas.sh,dw=entry.drawWidth||meta.drawWidth||atlas.sw*scale,dh=size,footX=entry.footX??meta.footX??atlas.sw/2,footY=entry.footY??meta.footY??atlas.sh,dx=Math.round(-footX*dw/atlas.sw),dy=Math.round(-footY*dh/atlas.sh);if(atlas.flip)ctx.scale(-1,1);if(active&&pose.festivalAction==='skank')drawSkankFrame(atlas,dx,dy,Math.round(dw),Math.round(dh),pose);else ctx.drawImage(atlas.sheet,atlas.sx,atlas.sy,atlas.sw,atlas.sh,dx,dy,Math.round(dw),Math.round(dh));if(active&&pose.phoneLight)drawPhoneLight(a,role,action,pose,size,state);}
     else throw new Error('No pixel character atlas entry for '+role);
     ctx.restore();
     if(active&&pose.cheer){ctx.fillStyle='#ffe9ac';ctx.fillRect(Math.round(p.x-9),Math.round(p.y-size+6),1,3);ctx.fillRect(Math.round(p.x+8),Math.round(p.y-size+2),1,3);}
@@ -606,7 +656,9 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
     return(state.actors||[]).filter(actor=>actor.visible!==false&&['guest','seated','support','surfer'].includes(actor.role)).map(actor=>{
       const pose=pixelAudiencePose(actor,state,seconds),selected=assets.festivalModels?pixelFestivalFrame(actor,state,seconds,assets.festivalModels):null;
       return{id:actor.id,role:actor.role,seated:!!seatFor(actor),moving:!!actor.moving,action:pose.action,festivalAction:pose.festivalAction||null,
-        atlas:selected?.atlas||null,row:selected?.row??null,column:selected?.column??null,style:selected?.style||null,lift:pose.lift||0,...actorPoint(actor,finite(actor.y))};
+        atlas:selected?.atlas||null,row:selected?.row??null,column:selected?.column??null,style:selected?.style||null,lift:pose.lift||0,
+        ...(pose.festivalAction==='skank'?{skankStep:pose.skankStep,skankKnee:pose.skankKnee,skankArm:pose.skankArm}:{}),
+        ...(pose.festivalAction==='flash'?{phoneLight:!!pose.phoneLight,phoneWave:pose.phoneWave}:{}),...actorPoint(actor,finite(actor.y))};
     });
   }
   function getInspectorPresentation(state=getState()){selectVenue(state);return(state.actors||[]).filter(a=>a.role==='inspector'&&a.visible!==false).map(a=>({id:a.id,moving:!!a.moving,...inspectorFrame(a)}));}
