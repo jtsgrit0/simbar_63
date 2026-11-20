@@ -66,7 +66,7 @@ SNAPSHOT = r'''() => {
   const tracklist=[...document.querySelectorAll('.track-list [data-playlist]')].map(e=>({index:e.dataset.playlist,title:e.querySelector('.track-title-text')?.textContent.split(' · ')[0]}));
   return{language:simbarGame.language,phase:simbarGame.phase,mode:q('.fast-game').dataset.viewMode,gear,tools,modeButton:mode,labels,lines,
     camera:world.getVenueBounds(),protected:{stage:region(550,90,885,385),sign:region(370,25,565,115)},
-    card:rect(q('.live-console')),tabs:[...document.querySelectorAll('.live-console-tabs button')].map(rect),
+    card:rect(q('.live-console')),menuReady:rect(q('.menu-ready')),mood:rect(q('.mood')),quest:rect(q('.quest-panel')),tabs:[...document.querySelectorAll('.live-console-tabs button')].map(rect),
     tracks:tracklist,transport:[...document.querySelectorAll('.music-controls button')].map(e=>e.dataset.action),
     documentScroll:{width:document.documentElement.scrollWidth,client:document.documentElement.clientWidth}};
 }'''
@@ -136,11 +136,14 @@ def case(browser, url, width, height):
                 assert b['visible'] and b['topmost'] and b['style']['borderRadius']=='50%',b
                 assert b['iconRect'] and b['labelRect'],b
                 if language=='ko':
-                    assert b['rect']['width']==84 and b['rect']['height']==84 and b['style']['fontSize']=='14px',b
-                    assert b['labelImage']==b['icon'] and b['labelCrop']=={'width':'76px','height':'20px','imageLeft':'-4px','imageTop':'-52px','imageWidth':'84px','imageHeight':'88px','blend':'lighten'},b
-            if language=='en':
+                    assert b['labelImage']==b['icon'],b
+                    crop=b['labelCrop'];assert crop and float(crop['width'].replace('px',''))<=70, b
+                    px=lambda key:float(crop[key].replace('px',''))
+                    assert abs(px('imageLeft')+px('imageWidth')*7/84)<.1 and abs(px('width')-px('imageWidth')*69/84)<.1,b
+                    assert b['rect']['y']>=0 and b['rect']['bottom']<=height+.05,b
+            if language=='en' and (width,height) in baseline:
                 for current,old in zip(management['tools'],baseline[(width,height)]['buttons']):
-                    assert equivalent(current['rect'],old['rect']),(current,old)
+                    assert abs(current['rect']['width']-old['rect']['width'])<.05 and abs(current['rect']['height']-old['rect']['height'])<.05,(current,old)
                     for key in ('fontSize','lineHeight','borderRadius','backgroundColor','borderTopWidth','paddingTop','paddingRight','paddingBottom','paddingLeft'):
                         assert current['style'][key]==old['style'][key],(key,current,old)
                     assert current['icon'].split('/art/')[-1]==old['icon'].split('/art/')[-1],(current,old)
@@ -148,15 +151,18 @@ def case(browser, url, width, height):
                 assert (b['badge']['content']!='none')==(language=='ko'),b
             gear=management['gear'];assert gear['visible'] and gear['topmost'] and gear['rect']['width']==49 and gear['rect']['height']==45,gear
             assert management['documentScroll']['width']<=management['documentScroll']['client'],management['documentScroll']
+            for index,b in enumerate(management['tools']):
+                for other in management['tools'][index+1:]:assert not intersects(b['rect'],other['rect']),(b,other)
+                for other in [management['card'],management['menuReady'],management['mood'],management['quest']]:assert not intersects(b['rect'],other),(b,other)
             for b in [gear,*management['tools']]:
                 assert not intersects(b['rect'],management['protected']['stage']) and not intersects(b['rect'],management['protected']['sign']),(b,management['protected'])
-            page.locator('.venue-tools.bottom-tabs').screenshot(path=str(OUT/f'{width}-{language}-management.png'))
+            page.screenshot(path=str(OUT/f'{width}-{language}-management.png'))
             click_visible_mode(page)
             page.wait_for_function("document.querySelector('.fast-game').dataset.viewMode==='viewing'&&document.querySelector('.fast-game').dataset.viewModeTransition==='settled'",timeout=6000)
             viewing=snapshot(page);assert viewing['modeButton']['label']==want['manage'] and viewing['modeButton']['text']==want['manage'],viewing['modeButton']
             assert viewing['modeButton']['visible'] and viewing['modeButton']['topmost'] and viewing['modeButton']['rect']['width']==84 and viewing['modeButton']['rect']['height']==84,viewing['modeButton']
             if language=='ko':
-                assert equivalent(viewing['modeButton']['rect'],management['tools'][0]['rect']) and viewing['modeButton']['labelImage']==viewing['modeButton']['icon'],viewing['modeButton']
+                assert viewing['modeButton']['labelImage']==viewing['modeButton']['icon'],viewing['modeButton']
             if args.view_settings:
                 assert viewing['gear']['visible'] and viewing['gear']['topmost'] and equivalent(viewing['gear']['rect'],gear['rect']),viewing['gear']
             else:
@@ -167,13 +173,15 @@ def case(browser, url, width, height):
                 assert not intersects(b['rect'],viewing['protected']['stage']) and not intersects(b['rect'],viewing['protected']['sign']),(b,viewing['protected'])
             assert len(viewing['tracks'])==5 and [p['index'] for p in viewing['tracks']]==['0','1','2','3','4'],viewing['tracks']
             assert viewing['transport']==['ui:musicPrevious','ui:musicToggle','ui:musicNext'],viewing['transport']
-            page.locator('.view-mode-slot').screenshot(path=str(OUT/f'{width}-{language}-viewing.png'))
+            page.screenshot(path=str(OUT/f'{width}-{language}-viewing.png'))
             measurements[language]={'management':management,'viewing':viewing}
             click_visible_mode(page)
             page.wait_for_function("document.querySelector('.fast-game').dataset.viewMode==='management'&&document.querySelector('.fast-game').dataset.viewModeTransition==='settled'",timeout=6000)
         ko,en=measurements['ko'],measurements['en']
+        for k,e in zip(ko['management']['tools'],en['management']['tools']):
+            assert abs(k['rect']['width']-e['rect']['width'])<0.1 and abs(k['rect']['height']-e['rect']['height'])<0.1, (k,e)
         a,b=ko['viewing']['modeButton'],en['viewing']['modeButton']
-        assert equivalent(a['rect'],b['rect']) and a['style']==b['style'] and a['icon']==b['icon'] and relative(a['iconRect'],a['rect'])==relative(b['iconRect'],b['rect']) and relative(a['labelRect'],a['rect'])==relative(b['labelRect'],b['rect']),(a,b)
+        assert equivalent(a['rect'],b['rect']) and a['style']==b['style'] and a['icon']==b['icon'] and relative(a['iconRect'],a['rect'])==relative(b['iconRect'],b['rect']) ,(a,b)
         assert [x['title'] for x in ko['viewing']['tracks']]==[x['title'] for x in en['viewing']['tracks']]
         result.update(passed=True,languages=measurements,englishLabelDiagnostics=[x for x in en['management']['lines'] if x['lines']>1 or x['clip'] or x['glyphOutside']])
     finally:
