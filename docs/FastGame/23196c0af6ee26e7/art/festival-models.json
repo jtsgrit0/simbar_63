@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "frameWidth": 64,
+  "frameHeight": 64,
+  "columns": 12,
+  "footX": 32,
+  "footY": 60,
+  "drawWidth": 54,
+  "drawHeight": 54,
+  "styles": {"Casual":0,"Suit":1,"Beach":2,"Worker":3,"Farmer":4,"Adventurer":5,"Casual2":6,"Punk":7},
+  "atlases": {
+    "gestures": {"file":"festival-gestures.png"},
+    "vocals": {"file":"festival-vocals.png","drawHeight":58,"drawWidth":58},
+    "surf": {"file":"festival-surf.png","columns":4}
+  },
+  "actions": {
+    "horns": {"atlas":"gestures","frames":[0,1,2,3],"fps":5},
+    "airguitar": {"atlas":"gestures","frames":[4,5,6,7],"fps":6},
+    "headbang": {"atlas":"gestures","frames":[8,9,10,11],"fps":6},
+    "sing": {"atlas":"vocals","frames":[0,1,2,3],"fps":5},
+    "encore": {"atlas":"vocals","frames":[4,5,6,7],"fps":5},
+    "dance": {"atlas":"vocals","frames":[8,9,10,11],"fps":6},
+    "surf": {"atlas":"surf","frames":[0,1,2,3],"fps":5,"horizontal":true,"footX":32,"footY":32}
+  }
+}

@@ -284,17 +284,31 @@
 .fast-game .venue-ui .venue-tools .circle-tool .tool-label-crop {position:relative;display:block;flex:none;width:min(69px,calc(var(--ko-tool-size) - 12px));height:auto;aspect-ratio:69 / 20;overflow:hidden}
 .fast-game .venue-ui .venue-tools .circle-tool .tool-label-crop img.reference-button-image {position:absolute;left:-10.144928%;top:-260%;display:block;width:121.73913%;height:440%;min-width:0;min-height:0;max-width:none;max-height:none;margin:0;padding:0;object-fit:fill;mix-blend-mode:lighten;pointer-events:none}
 .fast-game .venue-ui .venue-tools .circle-tool .tool-label-accessible {position:absolute;overflow:hidden;clip:rect(0,0,0,0);width:1px;height:1px;margin:-1px;padding:0;white-space:nowrap}
-.fast-game .venue-ui .venue-tools .circle-tool[data-reference-button="upgrades"][aria-label="업그레이드"]::after,.fast-game .venue-ui .venue-tools .circle-tool[data-reference-button="events"][aria-label="이벤트"]::after {content:'';position:absolute;top:2px;right:6px;width:16px;height:16px;background-position:-64px 0;background-size:84px 88px;background-repeat:no-repeat;mix-blend-mode:lighten;pointer-events:none}
-.fast-game .venue-ui .venue-tools .circle-tool[data-reference-button="upgrades"][aria-label="업그레이드"]::after {background-image:url('./art/ui-reference/mobile-re-v20261114-upgrades.png')}
-.fast-game .venue-ui .venue-tools .circle-tool[data-reference-button="events"][aria-label="이벤트"]::after {background-image:url('./art/ui-reference/mobile-re-v20261114-events.png')}
 @media(max-width:1100px),(max-height:500px){.fast-game .venue-ui .venue-tools .venue-tool.circle-tool {--ko-icon-width:28px}}
+@media(min-width:1101px) and (min-height:501px){
+ .fast-game .venue-ui .venue-tools:not(.view-mode-slot) .venue-tool.circle-tool {transform:translateY(calc(-1 * max(0px,var(--ko-tool-size) - 88px)))}
+ .fast-game .venue-ui .venue-tools:not(.view-mode-slot) .venue-tool.legacy-en-tool {transform:translateY(calc(-1 * max(0px,var(--tool-size) - 88px)))}
+ .fast-game .venue-ui .ops-status {bottom:max(96px,calc(var(--tool-size) + 4px))}
+}
 .fast-game .venue-ui .view-mode-slot .venue-tool.circle-tool {--ko-tool-size:84px;--ko-icon-width:40px;align-self:flex-start;transform:translateY(calc(4px + max(0px,var(--tool-size) - 96px)))}
 .fast-game .venue-ui .view-mode-slot .legacy-en-view {transition:width 360ms ease-out,height 360ms ease-out,transform 360ms ease-out}
 .fast-game .venue-ui .view-mode-slot .legacy-en-view .view-mode-icon-crop img.reference-button-image {transition:width 360ms ease-out,height 360ms ease-out}
 .fast-game[data-view-mode="viewing"] .venue-ui .view-mode-slot .legacy-en-view {width:84px;height:84px;flex-basis:84px;font-size:14px;transform:translateY(calc(4px + max(0px,var(--tool-size) - 96px)));isolation:isolate}
 .fast-game[data-view-mode="viewing"] .venue-ui .view-mode-slot .legacy-en-view .view-mode-icon-crop img.reference-button-image {width:84px;height:88px;min-width:84px;min-height:88px;max-width:none;max-height:none;mix-blend-mode:lighten}
 .fast-game[data-view-mode="viewing"] .venue-ui .view-mode-slot .legacy-en-view .nav-label {display:flex;align-items:center;justify-content:center;width:100%;height:20px}
+@media(min-width:1101px) and (min-height:501px){
+ .fast-game .venue-ui .view-mode-slot .venue-tool.circle-tool,.fast-game[data-view-mode="viewing"] .venue-ui .view-mode-slot .legacy-en-view {transform:translateY(calc(4px + max(0px,var(--tool-size) - 88px)))}
+}
 @media(prefers-reduced-motion:reduce){.fast-game .venue-ui .view-mode-slot .legacy-en-view,.fast-game .venue-ui .view-mode-slot .legacy-en-view .view-mode-icon-crop img.reference-button-image{transition:none}}
 
 /* Keep the new flash label readable without resizing existing controls. */
 .fast-game .venue-ui .festival-actions [data-festival-action="flash"] .festival-action-name {word-break:keep-all;line-height:14px}
+
+/* Crop the original view icon at its native size in the English controls. */
+.fast-game .venue-ui .venue-tools .legacy-en-view .view-mode-icon-crop img.reference-button-image {width:84px;height:88px;min-width:84px;min-height:88px;max-width:none;max-height:none;mix-blend-mode:lighten}
+
+/* Blend the existing English tool artwork into its circular button. */
+.fast-game .venue-ui .venue-tools .legacy-en-tool:not(.legacy-en-view) .nav-icon img {mix-blend-mode:lighten}
+
+/* Soften the approved edges of the existing feedback artwork. */
+.fast-game .venue-ui .mood-card img {-webkit-mask-image:linear-gradient(to right,transparent,#000 8%,#000 92%,transparent),linear-gradient(to bottom,transparent,#000 8%,#000 92%,transparent);-webkit-mask-composite:source-in;mask-image:linear-gradient(to right,transparent,#000 8%,#000 92%,transparent),linear-gradient(to bottom,transparent,#000 8%,#000 92%,transparent);mask-composite:intersect}

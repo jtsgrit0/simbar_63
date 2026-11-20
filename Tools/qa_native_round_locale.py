@@ -66,7 +66,7 @@ SNAPSHOT = r'''() => {
   const tracklist=[...document.querySelectorAll('.track-list [data-playlist]')].map(e=>({index:e.dataset.playlist,title:e.querySelector('.track-title-text')?.textContent.split(' · ')[0]}));
   return{language:simbarGame.language,phase:simbarGame.phase,mode:q('.fast-game').dataset.viewMode,gear,tools,modeButton:mode,labels,lines,
     camera:world.getVenueBounds(),protected:{stage:region(550,90,885,385),sign:region(370,25,565,115)},
-    card:rect(q('.live-console')),menuReady:rect(q('.menu-ready')),mood:rect(q('.mood')),quest:rect(q('.quest-panel')),tabs:[...document.querySelectorAll('.live-console-tabs button')].map(rect),
+    card:rect(q('.live-console')),menuReady:rect(q('.menu-ready')),mood:rect(q('.mood')),quest:rect(q('.quest-panel')),opsStatus:rect(q('.ops-status')),tabs:[...document.querySelectorAll('.live-console-tabs button')].map(rect),
     tracks:tracklist,transport:[...document.querySelectorAll('.music-controls button')].map(e=>e.dataset.action),
     documentScroll:{width:document.documentElement.scrollWidth,client:document.documentElement.clientWidth}};
 }'''
@@ -148,7 +148,12 @@ def case(browser, url, width, height):
                         assert current['style'][key]==old['style'][key],(key,current,old)
                     assert current['icon'].split('/art/')[-1]==old['icon'].split('/art/')[-1],(current,old)
             for b in management['tools'][:2]:
-                assert (b['badge']['content']!='none')==(language=='ko'),b
+                assert b['badge']['content'] in ('none', 'normal'),b
+            # Desktop management buttons share the right-hand cards' lower edge.
+            if width>1100 and height>500:
+                for b in management['tools']:
+                    assert abs(b['rect']['bottom']-management['mood']['bottom'])<.1,(b,management['mood'])
+                    assert not intersects(b['rect'],management['opsStatus']),(b,management['opsStatus'])
             gear=management['gear'];assert gear['visible'] and gear['topmost'] and gear['rect']['width']==49 and gear['rect']['height']==45,gear
             assert management['documentScroll']['width']<=management['documentScroll']['client'],management['documentScroll']
             for index,b in enumerate(management['tools']):
