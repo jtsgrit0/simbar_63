@@ -43,7 +43,7 @@ SNAPSHOT = r'''() => {
   const control=e=>{const r=rect(e),icon=e.querySelector('.tool-icon-crop,.view-mode-icon-crop,.nav-icon'),label=e.querySelector('.tool-label-crop,.nav-label'),img=icon?.querySelector('img'),accessible=e.querySelector('.nav-label');
     return{action:e.dataset.action,label:e.getAttribute('aria-label')||e.textContent.trim(),rect:r,style:style(e),icon:img?.getAttribute('src'),
       badge:{content:getComputedStyle(e,'::after').content,background:getComputedStyle(e,'::after').backgroundImage},
-      iconRect:icon?rect(icon):null,labelRect:label?rect(label):null,text:accessible?.textContent.trim(),labelImage:e.querySelector('.tool-label-crop img')?.getAttribute('src'),labelCrop:label?.classList.contains('tool-label-crop')?{width:getComputedStyle(label).width,height:getComputedStyle(label).height,imageLeft:getComputedStyle(label.querySelector('img')).left,imageTop:getComputedStyle(label.querySelector('img')).top,imageWidth:getComputedStyle(label.querySelector('img')).width,imageHeight:getComputedStyle(label.querySelector('img')).height,blend:getComputedStyle(label.querySelector('img')).mixBlendMode}:null,
+      iconRect:icon?rect(icon):null,iconStyle:img?{width:getComputedStyle(img).width,height:getComputedStyle(img).height,blend:getComputedStyle(img).mixBlendMode}:null,labelRect:label?rect(label):null,text:accessible?.textContent.trim(),labelImage:e.querySelector('.tool-label-crop img')?.getAttribute('src'),labelCrop:label?.classList.contains('tool-label-crop')?{width:getComputedStyle(label).width,height:getComputedStyle(label).height,imageLeft:getComputedStyle(label.querySelector('img')).left,imageTop:getComputedStyle(label.querySelector('img')).top,imageWidth:getComputedStyle(label.querySelector('img')).width,imageHeight:getComputedStyle(label.querySelector('img')).height,blend:getComputedStyle(label.querySelector('img')).mixBlendMode}:null,
       visible:getComputedStyle(e).visibility!=='hidden'&&!e.closest('[inert]')&&r.right>0&&r.bottom>0,
       topmost:(()=>{const h=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return h===e||e.contains(h);})()};};
   const qctrl=s=>control(q(s)),gear=qctrl('.hud-settings'),tools=[...document.querySelectorAll('.bottom-tabs > button')].map(control),mode=qctrl('button[data-view-mode]');
@@ -66,7 +66,7 @@ SNAPSHOT = r'''() => {
   const tracklist=[...document.querySelectorAll('.track-list [data-playlist]')].map(e=>({index:e.dataset.playlist,title:e.querySelector('.track-title-text')?.textContent.split(' · ')[0]}));
   return{language:simbarGame.language,phase:simbarGame.phase,mode:q('.fast-game').dataset.viewMode,gear,tools,modeButton:mode,labels,lines,
     camera:world.getVenueBounds(),protected:{stage:region(550,90,885,385),sign:region(370,25,565,115)},
-    card:rect(q('.live-console')),menuReady:rect(q('.menu-ready')),mood:rect(q('.mood')),quest:rect(q('.quest-panel')),opsStatus:rect(q('.ops-status')),tabs:[...document.querySelectorAll('.live-console-tabs button')].map(rect),
+    card:rect(q('.live-console')),menuReady:rect(q('.menu-ready')),mood:rect(q('.mood')),moodImages:[...document.querySelectorAll('.mood-card img')].map(e=>({mask:getComputedStyle(e).maskImage,composite:getComputedStyle(e).maskComposite})),quest:rect(q('.quest-panel')),opsStatus:rect(q('.ops-status')),tabs:[...document.querySelectorAll('.live-console-tabs button')].map(rect),
     tracks:tracklist,transport:[...document.querySelectorAll('.music-controls button')].map(e=>e.dataset.action),
     documentScroll:{width:document.documentElement.scrollWidth,client:document.documentElement.clientWidth}};
 }'''
@@ -135,12 +135,16 @@ def case(browser, url, width, height):
             for b in management['tools']:
                 assert b['visible'] and b['topmost'] and b['style']['borderRadius']=='50%',b
                 assert b['iconRect'] and b['labelRect'],b
+                assert b['iconStyle']['blend']=='lighten',b
                 assert b['rect']['y']>=0 and b['rect']['bottom']<=height+.05,b
                 if language=='ko':
                     assert b['labelImage']==b['icon'],b
                     crop=b['labelCrop'];assert crop and float(crop['width'].replace('px',''))<=70, b
                     px=lambda key:float(crop[key].replace('px',''))
                     assert abs(px('imageLeft')+px('imageWidth')*7/84)<.1 and abs(px('width')-px('imageWidth')*69/84)<.1,b
+            assert len(management['moodImages'])==2 and all('linear-gradient' in i['mask'] and all(part.strip()=='intersect' for part in i['composite'].split(',')) for i in management['moodImages']),management['moodImages']
+            if language=='en':
+                assert management['modeButton']['iconStyle']['width']=='84px' and management['modeButton']['iconStyle']['height']=='88px',management['modeButton']
             if language=='en' and (width,height) in baseline:
                 for current,old in zip(management['tools'],baseline[(width,height)]['buttons']):
                     assert abs(current['rect']['width']-old['rect']['width'])<.05 and abs(current['rect']['height']-old['rect']['height'])<.05,(current,old)
