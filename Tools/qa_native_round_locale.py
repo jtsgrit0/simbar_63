@@ -135,12 +135,12 @@ def case(browser, url, width, height):
             for b in management['tools']:
                 assert b['visible'] and b['topmost'] and b['style']['borderRadius']=='50%',b
                 assert b['iconRect'] and b['labelRect'],b
+                assert b['rect']['y']>=0 and b['rect']['bottom']<=height+.05,b
                 if language=='ko':
                     assert b['labelImage']==b['icon'],b
                     crop=b['labelCrop'];assert crop and float(crop['width'].replace('px',''))<=70, b
                     px=lambda key:float(crop[key].replace('px',''))
                     assert abs(px('imageLeft')+px('imageWidth')*7/84)<.1 and abs(px('width')-px('imageWidth')*69/84)<.1,b
-                    assert b['rect']['y']>=0 and b['rect']['bottom']<=height+.05,b
             if language=='en' and (width,height) in baseline:
                 for current,old in zip(management['tools'],baseline[(width,height)]['buttons']):
                     assert abs(current['rect']['width']-old['rect']['width'])<.05 and abs(current['rect']['height']-old['rect']['height'])<.05,(current,old)
@@ -180,6 +180,7 @@ def case(browser, url, width, height):
         ko,en=measurements['ko'],measurements['en']
         for k,e in zip(ko['management']['tools'],en['management']['tools']):
             assert abs(k['rect']['width']-e['rect']['width'])<0.1 and abs(k['rect']['height']-e['rect']['height'])<0.1, (k,e)
+            assert abs(k['rect']['y']-e['rect']['y'])<0.1, (k,e)
         a,b=ko['viewing']['modeButton'],en['viewing']['modeButton']
         assert equivalent(a['rect'],b['rect']) and a['style']==b['style'] and a['icon']==b['icon'] and relative(a['iconRect'],a['rect'])==relative(b['iconRect'],b['rect']) ,(a,b)
         assert [x['title'] for x in ko['viewing']['tracks']]==[x['title'] for x in en['viewing']['tracks']]

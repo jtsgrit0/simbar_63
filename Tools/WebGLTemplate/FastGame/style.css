@@ -278,7 +278,7 @@
 /* Keep the same circular controls and original icon artwork in both languages. */
 .fast-game .venue-ui .venue-tools {align-items:flex-end}
 .fast-game .venue-ui .venue-tools .venue-tool.circle-tool {--ko-tool-size:var(--tool-size);--ko-icon-width:40px;position:relative;align-self:flex-start;flex:0 0 var(--ko-tool-size);width:var(--ko-tool-size);height:var(--ko-tool-size);font-size:14px;transform:translateY(calc(-1 * max(0px,var(--ko-tool-size) - 96px)));isolation:isolate}
-.fast-game .venue-ui .venue-tools .venue-tool.legacy-en-tool {align-self:flex-start}
+.fast-game .venue-ui .venue-tools .venue-tool.legacy-en-tool {align-self:flex-start;transform:translateY(calc(-1 * max(0px,var(--tool-size) - 96px)))}
 .fast-game .venue-ui .venue-tools .circle-tool .tool-icon-crop {position:relative;display:block;flex:none;width:var(--ko-icon-width);height:calc(var(--ko-icon-width) * .9);overflow:hidden}
 .fast-game .venue-ui .venue-tools .circle-tool .tool-icon-crop img.reference-button-image {position:absolute;left:-50%;top:-33.333333%;display:block;width:210%;height:244.444444%;min-width:0;min-height:0;max-width:none;max-height:none;margin:0;padding:0;object-fit:fill;mix-blend-mode:lighten;pointer-events:none}
 .fast-game .venue-ui .venue-tools .circle-tool .tool-label-crop {position:relative;display:block;flex:none;width:min(69px,calc(var(--ko-tool-size) - 12px));height:auto;aspect-ratio:69 / 20;overflow:hidden}
@@ -291,7 +291,7 @@
 .fast-game .venue-ui .view-mode-slot .venue-tool.circle-tool {--ko-tool-size:84px;--ko-icon-width:40px;align-self:flex-start;transform:translateY(calc(4px + max(0px,var(--tool-size) - 96px)))}
 .fast-game .venue-ui .view-mode-slot .legacy-en-view {transition:width 360ms ease-out,height 360ms ease-out,transform 360ms ease-out}
 .fast-game .venue-ui .view-mode-slot .legacy-en-view .view-mode-icon-crop img.reference-button-image {transition:width 360ms ease-out,height 360ms ease-out}
-.fast-game[data-view-mode="viewing"] .venue-ui .view-mode-slot .legacy-en-view {width:84px;height:84px;flex-basis:84px;font-size:14px;transform:translateY(4px);isolation:isolate}
+.fast-game[data-view-mode="viewing"] .venue-ui .view-mode-slot .legacy-en-view {width:84px;height:84px;flex-basis:84px;font-size:14px;transform:translateY(calc(4px + max(0px,var(--tool-size) - 96px)));isolation:isolate}
 .fast-game[data-view-mode="viewing"] .venue-ui .view-mode-slot .legacy-en-view .view-mode-icon-crop img.reference-button-image {width:84px;height:88px;min-width:84px;min-height:88px;max-width:none;max-height:none;mix-blend-mode:lighten}
 .fast-game[data-view-mode="viewing"] .venue-ui .view-mode-slot .legacy-en-view .nav-label {display:flex;align-items:center;justify-content:center;width:100%;height:20px}
 @media(prefers-reduced-motion:reduce){.fast-game .venue-ui .view-mode-slot .legacy-en-view,.fast-game .venue-ui .view-mode-slot .legacy-en-view .view-mode-icon-crop img.reference-button-image{transition:none}}
