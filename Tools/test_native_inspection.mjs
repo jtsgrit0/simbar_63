@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import {SimBarGame,Booking,Floor,Challenges} from './WebGLTemplate/FastGame/core.js';
+import {SpectatorFeedback} from './WebGLTemplate/FastGame/spectator-feedback.js';
 import {Audience} from './WebGLTemplate/FastGame/audience.js';
 import {Inspection} from './WebGLTemplate/FastGame/inspection.js';
 import {distance,walkable} from './WebGLTemplate/FastGame/navigation.js';
@@ -40,7 +41,12 @@ for(const owner of [0,1,2]){
   assert(frozenCast(g).every(a=>!a.moving&&a.y===0),'The audience must stand on the floor');
   assert(g.actors.filter(a=>a.role==='band').every(a=>a.action==='perform'&&!a._inspectionPose),'The band must continue performing during patrol');
   assert.deepEqual(g.journey.festival,festival,'Patrol consumed an active crowd action or cooldown');
-  assert.deepEqual(g.journey.feedback,feedback,'Standing still earned spectator feedback');
+  for(const [id,guest] of Object.entries(feedback.guests)){
+    const current=g.journey.feedback.guests[id];
+    assert.equal(current.enjoyedSeconds,guest.enjoyedSeconds,'Standing still earned concert experience');
+    assert.equal(current.serviceTotal,guest.serviceTotal,'Standing still earned service experience');
+    assert(current.frustration>=guest.frustration&&current.discomfort>=guest.discomfort,'Inspection unexpectedly improved a guest\'s mood');
+  }
   assert(g.journey.secondsLeft<left,'The show clock must continue during an inspection');
   const rewards={cash:g.state.money,fans:g.state.fans,score:g.journey.score};
   assert.equal(g.act('festival',{id:'dance'}).code,'inspection_blocked','Inspection must take priority over an existing cooldown');
@@ -72,6 +78,41 @@ for(const owner of [0,1,2]){
   assert.equal(restored.act('festival',{id:'dance'}).code,'festival_cooldown');
   assert.equal(restored.act('inspection').success,false,'Inspection repeated within the same night');
   assert.equal(JSON.parse(paused.journeyJson).inspection.phase,'patrol');
+}
+
+// The interruption affects actual guests from the first visible inspector to
+// the last departure, survives saving, pauses with the game, and stops after.
+{
+  const g=launch(2),audience=frozenCast(g);
+  for(const actor of audience){
+    SpectatorFeedback.service(g.journey.feedback,{guestId:actor.id,item:0,quality:1,patience:80,maxPatience:80});
+    g.journey.feedback.guests[actor.id].enjoyedSeconds=20;
+  }
+  g._refreshFeedback();g.act('inspection');
+  const warning=structuredClone(g.journey.feedback);g.tick(.2);
+  assert.deepEqual(g.journey.feedback.guests,warning.guests,'Warning alone must not apply an inspection penalty');
+  waitFor(g,()=>g.inspection.active);
+  const before={satisfaction:g.state.satisfaction,performance:g.state.performance};
+  g.tick(1);
+  assert(g.state.satisfaction<before.satisfaction,'Guest satisfaction did not decrease during inspection');
+  assert(g.state.performance<before.performance,'Audience response did not decrease during inspection');
+  assert(g.state.satisfaction>=0&&g.state.performance>=0,'Inspection scores fell below zero');
+  g.act('pause');const paused=structuredClone(g.journey.feedback),score=structuredClone(g.spectatorFeedback);
+  g.tick(3);assert.deepEqual(g.journey.feedback,paused,'Penalty advanced while paused');
+  const restored=new SimBarGame({storage:g.storage});restored.importSave(g.exportSave());
+  assert.deepEqual(restored.journey.feedback,paused,'Inspection penalties were not saved');
+  assert.equal(restored.spectatorFeedback.satisfaction,score.satisfaction);
+  assert.equal(restored.spectatorFeedback.performance,score.performance);
+  restored.act('continue');restored.tick(1);
+  assert(restored.state.satisfaction<score.satisfaction&&restored.state.performance<score.performance,'Penalty did not continue after reload');
+  waitFor(restored,()=>restored.inspection.phase==='done',45);
+  restored.orders=[];restored._requestTimer=1e6;
+  const after=structuredClone(restored.journey.feedback.guests);restored.tick(.1);
+  for(const [id,guest] of Object.entries(after)){
+    const current=restored.journey.feedback.guests[id];
+    assert.equal(current.frustration,guest.frustration,'Inspection penalty continued after departure');
+    assert.equal(current.discomfort,guest.discomfort,'Inspection penalty continued after departure');
+  }
 }
 
 // The naturally scheduled complaint is stable across reloads and occurs only

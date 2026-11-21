@@ -577,7 +577,12 @@ export class SimBarGame{
     if(this.viewClosingActive&&this.farewellPending&&(!this.paused||this.pauseReason==='farewell'))this.act('farewellAck');
     if(this.paused||(!this.playing&&!this.closing))return;this.elapsed+=dt;this._inputGuard=Math.max(0,this._inputGuard-dt);this._messageTimer-=dt;if(this._messageTimer<=0)this._message=['',''];
     const j=this.journey,s=this.state;this.effects=this.effects.filter(e=>this.elapsed-e.time<8);
+    const inspectionWasActive=this.inspection.active;
     this._inspectionTick(dt);const frozen=this.inspection.freezePerformers;
+    if((inspectionWasActive||frozen)&&j.feedback){
+      SpectatorFeedback.inspection(j.feedback,dt,{actors:this.actors});
+      this._refreshFeedback();
+    }
     if(this.playing){
       j.secondsLeft=Math.max(0,j.secondsLeft-dt);j.feverSeconds=Math.max(0,j.feverSeconds-dt);if(j.secondsLeft<=0){this._lastCall();return;}
       if(Booking.isCampaign(j.booking)&&j.booking.showId==='double'&&!j.campaignSecondSet&&j.secondsLeft<=90){

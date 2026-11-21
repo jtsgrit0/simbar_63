@@ -92,7 +92,7 @@ export const SpectatorFeedback=Object.freeze({
     next.recent=(Array.isArray(value.recent)?value.recent:[]).filter(id=>ACTIONS.includes(id)).slice(-6);
     next.lastSerial=integer(value.lastSerial);next.lastAction=ACTIONS.includes(value.lastAction)?value.lastAction:'';
     next.lastParticipation=clamp(value.lastParticipation);
-    next.lastReason=['no-experience','service-good','service-disappointing','wrong-item','timeout','unsafe','participation','poor-fit','waiting'].includes(value.lastReason)?value.lastReason:'no-experience';
+    next.lastReason=['no-experience','service-good','service-disappointing','wrong-item','timeout','unsafe','participation','poor-fit','waiting','inspection'].includes(value.lastReason)?value.lastReason:'no-experience';
     return next;
   },
   service(state,{guestId,item,quality=.7,automatic=false,patience,maxPatience,preferred=false,preferredItems,crowdCount=0,capacity=80}={}){
@@ -118,6 +118,19 @@ export const SpectatorFeedback=Object.freeze({
     g.frustration=clamp(g.frustration+weight*clamp(severity)*(.88+(hash(guestId)%101)/400));
     state.lastReason=['wrong-item','timeout','unsafe'].includes(reason)?reason:'wrong-item';
     return true;
+  },
+  inspection(state,dt,{actors}={}){
+    if(!state||!Number.isFinite(dt)||dt<=0)return;
+    dt=Math.min(5,dt);
+    const audience=remember(state,actors);
+    for(const actor of audience){
+      const g=state.guests[actor.id];if(!g)continue;
+      // Guests experience the interruption while officers are physically present.
+      // Existing service and later participation can improve their judgement.
+      g.frustration=clamp(g.frustration+dt*.008);
+      g.discomfort=clamp(g.discomfort+dt*.01);
+    }
+    if(audience.length)state.lastReason='inspection';
   },
   tick(state,dt,context={}){
     if(context.paused||!Number.isFinite(dt)||dt<=0)return;

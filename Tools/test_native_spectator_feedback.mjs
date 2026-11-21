@@ -132,4 +132,30 @@ function react(s,actors,id,seconds,{serial=1,participating=actors.length,seconds
   assert.equal(score(s,a).audienceCount,12);
   assert.equal(Object.hasOwn(s.guests,'assisted-guest'),false);
 }
+
+// Inspection lowers earned judgements for present guests at a time-based rate.
+// The same elapsed time yields the same result regardless of step size; normal
+// service and later participation can still repair those individual judgements.
+{
+  const a=crowd(3),s=fresh(a);
+  for(const actor of a)serve(s,actor.id);
+  react(s,a,'dance',12);
+  const before=score(s,a),coarse=structuredClone(s),fine=structuredClone(s);
+  for(let t=0;t<10;t+=5)Feedback.inspection(coarse,5,{actors:a});
+  for(let t=0;t<100;t++)Feedback.inspection(fine,.1,{actors:a});
+  const during=score(fine,a),other=score(coarse,a);
+  assert(during.satisfaction<before.satisfaction&&during.performance<before.performance);
+  assert(Math.abs(during.satisfaction-other.satisfaction)<1e-10);
+  assert(Math.abs(during.performance-other.performance)<1e-10);
+  const saved=Feedback.sanitize(JSON.parse(JSON.stringify(fine)),{session:1,owner:0});
+  assert.deepEqual(score(saved,a),during);
+  for(const actor of a)serve(saved,actor.id);
+  assert(score(saved,a).satisfaction>during.satisfaction,'Good service did not improve satisfaction after inspection');
+  react(saved,a,'sing',10,{serial:2});
+  assert(score(saved,a).performance>during.performance,'Participation did not improve response after inspection');
+  const zero=fresh(a);Feedback.inspection(zero,5,{actors:a});
+  assert.equal(score(zero,a).satisfaction,0);assert.equal(score(zero,a).performance,0);
+  const away=structuredClone(s);a[0].visible=false;const absent=structuredClone(away.guests[a[0].id]);
+  Feedback.inspection(away,1,{actors:a});assert.deepEqual(away.guests[a[0].id],absent);
+}
 console.log('PASS: earned independent spectator judgements, real participation, quality/wait/preferences, individual saturation, timing/venue/variety, persistence and zero-start.');
