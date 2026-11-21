@@ -24,7 +24,7 @@ export const PETSOUNDS_STANDING_SPOTS=Object.freeze([[-8.228,-6.7495],[-6.7349,-
 export const AUDIENCE_VENUES=Object.freeze([
   Object.freeze({key:'freebird',capacity:64,demandMultiplier:1,energy:.75,style:'open-floor',
     entry:Object.freeze({x:-1.12,z:3.6}),
-    zones:Object.freeze([zone('front-floor',.7,-3,8.7,1.35,1.4),zone('left-social',-8.45,-4.5,-4.4,1.6,1.3),zone('open-floor',-7.8,-5.25,.3,1.05),zone('bar-side',-8.4,2.4,-6.75,5.3,.7)]),seats:waitingSeats}),
+    zones:Object.freeze([zone('front-floor',.7,-5.25,8.7,1.35,1.4),zone('left-social',-8.45,-4.5,-4.4,1.6,1.3),zone('open-floor',-7.8,-5.25,.3,1.05),zone('bar-side',-8.4,2.4,-6.75,5.3,.7)]),seats:waitingSeats}),
   Object.freeze({key:'ff',capacity:80,demandMultiplier:1.2,energy:1,style:'tables-dj',
     zones:Object.freeze([zone('stage-floor',.5,-5.25,8.7,1.35,1.3),zone('table-floor',-6.3,-5.25,-.55,1.35),zone('dj-tables',-8.6,2,-2.3,5.4,1.1)]),seats:Object.freeze([]),standingSpots:ffStandingSpots}),
   Object.freeze({key:'original',capacity:44,demandMultiplier:.8,energy:.35,style:'seated-listening',

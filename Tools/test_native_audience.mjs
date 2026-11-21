@@ -44,6 +44,42 @@ function assertSafePopulation(g){
 }
 function restore(g){g.save();const restored=new SimBarGame({storage:g.storage});restored.act('continue');return restored;}
 
+// Freebird retains its wall-table cast while most guests start near the stage.
+// Check all three lineups and small, ordinary and full-capacity crowds; a
+// small paid crowd must not be consumed by six fixed wall seats.
+for(const showId of ['freewill','july','double'])for(const attendance of [4,8,12,16,20,32,44,64])for(const day of [1,2,3]){
+  const actors=Audience.build({owner:0,attendance,showId,day,session:1});
+  const front=actors.filter(a=>!a.waitingSeat&&a.x>=.6&&a.z<=1.5);
+  assert(front.length>attendance/2,`${showId}/${day}/${attendance}: only ${front.length} guests near the stage`);
+  assert.equal(actors.filter(a=>a.id.startsWith('freebird-wall-')).length,Math.min(6,attendance),'A familiar wall guest ID was replaced');
+  assert.equal(actors.filter(a=>a.waitingSeat).length,attendance>=20?6:Math.floor(attendance*.3));
+  for(const actor of actors)if(actor.role!=='seated')assert(walkable(actor,false,false,actor.layout),`${actor.id} was placed inside furniture`);
+}
+{
+  const actors=Audience.build({owner:0,attendance:30,showId:'freewill'}),waiting=actors.find(a=>a.waitingSeat),target=waiting.seatStageTarget;
+  assert(target,'A seat needs a reserved destination in front of the stage');
+  const temporarilyOccupied=[...actors,{id:'blocker',role:'guest',visible:true,x:target.x,z:target.z,homeX:target.x,homeZ:target.z}];
+  const alternative=Audience.frontTarget({owner:0,actor:waiting,actors:temporarilyOccupied});
+  assert(alternative&&Math.hypot(alternative.x-target.x,alternative.z-target.z)>=.48,'A temporarily occupied reservation stranded a seated guest');
+  for(let serial=1;serial<=3;serial++){
+    const visitor=Audience.arrival({owner:0,showId:'freewill',serial,actors});
+    assert(visitor&&visitor.audienceZone==='front-floor'&&visitor.homeX>=.6,'A new visitor did not prefer an available stage-front spot');
+    actors.push(visitor);
+  }
+}
+{
+  // Existing active saves may contain six seated wall guests even when the
+  // newly generated small crowd starts some of those same IDs on the floor.
+  const {g}=launch(0);g.journey.booking.lockedMetrics.attendance=12;g._buildActors();
+  for(const actor of g.actors.filter(a=>a.id.startsWith('freebird-wall-'))){
+    const seat=Audience.profile(0).seats.find(p=>p.id===actor.id);
+    Object.assign(actor,{role:'seated',seat:true,waitingSeat:true,seatReleased:false,x:seat.x,z:seat.z,homeX:seat.x,homeZ:seat.z,targetX:seat.x,targetZ:seat.z,action:'listen',moving:false});
+  }
+  g.orders=[];g._seedOrders();const before=fixedSnapshot(g),orderIds=g.orders.map(o=>o.id),loaded=restore(g);
+  assert.deepEqual(fixedSnapshot(loaded),before,'Loading a small older Freebird crowd replaced or moved its original guests');
+  assert.deepEqual(loaded.orders.map(o=>o.id),orderIds,'Loading changed existing guests\' orders');
+}
+
 // The same opening show attracts distinct venue populations and those exact
 // people are present in the scene. This checks the live integration rather
 // than just the audience factory's requested array length.

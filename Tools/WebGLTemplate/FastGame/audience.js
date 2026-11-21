@@ -59,6 +59,7 @@ function standingBehavior(owner,showId,next){
 function build({owner=2,attendance=0,showId='freewill',day=1,session=1}={}){
   owner=ownerIndex(owner);
   const profile=AUDIENCE_VENUES[owner],total=whole(attendance,0,profile.capacity),seed=hash(owner,day,session,showId),next=random(seed),layout=layoutFor(owner),actors=[];
+  const candidates=floorCandidates(owner,seed^0x9e3779b9);
   const make=(id,role,slot,point,behavior,extra={})=>{
     const descriptor={id,name:names[slot%names.length]||'Guest',role,slot,audienceVersion:1,behavior,behaviorPhase:round(next()*TAU),animationSpeed:round(.72+next()*.56),
       x:point.x,z:point.z,y:0,homeX:point.x,homeZ:point.z,targetX:point.x,targetZ:point.z,facing:point.facing??facing(point.x,point.z),
@@ -69,10 +70,18 @@ function build({owner=2,attendance=0,showId='freewill',day=1,session=1}={}){
 
   // These eleven locations are authored chairs/sofas, intentionally outside
   // the walking floor. Standing guests are always tested against navigation.
+  const freebirdSeatCount=owner===0?(total>=20?profile.seats.length:Math.floor(total*.3)):Infinity;
   for(const [index,point]of (profile.seats||[]).entries()){
     if(actors.length>=total)break;
+    // Preserve the existing wall-guest IDs even for small crowds. Some of
+    // those familiar guests start at the stage instead of occupying every
+    // seat; old saves can therefore restore the original seated cast intact.
+    if(owner===0&&index>=freebirdSeatCount){
+      const front=candidates.find(p=>p.zone==='front-floor'&&p.x>=.6&&actors.every(a=>distance(a,p)>=MIN_SPACING));
+      if(front){make(point.id,'guest',100+index,front,standingBehavior(owner,showId,next),{seat:false,seatReleased:true,audienceZone:'front-floor',styleKey:index%2?'Suit':'Casual'});continue;}
+    }
     make(point.id,'seated',100+index,point,index%3===0?'listen':'sway',
-      {seat:true,...(owner===0?{waitingSeat:true,waitRemaining:point.waitSeconds??12+index*3.2,styleKey:index%2?'Suit':'Casual'}:{} )});
+      {seat:true,...(owner===0?{waitingSeat:true,waitRemaining:round(10+next()*22),styleKey:index%2?'Suit':'Casual'}:{} )});
   }
 
   for(const [index,point]of (profile.standingSpots||[]).entries()){
@@ -100,19 +109,43 @@ function build({owner=2,attendance=0,showId='freewill',day=1,session=1}={}){
     make('crowd-surfer','surfer',203,{x:6,z:-4.25},'surf');
   }
 
-  const candidates=floorCandidates(owner,seed^0x9e3779b9);
   const frontReservations=[];
   for(const actor of actors.filter(a=>a.waitingSeat)){
-    const target=candidates.find(p=>p.zone==='front-floor'&&clearAudiencePoint(p,actors,{front:true})
-      &&frontReservations.every(other=>distance(p,other)>=1));
+    // Reserve reachable spots at the near edge of the stage floor. Keep these
+    // spaces free so seated visitors can join even after the room fills up.
+    const target=candidates.filter(p=>p.zone==='front-floor'&&clearAudiencePoint(p,actors,{front:true})
+      &&frontReservations.every(other=>distance(p,other)>=1))
+      .sort((a,b)=>distance(a,actor)-distance(b,actor))[0];
     if(target){actor.seatStageTarget={x:target.x,z:target.z};frontReservations.push(target);}
+  }
+  const place=point=>{
+    if(actors.length>=total)return false;
+    if(frontReservations.some(target=>distance(point,target)<.78))return false;
+    if(actors.some(actor=>distance(actor,point)<MIN_SPACING))return false;
+    const slot=guestSlot++,id=slot<16?'patron-'+slot:'audience-'+slot;
+    make(id,'guest',slot,point,standingBehavior(owner,showId,next),{audienceZone:point.zone});
+    return true;
+  };
+  if(owner===0){
+    // Retain a few people in the social area, while placing most of the room
+    // in front of the stage. Fixed mosh/surf performers count toward the front.
+    const waiting=actors.filter(a=>a.waitingSeat).length;
+    const social=Math.min(3,Math.floor(total*.15),Math.max(0,total-actors.length));
+    let placed=0;
+    for(const point of candidates){
+      if(placed>=social||actors.length>=total)break;
+      if(point.zone==='left-social'&&place(point))placed++;
+    }
+    const desired=Math.min(Math.ceil(total*.7),total-waiting-placed);
+    let inFront=actors.filter(a=>!a.waitingSeat&&a.x>=.6&&a.z<2).length;
+    for(const point of candidates){
+      if(inFront>=desired||actors.length>=total)break;
+      if(point.zone==='front-floor'&&point.x>=.6&&place(point))inFront++;
+    }
   }
   for(const point of candidates){
     if(actors.length>=total)break;
-    if(frontReservations.some(target=>distance(point,target)<.78))continue;
-    if(actors.some(actor=>distance(actor,point)<MIN_SPACING))continue;
-    const slot=guestSlot++,id=slot<16?'patron-'+slot:'audience-'+slot;
-    make(id,'guest',slot,point,standingBehavior(owner,showId,next),{audienceZone:point.zone});
+    place(point);
   }
   if(actors.length!==total)throw new Error(`Audience floor ${profile.key} has ${actors.length} safe slots for ${total} guests`);
   return actors;
@@ -130,7 +163,7 @@ function clearAudiencePoint(point,actors,{front=false}={}){
 function frontTarget({owner=0,actor,actors=[],day=1,session=1}={}){
   owner=ownerIndex(owner);
   const target=actor?.seatStageTarget;
-  if(target&&walkable(target,false,true,layoutFor(owner)?.id))return actors.every(a=>a===actor||a.visible===false||distance(a,target)>=.48)?target:null;
+  if(target&&walkable(target,false,true,layoutFor(owner)?.id)&&actors.every(a=>a===actor||a.visible===false||distance(a,target)>=.48))return target;
   const points=floorCandidates(owner,hash(owner,day,session,actor?.id||'', 'front'));
   return points.filter(p=>['front-floor','stage-floor','listening-floor'].includes(p.zone)&&clearAudiencePoint(p,actors.filter(a=>a!==actor),{front:true}))
     .sort((a,b)=>distance(a,actor)-distance(b,actor))[0]||null;
@@ -144,7 +177,9 @@ function safePoint({owner=0,actor,actors=[],day=1,session=1}={}){
 
 function arrival({owner=2,showId='freewill',day=1,session=1,serial=1,actors=[]}={}){
   owner=ownerIndex(owner);const seed=hash(owner,day,session,serial,'arrival'),next=random(seed),layout=layoutFor(owner);
-  const point=floorCandidates(owner,seed).find(point=>clearAudiencePoint(point,actors));if(!point)return null;
+  const candidates=floorCandidates(owner,seed);
+  const ordered=owner===0?[...candidates.filter(point=>point.zone==='front-floor'&&point.x>=.6),...candidates.filter(point=>point.zone!=='front-floor'||point.x<.6)]:candidates;
+  const point=ordered.find(point=>clearAudiencePoint(point,actors));if(!point)return null;
   const slot=300+serial,behavior=standingBehavior(owner,showId,next);
   return{id:`arrival-${session}-${serial}`,name:names[slot%names.length],role:'guest',slot,audienceVersion:1,
     audienceArrival:true,audienceZone:point.zone,behavior,behaviorPhase:round(next()*TAU),animationSpeed:round(.72+next()*.56),
