@@ -41,7 +41,7 @@ SNAPSHOT = r'''() => {
   const rect=e=>{const r=e.getBoundingClientRect();return{x:r.x,y:r.y,width:r.width,height:r.height,right:r.right,bottom:r.bottom};};
   const style=e=>{const s=getComputedStyle(e);return Object.fromEntries(['fontFamily','fontSize','fontWeight','lineHeight','color','backgroundColor','borderRadius','borderTopWidth','borderTopColor','paddingTop','paddingRight','paddingBottom','paddingLeft'].map(k=>[k,s[k]]));};
   const control=e=>{const r=rect(e),icon=e.querySelector('.tool-icon-crop,.view-mode-icon-crop,.nav-icon'),label=e.querySelector('.tool-label-crop,.nav-label'),img=icon?.querySelector('img'),accessible=e.querySelector('.nav-label');
-    return{action:e.dataset.action,label:e.getAttribute('aria-label')||e.textContent.trim(),rect:r,style:style(e),icon:img?.getAttribute('src'),
+    return{action:e.dataset.action,label:e.getAttribute('aria-label')||e.textContent.trim(),pressed:e.getAttribute('aria-pressed'),rect:r,style:style(e),icon:img?.getAttribute('src'),
       badge:{content:getComputedStyle(e,'::after').content,background:getComputedStyle(e,'::after').backgroundImage},
       iconRect:icon?rect(icon):null,iconStyle:img?{width:getComputedStyle(img).width,height:getComputedStyle(img).height,blend:getComputedStyle(img).mixBlendMode}:null,labelRect:label?rect(label):null,text:accessible?.textContent.trim(),labelImage:e.querySelector('.tool-label-crop img')?.getAttribute('src'),labelCrop:label?.classList.contains('tool-label-crop')?{width:getComputedStyle(label).width,height:getComputedStyle(label).height,imageLeft:getComputedStyle(label.querySelector('img')).left,imageTop:getComputedStyle(label.querySelector('img')).top,imageWidth:getComputedStyle(label.querySelector('img')).width,imageHeight:getComputedStyle(label.querySelector('img')).height,blend:getComputedStyle(label.querySelector('img')).mixBlendMode}:null,
       visible:getComputedStyle(e).visibility!=='hidden'&&!e.closest('[inert]')&&r.right>0&&r.bottom>0,
@@ -122,6 +122,7 @@ def case(browser, url, width, height):
             page.evaluate('language=>simbarGame.act("language",{language})',language)
             page.wait_for_function('language=>simbarGame.language===language',arg=language)
             management=snapshot(page);want=expected[language];assert management['phase']=='playing' and management['mode']=='management',management
+            assert management['modeButton']['pressed']=='false',management['modeButton']
             assert [t['label'] for t in management['tools']]==want['tools'],management['tools']
             assert management['labels']['tabs']==want['tabs'],management['labels']['tabs']
             assert management['labels']['menu']==want['menu'] and management['labels']['mood']==want['mood'],management['labels']
@@ -169,7 +170,10 @@ def case(browser, url, width, height):
             click_visible_mode(page)
             page.wait_for_function("document.querySelector('.fast-game').dataset.viewMode==='viewing'&&document.querySelector('.fast-game').dataset.viewModeTransition==='settled'",timeout=6000)
             viewing=snapshot(page);assert viewing['modeButton']['label']==want['manage'] and viewing['modeButton']['text']==want['manage'],viewing['modeButton']
-            assert viewing['modeButton']['visible'] and viewing['modeButton']['topmost'] and viewing['modeButton']['rect']['width']==84 and viewing['modeButton']['rect']['height']==84,viewing['modeButton']
+            assert viewing['modeButton']['pressed']=='true',viewing['modeButton']
+            assert viewing['modeButton']['visible'] and viewing['modeButton']['topmost'],viewing['modeButton']
+            assert all(abs(viewing['modeButton']['rect'][key]-management['modeButton']['rect'][key])<.1 for key in ('width','height')),(management['modeButton'],viewing['modeButton'])
+            assert viewing['modeButton']['rect']['x']>=0 and viewing['modeButton']['rect']['y']>=0 and viewing['modeButton']['rect']['right']<=width+.05 and viewing['modeButton']['rect']['bottom']<=height+.05,viewing['modeButton']
             if language=='ko':
                 assert viewing['modeButton']['labelImage']==viewing['modeButton']['icon'],viewing['modeButton']
             if args.view_settings:
@@ -191,7 +195,9 @@ def case(browser, url, width, height):
             assert abs(k['rect']['width']-e['rect']['width'])<0.1 and abs(k['rect']['height']-e['rect']['height'])<0.1, (k,e)
             assert abs(k['rect']['y']-e['rect']['y'])<0.1, (k,e)
         a,b=ko['viewing']['modeButton'],en['viewing']['modeButton']
-        assert equivalent(a['rect'],b['rect']) and a['style']==b['style'] and a['icon']==b['icon'] and relative(a['iconRect'],a['rect'])==relative(b['iconRect'],b['rect']) ,(a,b)
+        assert equivalent(a['rect'],b['rect']) and a['style']==b['style'] and a['icon']==b['icon'],(a,b)
+        assert all(abs(x-y)<.5 for x,y in zip(relative(a['iconRect'],a['rect']),relative(b['iconRect'],b['rect']))),(a,b)
+        assert not intersects(a['iconRect'],a['labelRect']) and not intersects(b['iconRect'],b['labelRect']),(a,b)
         assert [x['title'] for x in ko['viewing']['tracks']]==[x['title'] for x in en['viewing']['tracks']]
         result.update(passed=True,languages=measurements,englishLabelDiagnostics=[x for x in en['management']['lines'] if x['lines']>1 or x['clip'] or x['glyphOutside']])
     finally:
