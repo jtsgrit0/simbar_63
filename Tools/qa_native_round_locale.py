@@ -40,10 +40,10 @@ SNAPSHOT = r'''() => {
   const q=s=>document.querySelector(s),world=simbarApplication.world,canvas=q('#unity-canvas'),c=canvas.getBoundingClientRect();
   const rect=e=>{const r=e.getBoundingClientRect();return{x:r.x,y:r.y,width:r.width,height:r.height,right:r.right,bottom:r.bottom};};
   const style=e=>{const s=getComputedStyle(e);return Object.fromEntries(['fontFamily','fontSize','fontWeight','lineHeight','color','backgroundColor','borderRadius','borderTopWidth','borderTopColor','paddingTop','paddingRight','paddingBottom','paddingLeft'].map(k=>[k,s[k]]));};
-  const control=e=>{const r=rect(e),icon=e.querySelector('.tool-icon-crop,.view-mode-icon-crop,.nav-icon'),label=e.querySelector('.tool-label-crop,.nav-label'),img=icon?.querySelector('img'),accessible=e.querySelector('.nav-label');
+  const control=e=>{const r=rect(e),icon=e.querySelector('.tool-icon-crop,.view-mode-icon-crop,.nav-icon'),label=e.querySelector('.tool-label-crop,.nav-label'),img=icon?.querySelector('img'),accessible=e.querySelector('.nav-label'),range=document.createRange();if(accessible)range.selectNodeContents(accessible);
     return{action:e.dataset.action,label:e.getAttribute('aria-label')||e.textContent.trim(),pressed:e.getAttribute('aria-pressed'),rect:r,style:style(e),icon:img?.getAttribute('src'),
       badge:{content:getComputedStyle(e,'::after').content,background:getComputedStyle(e,'::after').backgroundImage},
-      iconRect:icon?rect(icon):null,iconStyle:img?{width:getComputedStyle(img).width,height:getComputedStyle(img).height,blend:getComputedStyle(img).mixBlendMode}:null,labelRect:label?rect(label):null,text:accessible?.textContent.trim(),labelImage:e.querySelector('.tool-label-crop img')?.getAttribute('src'),labelCrop:label?.classList.contains('tool-label-crop')?{width:getComputedStyle(label).width,height:getComputedStyle(label).height,imageLeft:getComputedStyle(label.querySelector('img')).left,imageTop:getComputedStyle(label.querySelector('img')).top,imageWidth:getComputedStyle(label.querySelector('img')).width,imageHeight:getComputedStyle(label.querySelector('img')).height,blend:getComputedStyle(label.querySelector('img')).mixBlendMode}:null,
+      iconRect:icon?rect(icon):null,iconStyle:img?{width:getComputedStyle(img).width,height:getComputedStyle(img).height,blend:getComputedStyle(img).mixBlendMode}:null,labelRect:label?rect(label):null,textRect:accessible?rect(range):null,textStyle:accessible?style(accessible):null,textLines:accessible?[...range.getClientRects()].filter(x=>x.width>0).length:0,text:accessible?.textContent.trim(),labelImage:e.querySelector('.tool-label-crop img')?.getAttribute('src'),labelCrop:label?.classList.contains('tool-label-crop')?{width:getComputedStyle(label).width,height:getComputedStyle(label).height,imageLeft:getComputedStyle(label.querySelector('img')).left,imageTop:getComputedStyle(label.querySelector('img')).top,imageWidth:getComputedStyle(label.querySelector('img')).width,imageHeight:getComputedStyle(label.querySelector('img')).height,blend:getComputedStyle(label.querySelector('img')).mixBlendMode}:null,
       visible:getComputedStyle(e).visibility!=='hidden'&&!e.closest('[inert]')&&r.right>0&&r.bottom>0,
       topmost:(()=>{const h=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);return h===e||e.contains(h);})()};};
   const qctrl=s=>control(q(s)),gear=qctrl('.hud-settings'),tools=[...document.querySelectorAll('.bottom-tabs > button')].map(control),mode=qctrl('button[data-view-mode]');
@@ -143,6 +143,15 @@ def case(browser, url, width, height):
                     crop=b['labelCrop'];assert crop and float(crop['width'].replace('px',''))<=70, b
                     px=lambda key:float(crop[key].replace('px',''))
                     assert abs(px('imageLeft')+px('imageWidth')*7/84)<.1 and abs(px('width')-px('imageWidth')*69/84)<.1,b
+            if width<=1100 or height<=500:
+                if language=='en':
+                    expected_size='9px' if width<=740 else '11px'
+                    for b in (management['tools'][0],management['modeButton']):
+                        assert b['textStyle']['fontSize']==expected_size,(b,expected_size)
+                else:
+                    for b in (management['tools'][0],management['modeButton']):
+                        expected_width=min(48,b['rect']['width']-20)
+                        assert abs(b['labelRect']['width']-expected_width)<.1,(b,expected_width)
             assert len(management['moodImages'])==2 and all('linear-gradient' in i['mask'] and all(part.strip()=='intersect' for part in i['composite'].split(',')) for i in management['moodImages']),management['moodImages']
             if language=='en':
                 assert management['modeButton']['iconStyle']['width']=='84px' and management['modeButton']['iconStyle']['height']=='88px',management['modeButton']
@@ -174,6 +183,10 @@ def case(browser, url, width, height):
             assert viewing['modeButton']['visible'] and viewing['modeButton']['topmost'],viewing['modeButton']
             assert all(abs(viewing['modeButton']['rect'][key]-management['modeButton']['rect'][key])<.1 for key in ('width','height')),(management['modeButton'],viewing['modeButton'])
             assert viewing['modeButton']['rect']['x']>=0 and viewing['modeButton']['rect']['y']>=0 and viewing['modeButton']['rect']['right']<=width+.05 and viewing['modeButton']['rect']['bottom']<=height+.05,viewing['modeButton']
+            if language=='en':
+                button=viewing['modeButton'];text_box=button['textRect'];outer=button['rect']
+                assert button['textStyle']['fontSize']==management['tools'][0]['textStyle']['fontSize'],(button,management['tools'][0])
+                assert button['textLines']==1 and text_box['x']>=outer['x'] and text_box['right']<=outer['right'] and text_box['y']>=outer['y'] and text_box['bottom']<=outer['bottom'],button
             if language=='ko':
                 assert viewing['modeButton']['labelImage']==viewing['modeButton']['icon'],viewing['modeButton']
             if args.view_settings:
@@ -195,8 +208,8 @@ def case(browser, url, width, height):
             assert abs(k['rect']['width']-e['rect']['width'])<0.1 and abs(k['rect']['height']-e['rect']['height'])<0.1, (k,e)
             assert abs(k['rect']['y']-e['rect']['y'])<0.1, (k,e)
         a,b=ko['viewing']['modeButton'],en['viewing']['modeButton']
-        assert equivalent(a['rect'],b['rect']) and a['style']==b['style'] and a['icon']==b['icon'],(a,b)
-        assert all(abs(x-y)<.5 for x,y in zip(relative(a['iconRect'],a['rect']),relative(b['iconRect'],b['rect']))),(a,b)
+        assert equivalent(a['rect'],b['rect']) and a['icon']==b['icon'],(a,b)
+        assert all(a['style'][key]==b['style'][key] for key in a['style'] if key not in ('fontSize','lineHeight')),(a,b)
         assert not intersects(a['iconRect'],a['labelRect']) and not intersects(b['iconRect'],b['labelRect']),(a,b)
         assert [x['title'] for x in ko['viewing']['tracks']]==[x['title'] for x in en['viewing']['tracks']]
         result.update(passed=True,languages=measurements,englishLabelDiagnostics=[x for x in en['management']['lines'] if x['lines']>1 or x['clip'] or x['glyphOutside']])
@@ -208,7 +221,7 @@ server,url=shared.serve(args.package.resolve())
 try:
     with sync_playwright() as pw:
         browser=pw.chromium.launch(executable_path=shared.chromium_executable(None),args=['--mute-audio'])
-        for width,height in ((1600,900),(844,390),(1024,768),(1366,768),(1280,390)):case(browser,url,width,height)
+        for width,height in ((1600,900),(844,390),(1024,768),(1366,768),(1280,390),(720,360)):case(browser,url,width,height)
         browser.close()
     assert not report['errors'] and not report['httpErrors'],report
     report['passed']=all(c['passed'] for c in report['cases'])
