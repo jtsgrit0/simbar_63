@@ -315,6 +315,15 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
     return{x:offset[0]*stageWeight+(region?.offset?.[0]||0)*weight,y:offset[1]*stageWeight+(region?.offset?.[1]||0)*weight-elevation};
   };
   const actorPoint=(a,y=0)=>{const p=project(finite(a.x),finite(a.z),y),o=actorOffset(a);return{x:p.x+o.x,y:p.y+o.y};};
+  // The rear booth guests pass behind the tall end of the shelf before
+  // reaching the right-hand aisle. Clip only their moving exit sprites at the
+  // shelf's right edge, so the person emerges progressively rather than
+  // appearing above the shelf. Seated guests and other actors are unchanged.
+  const behindRearShelf=(actor,state)=>{
+    if(state.owner!==2||state.phase!=='closing'||actor.role==='seated'||!/^lounge-[0-3]$/.test(actor.id||''))return false;
+    const item=state.journey?.afterShow?.audience?.find(entry=>entry.id===actor.id);
+    return !!actor._rearExitActive||!!(item?.phase==='exit'&&Array.isArray(item.egress)&&item.egressAt<item.egress.length);
+  };
   const modelRoster=state=>assets.bandModels?performingRoster(state,assets.bandModels):[];
   function modelPoint(entry){
     const p=actorPoint(entry.actor,finite(entry.actor.y));if(!entry.extra)return p;
@@ -616,7 +625,7 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
     for(const prop of propLayers)drawables.push({depth:prop.depth,draw:()=>drawProp(ctx,prop)});
     for(const feature of pixelVenueFeatures(state))drawables.push({depth:feature.depth,draw:()=>drawFeature(ctx,feature)});
     const models=modelRoster(state);
-    for(const actor of state.actors||[]){if(actor.visible===false||models.length&&actor.role==='band')continue;const seat=seatFor(actor);let depth=seat?.depth??actorPoint(actor).y+(actor.action==='surf'?2:0);if(actor.id==='drummer'&&actor.action==='perform'&&assets.venueMeta?.drumForegroundDepth>0)depth=Math.min(depth,assets.venueMeta.drumForegroundDepth-1);drawables.push({depth,draw:()=>{drawActor(actor,state);for(const layer of occluders)if(layer.actors?.includes(actor.id)&&((seat&&!layer.rearExit)||(state.phase==='closing'&&(layer.rearExit?actor._rearExitActive:actor._seatExitOrigin&&Math.hypot(actor.x-actor._seatExitOrigin.x,actor.z-actor._seatExitOrigin.z)<1))))drawLayer(layer,state);}});}
+    for(const actor of state.actors||[]){if(actor.visible===false||models.length&&actor.role==='band')continue;const seat=seatFor(actor);let depth=seat?.depth??actorPoint(actor).y+(actor.action==='surf'?2:0);if(actor.id==='drummer'&&actor.action==='perform'&&assets.venueMeta?.drumForegroundDepth>0)depth=Math.min(depth,assets.venueMeta.drumForegroundDepth-1);drawables.push({depth,draw:()=>{const rearClip=behindRearShelf(actor,state);if(rearClip){ctx.save();ctx.beginPath();ctx.rect(427,0,REF_W-427,REF_H);ctx.clip();}drawActor(actor,state);if(rearClip)ctx.restore();for(const layer of occluders)if(layer.actors?.includes(actor.id)&&((seat&&!layer.rearExit)||(state.phase==='closing'&&(layer.rearExit?actor._rearExitActive:actor._seatExitOrigin&&Math.hypot(actor.x-actor._seatExitOrigin.x,actor.z-actor._seatExitOrigin.z)<1))))drawLayer(layer,state);}});}
     for(const model of models){let depth=modelPoint(model).y;if(model.role==='drummer'&&model.actor.action==='perform'&&assets.venueMeta?.drumForegroundDepth>0)depth=Math.min(depth,assets.venueMeta.drumForegroundDepth-1);drawables.push({depth,draw:()=>drawBandModel(model,state)});}
     drawables.sort((a,b)=>a.depth-b.depth);for(const item of drawables)item.draw();airborne();orderBubbles(state);ctx.restore();
   }
