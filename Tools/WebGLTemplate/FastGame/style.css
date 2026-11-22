@@ -210,28 +210,13 @@
  .fast-game .css-layer .pour-ref {padding:13px 16px}.fast-game .css-layer .pour-head {font-size:17px}.fast-game .css-layer .pour-subtitle {font-size:13px}.fast-game .css-layer .pour-help {font-size:11px}
 }
 
-/* A preview keeps the actual room in view, including on a portrait phone. */
+/* Management panels and purchase controls. */
 .fast-game .css-layer>.management-overlay{justify-content:flex-end;background:#01020599}
 .fast-game .management-overlay .operations-ref{width:min(650px,100%)}
 .fast-game .management-overlay .operations-item .operation-purchase-actions{display:flex;flex-direction:column;gap:8px;flex:0 0 190px;align-items:stretch}
 .fast-game .management-overlay .operation-purchase-actions button{width:100%;min-width:0}
-.fast-game .management-overlay .operation-purchase-actions .pixel-preview{min-height:36px;height:36px;padding:5px 8px;font-size:12px;background:#213f49;border-color:#6eaaa5;color:#c2eed9}
-.fast-game .operations-preview-note{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 10px;margin-bottom:12px;border:1px solid #94b4a4;border-radius:5px;background:#1e3b39;color:#d5f2d7;font-size:12px;line-height:19px;flex-shrink:0}
-.fast-game .operations-preview-note .preview-back{min-width:84px;min-height:34px;padding:5px 8px;font-size:12px;background:#2d554f}
-.fast-game .management-overlay .operations-item.preview-selected{border:1px solid #a0dbb5;background:#213d3d}
-.fast-game.previewing-venue .css-layer>.management-overlay{background:#01020533}
-.fast-game.previewing-venue .venue-ui,.fast-game.previewing-venue .daydesk{visibility:hidden;pointer-events:none}
-.fast-game.previewing-venue .management-overlay .operations-ref{width:min(550px,100%)}
-.fast-game.previewing-venue .css-layer>.management-overlay{align-items:flex-end}
-.fast-game.previewing-venue .management-overlay .operations-ref{max-height:300px;padding:18px}
-.fast-game.previewing-venue .operations-wallet,.fast-game.previewing-venue .operations-tabs,.fast-game.previewing-venue .operations-feedback,.fast-game.previewing-venue .operations-list .operations-item:not(.preview-selected){display:none}
-.fast-game.previewing-venue .operations-preview-note{margin:9px 0}
-.fast-game.previewing-venue .operations-list .operations-item{margin:0;min-height:0;padding:12px}
-.fast-game.previewing-venue .operations-list .operations-item h3{font-size:17px;margin-bottom:8px}
-.fast-game.previewing-venue .operations-list .operations-item p:not(.purchase-reason){display:none}
-.fast-game.previewing-venue .management-overlay .operations-close{top:15px;right:18px}
 @media(max-width:599px){
- .fast-game .management-overlay .operations-item .operation-purchase-actions{margin-top:12px;gap:7px}.fast-game .management-overlay .operation-purchase-actions button{margin:0}.fast-game.previewing-venue .css-layer>.management-overlay{align-items:flex-end;padding:8px}.fast-game.previewing-venue .management-overlay .operations-ref{width:100%;max-height:285px;padding:13px}.fast-game.previewing-venue .operations-wallet,.fast-game.previewing-venue .operations-tabs,.fast-game.previewing-venue .operations-feedback,.fast-game.previewing-venue .operations-list .operations-item:not(.preview-selected){display:none}.fast-game.previewing-venue .operations-preview-note{margin:7px 0;font-size:11px;padding:7px}.fast-game.previewing-venue .operations-list .operations-item{padding:10px;margin:0}.fast-game.previewing-venue .operations-list .operations-item h3{font-size:14px;margin:0}.fast-game.previewing-venue .operations-list .operations-item p{display:none}.fast-game.previewing-venue .operations-item .operation-purchase-actions{margin-top:8px;flex-direction:row;gap:7px}.fast-game.previewing-venue .operation-purchase-actions button{flex:1;font-size:12px;min-height:39px}.fast-game.previewing-venue .operation-purchase-actions .pixel-preview{min-height:39px;height:auto}.fast-game.previewing-venue .operations-close{top:12px;right:12px}
+ .fast-game .management-overlay .operations-item .operation-purchase-actions{margin-top:12px;gap:7px}.fast-game .management-overlay .operation-purchase-actions button{margin:0}
 }
 
 /* Native reference-button pixels; keep the approved original PNG dimensions. */
