@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {SimBarGame,SAVE_KEY,Booking} from './WebGLTemplate/FastGame/core.js';
 import {BAND_MEMBERS,GREETING_AUDIENCE,GREETING_SECONDS,EXIT_POINT,SURFER_LOWER_SPEED} from './WebGLTemplate/FastGame/aftershow.js';
 import {Audience} from './WebGLTemplate/FastGame/audience.js';
+import {walkable} from './WebGLTemplate/FastGame/navigation.js';
 
 function storage(){const map=new Map();return{getItem:k=>map.get(k)??null,setItem:(k,v)=>map.set(k,String(v))};}
 // This retained choreography fixture requires all twenty historical front-row
@@ -129,12 +130,62 @@ assert(v2RoundTrip.actors.filter(Audience.isAudience).every(a=>a.visible===false
 // reach the same doorway; they do not teleport or remain seated at results.
 const seatedRoom=openNight(14,2),chairIds=seatedRoom.actors.filter(a=>a.role==='seated').map(a=>a.id);
 assert.equal(chairIds.length,8);endPerformance(seatedRoom);let oldPositions=new Map(seatedRoom.actors.map(a=>[a.id,{x:a.x,z:a.z}]));
+const frontWalks=new Set(),barAisles=new Set();
 for(let time=0;time<240&&seatedRoom.phase!=='results';time+=.05){
   seatedRoom.tick(.05);if(seatedRoom.farewellPending)seatedRoom.act('farewellAck');if(seatedRoom.reaction.activeKind)seatedRoom.act('quick',{kind:seatedRoom.reaction.activeKind});
   for(const id of chairIds){const a=seatedRoom.actors.find(a=>a.id===id),old=oldPositions.get(id);assert(Math.hypot(a.x-old.x,a.z-old.z)<.19,'A seated listener teleported during the aisle handoff');}
+  for(const a of seatedRoom.actors){
+    if(a.visible===false||!a.moving||a._exitNavLayout!=='petsounds-exit')continue;
+    if(/^lounge-[4-6]$/.test(a.id)){assert(walkable(a,false,false,'petsounds-exit'),`${a.id} walked through a front table`);frontWalks.add(a.id);}
+    if(/^bar-seat-[0-3]$/.test(a.id)&&a.z<=-4.1&&a.x< -1.3){
+      for(let i=0;i<4;i++)assert(Math.hypot(a.x-(-7.55+i*1.55),a.z+3.15)>.5,`${a.id} crossed another bar stool`);
+      barAisles.add(a.id);
+    }
+  }
   oldPositions=new Map(seatedRoom.actors.map(a=>[a.id,{x:a.x,z:a.z}]));
 }
 assert.equal(seatedRoom.phase,'results');assert(seatedRoom.actors.filter(Audience.isAudience).every(a=>a.visible===false));
+assert.equal(frontWalks.size,3,'All three front listeners must use the table-safe exit route');
+assert.equal(barAisles.size,4,'All four bar guests must leave along the aisle');
+
+// Resume an old closing save with seated guests already walking. Their saved
+// coordinates remain intact and all guests still reach the real exit.
+const oldPet=openNight(16,2);endPerformance(oldPet);oldPet.tick(.5);oldPet.act('pause');
+const oldPetRaw=JSON.parse(oldPet.exportSave()),oldPetJourney=JSON.parse(oldPetRaw.journeyJson);
+for(const a of oldPetRaw.native.actors){delete a._exitNavLayout;delete a._seatExitOrigin;delete a._rearExitActive;}
+for(const item of oldPetJourney.afterShow.audience)delete item.egressVersion;
+oldPetRaw.journeyJson=JSON.stringify(oldPetJourney);
+const restoredPet=new SimBarGame({storage:oldPet.storage});assert(restoredPet.importSave(oldPetRaw));
+for(const id of ['bar-seat-0','lounge-0']){
+  const saved=oldPetRaw.native.actors.find(a=>a.id===id),restored=restoredPet.actors.find(a=>a.id===id);
+  assert.equal(restored.x,saved.x);assert.equal(restored.z,saved.z);
+}
+restoredPet.act('continue');finish(restoredPet);assert.equal(restoredPet.phase,'results');
+assert(restoredPet.actors.filter(Audience.isAudience).every(a=>a.visible===false));
+
+// A legacy save can already have a standing listener inside a tabletop that
+// the previous exit mesh did not block. Walk out continuously, never teleport
+// or route through the opposite tabletop, then finish the same closing.
+const tableSave=openNight(19,2),tableGuest=tableSave.actors.find(a=>a.id==='lounge-4');
+tableGuest.x=-8.1;tableGuest.z=-5.5;tableGuest.homeX=tableGuest.x;tableGuest.homeZ=tableGuest.z;
+assert.equal(walkable(tableGuest,false,false,'petsounds-exit'),false);endPerformance(tableSave);
+let cleared=false;
+for(let time=0;time<15&&!cleared;time+=.05){
+  const before={x:tableGuest.x,z:tableGuest.z};tableSave.tick(.05);
+  assert(Math.hypot(tableGuest.x-before.x,tableGuest.z-before.z)<.19,'Saved table guest teleported');
+  cleared=walkable(tableGuest,false,false,'petsounds-exit');
+}
+assert(cleared,'Saved table guest did not leave the overlapping footprint');finish(tableSave);assert.equal(tableSave.phase,'results');
+const tableBarSave=openNight(20,2),tableBarGuest=tableBarSave.actors.find(a=>a.id==='bar-seat-0');
+tableBarGuest.role='guest';tableBarGuest.seat=false;tableBarGuest.seatReleased=true;tableBarGuest.x=-1.03;tableBarGuest.z=-5.18;
+assert.equal(walkable(tableBarGuest,false,false,'petsounds-exit'),false);endPerformance(tableBarSave);
+let barCleared=false;
+for(let time=0;time<15&&!barCleared;time+=.05){
+  const before={x:tableBarGuest.x,z:tableBarGuest.z};tableBarSave.tick(.05);
+  assert(Math.hypot(tableBarGuest.x-before.x,tableBarGuest.z-before.z)<.19,'Saved bar guest teleported');
+  barCleared=walkable(tableBarGuest,false,false,'petsounds-exit');
+}
+assert(barCleared,'Saved bar guest did not leave the overlapping footprint');finish(tableBarSave);assert.equal(tableBarSave.phase,'results');
 
 // Historical v1 receipts remain historical. Floor actors do not reappear and
 // neither the new popup nor the financial settlement is replayed on Continue.

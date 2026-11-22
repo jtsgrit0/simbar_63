@@ -36,6 +36,10 @@ export const PETSOUNDS_LAYOUT=Object.freeze({
   tables:Object.freeze([Object.freeze({x:-6.9001,z:-7.6138,radius:.55}),Object.freeze({x:-1.8907,z:-7.4699,radius:.55})])
 });
 const petsoundsObstacles=[...obstacles.slice(0,3),...obstacles.slice(5)];
+// During closing, the retained tabletop silhouettes are physical obstacles,
+// not only the table legs.  The formerly seated bar guests may also use the
+// clear aisle between the stools and these tables to reach the public floor.
+const petsoundsExitTables=[[-9.75,-6.02,-6.35,-4.65],[-4.45,-6.02,-.75,-4.65]];
 const nearPolygon=(point,polygon,padding=.23)=>{
   let positive=false,negative=false,near=false;
   for(let i=0;i<polygon.length;i++){
@@ -62,10 +66,13 @@ export function walkable(p,staff=false,floor=false,layout=p?.layout){
     if(ffRoundObstacles.some(circle=>Math.hypot(p.x-circle.x,p.z-circle.z)<circle.radius+.23))return false;
     return !floor||!reserved(p);
   }
+  const closing=layout==='petsounds-exit';
   const clearedFront=p.x>=-9.4&&p.x<=1&&p.z>=-7.3&&p.z<=-5.5;
   if(p.x>9.1||p.z<(clearedFront?-7.3:-5.85)||p.z>3.45)return false;
-  if(!clearedFront&&p.x< -1.65&&(!staff||p.x< -9.4||p.z< -.62||p.z>1.2))return false;
+  if(closing&&p.x< -9.4)return false;
+  if(!clearedFront&&p.x< -1.65&&(!closing||p.z> -3.7)&&(!staff||p.x< -9.4||p.z< -.62||p.z>1.2))return false;
   if(petsoundsObstacles.some(([x0,z0,x1,z1])=>p.x>x0-.23&&p.x<x1+.23&&p.z>z0-.23&&p.z<z1+.23))return false;
+  if(closing&&petsoundsExitTables.some(([x0,z0,x1,z1])=>p.x>x0-.1&&p.x<x1+.1&&p.z>z0-.1&&p.z<z1+.1))return false;
   if(PETSOUNDS_LAYOUT.tables.some(circle=>Math.hypot(p.x-circle.x,p.z-circle.z)<circle.radius+.23)||nearPolygon(p,PETSOUNDS_LAYOUT.dj))return false;
   return !floor||!reserved(p);
 }
@@ -75,7 +82,7 @@ export function segment(a,b,staff=false,floor=false,layout=a?.layout){
 const grids=new Map();
 function grid(staff,floor,layout){
   const custom=layout==='ff'||layout==='freebird';
-  const key=(custom?layout+':':'')+staff+':'+floor;if(grids.has(key))return grids.get(key);
+  const key=(custom||layout==='petsounds-exit'?layout+':':'')+staff+':'+floor;if(grids.has(key))return grids.get(key);
   const width=48,height=custom?30:34,x0=-9.6,z0=custom?-5.8:-7.4,points=Array.from({length:width*height},(_,i)=>({x:x0+(i%width)*.4,z:z0+Math.floor(i/width)*.4}));
   const valid=points.map(p=>walkable(p,staff,floor,layout)),neighbors=points.map(()=>[]);
   for(let i=0;i<points.length;i++)if(valid[i])for(let dz=-1;dz<=1;dz++)for(let dx=-1;dx<=1;dx++){
@@ -134,7 +141,7 @@ export function pathfind(start,goal,{staff=false,floor=false,people=[],layout=st
 }
 export function setRoute(actor,goal,actors=[],floor=false){
   actor.targetX=goal.x;actor.targetZ=goal.z;actor._floorRoute=floor;
-  actor._path=pathfind(actor,goal,{staff:actor.role==='bartender'||actor.role==='server'||actor.role.startsWith('hired'),floor,layout:actor.layout,people:actors.filter(a=>a!==actor&&a.visible&&a.role!=='band'&&(a.role!=='seated'||a.waitingSeat)&&a.id!==actor._partner).map(a=>({x:a.x,z:a.z}))});
+  actor._path=pathfind(actor,goal,{staff:actor.role==='bartender'||actor.role==='server'||actor.role.startsWith('hired'),floor,layout:actor._exitNavLayout||actor.layout,people:actors.filter(a=>a!==actor&&a.visible&&a.role!=='band'&&(a.role!=='seated'||a.waitingSeat)&&a.id!==actor._partner).map(a=>({x:a.x,z:a.z}))});
   actor._pathAt=0;actor._blocked=0;return actor._path.length>0;
 }
 // Closing crowds can pack between the40cm mesh nodes while still leaving a
@@ -145,7 +152,7 @@ export function setCrowdRoute(actor,goal,actors=[],floor=false){
   const staff=actor.role==='bartender'||actor.role==='server'||actor.role.startsWith('hired');
   const people=actors.filter(a=>a!==actor&&a.visible!==false&&a.role!=='band'&&a.id!==actor._partner&&a.id!=='crowd-surfer'&&Math.abs((a.y||0)-(actor.y||0))<1);
   const clear=next=>{
-    if(!segment(actor,next,staff,floor,actor.layout))return false;
+    if(!segment(actor,next,staff,floor,actor._exitNavLayout||actor.layout))return false;
     const dx=next.x-actor.x,dz=next.z-actor.z,length=dx*dx+dz*dz;
     return people.every(other=>{
       const before=distance(actor,other),after=distance(next,other);
@@ -177,7 +184,7 @@ export function move(actor,dt,speed,actors=[]){
     const target=actor._path[actor._pathAt],d=distance(actor,target);
     if(d<.015){actor.x=target.x;actor.z=target.z;actor._pathAt++;continue;}
     const step=Math.min(budget,d),next={x:actor.x+(target.x-actor.x)*step/d,z:actor.z+(target.z-actor.z)*step/d};
-    const blocked=!segment(actor,next,staff,actor._floorRoute)||actors.some(other=>other!==actor&&other.visible&&other.role!=='band'&&other.id!==actor._partner&&other.id!=='crowd-surfer'&&Math.abs((other.y||0)-(actor.y||0))<1&&distance(next,other)<.34&&distance(next,other)<distance(actor,other)-.00001);
+    const blocked=!segment(actor,next,staff,actor._floorRoute,actor._exitNavLayout||actor.layout)||actors.some(other=>other!==actor&&other.visible&&other.role!=='band'&&other.id!==actor._partner&&other.id!=='crowd-surfer'&&Math.abs((other.y||0)-(actor.y||0))<1&&distance(next,other)<.34&&distance(next,other)<distance(actor,other)-.00001);
     if(blocked){actor._blocked=(actor._blocked||0)+dt;if(actor._blocked>.8)setRoute(actor,{x:actor.targetX,z:actor.targetZ},actors,actor._floorRoute);break;}
     actor.x=next.x;actor.z=next.z;actor.facing=Math.atan2(next.x-start.x,next.z-start.z);budget-=step;actor._blocked=0;
   }

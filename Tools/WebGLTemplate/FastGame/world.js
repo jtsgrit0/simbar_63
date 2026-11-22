@@ -294,10 +294,15 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
     const position=[x-EYE[0],y-EYE[1],z-EYE[2]],scale=REF_H/(2*ORTHO);
     return{x:REF_W/2+dot(position,RIGHT)*scale,y:REF_H/2-dot(position,UP)*scale};
   };
-  const seatFor=a=>a.role==='seated'&&!a.moving&&['idle','sit','drink','listen','sway','cheer'].includes(a.action||'idle')?assets.venueMeta?.seatedActors?.[a.seatId||a.id]:null;
+  const seatFor=a=>a.role==='seated'&&!a.moving&&(['idle','sit','drink','listen','sway','cheer'].includes(a.action||'idle')||a.action==='aftershow-wait'&&(!a.layout||a.layout==='original'))?assets.venueMeta?.seatedActors?.[a.seatId||a.id]:null;
   const actorOffset=a=>{
     const seat=seatFor(a);
     if(seat){const ground=project(finite(a.x),finite(a.z));return{x:seat.feet[0]-ground.x,y:seat.feet[1]-ground.y};}
+    if(a._seatExitOrigin&&assets.venueMeta?.seatedActors?.[a.id]){
+      const origin=a._seatExitOrigin,ground=project(finite(origin.x),finite(origin.z)),feet=assets.venueMeta.seatedActors[a.id].feet;
+      const weight=1-clamp(Math.hypot(finite(a.x)-finite(origin.x),finite(a.z)-finite(origin.z)),0,1);
+      if(weight>0)return{x:(feet[0]-ground.x)*weight,y:(feet[1]-ground.y)*weight};
+    }
     const offset=assets.venueMeta?.actorOffsets?.[a.id]||[0,0],region=assets.venueMeta?.barRegion;
     const employee=['bartender','server'].includes(a.role)||a.id?.startsWith('hired-');
     let weight=employee&&region&&a.z>=region.zMin&&a.z<=region.zMax?clamp((region.xMax-a.x)/region.xFade,0,1):0;
@@ -359,8 +364,9 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
     const supplied=assets.venueMeta?.occluders;
     const bar=Array.from({length:8},(_,i)=>{const x0=-9.95+i*1.09,x1=x0+1.1;return{points:boxMask(x0,x1,-2.35,-.88,1.48),worldX:(x0+x1)/2,worldZ:-2.35};});
     const boxes=(assets.venueMeta?.occluderBoxes||[]).map(({x0,x1,z0,z1,height,worldX=(x0+x1)/2,worldZ=z0})=>({points:boxMask(x0,x1,z0,z1,height),worldX,worldZ}));
-    const layers=[...(supplied||bar),...boxes];
-    for(const layer of layers){if(!layer.points?.length)continue;const p=layer.points.map(p=>Array.isArray(p)?{x:p[0],y:p[1]}:p),xs=p.map(v=>v.x),ys=p.map(v=>v.y),left=Math.floor(Math.min(...xs)),top=Math.floor(Math.min(...ys)),w=Math.ceil(Math.max(...xs))-left+1,h=Math.ceil(Math.max(...ys))-top+1;if(w<=0||h<=0)continue;const mask=surface(w,h),c=mask.getContext('2d');c.imageSmoothingEnabled=false;c.translate(-left,-top);c.beginPath();p.forEach((v,i)=>i?c.lineTo(Math.round(v.x),Math.round(v.y)):c.moveTo(Math.round(v.x),Math.round(v.y)));c.closePath();c.clip();c.drawImage(plate,0,0,REF_W,REF_H);occluders.push({image:mask,x:left,y:top,points:p,stage:left+w>556&&left<867&&top+h>209&&top<373,actors:layer.actors||null,depth:Number.isFinite(layer.depth)?layer.depth:project(layer.worldX||0,layer.worldZ||0).y});}
+    const rearExit=assets.venueMeta?.seatedActors?.['lounge-0']?[{points:[[185,140],[427,207],[427,299],[185,232]],actors:['lounge-0','lounge-1','lounge-2','lounge-3'],rearExit:true}]:[];
+    const layers=[...(supplied||bar),...boxes,...rearExit];
+    for(const layer of layers){if(!layer.points?.length)continue;const p=layer.points.map(p=>Array.isArray(p)?{x:p[0],y:p[1]}:p),xs=p.map(v=>v.x),ys=p.map(v=>v.y),left=Math.floor(Math.min(...xs)),top=Math.floor(Math.min(...ys)),w=Math.ceil(Math.max(...xs))-left+1,h=Math.ceil(Math.max(...ys))-top+1;if(w<=0||h<=0)continue;const mask=surface(w,h),c=mask.getContext('2d');c.imageSmoothingEnabled=false;c.translate(-left,-top);c.beginPath();p.forEach((v,i)=>i?c.lineTo(Math.round(v.x),Math.round(v.y)):c.moveTo(Math.round(v.x),Math.round(v.y)));c.closePath();c.clip();c.drawImage(plate,0,0,REF_W,REF_H);occluders.push({image:mask,x:left,y:top,points:p,stage:left+w>556&&left<867&&top+h>209&&top<373,actors:layer.actors||null,rearExit:!!layer.rearExit,depth:Number.isFinite(layer.depth)?layer.depth:project(layer.worldX||0,layer.worldZ||0).y});}
   }
   function atlasFrame(actor,role,action,frame,state,frameOverride=null,animationSeconds=seconds){
     const meta=assets.spriteMeta||{};
@@ -610,7 +616,7 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
     for(const prop of propLayers)drawables.push({depth:prop.depth,draw:()=>drawProp(ctx,prop)});
     for(const feature of pixelVenueFeatures(state))drawables.push({depth:feature.depth,draw:()=>drawFeature(ctx,feature)});
     const models=modelRoster(state);
-    for(const actor of state.actors||[]){if(actor.visible===false||models.length&&actor.role==='band')continue;const seat=seatFor(actor);let depth=seat?.depth??actorPoint(actor).y+(actor.action==='surf'?2:0);if(actor.id==='drummer'&&actor.action==='perform'&&assets.venueMeta?.drumForegroundDepth>0)depth=Math.min(depth,assets.venueMeta.drumForegroundDepth-1);drawables.push({depth,draw:()=>{drawActor(actor,state);for(const layer of occluders)if(seat&&layer.actors?.includes(actor.id))drawLayer(layer,state);}});}
+    for(const actor of state.actors||[]){if(actor.visible===false||models.length&&actor.role==='band')continue;const seat=seatFor(actor);let depth=seat?.depth??actorPoint(actor).y+(actor.action==='surf'?2:0);if(actor.id==='drummer'&&actor.action==='perform'&&assets.venueMeta?.drumForegroundDepth>0)depth=Math.min(depth,assets.venueMeta.drumForegroundDepth-1);drawables.push({depth,draw:()=>{drawActor(actor,state);for(const layer of occluders)if(layer.actors?.includes(actor.id)&&((seat&&!layer.rearExit)||(state.phase==='closing'&&(layer.rearExit?actor._rearExitActive:actor._seatExitOrigin&&Math.hypot(actor.x-actor._seatExitOrigin.x,actor.z-actor._seatExitOrigin.z)<1))))drawLayer(layer,state);}});}
     for(const model of models){let depth=modelPoint(model).y;if(model.role==='drummer'&&model.actor.action==='perform'&&assets.venueMeta?.drumForegroundDepth>0)depth=Math.min(depth,assets.venueMeta.drumForegroundDepth-1);drawables.push({depth,draw:()=>drawBandModel(model,state)});}
     drawables.sort((a,b)=>a.depth-b.depth);for(const item of drawables)item.draw();airborne();orderBubbles(state);ctx.restore();
   }

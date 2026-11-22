@@ -196,12 +196,42 @@ function beginDepartures(state,actors){
 function standCustomer(item,a){
   if(a.role==='seated'){
     if(!a.styleKey)a.styleKey=a.id.startsWith('bar-seat-')?(Number(a.id.split('-').at(-1))%2?'Punk':'Casual2'):(Number(a.id.split('-').at(-1))%2?'Suit':'Casual');
+    if(a._exitNavLayout==='petsounds-exit')a._seatExitOrigin={x:a.x,z:a.z};
     a.role='guest';a.seat=false;a.waitingSeat=false;a.seatReleased=true;
     item.standingReleased=true;
   }
+  if(a._exitNavLayout==='petsounds-exit'&&a.id.startsWith('bar-seat-')&&item.egressVersion!==2&&(a.x< -1.25&&a.z> -3.7||walkable(a,false,false,a._exitNavLayout))){
+    // Leave the actor's own stool toward the clear aisle first, then follow
+    // that aisle: the old straight line walked through the other stools.
+    item.egress=[];
+    if(a.x< -1.25&&a.z> -3.7){
+      item.egress.push(point(a.x,-4.15));
+      item.egress.push(point(-1.25,-4.15));
+    }
+    item.egressAt=0;item.egressPrepared=true;item.egressVersion=2;
+    return;
+  }
+  // Older closing saves may already have a standing guest inside a tabletop
+  // footprint that was not represented in the former exit mesh. Let that
+  // guest walk directly out to the nearest safe floor point once; never snap
+  // them to a new position or send them through another blocked area.
+  if(a._exitNavLayout==='petsounds-exit'&&!/^lounge-[0-3]$/.test(a.id)&&item.egressVersion!==2&&!walkable(a,false,false,a._exitNavLayout)){
+    let target=null;
+    for(let radius=.2;radius<=4&&!target;radius+=.2)for(let i=0;i<32&&!target;i++){
+      const angle=i*Math.PI/16,p=point(a.x+Math.cos(angle)*radius,a.z+Math.sin(angle)*radius);
+      if(!walkable(p,false,false,a._exitNavLayout))continue;
+      let clear=false,valid=true;
+      for(let step=1;step<=Math.ceil(radius/.1);step++){
+        const f=step/Math.ceil(radius/.1),inside=walkable(point(a.x+(p.x-a.x)*f,a.z+(p.z-a.z)*f),false,false,a._exitNavLayout);
+        if(clear&&!inside){valid=false;break;}clear||=inside;
+      }
+      if(valid)target=p;
+    }
+    if(target){item.egress=[target];item.egressAt=0;item.egressPrepared=true;item.egressVersion=2;return;}
+  }
   if(item.egressPrepared)return;
   item.egressPrepared=true;
-  if(walkable(a,false,false,a.layout))return;
+  if(walkable(a,false,false,a._exitNavLayout||a.layout))return;
   // Retained bar/sofa seats lie outside the old public navigation mesh.
   // Stand and walk off their authored chair footprint before joining it,
   // just as the stage musicians use authored steps down to the same aisle.
@@ -211,7 +241,7 @@ function standCustomer(item,a){
   item.egress.push(point(-1.25,z));item.egressAt=0;
 }
 function clearDoorwaySegment(a,goal,actors){
-  if(!segment(a,goal,false,false,a.layout))return false;
+  if(!segment(a,goal,false,false,a._exitNavLayout||a.layout))return false;
   const dx=goal.x-a.x,dz=goal.z-a.z,length=dx*dx+dz*dz;
   return actors.every(other=>{
     if(other===a||other.visible===false||other.role==='band'||other.id===a._partner||other.id==='crowd-surfer'||Math.abs((other.y||0)-(a.y||0))>=1)return true;
@@ -221,8 +251,10 @@ function clearDoorwaySegment(a,goal,actors){
     return Math.hypot(other.x-a.x-t*dx,other.z-a.z-t*dz)>=.34;
   });
 }
-function leave(item,a,actors,dt,speed,fullCrowd=false){
+function leave(item,a,actors,dt,speed,fullCrowd=false,afterShow=false){
+  if(afterShow&&(!a.layout||a.layout==='original'))a._exitNavLayout='petsounds-exit';
   if(!BAND_MEMBERS.includes(item.id))standCustomer(item,a);
+  a._rearExitActive=!!(afterShow&&a._exitNavLayout==='petsounds-exit'&&/^lounge-[0-3]$/.test(a.id)&&item.egressAt<(item.egress?.length||0));
   if(item.egressAt<(item.egress?.length||0)){
     let budget=dt*speed;a.moving=false;
     while(item.egressAt<item.egress.length&&budget>0){
@@ -233,7 +265,7 @@ function leave(item,a,actors,dt,speed,fullCrowd=false){
       face(a,goal);a.x=next.x;a.z=next.z;budget-=step;a.moving=true;
       if(step>=d-.0001)item.egressAt++;
     }
-    if(item.egressAt>=item.egress.length){a._path=[];a._pathAt=0;a._afterShowRetry=0;}
+    if(item.egressAt>=item.egress.length){a._path=[];a._pathAt=0;a._afterShowRetry=0;a._rearExitActive=false;}
     return false;
   }
   // The furniture mesh plans the shared exit aisle; only nearby moving bodies
@@ -269,7 +301,7 @@ function tickParallelAudience(state,actors,dt){
     a.y=0;
     if(state.elapsed<item.exitDelay){a.action='aftershow-wait';a.moving=false;continue;}
     a.action='walk';
-    if(leave(item,a,actors,dt,PARALLEL_EXIT_SPEED)){
+    if(leave(item,a,actors,dt,PARALLEL_EXIT_SPEED,false,true)){
       item.phase='gone';item.visible=false;a.visible=false;a.moving=false;a._path=[];a._pathAt=0;
     }
   }
@@ -296,7 +328,7 @@ function tickDepartures(state,actors,dt){
     a.y=0;a.stageLevel=0;
     if(item.parallel?state.elapsed<item.exitDelay:item.id!==state.departingActor){a.action='aftershow-wait';a.moving=false;continue;}
     a.action='walk';
-    if(leave(item,a,actors,dt,BAND_MEMBERS.includes(item.id)?1.65:item.parallel?PARALLEL_EXIT_SPEED:1.45)){
+    if(leave(item,a,actors,dt,BAND_MEMBERS.includes(item.id)?1.65:item.parallel?PARALLEL_EXIT_SPEED:1.45,false,true)){
       item.phase='gone';item.visible=false;a.visible=false;a.moving=false;a._path=[];a._pathAt=0;
       if(BAND_MEMBERS.includes(item.id))a.afterShowPhase='gone';
       if(state.departingActor===item.id)state.departingActor=null;
