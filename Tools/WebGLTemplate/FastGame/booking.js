@@ -3,6 +3,7 @@ import {createDailyPoster,DAILY_POSTER_INDEX} from './daily-poster.js';
 import {Campaign} from './campaign.js';
 import {Audience} from './audience.js';
 import {Encore} from './desk-encore.js';
+import {LaterDesk} from './desk-later.js';
 
 export const clamp=(n,a,b)=>Math.max(a,Math.min(b,Number.isFinite(+n)?+n:a));
 export const int=(n,a=0,b=1e9)=>Math.trunc(clamp(n,a,b));
@@ -74,6 +75,7 @@ export const Booking={
   isPetSoundsEncore(p,owner,completedNights){
     return owner===2&&completedNights>=3&&p?.day===4&&isCampaign(p)&&!p.completed&&!p.locked;
   },
+  isPetSoundsLater(p,owner){return owner===2&&LaterDesk.enabled(p)&&!p.completed&&!p.locked;},
   setEncoreChoice(p,choice){
     const e=deskError(p);if(e)return result(e);
     if((choice!==0&&choice!==1)||!Encore.scene(p)||!this.campaignOptions(p).some(s=>s.id===p.showId&&!s.locked))return result('unavailable');
@@ -259,6 +261,7 @@ export const Booking={
       if(p.showId!=='july'||p.day!==2||(p.entranceMusicChoice!=='owner'&&p.entranceMusicChoice!=='band'))delete p.entranceMusicChoice;
       if(p.showId!=='double'||p.day!==3||(p.secondSetIntro!=='freewill'&&p.secondSetIntro!=='owner'))delete p.secondSetIntro;
       if(p.day!==4||!Number.isInteger(p.encoreSeed)||p.encoreSeed<=0||p.encoreSeed>0xffffffff)delete p.encoreSeed;
+      LaterDesk.sanitizePlan(p);
       if(!Encore.effect(p))delete p.encoreChoice;
       if(!p.showId||!(p.deskDoneMask&1))p.deskDoneMask=0;
       p.blocks=p.listenedMask=p.scoutedPosterMask=0;p.promotions=int(p.promotions,0,1);p.bookedGrowth=arr(p.bookedGrowth);

@@ -1,3 +1,4 @@
+import {LaterDesk} from './desk-later.js';
 const pair=(en,ko)=>[en,ko];
 const scenes={
   freewill:[
@@ -13,6 +14,7 @@ const scenes={
   ]
 };
 const getScene=p=>{
+  if(LaterDesk.enabled(p))return LaterDesk.scene(p);
   const group=Object.hasOwn(scenes,p?.showId)?scenes[p.showId]:null;
   if(p?.day!==4||!Number.isInteger(p.encoreSeed)||p.encoreSeed<=0||p.encoreSeed>0xffffffff||!group)return null;
   const index=p.showId==='july'?(p.encoreSeed>>>1)%group.length:p.encoreSeed%group.length;

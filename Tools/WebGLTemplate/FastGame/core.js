@@ -4,6 +4,7 @@ import {createDailyPoster,DAILY_POSTER_INDEX} from './daily-poster.js';
 import {Booking,clamp,int,count} from './booking.js';
 import {Campaign} from './campaign.js';
 import {Encore} from './desk-encore.js';
+import {LaterDesk} from './desk-later.js';
 import {Audience} from './audience.js';
 import {Festival} from './festival.js';
 import {Inspection} from './inspection.js';
@@ -144,11 +145,11 @@ export class SimBarGame{
       const show=Campaign.show(p.showId);
       const julyPilot=Booking.isPetSoundsJulyPilot(p,this.owner,this.journey.completedNights);
       const doublePilot=Booking.isPetSoundsDoublePilot(p,this.owner,this.journey.completedNights);
-      const encorePilot=Booking.isPetSoundsEncore(p,this.owner,this.journey.completedNights);
+      const encorePilot=Booking.isPetSoundsEncore(p,this.owner,this.journey.completedNights),laterDesk=Booking.isPetSoundsLater(p,this.owner);
       return{...m,deskVersion:2,campaignStage:p.campaignStage,show,campaignOptions:Booking.campaignOptions(p),
         artistFee:m.artistFee??m.fee??0,netTicketIncome:m.netIncome??0,ticketIncomeMin:Math.floor(m.ticketIncome*.8),
         netTicketIncomeMin:Math.floor(m.ticketIncome*.8)-(m.artistFee??m.fee??0),allowedTracks:show?show.tracks:[],
-        canLaunch:!p.locked&&!p.completed&&!!show&&p.deskDoneMask===3&&(!julyPilot||!!p.entranceMusicChoice)&&(!doublePilot||!!p.secondSetIntro)&&(!encorePilot||!!Encore.effect(p)),hour:Booking.hour(p),petSoundsPilot:Booking.isPetSoundsPilot(p,this.owner,this.journey.completedNights),petSoundsJulyPilot:julyPilot,petSoundsDoublePilot:doublePilot,petSoundsEncore:encorePilot,
+        canLaunch:!p.locked&&!p.completed&&!!show&&p.deskDoneMask===3&&(!julyPilot||!!p.entranceMusicChoice)&&(!doublePilot||!!p.secondSetIntro)&&(!(encorePilot||laterDesk)||!!Encore.effect(p)),hour:Booking.hour(p),petSoundsPilot:Booking.isPetSoundsPilot(p,this.owner,this.journey.completedNights),petSoundsJulyPilot:julyPilot,petSoundsDoublePilot:doublePilot,petSoundsEncore:encorePilot,petSoundsLater:laterDesk,
         lineup:show?show.bandIndices.map(i=>catalog.bands[i]):[],ticketTier:p.ticketTier,venue:Number.isInteger(m.venueOwner)?ownerVenue(m.venueOwner):catalog.venues[p.venue]};
     }
     if(Booking.isDesk(p))return{...m,deskVersion:1,freewillSelected:p.freewillSelected,deskDoneMask:p.deskDoneMask,
@@ -271,7 +272,7 @@ export class SimBarGame{
     return true;
   }
   _sanitizeJourney(){
-    const j=this.journey;j.version=1;j.day=int(j.day,1,9999);j.session=int(j.session);j.settledSession=int(j.settledSession,0,j.session);j.secondsLeft=finite(j.secondsLeft,180,0,180);
+    const j=this.journey;j.petDeskHistory=LaterDesk.sanitizeHistory(j.petDeskHistory);j.version=1;j.day=int(j.day,1,9999);j.session=int(j.session);j.settledSession=int(j.settledSession,0,j.session);j.secondsLeft=finite(j.secondsLeft,180,0,180);
     for(const key of ['score','combo','bestCombo','manualPerfects','orders','mistakes','successfulEvents','manualStreak','xp','bestScore','completedNights','resultServed','resultXP','resultBonus','resultTicketGross','resultArtistFee'])j[key]=int(j[key],0,1e8);
     j.bestCombo=Math.max(j.bestCombo,j.combo);j.orders=Math.max(j.orders,j.manualPerfects);j.guideStep=int(j.guideStep,0,2);j.feverSeconds=clamp(j.feverSeconds,0,12);j.feverCharge=clamp(j.feverCharge,0,1);j.resultStars=int(j.resultStars,0,3);j.bestStars=int(j.bestStars,0,3);
     j.openingCash=finite(j.openingCash,this.state.money,0,1e9);j.resultProfit=finite(j.resultProfit,0,-1e9,1e9);j.floorMissions={...Floor.newState(),...(j.floorMissions||{})};Floor.sanitize(j.floorMissions);
@@ -349,7 +350,7 @@ export class SimBarGame{
         r=Booking.setPilotSecondSetIntro(j.booking,p.speaker);if(!r.success)return this._done(false,r.code);
         this.state.clock=Booking.hour(j.booking);break;
       case'deskEncoreChoice':
-        if(this.phase!=='planning'||!Booking.isPetSoundsEncore(j.booking,this.owner,j.completedNights))return this._done(false);
+        if(this.phase!=='planning'||!(Booking.isPetSoundsEncore(j.booking,this.owner,j.completedNights)||Booking.isPetSoundsLater(j.booking,this.owner)))return this._done(false);
         r=Booking.setEncoreChoice(j.booking,p.choice);if(!r.success)return this._done(false,r.code);
         this.state.clock=Booking.hour(j.booking);break;
       case'selectShow':
@@ -371,8 +372,9 @@ export class SimBarGame{
         if(this.phase!=='planning'||!this._activePlan())return this._done(false);
         if(Booking.isPetSoundsJulyPilot(j.booking,this.owner,j.completedNights)&&!j.booking.entranceMusicChoice)return this._done(false,'desk_incomplete');
         if(Booking.isPetSoundsDoublePilot(j.booking,this.owner,j.completedNights)&&!j.booking.secondSetIntro)return this._done(false,'desk_incomplete');
-        if(Booking.isPetSoundsEncore(j.booking,this.owner,j.completedNights)&&!Encore.effect(j.booking))return this._done(false,'desk_incomplete');
+        if((Booking.isPetSoundsEncore(j.booking,this.owner,j.completedNights)||Booking.isPetSoundsLater(j.booking,this.owner))&&!Encore.effect(j.booking))return this._done(false,'desk_incomplete');
         if(Booking.isDesk(j.booking)){r=Booking.lockDesk(j.booking,j.bookingCareer);if(!r.success)return this._done(false,r.code);}else Booking.lock(j.booking);
+        if(LaterDesk.enabled(j.booking)&&this.owner===2)j.petDeskHistory=LaterDesk.consume(j.booking,j.petDeskHistory);
         this._newNight();break;
       case'menuItem':if(!this.menuEntry(p.item))return this._done(false,'unavailable');this.selectedItem=p.item;if(this.pauseReason==='menu'){this.paused=false;this.pauseReason='';}r=this._startPour(this.selectedItem);break;
       case'prepare':r=this._startPour(this.orders[0]?.item??this.selectedItem);break;
@@ -423,6 +425,11 @@ export class SimBarGame{
       if(!j.booking.encoreSeed)j.booking.encoreSeed=freshScheduleSeed()||1;
       if(Encore.effect(j.booking))Booking.setEncoreChoice(j.booking,j.booking.encoreChoice);
     }
+    if(Booking.isPetSoundsLater(j.booking,this.owner)){
+      const seed=freshScheduleSeed();let draw=0;
+      LaterDesk.prepare(j.booking,j.petDeskHistory,()=>mixScheduleSeed(seed,this.owner,j.day,j.session,++draw)/0x80000000);
+      if(Encore.effect(j.booking))Booking.setEncoreChoice(j.booking,j.booking.encoreChoice);
+    }
     j.challenge=challenge;this.phase='planning';this.paused=true;this.pauseReason='planning';this.state.clock=Booking.hour(j.booking);
   }
   _newNight(){
@@ -438,7 +445,7 @@ export class SimBarGame{
     j.feedback=SpectatorFeedback.create({session:j.session,owner:this.owner});
     j.inspection=Inspection.create({session:j.session,day:j.day,owner:this.owner,seed:scheduleSeed===undefined?this._seed:mixScheduleSeed(scheduleSeed,this.owner,j.day,j.session,0x70617472)});
     if(Booking.isCampaign(j.booking)){const tracks=this.metrics().allowedTracks;if(j.booking.showId==='double'||!tracks.includes(this.state.playlist))this.state.playlist=tracks[0]??0;}
-    this._buildActors();this._refreshFeedback();this.crew=[];this.escort=null;this.effects=[];this.pour=null;this._seedOrders(Encore.effect(j.booking)?.item);this._requestTimer=3*(j.challenge?.72:1.18)*this.metrics().orderIntervalMultiplier;
+    this._buildActors();this._refreshFeedback();this.crew=[];this.escort=null;this.effects=[];this.pour=null;this._seedOrders(Encore.effect(j.booking)?.item,LaterDesk.enabled(j.booking));this._requestTimer=3*(j.challenge?.72:1.18)*this.metrics().orderIntervalMultiplier;
     this.phase=j.guidePending?'guide':'playing';this.paused=j.guidePending;this.pauseReason=this.paused?'guide':'';this._say('영업 시작! 주문과 공연을 멋지게 운영해 보세요.','The show is open! Serve guests and keep the crowd glowing.');
   }
   _ensureReaction(scheduleSeed){if(!this.floor.reaction){const gameplaySeed=Math.floor(this._random()*0x7fffffff)||1;this.floor.reaction=Challenges.newState(scheduleSeed??gameplaySeed,180-this.journey.secondsLeft);}}
@@ -594,13 +601,13 @@ export class SimBarGame{
     if(show&&this._random()<.72)return show.preferredItems[Math.floor(this._random()*show.preferredItems.length)];
     return Math.floor(this._random()*this.activeMenu.length);
   }
-  _seedOrders(firstItem){
+  _seedOrders(firstItem,recommendOnly=false){
     this.orders=[];
     if(this._usesAudience()){
       const pool=this.actors.filter(a=>this._orderGuest(a));
       for(let i=0;i<Math.min(3,pool.length);i++){
         const item=this._orderItem();
-        this._assignOrder(pool[i].id,i===0&&Number.isInteger(firstItem)?firstItem:item);
+        this._assignOrder(pool[i].id,i===0&&Number.isInteger(firstItem)&&(!recommendOnly||this._random()<.5)?firstItem:item);
       }
       return;
     }

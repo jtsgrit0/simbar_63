@@ -143,15 +143,15 @@ export function createDayDesk({g,asset,t,name}){
     const lines=(portrait,speaker,line,band=false)=>`<div class="pilot-line"><img src="${esc(asset('office/'+portrait))}" alt="" width="58" height="58" draggable="false"><div class="pilot-bubble${band?' pilot-band':''}"><strong>${esc(speaker)}</strong><p>${esc(local(line))}</p></div></div>`;
     const opts=scene?.options.map((option,choice)=>action('deskEncoreChoice',esc(local(option.label)),{choice},!ready,
       `class="pilot-option${p.encoreChoice===choice?' selected':''}" aria-pressed="${p.encoreChoice===choice}"`)).join('')||'';
-    const item=Number.isInteger(effect?.item)?catalog.drinks[effect.item]:null;
+    const item=Number.isInteger(effect?.item)?(m.petSoundsLater?g.menuEntry(effect.item):catalog.drinks[effect.item]):null;
     const isJuly=p.showId==='july';
     const speaker=p.showId==='double'?t('Both bands','두 밴드'):isJuly?t('JulyWantsMore vocalist','줄라이원츠모어 보컬'):t('Freewill vocalist','프리윌 보컬');
-    const cue=p.showId==='double'?t('Second-set intro','2부 소개'):t('First order','첫 주문');
+    const cue=p.showId==='double'?t('Second-set intro','2부 소개'):m.petSoundsLater?t('House recommendation','오늘의 추천 메뉴'):t('First order','첫 주문');
     const ownerLine=scene?lines('pilot-july-jaiden.png',t('Jaiden','제이든'),scene.jaiden):'';
     const bandLine=scene?lines(isJuly?'pilot-july-vocal.png':'pilot-freewill.png',speaker,scene.band,true):'';
     const dialogue=p.showId==='double'?ownerLine+bandLine:bandLine+ownerLine;
-    return `<section class="daydesk petsounds-pilot petsounds-encore" data-owner-index="2" aria-label="${t('Pet Sounds fourth show planning','펫사운즈 4회차 공연 기획')}">
-      <header class="pilot-header"><div><span>SIMBAR / PET SOUNDS</span><h1>${t("Jaiden's booking office",'제이든의 공연 기획실')}</h1></div><div class="pilot-meta"><b>${t('Show 4','4회차')}</b>${action('ui:language',g.language==='en'?'한국어':'English')}${action('lobby',t('Lobby','로비'))}</div></header>
+    return `<section class="daydesk petsounds-pilot petsounds-encore" data-owner-index="2" aria-label="${(m.petSoundsLater?t('Pet Sounds show planning','펫사운즈 공연 기획'):t('Pet Sounds fourth show planning','펫사운즈 4회차 공연 기획'))}">
+      <header class="pilot-header"><div><span>SIMBAR / PET SOUNDS</span><h1>${t("Jaiden's booking office",'제이든의 공연 기획실')}</h1></div><div class="pilot-meta"><b>${t('Show '+p.day,p.day+'회차')}</b>${action('ui:language',g.language==='en'?'한국어':'English')}${action('lobby',t('Lobby','로비'))}</div></header>
       <div class="pilot-main"><figure class="pilot-visual">
         <div class="encore-shows" role="group" aria-label="${t('Choose a lineup','공연 선택')}">${choices}</div>
         <div class="pilot-art"><img src="${esc(asset('office/pilot-jaiden-desk.png'))}" alt="${t('Jaiden at the Pet Sounds desk','펫사운즈 책상 앞의 제이든')}" draggable="false"></div>
@@ -166,7 +166,7 @@ export function createDayDesk({g,asset,t,name}){
   }
   function markup(){
     const m=g.metrics();
-    if(m.petSoundsEncore)return encoreMarkup(m);
+    if(m.petSoundsEncore||m.petSoundsLater)return encoreMarkup(m);
     if(m.petSoundsDoublePilot)return doubleMarkup(m);
     if(m.petSoundsJulyPilot)return julyMarkup();
     return g.metrics().petSoundsPilot?petSoundsMarkup():plan()?.deskVersion===2?campaignMarkup():legacyMarkup();
