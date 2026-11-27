@@ -5,6 +5,13 @@ public static class RuntimeBootstrap
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void Bootstrap()
     {
+#if UNITY_IOS && !UNITY_EDITOR
+        SimBarIOSFastGame.Boot();
+        return;
+#else
+#if UNITY_EDITOR_WIN
+        if (SimBarFastGamePlay.IsSelected) { SimBarFastGamePlay.Boot(); return; }
+#endif
 #if !UNITY_WEBGL || UNITY_EDITOR
         if (GameManager.Instance == null)
         {
@@ -27,6 +34,7 @@ public static class RuntimeBootstrap
             var experienceGO = new GameObject("SimBarExperience");
             experienceGO.AddComponent<SimBarExperience>();
         }
+#endif
     }
 
 }

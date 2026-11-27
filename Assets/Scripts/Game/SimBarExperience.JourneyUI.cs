@@ -312,6 +312,7 @@ public sealed partial class SimBarExperience
                 worldRoot.gameObject.SetActive(showVenue);
         }
         juiHud.SetActive(visible && JourneyIsPlaying);
+        RefreshVenuePresentationControls();
         JourneySetOverlay(juiLobby, visible && JourneyIsLobby);
         JourneySetOverlay(juiGuide, visible && JourneyIsGuide);
         JourneySetOverlay(juiResults, visible && JourneyIsResults);

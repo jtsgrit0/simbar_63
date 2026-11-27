@@ -46,6 +46,7 @@ public sealed partial class SimBarExperience
             settings.name = "Pause Settings Button";
             settings.onClick.AddListener(OpenLanguageSettings);
         }
+        BuildVenuePresentationControls();
         RefreshLanguageUI();
     }
 
@@ -96,6 +97,7 @@ public sealed partial class SimBarExperience
 
     private void OnDestroy()
     {
+        DestroyVenuePresentationArt();
         DestroyMusicRequests();
         DestroyPixelPresentation();
         SimBarLocalization.Changed -= RefreshLanguageUI;

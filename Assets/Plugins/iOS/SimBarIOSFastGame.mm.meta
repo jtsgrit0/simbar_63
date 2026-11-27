@@ -1,0 +1,27 @@
+fileFormatVersion: 2
+guid: cbcb197a207a4bc38737d3be7e0ef40a
+PluginImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  iconMap: {}
+  executionOrder: {}
+  isPreloaded: 0
+  isOverridable: 0
+  isExplicitlyReferenced: 0
+  validateReferences: 1
+  platformData:
+  - first:
+      Any: 
+    second:
+      enabled: 0
+      settings: {}
+  - first:
+      iPhone: iOS
+    second:
+      enabled: 1
+      settings:
+        CompileFlags: -fobjc-arc
+        FrameworkDependencies: WebKit
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
