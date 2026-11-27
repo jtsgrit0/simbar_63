@@ -396,3 +396,15 @@
  .fast-game .petsounds-encore .pilot-bubble strong{display:inline;margin-right:5px}
  .fast-game .petsounds-encore .pilot-bubble p{display:inline;margin:0}
 }
+
+.fast-game .pet-catalog{display:flex;flex-direction:column;gap:4px;padding:5px 8px;overflow:hidden;border:1px solid #716684;border-radius:6px;background:#141422f7;box-sizing:border-box}
+.fast-game .pet-catalog-top{display:flex;align-items:center;gap:7px;min-width:0;flex:none;font-size:clamp(11px,1.35vw,16px)}
+.fast-game .pet-catalog-top select{min-width:0;flex:1;color:#edf0fa;background:#252539;border:1px solid #716684;border-radius:4px;padding:4px}
+.fast-game .pet-catalog-top .pet-menu-back{padding:4px 8px;white-space:nowrap}
+.fast-game .pet-catalog-scroll{min-height:0;overflow-y:auto;overscroll-behavior:contain}
+.fast-game .pet-catalog-scroll ul{margin:0;padding:0;list-style:none}
+.fast-game .pet-catalog-scroll li{display:flex;justify-content:space-between;gap:8px;padding:4px 6px;border-top:1px solid #34344b;font-size:clamp(11px,1.35vw,16px)}
+.fast-game .pet-catalog-scroll li strong{white-space:nowrap;color:#ffd178}
+.fast-game .pet-catalog-scroll small{display:block}
+.fast-game .pet-catalog-scroll p{margin:4px 6px;font-size:12px}
+.fast-game .order-dialog-actions .pet-menu-open{white-space:nowrap}

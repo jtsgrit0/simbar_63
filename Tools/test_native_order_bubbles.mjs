@@ -33,10 +33,18 @@ game.tick(.2);assert.equal(game.act('pourStop').success,true);
 assert(!pixelPendingOrders(state()).some(o=>o.actor.id===manual),'Manual pour serving must remove the same customer bubble.');
 const neighbours=Array.from({length:5},(_,i)=>({...actor,id:'neighbour-'+i}));
 const cards=pixelOrderBubblePlacements({phase:'playing',actors:neighbours,orders:neighbours.map((a,i)=>({id:a.id,item:i}))},()=>({x:300,y:250}));
-for(let i=0;i<cards.length;i++)for(let j=i+1;j<cards.length;j++)assert(cards[i].x+cards[i].width<cards[j].x||cards[j].x+cards[j].width<cards[i].x||cards[i].y+cards[i].height<cards[j].y||cards[j].y+cards[j].height<cards[i].y,'Nearby customer cards must remain separately visible.');
-assert(cards.every(b=>b.tipX===300&&b.tipY===cards[0].tipY),'Dodged cards must still point at the actual customer head.');
+assert.equal(cards.length,5,'Crowded customers still have separate order records.');
+assert(cards.every(b=>b.tipX===300&&b.neckX===b.tipX&&b.tipY-b.y-b.height===4),
+  'Every tail stays short and vertical even when heads overlap.');
+const spread=pixelOrderBubblePlacements({phase:'playing',actors:neighbours,orders:neighbours.map((a,i)=>({id:a.id,item:i}))},
+  a=>({x:300+Number(a.id.at(-1))*11,y:250+Number(a.id.at(-1))*7}));
+assert(spread.every((b,i)=>b.tipX===300+i*11&&b.tipY===cards[0].tipY+i*7&&b.neckX===b.tipX));
+const newOrderState={phase:'playing',actors:[actor],orders:[{id:actor.id,item:6}]};
+assert.equal(pixelPendingOrders({...newOrderState,owner:2}).length,1);
+for(const owner of [0,1])assert.equal(pixelPendingOrders({...newOrderState,owner}).length,0);
+assert.equal(pixelPendingOrders({...newOrderState,owner:2,orders:[{id:actor.id,item:76}]}).length,0);
 
-function canvas(){const context=new Proxy({draws:[],createLinearGradient(){return{addColorStop(){}};},drawImage(...args){this.draws.push(args);}},{get(o,key){return key in o?o[key]:(()=>{});}});const value={width:960,height:558,style:{},getContext(){return context;},getBoundingClientRect(){return{width:960,height:558};},ctx:context};context.canvas=value;return value;}
+function canvas(){const context=new Proxy({draws:[],rects:[],fillRect(...args){this.rects.push([this.fillStyle,...args]);},createLinearGradient(){return{addColorStop(){}};},drawImage(...args){this.draws.push(args);}},{get(o,key){return key in o?o[key]:(()=>{});}});const value={width:960,height:558,style:{},getContext(){return context;},getBoundingClientRect(){return{width:960,height:558};},ctx:context};context.canvas=value;return value;}
 globalThis.document={createElement:()=>canvas()};
 globalThis.ResizeObserver=class{observe(){}disconnect(){}};
 const wardrobe={id:'wardrobe',width:256,height:512},icons={id:'orders',width:192,height:32};
@@ -46,5 +54,9 @@ const render=orders=>{target.ctx.draws=[];world.render(0,{phase:'playing',actors
 assert.deepEqual(render([{id:'test',item:2}]).map(args=>args.slice(1,5)),[[64,0,32,32]],'The actual canvas must sample the ordered pizza cell.');
 assert.equal(render([]).length,0,'Serving clears the drawn icon on the very next frame.');
 assert.deepEqual(render([{id:'test',item:1}]).map(args=>args.slice(1,5)),[[32,0,32,32]],'A later new order must draw its own cocktail rather than stale art.');
+target.ctx.rects=[];target.ctx.draws=[];
+world.render(0,{...newOrderState,owner:2,orders:[{id:actor.id,item:6}]});
+assert(target.ctx.rects.some(draw=>draw[0]==='#e7a55c'),'The new food draws a menu-category icon rather than an out-of-bounds atlas cell.');
+assert(!target.ctx.draws.some(args=>args[0]===icons));
 world.destroy();
 console.log('Order bubbles: live assignment, serve/expiry/closing removal, mapping and movement passed.');

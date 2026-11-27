@@ -1,4 +1,5 @@
 import {catalog} from './catalog.js';
+import {menuForOwner} from './petsounds-menu.js';
 import {createDailyPoster,DAILY_POSTER_INDEX} from './daily-poster.js';
 import {Booking,clamp,int,count} from './booking.js';
 import {Campaign} from './campaign.js';
@@ -90,6 +91,8 @@ export class SimBarGame{
   get reaction(){return this.floor.reaction;}
   get message(){return this._message[this.language==='en'?1:0]||'';}
   get cash(){return this.state.money;}
+  get activeMenu(){return menuForOwner(this.owner);}
+  menuEntry(index){return Number.isInteger(index)&&index>=0?this.activeMenu[index]:undefined;}
   get spectatorFeedback(){return this._spectatorScores||{satisfaction:0,performance:0,serviceCoverage:0,participation:0};}
   setMusicPlaybackActive(active){
     if(typeof active!=='boolean')return false;
@@ -235,10 +238,10 @@ export class SimBarGame{
         // A campaign can legitimately finish the queue between timed arrivals.
         // Preserve that saved gap instead of granting three new orders on reload.
         restoredEmptyQueue=Booking.isCampaign(this.journey.booking)&&restored.length>=this.actors.length-3&&Array.isArray(n.orders)&&n.orders.length===0;
-        this.orders=Array.isArray(n.orders)?n.orders.filter(o=>this.actors.some(a=>a.id===o.id)&&int(o.item,0,catalog.drinks.length-1)===o.item).slice(0,7).map(o=>({...o,patience:clamp(o.patience,0,200),maxPatience:clamp(o.maxPatience,1,200)})):[];
+        this.orders=Array.isArray(n.orders)?n.orders.filter(o=>this.actors.some(a=>a.id===o.id)&&!!this.menuEntry(o.item)).slice(0,7).map(o=>({...o,patience:clamp(o.patience,0,200),maxPatience:clamp(o.maxPatience,1,200)})):[];
         this.crew=Array.isArray(n.crew)?n.crew.filter(id=>this.actors.some(a=>a.id===id)).slice(0,5):[];
         this.escort=n.escort&&this.actors.some(a=>a.id===n.escort.worker)?n.escort:null;
-        this._seed=(n.seed>>>0)||this._seed;this.elapsed=clamp(n.elapsed,0,1e8);this._requestTimer=finite(n.requestTimer,3,0,10);this.selectedItem=int(n.selectedItem,0,catalog.drinks.length-1);this._eventSerial=int(n.eventSerial);
+        this._seed=(n.seed>>>0)||this._seed;this.elapsed=clamp(n.elapsed,0,1e8);this._requestTimer=finite(n.requestTimer,3,0,10);this.selectedItem=this.menuEntry(n.selectedItem)?n.selectedItem:0;this._eventSerial=int(n.eventSerial);
       }
       this.journey.feedback=SpectatorFeedback.sanitize(this.journey.feedback,{session:this.journey.session,owner:this.owner});
       restoreDrunkIncident(this.floor.guestIncident,this.actors);
@@ -371,7 +374,7 @@ export class SimBarGame{
         if(Booking.isPetSoundsEncore(j.booking,this.owner,j.completedNights)&&!Encore.effect(j.booking))return this._done(false,'desk_incomplete');
         if(Booking.isDesk(j.booking)){r=Booking.lockDesk(j.booking,j.bookingCareer);if(!r.success)return this._done(false,r.code);}else Booking.lock(j.booking);
         this._newNight();break;
-      case'menuItem':this.selectedItem=int(p.item,0,catalog.drinks.length-1);if(this.pauseReason==='menu'){this.paused=false;this.pauseReason='';}r=this._startPour(this.selectedItem);break;
+      case'menuItem':if(!this.menuEntry(p.item))return this._done(false,'unavailable');this.selectedItem=p.item;if(this.pauseReason==='menu'){this.paused=false;this.pauseReason='';}r=this._startPour(this.selectedItem);break;
       case'prepare':r=this._startPour(this.orders[0]?.item??this.selectedItem);break;
       case'pourStop':r=this._stopPour();break;
       case'hire':case'upgrade':case'event':case'payDebt':r=this._manage(type,idx);if(!r.success)this._say(...(messages[r.code]||messages.unavailable));break;
@@ -589,7 +592,7 @@ export class SimBarGame{
     if(festival?.actionsUsed&&this._random()<Festival.modifiers(festival,this.state.satisfaction,this.state.performance).cocktailBoost)return this._random()<.5?0:1;
     const show=Booking.isCampaign(this.journey.booking)?Campaign.show(this.journey.booking.showId):null;
     if(show&&this._random()<.72)return show.preferredItems[Math.floor(this._random()*show.preferredItems.length)];
-    return Math.floor(this._random()*catalog.drinks.length);
+    return Math.floor(this._random()*this.activeMenu.length);
   }
   _seedOrders(firstItem){
     this.orders=[];
@@ -604,7 +607,7 @@ export class SimBarGame{
     for(const [id,item]of[[1,0],[4,1],[8,2]])this._assignOrder('patron-'+id,Booking.isCampaign(this.journey.booking)?this._orderItem():item);
   }
   _assignOrder(id,item){
-    const a=this.actors.find(a=>a.id===id);if(!a||a.visible===false||a.drunkIncident||this.orders.some(o=>o.id===id))return;
+    const a=this.actors.find(a=>a.id===id);if(!a||a.visible===false||a.drunkIncident||!this.menuEntry(item)||this.orders.some(o=>o.id===id))return;
     const s=this.state,patience=52+this._random()*16+(this._onDuty(1)?18:0)+s.upgrades[2]*6+(s.activeEvent===0?8:0)+(this.journey.challenge?-12:18);
     this.orders.push({id,name:a.name,item,patience,maxPatience:patience});this._routeOrders();
   }
@@ -624,12 +627,12 @@ export class SimBarGame{
   _finishPour(quality){const p=this.pour;if(!p||this.orders[0]?.id!==p.orderId){this.pour=null;return{success:false,code:'stale_order'};}this.pour=null;this._inputGuard=.15;this.lastQuality=quality;return this._serve(p.item,false,quality);}
   _mistake(){const j=this.journey;j.mistakes++;j.combo=0;j.manualStreak=0;j.feverSeconds=0;j.feverCharge=0;}
   _serve(item,automatic,quality,context=null){
-    const o=this.orders[0],s=this.state,j=this.journey;if(!o||o.item!==item||!this.playing||this.paused)return{success:false,code:'wrong_item'};
+    const o=this.orders[0],s=this.state,j=this.journey,entry=this.menuEntry(item);if(!entry||!o||o.item!==item||!this.playing||this.paused)return{success:false,code:'wrong_item'};
     const viewService=context?.viewService===true;
     if(viewService&&(!this.viewServiceActive||context.order!==o||!automatic||this.pour))return{success:false,code:'stale_order'};
     this.orders.shift();const qualityTip=automatic?1:quality>=.9?1.4:quality>=.5?1:0,revenue=1+s.upgrades[0]*.08+(s.activeEvent===0?.10:s.activeEvent===2?.15:0),tips=1+s.upgrades[1]*.1+(s.activeEvent===1?.4:s.activeEvent===2?.2:0);
     const show=Booking.isCampaign(j.booking)?Campaign.show(j.booking.showId):null,showTips=show?show.tipMultiplier*(show.preferredItems.includes(item)?1.2:1):1;
-    const tip=viewService?0:round(catalog.drinks[item].price*clamp(o.patience/30,0,1)*.45*tips*showTips*(j.feverSeconds>0?1.75:1)*qualityTip),sale=round(catalog.drinks[item].price*revenue),income=tip+sale;
+    const tip=viewService?0:round(entry.price*clamp(o.patience/30,0,1)*.45*tips*showTips*(j.feverSeconds>0?1.75:1)*qualityTip),sale=round(entry.price*revenue),income=tip+sale;
     s.money=clamp(s.money+income,0,1e9);s.fans+=automatic||quality>=.5?1+(!automatic&&quality>=.9?1:0):0;s.pours++;
     SpectatorFeedback.service(j.feedback,{guestId:o.id,item,quality,automatic,patience:o.patience,maxPatience:o.maxPatience,preferred:!!show?.preferredItems.includes(item),crowdCount:this.festival.liveAttendance,capacity:Audience.capacity(this.owner)});this._refreshFeedback();
     j.orders++;j.drinkIncome+=income;if(!automatic){if(quality<.5)this._mistake();else{j.combo++;j.bestCombo=Math.max(j.bestCombo,j.combo);if(quality>=.9)j.manualPerfects++;j.manualStreak++;let multiplier=1+Math.min(20,j.combo-1)*.05;if(j.feverSeconds>0)multiplier*=1.3;j.score+=round((70+130*quality)*multiplier);j.feverCharge=clamp(j.manualStreak/5,0,1);if(!j.feverSeconds&&j.manualStreak>=5&&s.performance>=.72){j.feverSeconds=12;j.manualStreak=0;j.feverCharge=0;}}}

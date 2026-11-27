@@ -1,0 +1,52 @@
+import assert from 'node:assert/strict';
+import {catalog,SimBarGame} from './WebGLTemplate/FastGame/core.js';
+import {menuForOwner,PET_SOUNDS_MENU_GROUPS} from './WebGLTemplate/FastGame/petsounds-menu.js';
+import {launchPreparedDesk} from './native_test_workflow.mjs';
+
+const pet=menuForOwner(2),get=(en)=>pet.find(x=>x.en===en);
+assert.equal(pet.length,76);
+assert.equal(new Set(pet.map(x=>x.en)).size,76);
+assert(pet.every((x,i)=>x.index===i&&x.ko&&x.en&&x.price>0));
+assert.equal(menuForOwner(0),catalog.drinks);
+assert.equal(menuForOwner(1),catalog.drinks);
+assert.equal(catalog.drinks[2].price,9);
+assert.equal(pet[2].price,10);
+assert.equal(pet[3].price,15);
+assert.equal(pet[4].price,15);
+assert.equal(get('Food & Beer Set').price,25);
+assert.equal(get('Kelly Draft').price,7);
+assert.equal(get('Guinness Draft').price,10);
+assert.equal(get('Fogcutter').price,12);
+assert.equal(get('A Free Day Pale Ale').price,10);
+assert.equal(get('Nojito').price,14);
+assert.equal(get('Hawaiian Half Pizza').isFood,true);
+assert.equal(get('Strawberry Margarita').price,15);
+assert.equal(get('Dry Martini').price,14);
+assert.equal(get('Dirty Martini').price,14);
+assert(PET_SOUNDS_MENU_GROUPS.every(group=>pet.some(x=>x.group===group.id)));
+
+const memory=new Map(),storage={getItem:k=>memory.get(k)||null,setItem:(k,v)=>memory.set(k,v)};
+const g=new SimBarGame({storage,seed:2});
+g.act('owner',{index:2});g.act('start');launchPreparedDesk(g);
+while(g.phase==='guide')g.act('guide');
+const seen=new Set(Array.from({length:16000},()=>g._orderItem()));
+assert.equal(seen.size,pet.length);
+const item=get('Kelly Draft').index;
+g.orders[0].item=item;g.save();
+const loaded=new SimBarGame({storage,seed:2});
+loaded.act('continue');
+assert.equal(loaded.orders[0].item,item);
+assert(loaded.act('prepare').success);
+assert.equal(loaded.pour.item,item);
+const cash=loaded.cash;
+assert(loaded._finishPour(.2).success);
+assert.equal(loaded.cash-cash,7);
+for(const owner of [0,1]){
+ const other=new SimBarGame({seed:2,storage:{getItem:()=>null,setItem(){}}});
+ other.act('owner',{index:owner});
+ other.act('start');launchPreparedDesk(other);
+ while(other.phase==='guide')other.act('guide');
+ assert(Array.from({length:1000},()=>other._orderItem()).every(index=>index<6));
+ assert.equal(other.act('menuItem',{item}).code,'unavailable');
+}
+console.log('PASS: 76 distinct Pet Sounds options, price checks, venue isolation, order reload, preparation and settlement');

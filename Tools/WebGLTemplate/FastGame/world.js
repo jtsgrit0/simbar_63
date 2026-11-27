@@ -2,6 +2,7 @@
  * The HUD-free venue plate is static art; live actor behavior and effects remain
  * in core.js. Employee movement, guest exit, paper debt and rewards are unchanged. */
 import {ownerVenue} from './owner-venues.js';
+import {menuForOwner} from './petsounds-menu.js';
 import {performingRoster,performingFrame,bandPerformanceProfile} from './band-models.js';
 const REF_W=960,REF_H=558,ORTHO=8.4;
 const EYE=[13,21,-25],LOOK=[0,1.45,.15];
@@ -245,9 +246,10 @@ export function pixelBandJump(role,action,seconds,active=true,intensity=1){
 export function pixelPendingOrders(state={},columns=6){
   if(state.phase!=='playing')return[];
   const actors=new Map((state.actors||[]).filter(a=>a.visible!==false).map(a=>[a.id,a])),seen=new Set();
+  const menu=menuForOwner(state.owner);
   return(state.orders||[]).flatMap(order=>{
-    const actor=actors.get(order.id),item=Number(order.item);
-    if(!actor||seen.has(order.id)||!Number.isInteger(item)||item<0||item>=columns)return[];
+    const actor=actors.get(order.id),item=order.item;
+    if(!actor||seen.has(order.id)||!Number.isInteger(item)||item<0||!menu[item]||item>=columns&&state.owner!==2)return[];
     seen.add(order.id);return[{actor,item}];
   });
 }
@@ -263,19 +265,13 @@ export function pixelOrderBubbleLayout(actor,point,meta={}){
   return{x:Math.round(point.x-width/2),y:Math.round(point.y-headOffset-3-tail-bodyHeight),width,height:bodyHeight,tail};
 }
 
-// Neighbouring customers can share a queue lane. Move only their cards sideways
-// when needed; the tail remains attached to each customer's own head anchor.
+// The card and its short tail move together with the customer's head.
 export function pixelOrderBubblePlacements(state,pointFor,meta={},columns=6){
-  const placed=[],steps=[[0,0],[-36,0],[36,0],[-72,0],[72,0],[0,-34],[-36,-34],[36,-34],[0,-68]];
-  for(const order of pixelPendingOrders(state,columns)){
+  return pixelPendingOrders(state,columns).map(order=>{
     const base=pixelOrderBubbleLayout(order.actor,pointFor(order.actor),meta);
-    const free=b=>!placed.some(p=>b.x<p.x+p.width+2&&b.x+b.width+2>p.x&&b.y<p.y+p.height+2&&b.y+b.height+2>p.y);
-    const candidates=steps.map(([dx,dy])=>({...base,x:base.x+dx,y:base.y+dy}));
-    const b=candidates.find(b=>b.x>=2&&b.x+b.width<=REF_W-2&&b.y>=2&&free(b))||base;
     const tipX=base.x+base.width/2,tipY=base.y+base.height+base.tail;
-    placed.push({...order,...b,tipX,tipY,neckX:clamp(tipX,b.x+5,b.x+b.width-5)});
-  }
-  return placed;
+    return{...order,...base,tipX,tipY,neckX:tipX};
+  });
 }
 
 export function createWorld(canvas,{assets={},getState=()=>({})}={}){
@@ -499,20 +495,39 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
     ellipse(ctx,p.x,p.y+1,4,1,'#16182360');
     ctx.drawImage(sheet,p.column*fw,p.row*fh,fw,fh,Math.round(p.x-(meta.footX??32)*dw/fw),Math.round(p.y-(meta.footY??60)*dh/fh),dw,dh);
   }
+  function drawMenuCategoryIcon(item,x,y){
+    const rect=(color,dx,dy,w,h)=>{ctx.fillStyle=color;ctx.fillRect(x+dx,y+dy,w,h);};
+    if(item.isFood){
+      rect('#293548',3,16,18,3);rect('#293548',6,19,12,2);
+      rect('#293548',6,11,12,5);rect('#293548',9,7,6,4);rect('#293548',11,5,2,2);
+      rect('#e7a55c',8,12,8,3);rect('#ffe5a6',10,8,4,4);
+    }else if(['draft','bottle','zeroBeer'].includes(item.group)){
+      rect('#293548',5,5,12,15);rect('#293548',17,9,4,8);rect('#fff5d8',17,11,2,4);
+      rect('#d28c39',7,9,8,9);rect('#ffe5a6',7,6,8,4);
+    }else{
+      rect('#293548',4,5,16,3);rect('#293548',6,8,12,3);rect('#293548',8,11,8,3);
+      rect('#293548',11,14,2,6);rect('#293548',8,20,8,2);
+      rect('#b75070',8,8,8,2);rect('#b75070',10,10,4,2);
+    }
+  }
   function orderBubbles(state){
     const definition=assets.spriteMeta?.atlases?.orders,columns=definition?.columns||6;
     const orders=pixelOrderBubblePlacements(state,a=>actorPoint(a,finite(a.y)),assets.spriteMeta,columns);if(!orders.length)return;
     const sheet=assets.atlases?.orders;
     if(!ready(sheet))throw new Error('The order icon atlas must finish loading before orders are shown.');
     const fw=definition?.frameWidth||32,fh=definition?.frameHeight||32;
-    for(const b of orders){
+    const menu=menuForOwner(state.owner);
+    // Keep the first order readable when head-anchored cards overlap.
+    for(const b of orders.slice().reverse()){
       if(b.x+offsetX+b.width<0||b.x+offsetX>width||b.y+b.height+b.tail<0||b.y>height)continue;
       const x=b.x,y=b.y,w=b.width,h=b.height,cx=b.neckX;
       ctx.fillStyle='#182333';ctx.fillRect(x+2,y,w-4,h);ctx.fillRect(x,y+2,w,h-4);
       polygon(ctx,[{x:cx-4,y:y+h-1},{x:cx+4,y:y+h-1},{x:b.tipX,y:b.tipY}],'#182333');
       ctx.fillStyle='#fff5d8';ctx.fillRect(x+2,y+1,w-4,h-2);ctx.fillRect(x+1,y+2,w-2,h-4);
       polygon(ctx,[{x:cx-2,y:y+h-1},{x:cx+2,y:y+h-1},{x:b.tipX,y:b.tipY-2}],'#fff5d8');
-      ctx.drawImage(sheet,b.item*fw,0,fw,fh,x+4,y+2,24,24);
+      if(b.item<columns)ctx.drawImage(sheet,b.item*fw,0,fw,fh,x+4,y+2,24,24);
+      else drawMenuCategoryIcon(menu[b.item],x+4,y+2);
+
     }
   }
   function paper(state,dt){
