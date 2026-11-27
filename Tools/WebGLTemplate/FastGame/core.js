@@ -2,6 +2,7 @@ import {catalog} from './catalog.js';
 import {createDailyPoster,DAILY_POSTER_INDEX} from './daily-poster.js';
 import {Booking,clamp,int,count} from './booking.js';
 import {Campaign} from './campaign.js';
+import {Encore} from './desk-encore.js';
 import {Audience} from './audience.js';
 import {Festival} from './festival.js';
 import {Inspection} from './inspection.js';
@@ -136,10 +137,13 @@ export class SimBarGame{
     const p=this.journey.booking,m=Booking.forecast(p);
     if(Booking.isCampaign(p)){
       const show=Campaign.show(p.showId);
+      const julyPilot=Booking.isPetSoundsJulyPilot(p,this.owner,this.journey.completedNights);
+      const doublePilot=Booking.isPetSoundsDoublePilot(p,this.owner,this.journey.completedNights);
+      const encorePilot=Booking.isPetSoundsEncore(p,this.owner,this.journey.completedNights);
       return{...m,deskVersion:2,campaignStage:p.campaignStage,show,campaignOptions:Booking.campaignOptions(p),
         artistFee:m.artistFee??m.fee??0,netTicketIncome:m.netIncome??0,ticketIncomeMin:Math.floor(m.ticketIncome*.8),
         netTicketIncomeMin:Math.floor(m.ticketIncome*.8)-(m.artistFee??m.fee??0),allowedTracks:show?show.tracks:[],
-        canLaunch:!p.locked&&!p.completed&&!!show&&p.deskDoneMask===3,hour:Booking.hour(p),
+        canLaunch:!p.locked&&!p.completed&&!!show&&p.deskDoneMask===3&&(!julyPilot||!!p.entranceMusicChoice)&&(!doublePilot||!!p.secondSetIntro)&&(!encorePilot||!!Encore.effect(p)),hour:Booking.hour(p),petSoundsPilot:Booking.isPetSoundsPilot(p,this.owner,this.journey.completedNights),petSoundsJulyPilot:julyPilot,petSoundsDoublePilot:doublePilot,petSoundsEncore:encorePilot,
         lineup:show?show.bandIndices.map(i=>catalog.bands[i]):[],ticketTier:p.ticketTier,venue:Number.isInteger(m.venueOwner)?ownerVenue(m.venueOwner):catalog.venues[p.venue]};
     }
     if(Booking.isDesk(p))return{...m,deskVersion:1,freewillSelected:p.freewillSelected,deskDoneMask:p.deskDoneMask,
@@ -287,6 +291,24 @@ export class SimBarGame{
         if(this.phase!=='planning')return this._done(false);
         r=type==='deskSelect'?Booking.deskSelect(j.booking,p.selected):Booking.deskWork(j.booking,p.task);
         this.state.clock=Booking.hour(j.booking);this._say(...(messages[r.code]||messages.unavailable));break;
+      case'deskSoundcheck':
+        if(this.phase!=='planning'||!Booking.isPetSoundsPilot(j.booking,this.owner,j.completedNights))return this._done(false);
+        r=Booking.setPilotSoundcheck(j.booking,p.minutes);if(!r.success)return this._done(false,r.code);
+        this.state.clock=Booking.hour(j.booking);break;
+      case'deskEntranceChoice':
+        if(this.phase!=='planning'||!Booking.isPetSoundsJulyPilot(j.booking,this.owner,j.completedNights))return this._done(false);
+        r=Booking.setPilotEntranceChoice(j.booking,p.choice);if(!r.success)return this._done(false,r.code);
+        this.state.clock=Booking.hour(j.booking);break;
+      case'deskSecondSetIntro':
+        if(this.phase!=='planning'||!Booking.isPetSoundsDoublePilot(j.booking,this.owner,j.completedNights))return this._done(false);
+        if(p.speaker!=='freewill'&&p.speaker!=='owner')return this._done(false);
+        r=Booking.selectShow(j.booking,'double');if(!r.success)return this._done(false,r.code);
+        r=Booking.setPilotSecondSetIntro(j.booking,p.speaker);if(!r.success)return this._done(false,r.code);
+        this.state.clock=Booking.hour(j.booking);break;
+      case'deskEncoreChoice':
+        if(this.phase!=='planning'||!Booking.isPetSoundsEncore(j.booking,this.owner,j.completedNights))return this._done(false);
+        r=Booking.setEncoreChoice(j.booking,p.choice);if(!r.success)return this._done(false,r.code);
+        this.state.clock=Booking.hour(j.booking);break;
       case'selectShow':
         if(this.phase!=='planning'||!Booking.isCampaign(j.booking))return this._done(false);
         r=Booking.selectShow(j.booking,p.showId);this.state.clock=Booking.hour(j.booking);
@@ -304,6 +326,9 @@ export class SimBarGame{
         r=Booking.setTicket(j.booking,p.tier)||r;this.state.clock=Booking.hour(j.booking);break;
       case'launch':
         if(this.phase!=='planning'||!this._activePlan())return this._done(false);
+        if(Booking.isPetSoundsJulyPilot(j.booking,this.owner,j.completedNights)&&!j.booking.entranceMusicChoice)return this._done(false,'desk_incomplete');
+        if(Booking.isPetSoundsDoublePilot(j.booking,this.owner,j.completedNights)&&!j.booking.secondSetIntro)return this._done(false,'desk_incomplete');
+        if(Booking.isPetSoundsEncore(j.booking,this.owner,j.completedNights)&&!Encore.effect(j.booking))return this._done(false,'desk_incomplete');
         if(Booking.isDesk(j.booking)){r=Booking.lockDesk(j.booking,j.bookingCareer);if(!r.success)return this._done(false,r.code);}else Booking.lock(j.booking);
         this._newNight();break;
       case'menuItem':this.selectedItem=int(p.item,0,catalog.drinks.length-1);if(this.pauseReason==='menu'){this.paused=false;this.pauseReason='';}r=this._startPour(this.selectedItem);break;
@@ -341,6 +366,18 @@ export class SimBarGame{
       const previousVenue=j.booking?.venue??(this.owner===2?1:0);j.booking=Booking.newCampaignPlan(j.day,int(previousVenue,0,3),this._campaignContext());
       j.dayOpeningCash=this.state.money;j.hasDayOpeningCash=true;
     }
+    if(Booking.isPetSoundsPilot(j.booking,this.owner,j.completedNights)&&!j.booking.showId)Booking.selectShow(j.booking,'freewill');
+    if(Booking.isPetSoundsJulyPilot(j.booking,this.owner,j.completedNights)&&!j.booking.showId)Booking.selectShow(j.booking,'july');
+    if(Booking.isPetSoundsJulyPilot(j.booking,this.owner,j.completedNights)&&j.booking.entranceMusicChoice){
+      Booking.setPilotEntranceChoice(j.booking,j.booking.entranceMusicChoice);
+    }
+    if(Booking.isPetSoundsDoublePilot(j.booking,this.owner,j.completedNights)&&j.booking.secondSetIntro){
+      Booking.setPilotSecondSetIntro(j.booking,j.booking.secondSetIntro);
+    }
+    if(Booking.isPetSoundsEncore(j.booking,this.owner,j.completedNights)){
+      if(!j.booking.encoreSeed)j.booking.encoreSeed=freshScheduleSeed()||1;
+      if(Encore.effect(j.booking))Booking.setEncoreChoice(j.booking,j.booking.encoreChoice);
+    }
     j.challenge=challenge;this.phase='planning';this.paused=true;this.pauseReason='planning';this.state.clock=Booking.hour(j.booking);
   }
   _newNight(){
@@ -356,7 +393,7 @@ export class SimBarGame{
     j.feedback=SpectatorFeedback.create({session:j.session,owner:this.owner});
     j.inspection=Inspection.create({session:j.session,day:j.day,owner:this.owner,seed:scheduleSeed===undefined?this._seed:mixScheduleSeed(scheduleSeed,this.owner,j.day,j.session,0x70617472)});
     if(Booking.isCampaign(j.booking)){const tracks=this.metrics().allowedTracks;if(j.booking.showId==='double'||!tracks.includes(this.state.playlist))this.state.playlist=tracks[0]??0;}
-    this._buildActors();this._refreshFeedback();this.crew=[];this.escort=null;this.effects=[];this.pour=null;this._seedOrders();this._requestTimer=3*(j.challenge?.72:1.18)*this.metrics().orderIntervalMultiplier;
+    this._buildActors();this._refreshFeedback();this.crew=[];this.escort=null;this.effects=[];this.pour=null;this._seedOrders(Encore.effect(j.booking)?.item);this._requestTimer=3*(j.challenge?.72:1.18)*this.metrics().orderIntervalMultiplier;
     this.phase=j.guidePending?'guide':'playing';this.paused=j.guidePending;this.pauseReason=this.paused?'guide':'';this._say('영업 시작! 주문과 공연을 멋지게 운영해 보세요.','The show is open! Serve guests and keep the crowd glowing.');
   }
   _ensureReaction(scheduleSeed){if(!this.floor.reaction){const gameplaySeed=Math.floor(this._random()*0x7fffffff)||1;this.floor.reaction=Challenges.newState(scheduleSeed??gameplaySeed,180-this.journey.secondsLeft);}}
@@ -512,10 +549,15 @@ export class SimBarGame{
     if(show&&this._random()<.72)return show.preferredItems[Math.floor(this._random()*show.preferredItems.length)];
     return Math.floor(this._random()*catalog.drinks.length);
   }
-  _seedOrders(){
+  _seedOrders(firstItem){
     this.orders=[];
     if(this._usesAudience()){
-      const pool=this.actors.filter(a=>this._orderGuest(a));for(let i=0;i<Math.min(3,pool.length);i++)this._assignOrder(pool[i].id,this._orderItem());return;
+      const pool=this.actors.filter(a=>this._orderGuest(a));
+      for(let i=0;i<Math.min(3,pool.length);i++){
+        const item=this._orderItem();
+        this._assignOrder(pool[i].id,i===0&&Number.isInteger(firstItem)?firstItem:item);
+      }
+      return;
     }
     for(const [id,item]of[[1,0],[4,1],[8,2]])this._assignOrder('patron-'+id,Booking.isCampaign(this.journey.booking)?this._orderItem():item);
   }

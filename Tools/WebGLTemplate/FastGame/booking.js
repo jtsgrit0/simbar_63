@@ -2,6 +2,7 @@ import {catalog} from './catalog.js';
 import {createDailyPoster,DAILY_POSTER_INDEX} from './daily-poster.js';
 import {Campaign} from './campaign.js';
 import {Audience} from './audience.js';
+import {Encore} from './desk-encore.js';
 
 export const clamp=(n,a,b)=>Math.max(a,Math.min(b,Number.isFinite(+n)?+n:a));
 export const int=(n,a=0,b=1e9)=>Math.trunc(clamp(n,a,b));
@@ -52,6 +53,54 @@ export const Booking={
   },
   isDesk,
   isCampaign,
+  isPetSoundsPilot(p,owner,completedNights){
+    return owner===2&&completedNights===0&&p?.day===1&&isCampaign(p)&&!p.completed&&!p.locked&&(!p.showId||p.showId==='freewill');
+  },
+  isPetSoundsJulyPilot(p,owner,completedNights){
+    return owner===2&&completedNights===1&&p?.day===2&&isCampaign(p)&&!p.completed&&!p.locked&&(!p.showId||p.showId==='july');
+  },
+  isPetSoundsDoublePilot(p,owner,completedNights){
+    return owner===2&&completedNights===2&&p?.day===3&&isCampaign(p)&&!p.completed&&!p.locked&&(!p.showId||p.showId==='double');
+  },
+  setPilotSecondSetIntro(p,speaker){
+    const e=deskError(p);if(e)return result(e);
+    if((speaker!=='freewill'&&speaker!=='owner')||!isCampaign(p)||p.showId!=='double')return result('unavailable');
+    for(const task of [0,1])if(!(p.deskDoneMask&(1<<task))){
+      const prepared=this.deskWork(p,task);if(!prepared.success)return prepared;
+    }
+    p.secondSetIntro=speaker;
+    return result('second_set_intro_saved',true);
+  },
+  isPetSoundsEncore(p,owner,completedNights){
+    return owner===2&&completedNights>=3&&p?.day===4&&isCampaign(p)&&!p.completed&&!p.locked;
+  },
+  setEncoreChoice(p,choice){
+    const e=deskError(p);if(e)return result(e);
+    if((choice!==0&&choice!==1)||!Encore.scene(p)||!this.campaignOptions(p).some(s=>s.id===p.showId&&!s.locked))return result('unavailable');
+    for(const task of [0,1])if(!(p.deskDoneMask&(1<<task))){
+      const prepared=this.deskWork(p,task);if(!prepared.success)return prepared;
+    }
+    p.encoreChoice=choice;
+    return result('encore_choice_saved',true);
+  },
+  setPilotEntranceChoice(p,choice){
+    const e=deskError(p);if(e)return result(e);
+    if((choice!=='owner'&&choice!=='band')||!isCampaign(p)||p.showId!=='july')return result('unavailable');
+    for(const task of [0,1])if(!(p.deskDoneMask&(1<<task))){
+      const prepared=this.deskWork(p,task);if(!prepared.success)return prepared;
+    }
+    p.entranceMusicChoice=choice;
+    return result('entrance_choice_saved',true);
+  },
+  setPilotSoundcheck(p,minutes){
+    const e=deskError(p);if(e)return result(e);
+    if((minutes!==1050&&minutes!==1080)||!isCampaign(p)||p.showId!=='freewill')return result('unavailable');
+    for(const task of [0,1])if(!(p.deskDoneMask&(1<<task))){
+      const prepared=this.deskWork(p,task);if(!prepared.success)return prepared;
+    }
+    p.soundcheckMinutes=minutes;
+    return result('soundcheck_saved',true);
+  },
   campaignOptions(p){
     const context=p?.campaignContext||campaignContext();
     return Campaign.shows.map(show=>{
@@ -66,7 +115,7 @@ export const Booking={
     const e=deskError(p);if(e)return result(e);if(!isCampaign(p))return result('invalid_plan');
     const option=this.campaignOptions(p).find(show=>show.id===id);if(!option)return result('invalid_show');
     if(option.locked)return result('show_locked',false,{reason:option.reason,reasonKo:option.reasonKo,reasonEn:option.reasonEn,requiredNights:option.requiredNights});
-    if(p.showId!==id){p.showId=id;p.freewillSelected=true;p.deskDoneMask=0;}
+    if(p.showId!==id){p.showId=id;p.freewillSelected=true;p.deskDoneMask=0;delete p.soundcheckMinutes;delete p.entranceMusicChoice;delete p.secondSetIntro;delete p.encoreChoice;}
     return result('show_selected',true,{showId:id,bandIndex:option.bandIndices[0]});
   },
   refreshCampaignContext(p,context){
@@ -206,6 +255,11 @@ export const Booking={
     if(isCampaign(p)){
       p.campaignContext=campaignContext(p.campaignContext);p.campaignStage=int(p.campaignStage,1,3);
       p.showId=Campaign.show(p.showId)?.id||'';p.freewillSelected=!!p.showId;p.deskDoneMask=int(p.deskDoneMask,0,3);
+      if(p.showId!=='freewill'||p.day!==1||(p.soundcheckMinutes!==1050&&p.soundcheckMinutes!==1080))delete p.soundcheckMinutes;
+      if(p.showId!=='july'||p.day!==2||(p.entranceMusicChoice!=='owner'&&p.entranceMusicChoice!=='band'))delete p.entranceMusicChoice;
+      if(p.showId!=='double'||p.day!==3||(p.secondSetIntro!=='freewill'&&p.secondSetIntro!=='owner'))delete p.secondSetIntro;
+      if(p.day!==4||!Number.isInteger(p.encoreSeed)||p.encoreSeed<=0||p.encoreSeed>0xffffffff)delete p.encoreSeed;
+      if(!Encore.effect(p))delete p.encoreChoice;
       if(!p.showId||!(p.deskDoneMask&1))p.deskDoneMask=0;
       p.blocks=p.listenedMask=p.scoutedPosterMask=0;p.promotions=int(p.promotions,0,1);p.bookedGrowth=arr(p.bookedGrowth);
       if(p.completed)p.locked=true;

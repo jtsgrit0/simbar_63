@@ -1,3 +1,4 @@
+import {Encore} from './desk-encore.js';
 import {catalog} from './catalog.js';
 
 export const DESK_ART=['office/desk-jessy.png','office/desk-edison.png','office/desk-jaiden.png'];
@@ -68,7 +69,108 @@ export function createDayDesk({g,asset,t,name}){
       <section class="desk-pane desk-mobile-pane" data-desk-pane="phone" hidden><div class="desk-pane-top">PHONE / ${t('ARTIST CONFIRMATION','출연진 일정 확인')}</div><h2>${esc(selectedName)}</h2><div class="desk-phone-display"><div class="desk-contact"><span>♪</span><div><strong>${esc(selectedName)}</strong><small>${t('TONIGHT’S LIVE LINEUP','오늘의 라이브 출연진')}</small></div></div><p class="desk-message mine">${selected?t('Let’s confirm tonight’s lineup and ticket plan.','오늘 출연진과 티켓 기획을 확인할게요.'):t('Choose your show on the computer first.','먼저 컴퓨터에서 공연을 선택하세요.')}</p>${isConfirmed?`<p class="desk-message reply">${t('Confirmed! See you on stage tonight.','일정 확인 완료! 오늘 무대에서 만나요.')}</p>`:`<div class="desk-message-await">${isPlanned?t('The saved plan is ready to confirm.','저장한 기획대로 일정을 확인합니다.'):t('Save the show plan before confirming.','공연 기획을 저장한 뒤 확인할 수 있습니다.')}</div>`}</div>${action('deskWork',isConfirmed?t('LINEUP CONFIRMED ✓','출연진 확인 완료 ✓'):t('CONFIRM TONIGHT’S LINEUP','오늘 출연진 일정 확인'),{task:1},!selected||!isPlanned||isConfirmed,'class="desk-main-action"')}<p class="desk-confirm-note">${t('Changing the show, ticket price or promotion clears confirmation.','공연·티켓 가격·홍보를 바꾸면 기획과 일정 확인을 다시 진행합니다.')}</p></section></aside></main>
       <footer class="desk-footer"><div><strong>${ready?t('READY · ','준비 완료 · ')+esc(selectedName):isPlanned?t('NEXT · CONFIRM THE LINEUP ON THE PHONE','다음 · 휴대폰에서 출연진 일정 확인'):t('NEXT · CHOOSE AND SAVE THE SHOW PLAN','다음 · 공연을 선택하고 기획 저장')}</strong><span>${esc(g.message||nextUnlock(stage))}</span></div>${action('launch',t('OPEN TONIGHT’S VENUE →','밤 영업 시작 →'),{},!ready,'class="desk-launch"')}</footer></section>`;
   }
-  function markup(){return plan()?.deskVersion===2?campaignMarkup():legacyMarkup();}
+  function petSoundsMarkup(){
+    const p=plan(),minutes=p.soundcheckMinutes;
+    const chosen=minutes===1050||minutes===1080;
+    const time=minutes===1050?'17:30':'18:00';
+    const note=chosen?t('Soundcheck saved to the running order.','공연 진행표에 사운드체크 시간을 저장했어요.'):t('Choose one time to add it to tonight\'s running order.','고른 시간을 오늘 공연 진행표에 기록해요.');
+    const reply=(portrait,speaker,line,band=false)=>`<div class="pilot-line"><img src="${esc(asset('office/'+portrait))}" alt="" width="58" height="58" draggable="false"><div class="pilot-bubble${band?' pilot-band':''}"><strong>${esc(speaker)}</strong><p>${esc(line)}</p></div></div>`;
+    const option=(value,label)=>action('deskSoundcheck',label,{minutes:value},false,`class="pilot-option${minutes===value?' selected':''}" aria-pressed="${minutes===value}"`);
+    return `<section class="daydesk petsounds-pilot" data-owner-index="2" aria-label="${t('Pet Sounds first show planning','펫사운즈 첫 공연 기획')}">
+      <header class="pilot-header"><div><span>SIMBAR / PET SOUNDS</span><h1>${t("Jaiden's booking office",'제이든의 공연 기획실')}</h1></div><div class="pilot-meta"><b>${t('Show 1 / Freewill','1회차 · 프리윌')}</b>${action('ui:language',g.language==='en'?'한국어':'English')}${action('lobby',t('Lobby','로비'))}</div></header>
+      <div class="pilot-main"><figure class="pilot-visual">
+        <div class="pilot-art"><img src="${esc(asset('office/pilot-jaiden-desk.png'))}" alt="${t('Jaiden at the Pet Sounds desk','펫사운즈 책상에 앉은 제이든')}" draggable="false"><span>PET SOUNDS / ${t('DAYTIME','낮 기획')}</span></div>
+        <figcaption>${esc(note)}</figcaption>
+      </figure><section class="pilot-dialogue" aria-labelledby="pilot-heading">
+        <span class="pilot-kicker">${t('FREEWILL / SHOW PREP','프리윌 단독 · 공연 준비')}</span><h2 id="pilot-heading">${t('When should we soundcheck?','사운드체크는 몇 시에?')}</h2>
+        ${reply('pilot-jaiden.png',t('Jaiden','제이든'),t("Let's do a soundcheck before the show.",'공연 전에 사운드체크 한 번 하죠.'))}
+        ${reply('pilot-freewill.png',t('Freewill vocalist','프리윌 보컬'),t('5:30 or 6 works for us. When should we come in?','5시 반도, 6시도 괜찮아요. 언제 갈까요?'),true)}
+        <div class="pilot-schedule" aria-live="polite"><span>${t('RUNNING ORDER / SOUNDCHECK','공연 진행표 · 사운드체크')}</span><strong>${chosen?time:t('Not set','시간 미정')}</strong></div>
+      </section></div>
+      <footer class="pilot-footer"><div class="pilot-options" role="group" aria-label="${t('Soundcheck time','사운드체크 시간')}">${option(1050,t('17:30 · More check time','17:30 · 무대 점검 여유'))}${option(1080,t('18:00 · More travel time','18:00 · 밴드 도착 여유'))}</div>${action('launch',t('Open tonight','오늘 밤 공연 시작'),{},!chosen||!g.metrics().canLaunch,'class="pilot-launch"')}</footer>
+    </section>`;
+  }
+  function julyMarkup(){
+    const choice=plan().entranceMusicChoice,chosen=choice==='owner'||choice==='band';
+    const ownerChoice=t("Jaiden's pick",'제이든이 고른 입장곡'),bandChoice=t("Band's pick",'밴드가 고른 입장곡');
+    const option=(value,label)=>action('deskEntranceChoice',label,{choice:value},false,
+      `class="pilot-option${value===choice?' selected':''}" aria-pressed="${value===choice}"`);
+    const reply=(portrait,speaker,line,band=false)=>`<div class="pilot-line"><img src="${esc(asset('office/'+portrait))}" alt="" width="58" height="58" draggable="false"><div class="pilot-bubble${band?' pilot-band':''}"><strong>${esc(speaker)}</strong><p>${esc(line)}</p></div></div>`;
+    return `<section class="daydesk petsounds-pilot petsounds-july" data-owner-index="2" aria-label="${t('Pet Sounds second show planning','펫사운즈 2회차 공연 기획')}">
+      <header class="pilot-header"><div><span>SIMBAR / PET SOUNDS</span><h1>${t("Jaiden's booking office",'제이든의 공연 기획실')}</h1></div><div class="pilot-meta"><b>${t('Show 2 / Solo','2회차 / 단독')}</b>${action('ui:language',g.language==='en'?'한국어':'English')}${action('lobby',t('Lobby','로비'))}</div></header>
+      <div class="pilot-main"><figure class="pilot-visual">
+        <div class="pilot-art"><img src="${esc(asset('office/pilot-jaiden-desk.png'))}" alt="${t('Jaiden at the Pet Sounds desk','펫사운즈 책상 앞의 제이든')}" draggable="false"><span>PET SOUNDS / ${t('DAYTIME','낮 기획')}</span></div>
+        <figcaption>${t('JulyWantsMore solo show','줄라이원츠모어 단독 공연')}</figcaption>
+      </figure><section class="pilot-dialogue" aria-labelledby="pilot-heading">
+        <span class="pilot-kicker">${t('JULYWANTSMORE / DOORS OPEN','줄라이원츠모어 / 입장 준비')}</span><h2 id="pilot-heading">${t('One song before doors open','문 열기 전 한 곡')}</h2>
+        ${reply('pilot-july-jaiden.png',t('Jaiden','제이든'),t('Should we play one of your tracks when doors open?','입장 음악까지 줄라이 곡으로 채울까요?'))}
+        ${reply('pilot-july-vocal.png',t('JulyWantsMore vocalist','줄라이원츠모어 보컬'),t('That would be a little embarrassing! We’d rather hear what you usually play here.','아뇨, 그럼 저희도 민망해요. 사장님이 여기서 자주 트는 곡 듣고 싶어요.'),true)}
+        <div class="pilot-schedule" aria-live="polite"><span>${t('ENTRANCE MUSIC','입장 음악')}</span><strong>${choice==='owner'?ownerChoice:choice==='band'?bandChoice:t('Not chosen','선택 전')}</strong></div>
+      </section></div>
+      <footer class="pilot-footer"><div class="pilot-options" role="group" aria-label="${t('Who picks the entrance song?','입장 음악 선택')}">${option('owner',ownerChoice)}${option('band',bandChoice)}</div>${action('launch',t('Open tonight','오늘 밤 공연 시작'),{},!chosen||!g.metrics().canLaunch,'class="pilot-launch"')}</footer>
+    </section>`;
+  }
+  function doubleMarkup(m){
+    const p=plan(),choice=p.secondSetIntro,ready=m.campaignOptions.some(show=>show.id==='double'&&!show.locked);
+    const freewill=t('Freewill introduces JulyWantsMore','프리윌이 줄라이를 소개'),jaiden=t('Jaiden introduces both bands','제이든이 두 팀을 소개');
+    const reply=(portrait,speaker,line,variant='')=>`<div class="pilot-line"><img src="${esc(asset('office/'+portrait))}" alt="" width="58" height="58" draggable="false"><div class="pilot-bubble ${variant}"><strong>${esc(speaker)}</strong><p>${esc(line)}</p></div></div>`;
+    const option=(speaker,label)=>action('deskSecondSetIntro',label,{speaker},!ready,`class="pilot-option${choice===speaker?' selected':''}" aria-pressed="${choice===speaker}"`);
+    const soundCost=catalog.upgrades[1].cost[0];
+    const needsCash=!ready&&g.state.money<soundCost;
+    const footer=ready?`<div class="pilot-options" role="group" aria-label="${t('Second-set host','2부 소개 담당')}">${option('freewill',freewill)}${option('owner',jaiden)}</div>${action('launch',t('Open tonight','오늘 밤 공연 시작'),{},!m.canLaunch,'class="pilot-launch"')}`:
+      `<div class="pilot-options">${action('ui:upgrades',t('Sound & Lights Lv.1','음향·조명 1레벨'),{},false,'class="pilot-option"')}${needsCash?action('selectShow',t('Plan a solo show instead','단독 공연 먼저 기획'),{showId:'freewill'},false,'class="pilot-option"'):''}</div>${action('launch',t('Open tonight','오늘 밤 공연 시작'),{},true,'class="pilot-launch"')}`;
+    return `<section class="daydesk petsounds-pilot petsounds-double" data-owner-index="2" aria-label="${t('Pet Sounds third show planning','펫사운즈 3회차 공연 기획')}">
+      <header class="pilot-header"><div><span>SIMBAR / PET SOUNDS</span><h1>${t("Jaiden's booking office",'제이든의 공연 기획실')}</h1></div><div class="pilot-meta"><b>${t('Show 3 / Double bill','3회차 / 합동 공연')}</b>${action('ui:language',g.language==='en'?'한국어':'English')}${action('lobby',t('Lobby','로비'))}</div></header>
+      <div class="pilot-main"><figure class="pilot-visual">
+        <div class="pilot-art"><img src="${esc(asset('office/pilot-jaiden-desk.png'))}" alt="${t('Jaiden at the Pet Sounds desk','펫사운즈 책상 앞의 제이든')}" draggable="false"><span>PET SOUNDS / ${t('DAYTIME','낮 기획')}</span></div>
+        <figcaption class="double-running-order">${t('Set 1: Freewill / Set 2: JulyWantsMore','1부 프리윌 → 2부 줄라이원츠모어')}</figcaption>
+      </figure><section class="pilot-dialogue" aria-labelledby="pilot-heading">
+        <span class="pilot-kicker">${t('DOUBLE BILL / CHANGEOVER','합동 공연 / 무대 전환')}</span><h2 id="pilot-heading">${t('Who introduces the second set?','누가 2부를 소개할까요?')}</h2>
+        ${reply('pilot-july-jaiden.png',t('Jaiden','제이든'),t('JulyWantsMore is up after Freewill. Who should introduce them?','프리윌 무대가 끝나면 줄라이 차례예요. 다음 팀 소개는 누가 할까요?'))}
+        ${reply('pilot-freewill.png',t('Freewill vocalist','프리윌 보컬'),t('I can introduce them as I hand over the mic.','제가 마이크 넘기면서 소개할게요. 관객도 다음 팀을 바로 알 수 있게요.'),'pilot-band')}
+        ${reply('pilot-july-vocal.png',t('JulyWantsMore vocalist','줄라이원츠모어 보컬'),t('If you introduce us, Jaiden, we can say hello and go straight into our first song.','사장님이 소개해 주시면, 저희는 짧게 인사하고 바로 첫 곡 갈게요.'),'pilot-july-bubble')}
+        <div class="pilot-schedule" role="status"><span>${ready?t('INTRO BY','소개 담당'):t('REQUIRED','해금 조건')}</span><strong>${ready?(choice==='freewill'?t('Freewill','프리윌'):choice==='owner'?t('Jaiden','제이든'):t('Not chosen','선택 전')):t('Sound & Lights Lv.1','음향·조명 1레벨')}</strong></div>
+      </section></div>
+      <footer class="pilot-footer">${footer}</footer>
+    </section>`;
+  }
+  function encoreMarkup(m){
+    const p=plan(),scene=Encore.scene(p),effect=Encore.effect(p);
+    const local=parts=>t(...parts);
+    const ready=m.campaignOptions.some(show=>show.id===p.showId&&!show.locked);
+    const choices=m.campaignOptions.filter(show=>!show.locked).map(show=>action('selectShow',esc(name(show)),{showId:show.id},false,
+      `class="encore-show${show.id===p.showId?' selected':''}" aria-pressed="${show.id===p.showId}"`)).join('');
+    const lines=(portrait,speaker,line,band=false)=>`<div class="pilot-line"><img src="${esc(asset('office/'+portrait))}" alt="" width="58" height="58" draggable="false"><div class="pilot-bubble${band?' pilot-band':''}"><strong>${esc(speaker)}</strong><p>${esc(local(line))}</p></div></div>`;
+    const opts=scene?.options.map((option,choice)=>action('deskEncoreChoice',esc(local(option.label)),{choice},!ready,
+      `class="pilot-option${p.encoreChoice===choice?' selected':''}" aria-pressed="${p.encoreChoice===choice}"`)).join('')||'';
+    const item=Number.isInteger(effect?.item)?catalog.drinks[effect.item]:null;
+    const isJuly=p.showId==='july';
+    const speaker=p.showId==='double'?t('Both bands','두 밴드'):isJuly?t('JulyWantsMore vocalist','줄라이원츠모어 보컬'):t('Freewill vocalist','프리윌 보컬');
+    const cue=p.showId==='double'?t('Second-set intro','2부 소개'):t('First order','첫 주문');
+    const ownerLine=scene?lines('pilot-july-jaiden.png',t('Jaiden','제이든'),scene.jaiden):'';
+    const bandLine=scene?lines(isJuly?'pilot-july-vocal.png':'pilot-freewill.png',speaker,scene.band,true):'';
+    const dialogue=p.showId==='double'?ownerLine+bandLine:bandLine+ownerLine;
+    return `<section class="daydesk petsounds-pilot petsounds-encore" data-owner-index="2" aria-label="${t('Pet Sounds fourth show planning','펫사운즈 4회차 공연 기획')}">
+      <header class="pilot-header"><div><span>SIMBAR / PET SOUNDS</span><h1>${t("Jaiden's booking office",'제이든의 공연 기획실')}</h1></div><div class="pilot-meta"><b>${t('Show 4','4회차')}</b>${action('ui:language',g.language==='en'?'한국어':'English')}${action('lobby',t('Lobby','로비'))}</div></header>
+      <div class="pilot-main"><figure class="pilot-visual">
+        <div class="encore-shows" role="group" aria-label="${t('Choose a lineup','공연 선택')}">${choices}</div>
+        <div class="pilot-art"><img src="${esc(asset('office/pilot-jaiden-desk.png'))}" alt="${t('Jaiden at the Pet Sounds desk','펫사운즈 책상 앞의 제이든')}" draggable="false"></div>
+      </figure><section class="pilot-dialogue" aria-labelledby="pilot-heading">
+        <span class="pilot-kicker">${t('TONIGHT AT PET SOUNDS','펫사운즈의 오늘 밤')}</span>
+        <h2 id="pilot-heading">${esc(scene?local(scene.title):t('Who plays tonight?','오늘은 어떤 공연을 열까요?'))}</h2>
+        ${scene?dialogue:`<p class="encore-hint">${t('Choose a lineup to see one situation for tonight.','공연을 고르면 오늘의 상황과 선택지가 나와요.')}</p>`}
+        ${scene?`<div class="pilot-schedule" role="status"><span>${cue}</span><strong>${esc(item?name(item):effect?.speaker==='freewill'?t('Freewill','프리윌'):effect?.speaker==='owner'?t('Jaiden','제이든'):t('Not chosen','선택 전'))}</strong></div>`:''}
+      </section></div>
+      <footer class="pilot-footer"><div class="pilot-options" role="group" aria-label="${t('Tonight’s decision','오늘의 선택')}">${opts}</div>${action('launch',t('Open tonight','오늘 밤 공연 시작'),{},!ready||!m.canLaunch,'class="pilot-launch"')}</footer>
+    </section>`;
+  }
+  function markup(){
+    const m=g.metrics();
+    if(m.petSoundsEncore)return encoreMarkup(m);
+    if(m.petSoundsDoublePilot)return doubleMarkup(m);
+    if(m.petSoundsJulyPilot)return julyMarkup();
+    return g.metrics().petSoundsPilot?petSoundsMarkup():plan()?.deskVersion===2?campaignMarkup():legacyMarkup();
+  }
   function focus(channel){
     const index=CHANNELS.indexOf(channel);if(index<0)return;
     manual=index;

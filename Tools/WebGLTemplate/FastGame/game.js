@@ -8,6 +8,7 @@ import {AlbumArtLoader} from './album-art.js';
 import {OWNER_VENUES,ownerVenue,VENUE_PROPS} from './owner-venues.js';
 import {Audience} from './audience.js';
 import {Campaign} from './campaign.js';
+import {Encore} from './desk-encore.js';
 import {Festival} from './festival.js';
 import {createViewMode} from './view-mode.js';
 import {createBackgroundLoop} from './background-loop.js';
@@ -220,7 +221,12 @@ export async function startGame({root,assetsBase='./FastGame/art/',assets:predec
     if(g.closing){const show=j.afterShow;values.opsStatus=show?.departureStarted?t('BAND & AUDIENCE EXITING','\ubc34\ub4dc\u00b7\uad00\uac1d \ud1f4\uc7a5 \uc911')+' \u00b7 '+[...(show.members||[]),...(show.audience||[])].filter(a=>a.phase!=='gone').length+t(' remaining','\uba85'):t('THE BAND IS GREETING THE AUDIENCE','\uacf5\uc5f0 \uc778\uc0ac \ub9c8\ubb34\ub9ac \uc911');}
     values.floorDetails=[t('RANDOM STAGE EFFECTS','무작위 공연 퍼포먼스'),`${t('Confetti','꽃가루')} ${g.floor.confettiThrows} / ${t('Tissue','휴지')} ${g.floor.tissueThrows}`,'',t('EMPLOYEE CLEANUP','직원 청소'),`${t('Paper left','남은 정리량')} ${Floor.remaining(g.floor)} / ${Math.round(progress*100)}%`,`${t('Assigned','배치')} ${g.floor.cleanupWorkers} / ${t('Arrived','현장 도착')} ${g.cleanupReadyWorkers}`,'',t('COURTEOUS GUEST EXIT','정중한 손님 퇴점 안내'),g.floor.guestComplete?(g.guestExitFinished?t('Courteous exit complete.','정중한 퇴점 안내 완료'):t('An employee is accompanying the guest and returning.','직원이 손님과 동행한 뒤 복귀하고 있습니다.')):g.floor.guestActive?t('Assistance stage ','손님 안내 ')+(g.floor.guestStep+1)+'/3':t('No assistance request yet.','아직 안내 요청이 없습니다.')].join('\n');
     goals.forEach((value,i)=>values['goal'+i]=(value>=targets[i]?t('DONE','완료'):(i+1)+'.')+' '+[t('SERVE ORDERS','주문 제공'),t('MANUAL PERFECTS','직접 따르기 퍼펙트'),t('BEST COMBO','최고 콤보')][i]+` ${value}/${targets[i]}`);
-    for(const node of host.querySelectorAll('[data-bind]')){const val=String(values[node.dataset.bind]??'');if(node.textContent!==val)node.textContent=val;if(node.dataset.bind==='toast')node.hidden=!g.message;if(node.dataset.bind==='reactionClock')node.classList.toggle('urgent',!!r?.activeKind&&r.secondsLeft<=2);}
+    if(g.playing&&j.campaignSecondSet&&j.secondsLeft>84&&j.booking?.showId==='double'){
+      const speaker=j.booking.secondSetIntro||Encore.effect(j.booking)?.speaker;
+      if(speaker==='freewill')values.toast=t('Freewill: Please welcome JulyWantsMore to the stage!','프리윌: 다음 무대는 줄라이원츠모어입니다. 큰 박수 부탁드려요!');
+      else if(speaker==='owner')values.toast=t('Jaiden: That was Freewill! Now give it up for JulyWantsMore.','제이든: 지금까지 프리윌이었습니다! 이어서 줄라이원츠모어를 큰 박수로 맞아주세요.');
+    }
+    for(const node of host.querySelectorAll('[data-bind]')){const val=String(values[node.dataset.bind]??'');if(node.textContent!==val)node.textContent=val;if(node.dataset.bind==='toast')node.hidden=!val;if(node.dataset.bind==='reactionClock')node.classList.toggle('urgent',!!r?.activeKind&&r.secondsLeft<=2);}
     const widths={fever:j.feverSeconds>0?j.feverSeconds/12:j.feverCharge,satisfaction:s.satisfaction,performance:s.performance,reaction:r?.activeKind?r.presses/(r.activeKind===1?10:8):0,festivalProgress:festival.activeId?(festival.remaining||0)/(festival.duration||1):festival.hype||0};goals.forEach((v,i)=>widths['goal'+i]=Math.min(1,v/targets[i]));for(const node of host.querySelectorAll('[data-width]'))node.style.width=Math.max(0,Math.min(1,widths[node.dataset.width]||0))*100+'%';const cursor=host.querySelector('[data-pour-cursor]');if(cursor&&g.pour)cursor.style.left=g.pour.marker*100+'%';
     const map=host.querySelector('#mini-map');if(map)world.renderOverview(map.getContext('2d'),worldState());
     dayDesk.update(css);
@@ -277,6 +283,7 @@ export async function startGame({root,assetsBase='./FastGame/art/',assets:predec
       case'guests':ui.opPage=3;if(g.playing||g.phase==='planning')openMenu('operations');break;
       case'opPage':ui.opPage=p.index;break;
       case'language':run('language',{language:g.language==='en'?'ko':'en'});break;
+
       case'deskFocus':dayDesk.focus(p.channel);break;
       case'floor':if(ui.menu)closeMenu();if(!g.paused)ui.floorOpen=!ui.floorOpen;break;
       case'floorClose':ui.floorOpen=false;break;
@@ -306,7 +313,7 @@ export async function startGame({root,assetsBase='./FastGame/art/',assets:predec
     if(ui.pendingService||front&&!announcedOrders.has(front)){ui.pendingService=false;openMenu('service');}
   }
   function syncMusic(){if(!orientationBlocked&&['playing','closing','guide','results'].includes(g.phase)){music.sync();music.resumeContext();requestAlbum();}else music.suspend();}
-  const structure=()=>{const j=g.journey,p=j.booking,r=g.reaction;return JSON.stringify([g.phase,g.language,g.owner,g.paused,ui,j.guideStep,p?.deskVersion,p?.freewillSelected,p?.deskDoneMask,p?.showId,p?.ticketTier,p?.promotions,p?.campaignStage,j.completedNights,g.state.playlist,g.orders[0]?.id,g.orders[0]?.item,p?.venue,g.phase==='planning'?g.state.money:ui.menu==='operations'?g.state.money:0,g.state.staff,g.state.upgrades,g.state.activeEvent,g.state.wageDebt>0,!!g.pour,g.pour?.item,r?.activeKind,r?.activeStage,r?.cooldown>0,g.guestExitFinished,j.musicPaused,g.farewellPending,j.afterShow?.departureStarted]);};
+  const structure=()=>{const j=g.journey,p=j.booking,r=g.reaction;return JSON.stringify([g.phase,g.language,g.owner,g.paused,ui,j.guideStep,p?.deskVersion,p?.freewillSelected,p?.deskDoneMask,p?.showId,p?.ticketTier,p?.promotions,p?.campaignStage,p?.soundcheckMinutes,p?.entranceMusicChoice,p?.secondSetIntro,p?.encoreSeed,p?.encoreChoice,j.completedNights,g.state.playlist,g.orders[0]?.id,g.orders[0]?.item,p?.venue,g.phase==='planning'?g.state.money:ui.menu==='operations'?g.state.money:0,g.state.staff,g.state.upgrades,g.state.activeEvent,g.state.wageDebt>0,!!g.pour,g.pour?.item,r?.activeKind,r?.activeStage,r?.cooldown>0,g.guestExitFinished,j.musicPaused,g.farewellPending,j.afterShow?.departureStarted]);};
   // Focus changes do not pause the venue or its music. Hidden tabs use a timer
   // for the same game rules, while visible windows keep smooth canvas frames.
   const frame=(now,dt,{hidden})=>{if(stopped)return;syncOrientation();g.setMusicPlaybackActive(music.playing);g.setViewServiceActive(viewMode.viewing&&g.playing);g.setViewClosingActive(viewMode.viewing&&g.closing);if(!orientationBlocked)g.tick(dt);syncMusic();if(previousPhase!==g.phase){if(g.phase==='planning')dayDesk.reset(now);if(!['playing','closing'].includes(g.phase)){viewMode.reset();g.setViewServiceActive(false);g.setViewClosingActive(false);viewReturnTab=null;}ui.menu=null;ui.floorOpen=false;previousPhase=g.phase;dirty=true;}if(g.closing&&g.farewellPending){ui.menu=null;ui.floorOpen=false;}maybeOrderPopup();const key=structure();if((dirty||key!==lastKey)&&!viewMode.transitioning){rebuild();lastKey=key;}update();if(!hidden)world.render(now,worldState());};

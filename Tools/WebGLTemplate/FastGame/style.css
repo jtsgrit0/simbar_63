@@ -302,3 +302,94 @@
 
 /* Soften the approved edges of the existing feedback artwork. */
 .fast-game .venue-ui .mood-card img {-webkit-mask-image:linear-gradient(to right,transparent,#000 8%,#000 92%,transparent),linear-gradient(to bottom,transparent,#000 8%,#000 92%,transparent);-webkit-mask-composite:source-in;mask-image:linear-gradient(to right,transparent,#000 8%,#000 92%,transparent),linear-gradient(to bottom,transparent,#000 8%,#000 92%,transparent);mask-composite:intersect}
+
+
+/* Pet Sounds pilot is scoped to the first daytime desk only. */
+.fast-game .petsounds-pilot{--pilot-ink:#f6f0df;--pilot-panel:#192a31;--pilot-edge:#4c6663;--pilot-gold:#f2cf88;--pilot-mint:#a7d7c6;--pilot-x:clamp(16px,2.6vw,44px);--pilot-left:max(var(--pilot-x),calc(env(safe-area-inset-left,0px) + 10px));--pilot-right:max(var(--pilot-x),calc(env(safe-area-inset-right,0px) + 10px));display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:0;padding:0;background:#111b23;color:var(--pilot-ink);overflow:hidden;font-family:system-ui,'Malgun Gothic',sans-serif}
+.fast-game .petsounds-pilot *{box-sizing:border-box}
+.fast-game .pilot-header,.fast-game .pilot-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#16262d;padding:12px var(--pilot-right) 12px var(--pilot-left)}
+.fast-game .pilot-header{border-bottom:1px solid var(--pilot-edge);padding-top:max(12px,env(safe-area-inset-top,0px))}
+.fast-game .pilot-header h1,.fast-game .pilot-dialogue h2{margin:2px 0 0;color:var(--pilot-ink);font-size:clamp(18px,2.5vw,34px);line-height:1.18;letter-spacing:0}
+.fast-game .pilot-header span,.fast-game .pilot-kicker{color:var(--pilot-mint);font-size:clamp(11px,1.15vw,15px);font-weight:700}
+.fast-game .pilot-meta{display:flex;align-items:center;gap:7px;flex-shrink:0}
+.fast-game .pilot-meta b{padding:6px 11px;border:1px solid var(--pilot-edge);border-radius:99px;color:var(--pilot-gold);font-size:clamp(11px,1.25vw,16px);white-space:nowrap}
+.fast-game .pilot-meta button{min-height:36px;padding:4px 8px;border:1px solid var(--pilot-edge);border-radius:8px;background:#23383c;color:var(--pilot-ink);font:700 12px system-ui,sans-serif}
+.fast-game .pilot-main{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:clamp(10px,1.8vw,24px);align-items:stretch;min-height:0;padding:14px var(--pilot-right) 14px var(--pilot-left);overflow:auto}
+.fast-game .pilot-visual{min-width:0;min-height:0;display:grid;grid-template-rows:minmax(0,1fr) auto;gap:9px;margin:0}
+.fast-game .pilot-art{position:relative;min-height:0;border:1px solid #ab8f5c;border-radius:12px;overflow:hidden;background:#242329}
+.fast-game .pilot-art img{display:block;width:100%;height:100%;object-fit:cover;object-position:center 51%;image-rendering:pixelated}
+.fast-game .pilot-art span{position:absolute;left:10px;top:10px;padding:4px 8px;border-radius:99px;background:#203835;color:var(--pilot-mint);font:700 11px system-ui,sans-serif}
+.fast-game .pilot-visual figcaption{padding:8px 11px;border:1px solid var(--pilot-edge);border-radius:8px;background:var(--pilot-panel);color:#c6d8d0;font-size:clamp(11px,1.2vw,16px);line-height:1.3}
+.fast-game .pilot-dialogue{display:flex;flex-direction:column;min-width:0;gap:clamp(6px,1.5vh,14px);padding:clamp(9px,2vh,22px) clamp(10px,1.5vw,24px);border:1px solid var(--pilot-edge);border-radius:12px;background:var(--pilot-panel)}
+.fast-game .pilot-dialogue h2{margin:0;padding-bottom:clamp(5px,1.2vh,14px);border-bottom:1px solid var(--pilot-edge)}
+.fast-game .pilot-line{display:flex;align-items:flex-start;gap:clamp(5px,.8vw,12px)}
+.fast-game .pilot-line img{width:clamp(29px,4vw,58px);height:auto;aspect-ratio:1;image-rendering:pixelated;border-radius:6px}
+.fast-game .pilot-bubble{flex:1;padding:6px clamp(7px,1vw,14px);border-radius:9px;background:#fff0cd;color:#342c23;word-break:keep-all;overflow-wrap:anywhere}
+.fast-game .pilot-bubble.pilot-band{background:#d6eddf;color:#1e332c}
+.fast-game .pilot-bubble strong{display:block;font-size:clamp(10px,1.1vw,15px);line-height:1.2}
+.fast-game .pilot-bubble p{margin:4px 0 0;font-size:clamp(12px,1.45vw,20px);line-height:1.34;font-weight:650}
+.fast-game .pilot-schedule{margin-top:auto;color:var(--pilot-gold);display:flex;align-items:baseline;justify-content:space-between;gap:8px;font-size:clamp(10px,1.05vw,14px);border-top:1px solid var(--pilot-edge);padding-top:6px}
+.fast-game .pilot-schedule strong{font-size:clamp(13px,1.7vw,23px)}
+.fast-game .pilot-footer{border-top:1px solid var(--pilot-edge);padding-bottom:max(12px,env(safe-area-inset-bottom,0px))}
+.fast-game .pilot-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;flex:1;min-width:0}
+.fast-game .pilot-footer button{min-height:44px;padding:4px 9px;border-radius:12px;font:700 clamp(12px,1.45vw,19px)/1.22 system-ui,'Malgun Gothic',sans-serif}
+.fast-game .pilot-option{background:#213238;color:var(--pilot-ink);border:1px solid #659085}
+.fast-game .pilot-option.selected{background:#305248;border-color:#b7e1b4;box-shadow:inset 0 0 0 1px #b7e1b4}
+.fast-game .pilot-launch{flex:0 0 33%;background:var(--pilot-gold);color:#1a251f;border:1px solid var(--pilot-gold)}
+.fast-game .pilot-launch:disabled{background:#263438;color:#a5b2b0;border-color:#566968;opacity:1}
+.fast-game .petsounds-pilot button:focus-visible{outline:2px solid white;outline-offset:2px}
+@media(orientation:landscape) and (max-height:460px){
+ .fast-game .petsounds-pilot{--pilot-x:15px}
+ .fast-game .pilot-header,.fast-game .pilot-footer{padding-block:6px}
+ .fast-game .pilot-header{padding-top:max(6px,env(safe-area-inset-top,0px))}
+ .fast-game .pilot-footer{padding-bottom:max(6px,env(safe-area-inset-bottom,0px))}
+ .fast-game .pilot-main{padding-block:7px;gap:9px}
+ .fast-game .pilot-meta button{min-height:32px}
+ .fast-game .pilot-art span{left:5px;top:5px;font-size:9px}
+ .fast-game .pilot-visual{gap:4px}
+ .fast-game .pilot-visual figcaption{padding:5px 7px}
+}
+@media(orientation:landscape) and (max-height:350px){
+ .fast-game .pilot-main{padding-block:5px}
+ .fast-game .pilot-dialogue{padding-block:5px;gap:4px}
+ .fast-game .pilot-dialogue h2{font-size:16px;padding-bottom:3px}
+ .fast-game .pilot-line img{width:27px}
+ .fast-game .pilot-bubble{padding-block:3px}
+ .fast-game .pilot-bubble p{margin-top:2px;line-height:1.2}
+ .fast-game .pilot-schedule{padding-top:3px}
+}
+.fast-game .petsounds-july .pilot-bubble.pilot-band{background:#dce5f2;color:#202d3a}
+.fast-game .petsounds-july .pilot-schedule strong{font-size:clamp(11px,1.25vw,18px)}
+@media(orientation:landscape) and (max-height:350px){
+ .fast-game .petsounds-july .pilot-kicker{font-size:10px}
+ .fast-game .petsounds-july .pilot-dialogue{gap:3px}
+}
+.fast-game .petsounds-double .pilot-july-bubble{background:#dce5f2;color:#202d3a}
+.fast-game .petsounds-double .double-running-order{color:var(--pilot-gold);font-weight:700}
+@media(orientation:landscape) and (max-height:460px){
+ .fast-game .petsounds-double .pilot-dialogue{gap:3px;padding-block:5px}
+ .fast-game .petsounds-double .pilot-kicker{display:none}
+ .fast-game .petsounds-double .pilot-bubble{padding-block:3px}
+ .fast-game .petsounds-double .pilot-bubble p{margin-top:2px;line-height:1.16}
+ .fast-game .petsounds-double .pilot-line img{width:27px}
+}
+@media(orientation:landscape) and (max-height:350px){
+ .fast-game .petsounds-double .pilot-main{grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr)}
+ .fast-game .petsounds-double .pilot-bubble{font-size:12px;line-height:1.2}
+ .fast-game .petsounds-double .pilot-bubble strong{display:inline;margin-right:5px}
+ .fast-game .petsounds-double .pilot-bubble p{display:inline;margin:0}
+}
+
+.fast-game .petsounds-encore .pilot-visual{grid-template-rows:auto minmax(0,1fr)}
+.fast-game .petsounds-encore .encore-shows{display:flex;gap:5px;flex-wrap:wrap}
+.fast-game .petsounds-encore .encore-show{min-height:44px;flex:1 1 25%;padding:4px 7px;border:1px solid #659085;border-radius:8px;background:#213238;font-size:clamp(10px,1.1vw,16px);font-weight:700}
+.fast-game .petsounds-encore .encore-show.selected{background:#305248;border-color:#b7e1b4;color:var(--pilot-gold)}
+.fast-game .petsounds-encore .pilot-schedule strong{font-size:clamp(11px,1.4vw,19px)}
+.fast-game .petsounds-encore .encore-hint{margin:0;font-size:clamp(12px,1.5vw,18px)}
+@media(orientation:landscape) and (max-height:350px){
+ .fast-game .petsounds-encore .pilot-dialogue{gap:3px;padding-block:5px}
+ .fast-game .petsounds-encore .pilot-kicker{display:none}
+ .fast-game .petsounds-encore .pilot-bubble{padding-block:3px;font-size:12px;line-height:1.2}
+ .fast-game .petsounds-encore .pilot-bubble strong{display:inline;margin-right:5px}
+ .fast-game .petsounds-encore .pilot-bubble p{display:inline;margin:0}
+}
