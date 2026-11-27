@@ -16,15 +16,20 @@ const groups=[
   ["other","기타 칵테일","Other cocktails",[[14,"클래식 마르가리타","Classic Margarita"],[14,"드라이 마티니","Dry Martini"],[14,"더티 마티니","Dirty Martini"],[14,"다이키리","Daiquiri"],[14,"코스모폴리탄","Cosmopolitan"],[14,"김렛","Gimlet"]]],
   ["zeroCocktail","논알코올 칵테일","Non-alcoholic cocktails",[[14,"노히토","Nojito"],[12,"버진 피나 콜라다","Virgin Pina Colada"],[12,"판타지","Fantasy"],[13,"골든 메달리스트","Golden Medalist"]]]
 ];
-const legacyGroups=['special','tropical','half','main','main','legacy'];
-const legacyPrices=[14,12,10,15,15,18];
-const legacy=catalog.drinks.map((row,i)=>Object.freeze({...row,group:legacyGroups[i],price:legacyPrices[i],
+const legacyGroups=['special','tropical','half','main','main'];
+const legacyPrices=[14,12,10,15,15];
+const legacy=catalog.drinks.slice(0,5).map((row,i)=>Object.freeze({...row,group:legacyGroups[i],price:legacyPrices[i],
   ...(i===2?{name:'페퍼로니 피자 반판',ko:'페퍼로니 피자 반판',nameEnglish:'Pepperoni Half Pizza',en:'Pepperoni Half Pizza'}:{}),
   ...(i===4?{name:'칠리 치즈 나초',ko:'칠리 치즈 나초'}:{})}));
 const items=legacy.slice();
+items.push(undefined); // Preserve published order IDs after removing legacy item 5.
 for(const [group,,,rows] of groups)for(const [price,ko,en,noteKo,noteEn] of rows){
   items.push(Object.freeze({index:items.length,group,price,isFood:['set','main','half','side'].includes(group),ko,en,name:ko,nameEnglish:en,noteKo,noteEn}));
 }
 const petMenu=Object.freeze(items);
-export const PET_SOUNDS_MENU_GROUPS=Object.freeze([...groups.map(([id,ko,en])=>Object.freeze({id,ko,en})),Object.freeze({id:'legacy',ko:'기존 메뉴',en:'Existing menu'})]);
+const photoMenu=Object.freeze(petMenu.filter(Boolean));
+export const PET_SOUNDS_MENU_GROUPS=Object.freeze(groups.map(([id,ko,en])=>Object.freeze({id,ko,en})));
+export const menuEntriesForOwner=owner=>owner===2?photoMenu:catalog.drinks;
+export const PET_CHICKEN_TENDERS=photoMenu.find(item=>item.en==='Chicken Tenders & Fries').index;
+export const remapPetOrder=(owner,index)=>owner===2&&index===5?PET_CHICKEN_TENDERS:index;
 export const menuForOwner=owner=>owner===2?petMenu:catalog.drinks;

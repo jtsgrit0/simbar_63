@@ -1,12 +1,17 @@
 import assert from 'node:assert/strict';
 import {catalog,SimBarGame} from './WebGLTemplate/FastGame/core.js';
-import {menuForOwner,PET_SOUNDS_MENU_GROUPS} from './WebGLTemplate/FastGame/petsounds-menu.js';
+import {menuForOwner,menuEntriesForOwner,PET_CHICKEN_TENDERS,PET_SOUNDS_MENU_GROUPS} from './WebGLTemplate/FastGame/petsounds-menu.js';
 import {launchPreparedDesk} from './native_test_workflow.mjs';
 
-const pet=menuForOwner(2),get=(en)=>pet.find(x=>x.en===en);
-assert.equal(pet.length,76);
-assert.equal(new Set(pet.map(x=>x.en)).size,76);
-assert(pet.every((x,i)=>x.index===i&&x.ko&&x.en&&x.price>0));
+const byId=menuForOwner(2),pet=menuEntriesForOwner(2),get=(en)=>pet.find(x=>x.en===en);
+assert.equal(pet.length,75);
+assert.equal(byId[5],undefined);
+assert.equal(byId[6].en,'Food & Beer Set');
+assert.equal(get('FAUST').group,'special');
+assert.equal(get('ADIOS MOTHERFUCKER').group,'tropical');
+assert(!get('FRIED CHICKEN'));
+assert.equal(new Set(pet.map(x=>x.en)).size,75);
+assert(pet.every(x=>byId[x.index]===x&&x.ko&&x.en&&x.price>0));
 assert.equal(menuForOwner(0),catalog.drinks);
 assert.equal(menuForOwner(1),catalog.drinks);
 assert.equal(catalog.drinks[2].price,9);
@@ -31,6 +36,11 @@ g.act('owner',{index:2});g.act('start');launchPreparedDesk(g);
 while(g.phase==='guide')g.act('guide');
 const seen=new Set(Array.from({length:16000},()=>g._orderItem()));
 assert.equal(seen.size,pet.length);
+assert(!seen.has(5));
+assert(pet.every(x=>seen.has(x.index)));
+g.orders[0].item=5;g.save();
+const migrated=new SimBarGame({storage,seed:2});migrated.act('continue');
+assert.equal(migrated.orders[0].item,PET_CHICKEN_TENDERS);
 const item=get('Kelly Draft').index;
 g.orders[0].item=item;g.save();
 const loaded=new SimBarGame({storage,seed:2});
@@ -49,4 +59,4 @@ for(const owner of [0,1]){
  assert(Array.from({length:1000},()=>other._orderItem()).every(index=>index<6));
  assert.equal(other.act('menuItem',{item}).code,'unavailable');
 }
-console.log('PASS: 76 distinct Pet Sounds options, price checks, venue isolation, order reload, preparation and settlement');
+console.log('PASS: 75 photo-based Pet Sounds options, price checks, venue isolation, order reload, preparation and settlement');

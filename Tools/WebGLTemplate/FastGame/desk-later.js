@@ -2,7 +2,7 @@ import {menuForOwner} from './petsounds-menu.js';
 const menu=menuForOwner(2);
 const pair=(en,ko)=>[en,ko];
 const options=(names)=>names.map(key=>{
-  const item=menu.find(entry=>entry.en===key);
+  const item=menu.find(entry=>entry?.en===key);
   if(!item)throw new Error('Unknown Pet Sounds recommendation: '+key);
   return{label:pair(item.en,item.ko),item:item.index};
 });
@@ -29,7 +29,7 @@ const data={
     ["촬영보다 공연","Be here for the song","첫 곡은 화면 말고 맨눈으로 봐달라고 인사하면서 부탁하려고요.","In the intro, I’ll ask people to watch the first song with their own eyes.","좋아요. 그 전에 자리 잡은 손님께는 간단한 안주를 안내할게요.","I’ll suggest a light snack to the people already seated.","Nacho Chips","Wedge Potatoes"],
     ["오늘의 신곡","The new song","오늘 신곡은 중간에 넣을게요. 앞 두 곡은 편하게 듣는 곡으로 골랐어요.","The new song goes in the middle. We’ve chosen two easy openers.","그럼 바쁜 시간 전에 주방 추천을 먼저 알릴게요.","I’ll announce the kitchen recommendation ahead of the rush.","Painkiller Pizza","Cheese Pizza"],
     ["무대 뒤 마지막 확인","One last check backstage","코러스 한 번만 맞춰보고 나면 바로 무대에 오를 수 있어요.","One last chorus check and we’re ready for the stage.","천천히 하세요. 기다리는 테이블엔 가볍게 먹을 걸 제안할게요.","Take your time. I’ll suggest something small to the waiting tables.","Pepperoni Half Pizza","CHILI CHEESE CHIPS"],
-    ["첫 곡 끝나고 인사","A hello after the opener","오늘은 첫 곡부터 들려드리고, 끝나면 팀 소개할게요.","We’ll play the opener first and introduce ourselves afterward.","좋아요. 홀에 알리고 주방 추천 메뉴도 하나 정할게요.","I’ll tell the floor team and pick a kitchen recommendation.","Painkiller Half Pizza","FRIED CHICKEN"]
+    ["첫 곡 끝나고 인사","A hello after the opener","오늘은 첫 곡부터 들려드리고, 끝나면 팀 소개할게요.","We’ll play the opener first and introduce ourselves afterward.","좋아요. 홀에 알리고 주방 추천 메뉴도 하나 정할게요.","I’ll tell the floor team and pick a kitchen recommendation.","Painkiller Half Pizza","Chicken Tenders & Fries"]
   ]
 };
 const scenes=Object.fromEntries(Object.entries(data).map(([id,rows])=>[id,rows.map(([ko,en,bk,be,jk,je,...menu])=>({

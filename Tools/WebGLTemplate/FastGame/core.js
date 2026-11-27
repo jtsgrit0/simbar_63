@@ -1,5 +1,5 @@
 import {catalog} from './catalog.js';
-import {menuForOwner} from './petsounds-menu.js';
+import {menuForOwner,menuEntriesForOwner,remapPetOrder} from './petsounds-menu.js';
 import {createDailyPoster,DAILY_POSTER_INDEX} from './daily-poster.js';
 import {Booking,clamp,int,count} from './booking.js';
 import {Campaign} from './campaign.js';
@@ -92,8 +92,9 @@ export class SimBarGame{
   get reaction(){return this.floor.reaction;}
   get message(){return this._message[this.language==='en'?1:0]||'';}
   get cash(){return this.state.money;}
-  get activeMenu(){return menuForOwner(this.owner);}
-  menuEntry(index){return Number.isInteger(index)&&index>=0?this.activeMenu[index]:undefined;}
+  get activeMenu(){return menuEntriesForOwner(this.owner);}
+  menuEntry(index){return Number.isInteger(index)&&index>=0?menuForOwner(this.owner)[index]:undefined;}
+  showFavorites(show){return (show?.preferredItems||[]).map(item=>remapPetOrder(this.owner,item));}
   get spectatorFeedback(){return this._spectatorScores||{satisfaction:0,performance:0,serviceCoverage:0,participation:0};}
   setMusicPlaybackActive(active){
     if(typeof active!=='boolean')return false;
@@ -239,10 +240,10 @@ export class SimBarGame{
         // A campaign can legitimately finish the queue between timed arrivals.
         // Preserve that saved gap instead of granting three new orders on reload.
         restoredEmptyQueue=Booking.isCampaign(this.journey.booking)&&restored.length>=this.actors.length-3&&Array.isArray(n.orders)&&n.orders.length===0;
-        this.orders=Array.isArray(n.orders)?n.orders.filter(o=>this.actors.some(a=>a.id===o.id)&&!!this.menuEntry(o.item)).slice(0,7).map(o=>({...o,patience:clamp(o.patience,0,200),maxPatience:clamp(o.maxPatience,1,200)})):[];
+        this.orders=Array.isArray(n.orders)?n.orders.filter(Boolean).map(o=>({...o,item:remapPetOrder(this.owner,o.item)})).filter(o=>this.actors.some(a=>a.id===o.id)&&!!this.menuEntry(o.item)).slice(0,7).map(o=>({...o,patience:clamp(o.patience,0,200),maxPatience:clamp(o.maxPatience,1,200)})):[];
         this.crew=Array.isArray(n.crew)?n.crew.filter(id=>this.actors.some(a=>a.id===id)).slice(0,5):[];
         this.escort=n.escort&&this.actors.some(a=>a.id===n.escort.worker)?n.escort:null;
-        this._seed=(n.seed>>>0)||this._seed;this.elapsed=clamp(n.elapsed,0,1e8);this._requestTimer=finite(n.requestTimer,3,0,10);this.selectedItem=this.menuEntry(n.selectedItem)?n.selectedItem:0;this._eventSerial=int(n.eventSerial);
+        this._seed=(n.seed>>>0)||this._seed;this.elapsed=clamp(n.elapsed,0,1e8);this._requestTimer=finite(n.requestTimer,3,0,10);const selected=remapPetOrder(this.owner,n.selectedItem);this.selectedItem=this.menuEntry(selected)?selected:0;this._eventSerial=int(n.eventSerial);
       }
       this.journey.feedback=SpectatorFeedback.sanitize(this.journey.feedback,{session:this.journey.session,owner:this.owner});
       restoreDrunkIncident(this.floor.guestIncident,this.actors);
@@ -595,6 +596,7 @@ export class SimBarGame{
     this._viewServiceTimer=3;this._viewServiceOrder=this.orders[0]||null;
   }
   _orderItem(){
+    if(this.owner===2){const menu=this.activeMenu;return menu[Math.floor(this._random()*menu.length)].index;}
     const festival=this.journey.festival;
     if(festival?.actionsUsed&&this._random()<Festival.modifiers(festival,this.state.satisfaction,this.state.performance).cocktailBoost)return this._random()<.5?0:1;
     const show=Booking.isCampaign(this.journey.booking)?Campaign.show(this.journey.booking.showId):null;
@@ -638,10 +640,10 @@ export class SimBarGame{
     const viewService=context?.viewService===true;
     if(viewService&&(!this.viewServiceActive||context.order!==o||!automatic||this.pour))return{success:false,code:'stale_order'};
     this.orders.shift();const qualityTip=automatic?1:quality>=.9?1.4:quality>=.5?1:0,revenue=1+s.upgrades[0]*.08+(s.activeEvent===0?.10:s.activeEvent===2?.15:0),tips=1+s.upgrades[1]*.1+(s.activeEvent===1?.4:s.activeEvent===2?.2:0);
-    const show=Booking.isCampaign(j.booking)?Campaign.show(j.booking.showId):null,showTips=show?show.tipMultiplier*(show.preferredItems.includes(item)?1.2:1):1;
+    const show=Booking.isCampaign(j.booking)?Campaign.show(j.booking.showId):null,showTips=show?show.tipMultiplier*(this.showFavorites(show).includes(item)?1.2:1):1;
     const tip=viewService?0:round(entry.price*clamp(o.patience/30,0,1)*.45*tips*showTips*(j.feverSeconds>0?1.75:1)*qualityTip),sale=round(entry.price*revenue),income=tip+sale;
     s.money=clamp(s.money+income,0,1e9);s.fans+=automatic||quality>=.5?1+(!automatic&&quality>=.9?1:0):0;s.pours++;
-    SpectatorFeedback.service(j.feedback,{guestId:o.id,item,quality,automatic,patience:o.patience,maxPatience:o.maxPatience,preferred:!!show?.preferredItems.includes(item),crowdCount:this.festival.liveAttendance,capacity:Audience.capacity(this.owner)});this._refreshFeedback();
+    SpectatorFeedback.service(j.feedback,{guestId:o.id,item,quality,automatic,patience:o.patience,maxPatience:o.maxPatience,preferred:this.showFavorites(show).includes(item),crowdCount:this.festival.liveAttendance,capacity:Audience.capacity(this.owner)});this._refreshFeedback();
     j.orders++;j.drinkIncome+=income;if(!automatic){if(quality<.5)this._mistake();else{j.combo++;j.bestCombo=Math.max(j.bestCombo,j.combo);if(quality>=.9)j.manualPerfects++;j.manualStreak++;let multiplier=1+Math.min(20,j.combo-1)*.05;if(j.feverSeconds>0)multiplier*=1.3;j.score+=round((70+130*quality)*multiplier);j.feverCharge=clamp(j.manualStreak/5,0,1);if(!j.feverSeconds&&j.manualStreak>=5&&s.performance>=.72){j.feverSeconds=12;j.manualStreak=0;j.feverCharge=0;}}}
     this._routeOrders();if(!show)this._createOrder(o.id);else if(!this.orders.length)this._requestTimer=Math.min(this._requestTimer,2*this.festival.orderMultiplier);
     this._say((viewService?'감상모드 자동 서빙 · 팁 없음':automatic?'바 보조 서빙':quality>=.9?'완벽한 서빙!':quality>=.5?'잘 서빙했어요!':'타이밍을 놓쳤어요 — 팁 없음')+' +'+this.formatMoney(income),(viewService?'View-mode service · no tip':automatic?'Barback served':quality>=.9?'Perfect service!':quality>=.5?'Good service!':'Missed service — no tip')+' +'+this.formatMoney(income));return{success:true,code:viewService?'view_served':automatic?'auto_served':quality>=.9?'perfect':quality>=.5?'good':'miss',quality,income,...(viewService?{sale,tip,orderId:o.id}:{})};

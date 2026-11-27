@@ -408,3 +408,7 @@
 .fast-game .pet-catalog-scroll small{display:block}
 .fast-game .pet-catalog-scroll p{margin:4px 6px;font-size:12px}
 .fast-game .order-dialog-actions .pet-menu-open{white-space:nowrap}
+
+.fast-game .css-layer .bottom-order-dialog.pet-order-compact {grid-template-columns:minmax(0,1.65fr) repeat(3,minmax(0,1fr));gap:5px;padding:5px}
+.fast-game .bottom-order-dialog.pet-order-compact .order-dialog-actions button {padding:4px 5px;font-size:clamp(11px,1.45vw,15px);line-height:1.1;white-space:normal}
+.fast-game .bottom-order-dialog.pet-order-compact .order-summary {padding-inline:5px}
