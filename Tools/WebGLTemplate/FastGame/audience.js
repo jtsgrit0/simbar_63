@@ -26,6 +26,41 @@ function wardrobeFor(owner,role,id,seed){
   let draw=random(hash('crowd-look',seed,owner,id))()*weights.reduce((sum,weight)=>sum+weight,0);
   return wardrobes[weights.findIndex(weight=>(draw-=weight)<0)]||wardrobes[0];
 }
+const petGuestStyles=['Casual','Beach','Farmer','Casual2','Punk'];
+const petBarStyles=['Casual2','Punk'];
+const petLoungeStyles=['Casual','Beach','Farmer','Punk'];
+const petWardrobeVersion=1;
+const petStyles=actor=>actor.role!=='seated'?petGuestStyles:actor.id.startsWith('bar-seat-')?petBarStyles:petLoungeStyles;
+const petAudience=actor=>['guest','seated','support','surfer','assisted'].includes(actor.role);
+
+function petWardrobeFor(actor,others,seed){
+  let best,lowest=Infinity;
+  for(const style of petStyles(actor)){
+    let count=0,near=0;
+    for(const other of others){
+      if(other===actor||!petAudience(other)||other.visible===false||other.styleKey!==style||other.assistedSourceId===actor.id)continue;
+      if(petStyles(actor)===petStyles(other))count++;
+      const gap=Math.hypot((actor.homeX??actor.x)-(other.homeX??other.x),(actor.homeZ??actor.z)-(other.homeZ??other.z));
+      if(gap<2.1)near+=1+(2.1-gap)/2.1;
+    }
+    const score=count+near*2.5+random(hash('pet-wardrobe',seed,actor.id,style))()*.65;
+    if(score<lowest){lowest=score;best=style;}
+  }
+  return best;
+}
+
+function applyPetWardrobe(actors,seed){
+  const assigned=actors.filter(actor=>petAudience(actor)&&actor.petWardrobeVersion===petWardrobeVersion&&petStyles(actor).includes(actor.styleKey));
+  const pending=actors.filter(actor=>petAudience(actor)&&!assigned.includes(actor));
+  pending.sort((a,b)=>Number(a.role!=='seated')-Number(b.role!=='seated')||(a.role==='seated'&&b.role==='seated'?a.id.localeCompare(b.id):0)||Number(a.role==='assisted')-Number(b.role==='assisted')
+    ||hash('pet-order',seed,a.id)-hash('pet-order',seed,b.id));
+  for(const actor of pending){
+    const source=actor.assistedSourceId&&assigned.find(a=>a.id===actor.assistedSourceId);
+    actor.styleKey=source?.styleKey||petWardrobeFor(actor,assigned,seed);
+    actor.petWardrobeVersion=petWardrobeVersion;
+    assigned.push(actor);
+  }
+}
 const crowdFocus=[
   [[5.8,-3.6],[3.4,-1.4],[-5.7,-2.2]],
   [[4.7,-2.6],[1.8,-.8],[-4.4,-2.3],[-5.8,3.5]],
@@ -114,7 +149,7 @@ function buildCrowd({owner,attendance,showId,day,session,nameSeed,crowdSeed},leg
     const descriptor={id,name:names[actors.length]||'Guest',role,slot,audienceVersion:1,behavior,behaviorPhase:round(next()*TAU),animationSpeed:round(.72+next()*.56),
       x:point.x,z:point.z,y:0,homeX:point.x,homeZ:point.z,targetX:point.x,targetZ:point.z,facing:point.facing??facing(point.x,point.z),
       moving:false,action:behavior,visible:true,_path:[],_pathAt:0,_wait:round(2+next()*5),...extra};
-    if(crowdSeed&&(role==='guest'||role==='seated'))descriptor.styleKey=wardrobeFor(owner,role,id,crowdSeed);
+    if(owner!==2&&crowdSeed&&(role==='guest'||role==='seated'))descriptor.styleKey=wardrobeFor(owner,role,id,crowdSeed);
     if(layout){descriptor.layout=layout.id;descriptor.layoutVersion=layout.version;}
     actors.push(descriptor);return descriptor;
   };
@@ -201,6 +236,7 @@ function buildCrowd({owner,attendance,showId,day,session,nameSeed,crowdSeed},leg
   // At capacity an unlucky greedy ordering must not reduce the paid crowd.
   if(actors.length!==total&&crowdSeed&&!legacyOrder)return buildCrowd({owner,attendance,showId,day,session,nameSeed,crowdSeed},true);
   if(actors.length!==total)throw new Error(`Audience floor ${profile.key} has ${actors.length} safe slots for ${total} guests`);
+  if(owner===2)applyPetWardrobe(actors,crowdSeed||seed);
   return actors;
 }
 
@@ -240,7 +276,7 @@ function arrival({owner=2,showId='freewill',day=1,session=1,serial=1,actors=[],n
   const name=names.slice(offset).concat(names.slice(0,offset)).find(candidate=>!used.has(candidate))||names[offset];
   const id=`arrival-${session}-${serial}`;
   return{id,name,role:'guest',slot,audienceVersion:1,
-    ...(crowdSeed?{styleKey:wardrobeFor(owner,'guest',id,crowdSeed)}:{}),
+    ...(owner===2?{styleKey:petWardrobeFor({id,role:'guest',...point},actors,crowdSeed||seed),petWardrobeVersion}:crowdSeed?{styleKey:wardrobeFor(owner,'guest',id,crowdSeed)}:{}),
     audienceArrival:true,audienceZone:point.zone,behavior,behaviorPhase:round(next()*TAU),animationSpeed:round(.72+next()*.56),
     x:point.x,z:point.z,y:0,homeX:point.x,homeZ:point.z,targetX:point.x,targetZ:point.z,facing:facing(point.x,point.z),
     moving:false,action:behavior,visible:true,_path:[],_pathAt:0,_wait:3,
@@ -254,5 +290,5 @@ export const Audience={
   demand:owner=>AUDIENCE_VENUES[ownerIndex(owner)].demandMultiplier,
   isAudience:actor=>!!actor&&['guest','seated','support','surfer'].includes(actor.role),
   wardrobe:actor=>actor.styleKey||wardrobes[((actor.slot||0)%wardrobes.length+wardrobes.length)%wardrobes.length],
-  build,arrival,frontTarget,safePoint,guestNames
+  build,arrival,frontTarget,safePoint,guestNames,applyPetWardrobe
 };

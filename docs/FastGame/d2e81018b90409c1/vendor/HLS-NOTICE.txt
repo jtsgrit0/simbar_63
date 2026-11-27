@@ -1,0 +1,7 @@
+hls.js light ESM distribution, version 1.7.4
+Upstream: https://github.com/video-dev/hls.js
+Package: hls.js@1.7.4 (npm registry)
+License: Apache License 2.0; see HLS-LICENSE.txt in this directory.
+Upstream file: dist/hls.light.min.mjs (copied without content changes as hls-light.js)
+File SHA-256: 3d82a88cf9ae0d9aaab3cbe9ff6ecbb64bb89c54a399c34ae9bf8b559baeb20f
+Package integrity: sha512-3GlxGdPvT2YHvQYOt+yOzT/DEior/qJVNIylHA77kgeoBTdQQqi70GwefNEUmHQeNGyjC8U62+bruqW/Tpm+tg==

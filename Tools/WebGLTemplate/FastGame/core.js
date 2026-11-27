@@ -6,6 +6,7 @@ import {Campaign} from './campaign.js';
 import {Encore} from './desk-encore.js';
 import {LaterDesk} from './desk-later.js';
 import {Audience} from './audience.js';
+import {assignPatronModels} from './patron-models.js';
 import {Festival} from './festival.js';
 import {Inspection} from './inspection.js';
 import {SpectatorFeedback} from './spectator-feedback.js';
@@ -253,6 +254,8 @@ export class SimBarGame{
       Inspection.restore(this.journey.inspection,this.actors,this.owner,data.native?.actors);
       if(!this.orders.length&&!restoredEmptyQueue&&this.journey.inProgress&&!this.journey.floorClosing)this._seedOrders();
       if(this.floor.guestSpawned&&(!this.floor.guestComplete||this.actors.some(a=>a.id==='assisted-guest'&&a.visible!==false)))this._ensureGuest();
+      if(this.owner===2)Audience.applyPetWardrobe(this.actors,this.journey.crowdSeed||this.journey.session);
+      this._assignPatronModels();
       this._refreshFeedback();
       this.phase='lobby';this.paused=true;this.pauseReason='lobby';
       if(switchOwner===null){if(save)this.save();this._notify();}
@@ -519,7 +522,7 @@ export class SimBarGame{
     if(!this._walkable(entry,false,false)||this.actors.some(a=>a.visible&&a.role!=='band'&&distance(a,entry)<.5))return;
     actor.x=entry.x;actor.z=entry.z;actor.action='arrive';
     if(!setRoute(actor,point(actor.homeX,actor.homeZ),this.actors,false))return;
-    this.actors.push(actor);state.arrivalSerial=serial;state.arrivals++;state.arrivalCredit=0;
+    this.actors.push(actor);this._assignPatronModels();state.arrivalSerial=serial;state.arrivals++;state.arrivalCredit=0;
   }
   _refreshFeedback(){
     const j=this.journey;
@@ -793,7 +796,10 @@ export class SimBarGame{
     }
     this._restoreFestivalArrivals(savedActors);
     if(layoutForOwner(this.owner)||this.owner===2)this._applyOwnerLayout({reset:true});
+    if(this.owner===2)Audience.applyPetWardrobe(this.actors,this.journey.crowdSeed||this.journey.session);
+    if(!savedActors)this._assignPatronModels();
   }
+  _assignPatronModels(){assignPatronModels(this.actors,this.owner,this.journey.crowdSeed||this.journey.session);}
   _walkable(p,staff=false,floor=false){return walkable(p,staff,floor,layoutForOwner(this.owner)?.id);}
   _applyOwnerLayout({reset=false}={}){
     const layout=layoutForOwner(this.owner);let changed=false;
@@ -923,6 +929,8 @@ export class SimBarGame{
         source.visible=false;source.moving=false;source.reservedForAssistance=true;source._path=[];source._pathAt=0;
       }
     }
+    if(this.owner===2)Audience.applyPetWardrobe(this.actors,this.journey.crowdSeed||this.journey.session);
+    this._assignPatronModels();
     return actor;
   }
   _escortFollowGoal(worker,guest,preferred){

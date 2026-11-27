@@ -2,6 +2,7 @@
  * The HUD-free venue plate is static art; live actor behavior and effects remain
  * in core.js. Employee movement, guest exit, paper debt and rewards are unchanged. */
 import {ownerVenue} from './owner-venues.js';
+import {audienceIdentity,patronMotion,drawPatronModel} from './patron-models.js';
 import {menuForOwner} from './petsounds-menu.js';
 import {performingRoster,performingFrame,bandPerformanceProfile} from './band-models.js';
 const REF_W=960,REF_H=558,ORTHO=8.4;
@@ -17,6 +18,32 @@ const hash=v=>{let n=2166136261;for(const c of String(v))n=Math.imul(n^c.charCod
 const frozenPerformer=(actor,state)=>!!state.inspection?.freezePerformers&&['guest','seated','support','surfer','assisted'].includes(actor.role);
 const rng=seed=>{let n=seed>>>0;return()=>((n=(Math.imul(n,1664525)+1013904223)>>>0)/4294967296);};
 const surface=(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c;};
+const petLoungeShirts={
+  Beach:[[43,77,83],[55,126,128],[68,112,117],[71,140,135],[112,177,164]],
+  Farmer:[[79,61,41],[139,103,57],[125,92,55],[160,119,70],[185,146,94]],
+  Punk:[[69,44,64],[132,70,99],[111,58,87],[156,82,111],[181,111,137]]
+};
+const loungeShirtShades=[0x373847,0x54566d,0x514b64,0x655973,0x6f6883];
+const loungeFrames=new WeakMap();
+function petLoungeFrame(sheet,sx,sy,w,h,style){
+  const shirt=petLoungeShirts[style];
+  if(!shirt)return null;
+  if(!loungeFrames.has(sheet))loungeFrames.set(sheet,new Map());
+  const cache=loungeFrames.get(sheet),key=[sx,sy,w,h,style].join(':');
+  if(!cache.has(key)){
+    const canvas=surface(w,h),ctx=canvas.getContext('2d');
+    ctx.drawImage(sheet,sx,sy,w,h,0,0,w,h);
+    const pixels=ctx.getImageData(0,0,w,h),data=pixels.data;
+    for(let i=0;i<data.length;i+=4){
+      if(!data[i+3])continue;
+      const shade=loungeShirtShades.indexOf((data[i]<<16)|(data[i+1]<<8)|data[i+2]);
+      if(shade>=0){const [r,g,b]=shirt[shade];data[i]=r;data[i+1]=g;data[i+2]=b;}
+    }
+    ctx.putImageData(pixels,0,0);
+    cache.set(key,canvas);
+  }
+  return cache.get(key);
+}
 const polygon=(c,points,color)=>{c.fillStyle=color;c.beginPath();points.forEach((p,i)=>i?c.lineTo(Math.round(p.x),Math.round(p.y)):c.moveTo(Math.round(p.x),Math.round(p.y)));c.closePath();c.fill();};
 function ellipse(c,x,y,rx,ry,color){c.fillStyle=color;for(let row=-ry;row<=ry;row++){const w=Math.round(rx*Math.sqrt(Math.max(0,1-row*row/(ry*ry||1))));c.fillRect(Math.round(x-w),Math.round(y+row),w*2+1,1);}}
 function hull(points){const p=points.slice().sort((a,b)=>a.x-b.x||a.y-b.y),turn=(a,b,c)=>(b.x-a.x)*(c.y-a.y)-(b.y-a.y)*(c.x-a.x);let low=[],high=[];for(const a of p){while(low.length>1&&turn(low.at(-2),low.at(-1),a)<=0)low.pop();low.push(a);}for(const a of p.reverse()){while(high.length>1&&turn(high.at(-2),high.at(-1),a)<=0)high.pop();high.push(a);}return low.slice(0,-1).concat(high.slice(0,-1));}
@@ -377,7 +404,8 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
     const meta=assets.spriteMeta||{};
     let entry=meta.roles?.[role]??meta.roles?.[actor.role]??meta.roles?.guest??meta.roles?.default;
     if(entry==null)return null;if(typeof entry==='number')entry={row:entry};
-    const style=pixelStyle(actor,entry,meta);
+    const loungeStyle=state.owner===2&&role==='seated'&&actor.petWardrobeVersion?actor.styleKey:null;
+    const style=loungeStyle?'Casual':pixelStyle(actor,entry,meta);
     let selected=entry.actions?.[action]||entry.actions?.[['dance','mosh','slam','support'].includes(action)?'dance':action==='walk'?'walk':action==='clean'?'clean':'idle']||entry;
     if(selected.preserveStyle&&selected.variantStyles&&selected.variantStyles[style]==null)selected=entry;
     const phase=['playing','closing'].includes(state.phase),fps=finite(selected.fps||entry.fps);
@@ -401,7 +429,8 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
     let frames=selected.frames||entry.frames||columns,col=directionalColumn!=null?(Array.isArray(directionalColumn)?directionalColumn[frame%directionalColumn.length]:directionalColumn):frameColumns?.length?frameColumns[frame%frameColumns.length]:(selected.column||0)+frame%Math.max(1,Math.min(frames,columns));
     if(Array.isArray(selected.rects)){const r=selected.rects[frame%selected.rects.length];return{sheet,sx:r[0],sy:r[1],sw:r[2],sh:r[3],flip:false,meta:layout,entry:layout,direction,style,atlasKey};}
     if(row<0||col<0||col>=columns||(row+1)*fh>sheet.height)throw new Error('Pixel character atlas frame is out of bounds.');
-    return{sheet,sx:col*fw,sy:row*fh,sw:fw,sh:layout.cropHeight||fh,flip:false,meta:layout,entry:layout,direction,style,atlasKey};
+    const sh=layout.cropHeight||fh,recolored=loungeStyle&&petLoungeFrame(sheet,col*fw,row*fh,fw,sh,loungeStyle);
+    return{sheet:recolored||sheet,sx:recolored?0:col*fw,sy:recolored?0:row*fh,sw:fw,sh,flip:false,meta:layout,entry:layout,direction,style:loungeStyle||style,atlasKey};
   }
   function festivalAtlasFrame(actor,state){
     const manifest=assets.festivalModels;if(!manifest)return null;
@@ -468,11 +497,16 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
     const p=actorPoint(a,finite(a.y)),ground=actorPoint(a,role==='surfer'||a.festivalLead?0:finite(a.y)),surf=(action==='surf'||role==='surfer')&&finite(a.y)>.1;
     const liftedSurfer=a.festivalLead&&a.festivalLiftReady&&finite(a.y)>.05;
     if(!seatFor(a)?.hideShadow&&(role!=='drummer'||action!=='perform'))ellipse(ctx,ground.x,ground.y+1,liftedSurfer?12:Math.round(4*(jump?.shadow||1)),liftedSurfer?2:1,liftedSurfer||jump?'#16182348':'#16182360');
-    const atlas=festivalAtlasFrame(a,state)||atlasFrame(a,a.festivalLead&&action==='surf'?'surfer':role,action,frame,state,frozen?0:jump?.frame??(action==='highfive'?pose.frameOverride:pose.festivalAction==='skank'?1:null),band&&action==='perform'?bandTime:pose.animationSeconds),meta=atlas?.meta||{},entry=atlas?.entry||{},size=entry.drawHeight||meta.drawHeight||40;
+    const appearance=audienceIdentity(a,state.owner,state.journey?.crowdSeed||state.journey?.session),rig=appearance!=null?assets.patronRigs?.[appearance]:null;
+    const atlas=rig?null:festivalAtlasFrame(a,state)||atlasFrame(a,a.festivalLead&&action==='surf'?'surfer':role,action,frame,state,frozen?0:jump?.frame??(action==='highfive'?pose.frameOverride:pose.festivalAction==='skank'?1:null),band&&action==='perform'?bandTime:pose.animationSeconds),meta=atlas?.meta||{},entry=atlas?.entry||{},size=entry.drawHeight||meta.drawHeight||40;
     const varied=!!pose.kind,bob=!band&&active?(varied?pose.bob:['dance','mosh','slam'].includes(action)?Math.round(Math.sin(seconds*5+hash(a.id)%17)*.6):0):0;
     ctx.save();ctx.translate(Math.round(p.x+(active?pose.sway:0)),Math.round(p.y+bob-(jump?.lift||0)-(active?pose.lift||0:0)));if(active&&pose.lean)ctx.rotate(pose.lean);
     if(surf&&!entry.horizontal){ctx.rotate(-Math.PI/2);ctx.translate(0,-7);}
-    if(atlas){const scale=size/atlas.sh,dw=entry.drawWidth||meta.drawWidth||atlas.sw*scale,dh=size,footX=entry.footX??meta.footX??atlas.sw/2,footY=entry.footY??meta.footY??atlas.sh,dx=Math.round(-footX*dw/atlas.sw),dy=Math.round(-footY*dh/atlas.sh);if(atlas.flip)ctx.scale(-1,1);if(active&&pose.festivalAction==='skank')drawSkankFrame(atlas,dx,dy,Math.round(dw),Math.round(dh),pose);else ctx.drawImage(atlas.sheet,atlas.sx,atlas.sy,atlas.sw,atlas.sh,dx,dy,Math.round(dw),Math.round(dh));if(active&&pose.phoneLight)drawPhoneLight(a,role,action,pose,size,state);}
+    if(rig){
+      const motion=patronMotion(a,pose,action,{active,seated:role==='seated'||role==='barseated'});
+      drawPatronModel(ctx,assets.patronSheet,rig,appearance,pixelFacing(a,role,action,state),motion);
+      if(active&&pose.phoneLight)drawPhoneLight(a,role,action,pose,size,state);
+    }else if(atlas){const scale=size/atlas.sh,dw=entry.drawWidth||meta.drawWidth||atlas.sw*scale,dh=size,footX=entry.footX??meta.footX??atlas.sw/2,footY=entry.footY??meta.footY??atlas.sh,dx=Math.round(-footX*dw/atlas.sw),dy=Math.round(-footY*dh/atlas.sh);if(atlas.flip)ctx.scale(-1,1);if(active&&pose.festivalAction==='skank')drawSkankFrame(atlas,dx,dy,Math.round(dw),Math.round(dh),pose);else ctx.drawImage(atlas.sheet,atlas.sx,atlas.sy,atlas.sw,atlas.sh,dx,dy,Math.round(dw),Math.round(dh));if(active&&pose.phoneLight)drawPhoneLight(a,role,action,pose,size,state);}
     else throw new Error('No pixel character atlas entry for '+role);
     ctx.restore();
     if(active&&pose.cheer){ctx.fillStyle='#ffe9ac';ctx.fillRect(Math.round(p.x-9),Math.round(p.y-size+6),1,3);ctx.fillRect(Math.round(p.x+8),Math.round(p.y-size+2),1,3);}
