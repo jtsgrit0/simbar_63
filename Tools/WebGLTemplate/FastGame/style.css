@@ -420,3 +420,42 @@
 .fast-game .with-pet-manager .order-guest,.fast-game .with-pet-manager .order-request,.fast-game .with-pet-manager .order-patience{grid-column:2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.15}
 .fast-game .with-pet-manager .order-guest,.fast-game .with-pet-manager .order-patience{font-size:11px}
 .fast-game .with-pet-manager .order-request{font-size:clamp(12px,1.55vw,17px)}
+
+/* Keep the legacy tutorial layout on fine-pointer displays. */
+@media (orientation: landscape) and (pointer: coarse) and (hover: none){
+  .fast-game .guide-ref{
+    --u: var(--guide-unit, 3px);
+    width: min(84%, calc(1000 * var(--u)));
+    height: auto;
+    max-height: calc(100% - 24 * var(--u));
+    -webkit-text-size-adjust:100%;
+    text-size-adjust:100%;
+    display: grid;
+    grid-template-columns: minmax(0,1.15fr) minmax(0,1fr);
+    grid-template-areas:"number settings" "title title" "steps steps" "body example" "foot next";
+    column-gap: calc(20 * var(--u)); row-gap:calc(4 * var(--u));
+    align-items:center;
+    padding:calc(8 * var(--u)) calc(19 * var(--u));
+    border:calc(1.5 * var(--u)) solid #a38954;
+    border-radius:calc(12 * var(--u));
+    background:#101322;
+    box-shadow:0 calc(14 * var(--u)) calc(45 * var(--u)) #0009, inset 0 0 0 calc(3 * var(--u)) #171c2c;
+    overflow:auto;
+    text-align:left;
+  }
+  .fast-game .guide-ref :is(.guide-number,h1,.guide-steps,.guide-body,.guide-example,.guide-next,.guide-footer,.settings-entry){
+    position:static; inset:auto; width:auto; height:auto; min-height:0; margin:0;
+  }
+  .fast-game .guide-ref .guide-number{grid-area:number;color:#d1d9ec;font-size:calc(13 * var(--u));line-height:1.35; font-weight:700}
+  .fast-game .guide-ref .settings-entry{grid-area:settings; justify-self:end; padding:0 calc(14 * var(--u)) !important; min-height:calc(26 * var(--u)); border-radius:calc(6 * var(--u));font-size:calc(13 * var(--u)) !important}
+  .fast-game .guide-ref h1{grid-area:title;text-align:left;color:#ffda85;font-size:calc(26 * var(--u));font-weight:750;line-height:1.16;letter-spacing:-.035em}
+  .fast-game .guide-ref .guide-steps{grid-area:steps;justify-content:flex-start;gap:calc(5 * var(--u))}
+  .fast-game .guide-ref .guide-steps i{width:calc(33 * var(--u));height:calc(4 * var(--u));border-radius:calc(2 * var(--u))}
+  .fast-game .guide-ref :is(.guide-body,.guide-example){align-self:stretch;word-break:keep-all;overflow-wrap:anywhere}
+  .fast-game .guide-ref .guide-body{grid-area:body;font-size:calc(16 * var(--u));line-height:1.36;font-weight:500;color:#f6f7fd;padding:calc(4 * var(--u)) 0}
+  .fast-game .guide-ref .guide-example{grid-area:example;font-size:calc(14 * var(--u));line-height:1.35;padding:calc(7 * var(--u)) calc(11 * var(--u));border:calc(1 * var(--u)) solid #465169;border-radius:calc(8 * var(--u));background:#20283a;color:#edeff7}
+  .fast-game .guide-ref .guide-example-flow{display:block;font-weight:750;white-space:normal;font-size:calc(14 * var(--u));color:#ffda85;margin-bottom:calc(5 * var(--u));line-height:1.36}
+  .fast-game .guide-ref .guide-footer{grid-area:foot;font-size:calc(13 * var(--u));line-height:1.35;color:#c5cde2;word-break:keep-all}
+  .fast-game .guide-ref .guide-next{grid-area:next;justify-self:stretch;padding:0 calc(16 * var(--u)); min-height:calc(44 * var(--u));font-size:calc(16 * var(--u));font-weight:800;color:#161b26;background:#f8cf76;border-color:#f8cf76;border-radius:calc(7 * var(--u))}
+  .fast-game .guide-ref .guide-example-gap{display:none}
+}
