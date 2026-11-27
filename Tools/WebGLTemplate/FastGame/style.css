@@ -412,3 +412,11 @@
 .fast-game .css-layer .bottom-order-dialog.pet-order-compact {grid-template-columns:minmax(0,1.65fr) repeat(3,minmax(0,1fr));gap:5px;padding:5px}
 .fast-game .bottom-order-dialog.pet-order-compact .order-dialog-actions button {padding:4px 5px;font-size:clamp(11px,1.45vw,15px);line-height:1.1;white-space:normal}
 .fast-game .bottom-order-dialog.pet-order-compact .order-summary {padding-inline:5px}
+
+.fast-game .bottom-order-dialog .order-summary.with-pet-manager{display:grid;grid-template-columns:42px minmax(0,1fr);grid-template-rows:auto auto auto auto;align-content:center;align-items:center;column-gap:5px;line-height:1.1;overflow:hidden}
+.fast-game .with-pet-manager .pet-order-manager{display:contents}
+.fast-game .with-pet-manager .pet-order-manager img{grid-column:1;grid-row:1/5;width:42px;height:42px;object-fit:contain;align-self:start;image-rendering:auto;border:1px solid #929274;border-radius:4px;background:#182932}
+.fast-game .with-pet-manager .pet-manager-line{grid-column:2;grid-row:1;padding:2px 4px;color:#28253a;background:#fff0ca;border:1px solid #aa986a;border-radius:4px;font-size:clamp(10px,1.25vw,13px);line-height:1.2;overflow-wrap:anywhere}
+.fast-game .with-pet-manager .order-guest,.fast-game .with-pet-manager .order-request,.fast-game .with-pet-manager .order-patience{grid-column:2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.15}
+.fast-game .with-pet-manager .order-guest,.fast-game .with-pet-manager .order-patience{font-size:11px}
+.fast-game .with-pet-manager .order-request{font-size:clamp(12px,1.55vw,17px)}

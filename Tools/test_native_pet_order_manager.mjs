@@ -1,0 +1,25 @@
+import assert from 'node:assert/strict';
+import {petOrderManager} from './WebGLTemplate/FastGame/pet-order-manager.js';
+const g={owner:2,phase:'playing',language:'ko',state:{staff:[0,0,0],wageDebt:0,performance:0},journey:{orders:0,combo:0},orders:[{patience:60}],lastResult:{}};
+assert.equal(petOrderManager(g),null);
+g.state.staff[0]=1;assert.equal(petOrderManager(g),null);
+g.state.staff[1]=1;
+const seen=new Set();
+function check(mood){const m=petOrderManager(g);assert.equal(m?.mood,mood);assert(m.line);seen.add(mood);}
+check('smile');
+g.journey.orders=1;check('neutral');
+g.state.performance=.8;check('smirk');
+g.journey.combo=4;check('laugh');
+g.journey.combo=0;g.state.performance=0;g.orders.push({patience:60},{patience:60});check('surprised');
+g.orders.push({patience:60});check('determined');
+g.orders[0].patience=18;check('concerned');
+g.orders[0].patience=7;check('sad');
+g.orders[0].patience=60;g.lastResult.code='miss';check('embarrassed');
+g.lastResult.code='wrong_item';check('angry');
+assert.equal(seen.size,10);
+g.language='en';assert.match(petOrderManager(g).line,/Orders got mixed up/);
+g.state.wageDebt=1;assert.equal(petOrderManager(g),null);
+g.state.wageDebt=0;g.owner=1;assert.equal(petOrderManager(g),null);
+g.owner=0;assert.equal(petOrderManager(g),null);
+g.owner=2;g.phase='closing';assert.equal(petOrderManager(g),null);
+console.log('PASS: 10 situational manager portraits, hire gate, venue isolation, wages and localization');
