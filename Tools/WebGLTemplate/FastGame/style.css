@@ -459,3 +459,8 @@
   .fast-game .guide-ref .guide-next{grid-area:next;justify-self:stretch;padding:0 calc(16 * var(--u)); min-height:calc(44 * var(--u));font-size:calc(16 * var(--u));font-weight:800;color:#161b26;background:#f8cf76;border-color:#f8cf76;border-radius:calc(7 * var(--u))}
   .fast-game .guide-ref .guide-example-gap{display:none}
 }
+/* Match the compact label placement on the two circular mode controls. */
+@media (orientation:landscape) and (pointer:coarse) and (hover:none) and (max-width:1100px),
+       (orientation:landscape) and (pointer:coarse) and (hover:none) and (max-height:500px){
+  .fast-game .venue-ui .view-mode-slot .view-mode-tool.circle-tool[aria-pressed="true"] {--ko-icon-width:28px}
+}
