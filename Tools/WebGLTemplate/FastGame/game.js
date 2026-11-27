@@ -141,6 +141,138 @@ export async function startGame({root,assetsBase='./FastGame/art/',assets:predec
     return `<div class="title-screen pixel-art" style="background-image:url('${esc(asset(ownerVenue(g.owner).file))}'),url('${esc(asset(ownerVenue(g.owner).background))}')"><div class="owner-title">${button('ui:settings',t('SETTINGS','설정'),{},'class="settings-entry"')}<div class="title-eyebrow">${t('SEOUL AFTER DARK / LIVE HOUSE STORIES','서울의 밤 / 라이브하우스 스토리')}</div><div class="simbar-logo simbar-logo-image"><img src="${esc(asset('branding/simbar-title-logo.png'))}" alt="SIMBAR: Indie Live Club Tycoon" width="570" height="218" draggable="false"></div><div class="title-subtitle">${t('CHOOSE YOUR OWNER. TAKE THE NIGHT.','사장을 선택하고, 오늘의 밤을 시작하세요.')}</div><div class="owner-grid">${catalog.owners.map((o,i)=>button('owner',`<i class="owner-line"></i><img src="${esc(asset(['owner-female.png','owner-ff.png','owner-pet.png'][i]))}" alt="${esc(name(o))}" draggable="false"><span class="badge">${g.owner===i?t('SELECTED','선택됨'):'0'+(i+1)}</span><span class="owner-name">${esc(name(o))}</span><span class="owner-description">${esc(descriptions[i])}</span>`,{index:i},`class="owner-card ${g.owner===i?'selected':''}" style="--owner-accent:${['#ff5996','#51e8f2','#ffc459'][i]}"`)).join('')}</div><div class="owner-selection">${t('YOUR OWNER / ','선택한 사장 / ')}${esc(name(catalog.owners[g.owner]))} / ${esc(name(ownerVenue(g.owner)))}</div><div class="mode-cards">${[false,true].map(challenge=>button('ui:mode',`<b>${challenge?t('CHALLENGE NIGHT','도전의 밤'):t('COZY NIGHT','여유로운 밤')}</b><small>${challenge?t('3 MIN / FASTER ORDERS, HIGHER GOALS','3분 / 빠른 주문과 더 높은 목표'):t('3 MIN / RELAXED ORDERS','3분 / 여유로운 주문과 대기 시간')}</small>`,{challenge},`class="mode-card ${ui.mode===challenge?'selected':''}" ${active?'disabled':''}`)).join('')}</div><div class="selected-mode">${ui.mode?t('CHALLENGE NIGHT SELECTED / HIGHER GOALS','도전의 밤 선택 / 더 높은 목표'):t('COZY NIGHT SELECTED / A GENTLER PACE','여유로운 밤 선택 / 여유로운 진행')}</div><div class="title-actions">${g.hasSave?button('continue',j.floorClosing?t('CONTINUE AFTER-SHOW FLOOR MISSIONS','공연 후 홀 정리 이어하기'):j.inProgress?t('CONTINUE SAVED NIGHT / ','저장한 영업 이어하기 / ')+clock(j.secondsLeft):j.booking&&!j.booking.locked&&!j.booking.completed?t('CONTINUE DAY PLANNING','낮 기획·섭외 이어하기'):t('REVIEW LAST NIGHT','지난 영업 결과 보기')):''}${!active?button('start',t('PLAN THE DAY / BOOK BANDS','낮 공연 기획·섭외 시작'),{challenge:ui.mode}):''}</div><div class="title-progress">${t('DAY','일 차')} ${j.day} / ${t('RANK','등급')} ${rank()} / ${j.xp.toLocaleString()} XP / ${t('BEST','최고 점수')} ${j.bestScore.toLocaleString()}</div></div></div>`;
   }
   function guide(){const step=g.journey.guideStep,copy=(g.language==='en'?guideEn:guideKo)[step],[exampleFlow,exampleText]=copy[2].split("\n\n");return `<div class="screen-shade"><section class="modal-ref guide-ref">${button('ui:settings',t('SETTINGS','설정'),{},'class="settings-entry"')}<div class="guide-number">${t('WELCOME / ','처음 오셨나요? / ')}${step+1} / 3</div><h1>${copy[0]}</h1><div class="guide-steps">${[0,1,2].map(i=>`<i class="${i<=step?'active':''}"></i>`).join('')}</div><div class="guide-body">${copy[1]}</div><div class="guide-example"><span class="guide-example-flow">${esc(exampleFlow)}</span><span class="guide-example-gap">${"\n\n"}</span>${esc(exampleText)}</div>${button('guide',step===2?t('OPEN THE DOORS','영업 시작'):t('NEXT','다음'),{},'class="guide-next"')}<div class="guide-footer">${t('Take your time. The doors open after this guide.','천천히 살펴보세요. 안내가 끝나면 영업을 시작합니다.')}</div></section></div>`;}
+  const mobileSettlement=window.matchMedia('(orientation: landscape) and (pointer: coarse) and (hover: none)');
+  const settlementReduce=window.matchMedia('(prefers-reduced-motion: reduce)');
+  const settlementKey=()=>g.owner+':'+g.journey.settledSession;
+  let freshSettlement=null;
+  let settlement=null,settlementAudio=null,settlementFocus=false;
+
+  const settlementMoney=(value,signed=false)=>{
+    const n=Math.round((Number(value)||0)*1000);
+    return (n<0?'\u2212':signed&&n>0?'+':'')+'\u20a9'+Math.abs(n).toLocaleString('ko-KR');
+  };
+  const settlementText=(value,kind)=>{
+    if(kind==='money'||kind==='signed')return settlementMoney(value,kind==='signed');
+    const n=(Number(value)||0).toLocaleString(g.language==='en'?'en-US':'ko-KR');
+    return kind==='xp'?'+'+n:kind==='guests'?n+t(' guests','\uba85'):n;
+  };
+  const settlementNumber=(key,value,kind='',delay=120,duration=610,tag='strong')=>{
+    const target=Number(value)||0;
+    const currentLabel=settlementText(target,kind),len=currentLabel.length;
+    const fitStyle=(kind==='money'||kind==='signed')&&len>8?`style="--count-font:${len>14?12:len>12?15:len>10?18:21}"`:'';
+    return `<${tag} class="settlement-count" ${fitStyle} data-count-key="${key}" data-count-value="${target}" data-count-kind="${kind}" data-count-delay="${delay}" data-count-duration="${duration}" aria-label="${esc(settlementText(target,kind))}">${settlementText(target,kind)}</${tag}>`;
+  };
+  const settlementState=()=>{
+    const key=settlementKey();
+    if(settlement?.key!==key)settlement={key,restored:key!==freshSettlement||!g.journey.settledSession,view:'summary',details:false,tracks:Object.create(null)};
+    return settlement;
+  };
+  function mobileResults(){
+    const j=g.journey,s=settlementState(),m=g.metrics();
+    const show=m.show||Campaign.show(j.booking?.showId);
+    const venue=g.owner===2?t('Pet Sounds','\ud3ab\uc0ac\uc6b4\uc988'):name(ownerVenue(g.owner));
+    const freewill=t('Freewill','\ud504\ub9ac\uc70c'),july=t('JulyWantsMore','\uc904\ub77c\uc774\uc6d0\uce20\ubaa8\uc5b4');
+    const band=show?.id==='freewill'?freewill:show?.id==='july'?july:show?.id==='double'?freewill+' \u00d7 '+july:name(show);
+    const concert=show?.id==='double'?t('Double bill','\ud569\ub3d9 \uacf5\uc5f0'):show?t('Live show','\uacf5\uc5f0'):'';
+    const bandLine=band?` <span aria-hidden="true">\u00b7</span> <strong class="settlement-band">${esc(band)}</strong>${concert?' '+concert:''}`:'';
+    const stars=Math.max(0,Math.min(3,Number(j.resultStars)||0));
+    const starMarkup=`<div class="settlement-rating" aria-label="${esc(stars+t(' out of 3 stars',' / 3 \ubcc4\uc810'))}"><span class="settlement-star-list" aria-hidden="true">${[1,2,3].map(i=>`<span class="settlement-star ${i<=stars?'is-earned is-landed':''}" data-star="${i}"><span class="settlement-star-mark">\u2605</span>${i<=stars?'<span class="settlement-star-ring"></span><span class="settlement-star-sparks"></span>':''}</span>`).join('')}</span><b aria-hidden="true">${stars} / 3</b></div>`;
+    const isTicket=s.view==='ticket',title=isTicket?t('Ticket settlement','\ud2f0\ucf13 \uc815\uc0b0'):`${j.day}${t(' Day \u00b7 Last Call','\uc77c \ucc28 \u00b7 \uc601\uc5c5 \ub9c8\uac10')}`;
+    const fee=Math.max(0,j.resultArtistFee||0),net=Number(j.resultTicketIncome)||0,gross=Number(j.resultTicketGross)||(net+fee);
+    const header=`<header class="settlement-head"><div><h1 id="mobile-settlement-title" tabindex="-1">${esc(title)}</h1><div class="settlement-subtitle">${esc(venue)}${bandLine}</div></div><div class="settlement-head-right">${starMarkup}${isTicket?'':button('ui:settings',t('Settings','\uc124\uc815'),{},'class="settlement-settings"')}</div></header>`;
+    let content,footer;
+    if(isTicket){
+      content=`<div class="settlement-ticket-grid"><div class="settlement-ticket-card"><span>${t('Gross ticket sales','\ud2f0\ucf13 \ucd1d\ub9e4\ucd9c')}</span>${settlementNumber('gross',gross,'money',100,670)}<small>${t('Attendance: ','\uc785\uc7a5 \uad00\uac1d ')}${settlementNumber('attendance',j.resultAttendance,'guests',140,570,'b')}</small></div><div class="settlement-ticket-card is-deduction"><span>${t('Artist fee','\ucd9c\uc5f0\ub8cc')}</span>${settlementNumber('artistFee',-fee,'money',310,650)}<small>${band?`<strong class="settlement-band">${esc(band)}</strong> \u00b7 `:''}${t('Artist payout','\uc9c0\uae09\uc561')}</small></div><div class="settlement-ticket-card is-net"><span>${t('Net ticket settlement','\ud2f0\ucf13 \uc21c\uc815\uc0b0')}</span>${settlementNumber('net',net,'money',670,540)}<small>${t('Gross ticket sales minus artist fee','\ud2f0\ucf13 \ucd1d\ub9e4\ucd9c\uc5d0\uc11c \ucd9c\uc5f0\ub8cc \ucc28\uac10')}</small></div></div>`;
+      footer=`<footer class="settlement-ticket-footer"><span>${t('The show rating is the same as in Last Call.','\uacf5\uc5f0 \ubcc4\uc810\uc740 \uc601\uc5c5 \ub9c8\uac10 \uacb0\uacfc\uc640 \ub3d9\uc77c\ud569\ub2c8\ub2e4.')}</span>${button('ui:settlementSummary',t('Back to Last Call','\uc601\uc5c5 \ub9c8\uac10\uc73c\ub85c'),{},'class="settlement-primary"')}</footer>`;
+    }else{
+      const goals=g.goals(),targets=g.goalTargets(),labels=[t('Serve orders','\uc8fc\ubb38 \uc81c\uacf5'),t('Perfect pours','\uc9c1\uc811 \ud37c\ud399\ud2b8'),t('Best combo','\ucd5c\uace0 \ucf64\ubcf4')],stage=Campaign.stage(completedNights());
+      const goalRows=goals.map((v,i)=>`<div class="settlement-goal"><i class="${v>=targets[i]?'is-done':''}" aria-label="${v>=targets[i]?t('Done','\uc644\ub8cc'):t('Missed','\ubbf8\ub2ec\uc131')}">${v>=targets[i]?'\u2713':'\u2013'}</i><span>${labels[i]}</span><span class="settlement-goal-value">${settlementNumber('goal'+i,v,'',100+i*45,480,'b')} / ${targets[i]}</span></div>`).join('');
+      const stat=(label,key,value,kind,delay,duration)=>`<div><span>${label}</span>${settlementNumber(key,value,kind,delay,duration)}</div>`;
+      const summary=`<div class="settlement-summary-grid"><div class="settlement-goals"><h2>${t("Today's goals",'\uc624\ub298\uc758 \ud018\uc2a4\ud2b8')}</h2>${goalRows}</div><div class="settlement-summary-stats">${stat(t('Night profit','\uc624\ub298\uc758 \uc218\uc775'),'profit',j.resultProfit,'signed',120,760)}${stat(t('Orders served','\uc644\ub8cc \uc8fc\ubb38 \uc218'),'orders',j.resultServed,'',130,510)}${stat(t('XP earned','\ud68d\ub4dd \uacbd\ud5d8\uce58'),'xp',j.resultXP,'xp',200,640)}</div></div>`;
+      const row=(label,value)=>`<div><span>${label}</span><strong>${value}</strong></div>`;
+      const campaignGrowth=j.booking?.deskVersion===2?(completedNights()===1?t('Unlocked: JulyWantsMore, first hire and level-one facilities.','\ud574\uae08 \uc644\ub8cc: \uc904\ub77c\uc774\uc6d0\uce20\ubaa8\uc5b4 \u00b7 \uccab \uc9c1\uc6d0 \uace0\uc6a9 \u00b7 \uc2dc\uc124 1\ub808\ubca8.'):completedNights()===2?t('Unlocked: promoter. Sound & Lights Lv.1 unlocks the double bill.','\ud574\uae08 \uc644\ub8cc: \ud64d\ubcf4 \uc9c1\uc6d0 \u00b7 \uc74c\ud5a5\u00b7\uc870\uba85 1\ub808\ubca8 \uad6c\ub9e4 \uc2dc \ud569\ub3d9 \uacf5\uc5f0.'):growthHint(stage)):'';
+      const details=`<div id="mobile-settlement-details" class="settlement-detail-body">${row(t('Score / combo / perfect pours','\uc810\uc218 / \ucd5c\uace0 \ucf64\ubcf4 / \ud37c\ud399\ud2b8'),[j.score,j.bestCombo,j.manualPerfects].map(n=>settlementText(n,'')).join(' / '))}${row(t('Bonus / floor bonus','\ubcf4\ub108\uc2a4 / \ud640 \ubbf8\uc158 \ubcf4\ub108\uc2a4'),settlementMoney(j.resultBonus,true)+' / '+settlementMoney(j.resultFloorBonus))}${row(t('Attendance','\uad00\uac1d'),settlementText(j.resultAttendance,'guests'))}${row(t('Best score','\ucd5c\uace0 \uc810\uc218'),settlementText(j.bestScore,'')+(j.resultNewRecord?t(' \u00b7 New record!',' \u00b7 \ucd5c\uace0 \uc810\uc218 \uacbd\uc2e0!'):''))}${campaignGrowth?`<p>${esc(campaignGrowth)}</p>`:''}<p>${t('Progress saved. Invest in staff and facilities at the next daytime desk.','\uc9c4\ud589 \uc0c1\ud669 \uc800\uc7a5 \uc644\ub8cc. \ub2e4\uc74c \ub0ae \uae30\ud68d\uc2e4\uc5d0\uc11c \uc9c1\uc6d0\uacfc \uc2dc\uc124\uc5d0 \ud22c\uc790\ud560 \uc218 \uc788\uc2b5\ub2c8\ub2e4.')}</p></div>`;
+      content=`${s.details?details:summary}<nav class="settlement-links">${button('ui:settlementDetails',(s.details?'\u2212':'\uff0b')+' '+t('Settlement details','\uc815\uc0b0 \uc0c1\uc138'),{},'aria-expanded="'+s.details+'"')}${button('ui:settlementTicket',t('Ticket settlement \u203a','\ud2f0\ucf13 \uc815\uc0b0 \u203a'),{},'class="settlement-ticket-link"')}</nav>`;
+      footer=`<footer class="settlement-actions">${button('retry',t('Replan this day','\uc774\ub0a0 \ub2e4\uc2dc \uae30\ud68d'))}${button('lobby',t('Back to lobby','\ub85c\ube44\ub85c \ub3cc\uc544\uac00\uae30'))}${button('next',t('Plan next day','\ub2e4\uc74c \ub0a0 \ub0ae \uae30\ud68d'),{},'class="settlement-primary"')}</footer>`;
+    }
+    return `<div class="screen-shade"><section class="modal-ref mobile-results" data-settlement-view="${s.view}" role="dialog" aria-modal="true" aria-labelledby="mobile-settlement-title">${header}${content}${footer}</section></div>`;
+  }
+  function wakeSettlementSound(){
+    if(!mobileSettlement.matches||settlementReduce.matches||g.journey.musicPauseIntent)return;
+    const Context=window.AudioContext||window.webkitAudioContext;
+    if(!Context)return;
+    try{
+      if(!settlementAudio)settlementAudio=new Context();
+      if(settlementAudio.state==='suspended')void settlementAudio.resume().catch(()=>{});
+    }catch{}
+  }
+  function playSettlementStamp(index){
+    const ctx=settlementAudio;
+    if(!ctx||ctx.state!=='running'||g.journey.musicPauseIntent||settlementReduce.matches)return;
+    const time=ctx.currentTime;
+    for(const [type,frequency,level,duration] of [['sine',106+index*12,.14,.14],['triangle',276+index*44,.035,.09]]){
+      const wave=ctx.createOscillator(),gain=ctx.createGain();
+      wave.type=type;
+      wave.frequency.setValueAtTime(frequency,time);
+      wave.frequency.exponentialRampToValueAtTime(frequency*.56,time+duration);
+      gain.gain.setValueAtTime(.001,time);
+      gain.gain.exponentialRampToValueAtTime(level,time+.006);
+      gain.gain.exponentialRampToValueAtTime(.001,time+duration);
+      wave.connect(gain).connect(ctx.destination);
+      wave.onended=()=>{wave.disconnect();gain.disconnect();};
+      wave.start(time);
+      wave.stop(time+duration+.012);
+    }
+  }
+  let settlementNodes=null;
+  function syncSettlementMotion(now=performance.now()){
+    if(!settlementNodes||settlementNodes.finished)return;
+    const {modal,numbers,stars,rating}=settlementNodes, s=settlementState(),mode=modal.dataset.settlementView;
+    const clock=s.tracks[mode]??(s.tracks[mode]={start:now,stamps:0,done:s.restored});
+    const visible=!document.hidden&&!orientationBlocked&&ui.menu!=='settings';
+    if(settlementReduce.matches||!visible)clock.done=true;
+    const age=clock.done?Infinity:now-clock.start,timing=mode==='ticket'?1320:980;
+    if(age>timing+800)clock.done=true;
+    for(const node of numbers){
+      const d=node.dataset, target=Number(d.countValue),p=Math.max(0,Math.min(1,(age-d.countDelay)/d.countDuration));
+      const val=p===1?target:Math.sign(target)*Math.floor(Math.abs(target)*(1-Math.pow(1-p,2.65)));
+      const label=settlementText(val,d.countKind);
+      if(node.textContent!==label)node.textContent=label;
+    }
+    let earned=0;
+    stars.forEach((node,index)=>{
+      const delta=age-timing-index*175;
+      const landed=delta>=0,stamping=delta>=-120&&delta<300;
+      if(landed)earned++;
+      node.classList.toggle('is-landed',landed);
+      node.classList.toggle('is-stamping',stamping);
+      if(stamping){
+        const enter=Math.max(0,Math.min(1,(delta+120)/120)),bounce=Math.max(0,Math.min(1,delta/200)),pulse=Math.max(0,Math.min(1,delta/260));
+        const scale=delta<0?1.22+.93*(1-enter):1+.22*Math.cos(bounce*3.1*Math.PI)*Math.pow(1-bounce,2);
+        node.style.setProperty('--stamp-offset',-17*(1-enter));
+        node.style.setProperty('--stamp-turn',(-14*(1-enter))+'deg');
+        node.style.setProperty('--stamp-scale',scale);
+        node.style.setProperty('--stamp-opacity',enter);
+        node.style.setProperty('--stamp-ring-scale',.56+1.7*pulse);
+        node.style.setProperty('--stamp-ring-opacity',delta<0?0:.9*(1-pulse));
+      }
+      if(landed&&index>=clock.stamps&&delta<170&&visible)playSettlementStamp(index);
+    });
+    clock.stamps=Math.max(clock.stamps,earned);
+    const label=earned+' / 3';
+    if(rating.textContent!==label)rating.textContent=label;
+    if(clock.done)settlementNodes.finished=true;
+  }
+  function bindSettlementMotion(){
+    const modal=ref.querySelector('.mobile-results');
+    settlementNodes=modal?{modal,numbers:[...modal.querySelectorAll('.settlement-count')],stars:[...modal.querySelectorAll('.settlement-star.is-earned')],rating:modal.querySelector('.settlement-rating>b')}:null;
+    if(!settlementNodes)return;
+    syncSettlementMotion();
+    if(settlementFocus){modal.querySelector('h1')?.focus({preventScroll:true});settlementFocus=false;}
+  }
+
+  function settlementMediaChanged(){dirty=true;}
+  mobileSettlement.addEventListener('change',settlementMediaChanged);
   function results(){
     const j=g.journey,m=g.metrics(),show=m.show||Campaign.show(j.booking?.showId),stage=Campaign.stage(completedNights());
     const campaign=j.booking?.deskVersion===2;
@@ -211,12 +343,13 @@ export async function startGame({root,assetsBase='./FastGame/art/',assets:predec
     for(const [tab,selector] of [['festival','.festival-actions'],['music','.track-list']]){const list=hudRoot.querySelector(selector);if(list)consoleScroll[tab]=list.scrollTop;}
     hudRoot.innerHTML=hud();
     for(const [tab,selector] of [['festival','.festival-actions'],['music','.track-list']]){const list=hudRoot.querySelector(selector);if(list)list.scrollTop=consoleScroll[tab];}
-    ref.innerHTML=(g.phase==='lobby'?lobby():g.phase==='guide'?guide():g.phase==='results'?results():'');
+    ref.innerHTML=(g.phase==='lobby'?lobby():g.phase==='guide'?guide():g.phase==='results'?(mobileSettlement.matches?mobileResults():results()):'');
     css.innerHTML=(g.phase==='planning'?dayDesk.markup():ui.menu==='service'?service():'')+floorMarkup()+(ui.menu==='operations'?operations():'')+(ui.menu==='settings'?settings():'')+(g.paused&&(g.playing||g.closing)&&!g.farewellPending&&!ui.menu?pause():'')+pourMarkup()+farewellMarkup();
     orientationGate.innerHTML=orientationMarkup();
     if(css.querySelector('.daydesk-scroll'))css.querySelector('.daydesk-scroll').scrollTop=scroll;
     if(css.querySelector('.pet-catalog-scroll'))css.querySelector('.pet-catalog-scroll').scrollTop=petScroll;
     resize();
+    bindSettlementMotion();
     viewMode.onHUDRendered();
     if(focusAction){const replacement=[...hudRoot.querySelectorAll('button[data-action]')].find(node=>node.dataset.action===focusAction&&node.dataset.payload===focusPayload);replacement?.focus({preventScroll:true});}
     if(ui.menu==='service'&&!orderDialogWasOpen&&!orientationBlocked)(css.querySelector('.order-dialog-actions button[data-action="prepare"]:not(:disabled)')||css.querySelector('.order-dialog-actions button:not(:disabled)'))?.focus({preventScroll:true});
@@ -279,6 +412,13 @@ export async function startGame({root,assetsBase='./FastGame/art/',assets:predec
       case'musicToggle':toggleMusic();break;
       case'mode':ui.mode=p.challenge;break;
       case'settings':openMenu('settings');break;
+      case'settlementTicket':
+      case'settlementSummary':
+        if(g.phase==='results'&&mobileSettlement.matches){settlementState().view=action==='settlementTicket'?'ticket':'summary';settlementFocus=true;}
+        break;
+      case'settlementDetails':
+        if(g.phase==='results'&&mobileSettlement.matches){const s=settlementState();s.details=!s.details;settlementFocus=true;}
+        break;
       case'petCatalog':if(g.owner===2&&ui.menu==='service'&&g.playing){ui.petMenuOpen=!ui.petMenuOpen;}break;
       case'close':closeMenu();break;
       case'service':if(g.playing&&!g.pour&&(!g.paused||ui.menu==='service')){if(g._inputGuard>0)ui.pendingService=true;else openMenu('service');}break;
@@ -306,9 +446,9 @@ export async function startGame({root,assetsBase='./FastGame/art/',assets:predec
     dirty=true;
   }
   function handleAction(action,p={}){if(orientationBlocked&&action!=='ui:fullscreen')return;if((viewMode.viewing||viewMode.transitioning)&&!['ui:viewMode','ui:musicPrevious','ui:musicNext','ui:musicToggle','playlist','ui:fullscreen','ui:settings'].includes(action)&&!(ui.menu==='settings'&&['ui:close','language','ui:holdPause'].includes(action))&&!(action==='ui:liveTab'&&p.tab==='music'))return;if(action.startsWith('ui:'))uiAction(action.slice(3),p);else{if(action==='deskWork')dayDesk.focus(p.task===1?'phone':'monitor');if(['menuItem','prepare'].includes(action)&&ui.menu==='service')closeMenu();if(['lobby','next','retry','start','continue','resume'].includes(action))ui.menu=null;const result=run(action,p);if(action==='menuItem'&&!result.success&&result.code==='wrong_item')ui.pendingService=true;if(action==='playlist'&&allowedTracks().includes(p.index)){run('musicState',{paused:false});music.select();}}if(action!=='ui:viewMode')wakeAudio();}
-  const clickHandler=e=>{const b=e.target.closest('[data-action]');if(!b||!host.contains(b)||b.disabled)return;handleAction(b.dataset.action,JSON.parse(b.dataset.payload||'{}'));};
+  const clickHandler=e=>{const b=e.target.closest('[data-action]');if(!b||!host.contains(b)||b.disabled)return;if(e.isTrusted&&b.dataset.action!=='ui:musicToggle')wakeSettlementSound();handleAction(b.dataset.action,JSON.parse(b.dataset.payload||'{}'));};
   const changeHandler=e=>{if(orientationBlocked)return;if(e.target.matches('[data-pet-menu-group]')){if(PET_SOUNDS_MENU_GROUPS.some(group=>group.id===e.target.value)){ui.petMenuGroup=e.target.value;const list=css.querySelector('.pet-catalog-scroll');if(list)list.scrollTop=0;dirty=true;}return;}if(e.target.matches('[data-desk-selected]')){dayDesk.focus('monitor');run('deskSelect',{selected:e.target.checked});}};
-  const keyHandler=e=>{if(orientationBlocked||viewMode.transitioning)return;if(viewMode.viewing){if(ui.menu==='settings'&&e.key==='Escape'&&!e.repeat){e.preventDefault();closeMenu();}return;}if(g.closing&&g.farewellPending)return;if(e.repeat||e.ctrlKey||e.metaKey||e.altKey||/^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName))return;const key=e.key.toLowerCase();if([' ','p','m','h','e','c','f','1','2','3','4','5','6','escape'].includes(key))e.preventDefault();if(key==='c'||key==='f')handleAction('quick',{kind:key==='c'?1:2});else if(key===' '){if(g.pour)handleAction('pourStop');}else if(/^[1-6]$/.test(key))handleAction('menuItem',{item:+key-1});else if(key==='e')handleAction('prepare');else if(key==='m')uiAction('service',{});else if(key==='h')uiAction('floor',{});else if(key==='p'||key==='escape'){if(ui.menu){const service=ui.menu==='service';closeMenu();if(service&&key==='p')handleAction('pause');}else if(ui.floorOpen){ui.floorOpen=false;dirty=true;}else if(g.phase==='guide')handleAction('lobby');else handleAction(g.paused?'resume':'pause');}};
+  const keyHandler=e=>{if(orientationBlocked||viewMode.transitioning)return;if(viewMode.viewing){if(ui.menu==='settings'&&e.key==='Escape'&&!e.repeat){e.preventDefault();closeMenu();}return;}if(g.closing&&g.farewellPending)return;if(e.repeat||e.ctrlKey||e.metaKey||e.altKey||/^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName))return;const key=e.key.toLowerCase();if(key===' '&&e.target.closest?.('.mobile-results button'))return;if([' ','p','m','h','e','c','f','1','2','3','4','5','6','escape'].includes(key))e.preventDefault();if(key==='c'||key==='f')handleAction('quick',{kind:key==='c'?1:2});else if(key===' '){if(g.pour)handleAction('pourStop');}else if(/^[1-6]$/.test(key))handleAction('menuItem',{item:+key-1});else if(key==='e')handleAction('prepare');else if(key==='m')uiAction('service',{});else if(key==='h')uiAction('floor',{});else if(key==='p'||key==='escape'){if(ui.menu){const service=ui.menu==='service';closeMenu();if(service&&key==='p')handleAction('pause');}else if(ui.floorOpen){ui.floorOpen=false;dirty=true;}else if(g.phase==='guide')handleAction('lobby');else handleAction(g.paused?'resume':'pause');}};
   function wakeAudio(){
     if(orientationBlocked){music.suspend();return;}
     if(!['playing','closing','guide','results'].includes(g.phase)){
@@ -331,7 +471,7 @@ export async function startGame({root,assetsBase='./FastGame/art/',assets:predec
   const structure=()=>{const j=g.journey,p=j.booking,r=g.reaction;return JSON.stringify([g.phase,g.language,g.owner,g.paused,ui,j.guideStep,p?.deskVersion,p?.freewillSelected,p?.deskDoneMask,p?.showId,p?.ticketTier,p?.promotions,p?.campaignStage,p?.soundcheckMinutes,p?.entranceMusicChoice,p?.secondSetIntro,p?.encoreSeed,p?.encoreChoice,ui.menu==='service'&&!ui.petMenuOpen?petOrderManager(g)?.mood:null,j.completedNights,g.state.playlist,g.orders[0]?.id,g.orders[0]?.item,p?.venue,g.phase==='planning'?g.state.money:ui.menu==='operations'?g.state.money:0,g.state.staff,g.state.upgrades,g.state.activeEvent,g.state.wageDebt>0,!!g.pour,g.pour?.item,r?.activeKind,r?.activeStage,r?.cooldown>0,g.guestExitFinished,j.musicPaused,g.farewellPending,j.afterShow?.departureStarted]);};
   // Focus changes do not pause the venue or its music. Hidden tabs use a timer
   // for the same game rules, while visible windows keep smooth canvas frames.
-  const frame=(now,dt,{hidden})=>{if(stopped)return;syncOrientation();g.setMusicPlaybackActive(music.playing);g.setViewServiceActive(viewMode.viewing&&g.playing);g.setViewClosingActive(viewMode.viewing&&g.closing);if(!orientationBlocked)g.tick(dt);syncMusic();if(previousPhase!==g.phase){if(g.phase==='planning')dayDesk.reset(now);if(!['playing','closing'].includes(g.phase)){viewMode.reset();g.setViewServiceActive(false);g.setViewClosingActive(false);viewReturnTab=null;}ui.menu=null;ui.floorOpen=false;previousPhase=g.phase;dirty=true;}if(g.closing&&g.farewellPending){ui.menu=null;ui.floorOpen=false;}maybeOrderPopup();const key=structure();if((dirty||key!==lastKey)&&!viewMode.transitioning){rebuild();lastKey=key;}update();if(!hidden)world.render(now,worldState());};
+  const frame=(now,dt,{hidden})=>{if(stopped)return;syncOrientation();g.setMusicPlaybackActive(music.playing);g.setViewServiceActive(viewMode.viewing&&g.playing);g.setViewClosingActive(viewMode.viewing&&g.closing);if(!orientationBlocked)g.tick(dt);syncMusic();if(previousPhase!==g.phase){if(g.phase==='results'&&['playing','closing','guide'].includes(previousPhase))freshSettlement=settlementKey();if(g.phase==='planning')dayDesk.reset(now);if(!['playing','closing'].includes(g.phase)){viewMode.reset();g.setViewServiceActive(false);g.setViewClosingActive(false);viewReturnTab=null;}ui.menu=null;ui.floorOpen=false;previousPhase=g.phase;dirty=true;}if(g.closing&&g.farewellPending){ui.menu=null;ui.floorOpen=false;}maybeOrderPopup();const key=structure();if((dirty||key!==lastKey)&&!viewMode.transitioning){rebuild();lastKey=key;}update();if(settlementNodes)syncSettlementMotion();if(!hidden)world.render(now,worldState());};
   const gameLoop=createBackgroundLoop({onframe:frame});
   host.addEventListener('click',clickHandler);host.addEventListener('change',changeHandler);document.addEventListener('keydown',keyHandler);const observer=new ResizeObserver(resize);observer.observe(host);g.onchange=()=>{};
   const statsResume=()=>playStats.resume(),statsVisibility=()=>{if(!document.hidden)statsResume();};
@@ -342,7 +482,7 @@ export async function startGame({root,assetsBase='./FastGame/art/',assets:predec
   // Scene and interactive owner controls have both painted before the host is told ready.
   await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
 
-  const result={g,world,canvas,albumArt,viewMode,root:host,get orientationBlocked(){return orientationBlocked;},destroy(){stopped=true;gameLoop.destroy();observer.disconnect();host.removeEventListener('click',clickHandler);host.removeEventListener('change',changeHandler);document.removeEventListener('keydown',keyHandler);g.setViewServiceActive(false);g.setViewClosingActive(false);viewMode.destroy();music.destroy();playStats.destroy();clearInterval(statsRefreshTimer);window.removeEventListener('online',statsResume);document.removeEventListener('visibilitychange',statsVisibility);albumArt.destroy();g.save();world.destroy?.();host.remove();}};
+  const result={g,world,canvas,albumArt,viewMode,root:host,get orientationBlocked(){return orientationBlocked;},destroy(){stopped=true;mobileSettlement.removeEventListener('change',settlementMediaChanged);if(settlementAudio&&settlementAudio.state!=='closed')void settlementAudio.close().catch(()=>{});gameLoop.destroy();observer.disconnect();host.removeEventListener('click',clickHandler);host.removeEventListener('change',changeHandler);document.removeEventListener('keydown',keyHandler);g.setViewServiceActive(false);g.setViewClosingActive(false);viewMode.destroy();music.destroy();playStats.destroy();clearInterval(statsRefreshTimer);window.removeEventListener('online',statsResume);document.removeEventListener('visibilitychange',statsVisibility);albumArt.destroy();g.save();world.destroy?.();host.remove();}};
   window.simbarGame=g;
   return result;
 }
