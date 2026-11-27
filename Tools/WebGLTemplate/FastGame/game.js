@@ -64,7 +64,7 @@ export async function startGame({root,assetsBase='./FastGame/art/',assets:predec
   const name=o=>o?g.language==='en'?(o.en||o.nameEnglish||o.name):(o.ko||o.name):'';
   const dayDesk=createDayDesk({g,asset,t,name});
   const dayDeskMusic=new DayDeskMusic();
-  const syncDayDeskMusic=(gesture=false)=>dayDeskMusic.sync(!stopped&&!orientationBlocked&&!document.hidden&&g.phase==='planning'&&!g.journey.musicPauseIntent?g.owner:-1,gesture);
+  const syncDayDeskMusic=(gesture=false)=>dayDeskMusic.sync(!stopped&&!orientationBlocked&&!document.hidden&&g.phase==='planning'?g.owner:-1,gesture);
   const icon=(key,alt='')=>`<img class="hud-icon" src="${esc(asset('icons/'+key+'.png'))}" alt="${esc(alt)}" draggable="false">`;
   const worldState=()=>({...g.state,owner:g.owner,phase:g.phase,paused:g.paused||orientationBlocked,journey:g.journey,floor:g.floor,reaction:g.reaction,inspection:g.inspection,actors:g.actors,orders:g.orders,effects:g.effects,elapsed:g.elapsed,cleanupReadyWorkers:g.cleanupReadyWorkers,guestExitFinished:g.guestExitFinished});
   const world=createWorld(canvas,{assets,getState:worldState});
