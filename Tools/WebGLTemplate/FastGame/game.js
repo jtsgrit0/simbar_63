@@ -71,7 +71,7 @@ export async function startGame({root,assetsBase='./FastGame/art/',assets:predec
   const albumArt=new AlbumArtLoader({baseURL:base,covers:assets.albumCovers});let requestedAlbumIndex=-1;
   const requestAlbum=(force=false)=>{const index=g.state.playlist;if(!music.awake||(!force&&index===requestedAlbumIndex))return;requestedAlbumIndex=index;albumArt.ensure(index);};
   const syncOrientation=(box=host.getBoundingClientRect())=>{orientationBlocked=box.height>box.width;host.dataset.orientation=orientationBlocked?'portrait':'landscape';orientationGate.hidden=!orientationBlocked;for(const layer of[canvas,hudRoot,ref,css])layer.inert=orientationBlocked;if(orientationBlocked)music.suspend();return box;};
-  const resize=()=>{const box=syncOrientation(),s=Math.sqrt(box.width/1920*box.height/1080);ref.style.width=box.width/s+'px';ref.style.height=box.height/s+'px';ref.style.transform=`scale(${s})`;ref.style.setProperty('--guide-unit',1/Math.max(.01,s)+'px');const title=ref.querySelector('.owner-title');if(title){const fit=Math.min(1,(box.width/s-48)/1480,(box.height/s-48)/900);title.style.transform=`translate(-50%,-50%) scale(${Math.max(.1,fit)})`;}const results=ref.querySelector(".results-ref");if(results){const fit=Math.min(1,(box.width/s-24)/1080,(box.height/s-24)/800);results.style.transform=`translate(-50%,-50%) scale(${Math.max(.1,fit)})`;}viewMode.resize();world.resize?.();layoutBottomDock();layoutTrackTitles();};
+  const resize=()=>{const box=syncOrientation(),s=Math.sqrt(box.width/1920*box.height/1080);ref.style.width=box.width/s+'px';ref.style.height=box.height/s+'px';ref.style.transform=`scale(${s})`;ref.style.setProperty('--guide-unit',1/Math.max(.01,s)+'px');const title=ref.querySelector('.owner-title');if(title){const fit=Math.min(1,(box.width/s-48)/1480,(box.height/s-48)/900);title.style.transform=`translate(-50%,-50%) scale(${Math.max(.1,fit)})`;}const results=ref.querySelector(".results-ref");if(results){const fit=Math.min(1,(box.width/s-24)/1080,(box.height/s-24)/900);results.style.transform=`translate(-50%,-50%) scale(${Math.max(.1,fit)})`;}viewMode.resize();world.resize?.();layoutBottomDock();layoutTrackTitles();};
   const closeMenu=(resume=true)=>{const was=ui.menu;ui.menu=null;ui.pendingService=false;ui.petMenuOpen=false;if(resume&&was&&was!=='service'&&!ui.wasPaused)g.act('resume');dirty=true;};
   // Guest orders stay live; management menus retain their pause behavior.
   const openMenu=menu=>{if(viewMode.transitioning||viewMode.viewing&&menu!=='settings'||g.closing&&g.farewellPending)return;if(ui.menu===menu){closeMenu();return;}if(ui.menu)closeMenu();ui.wasPaused=g.paused;ui.menu=menu;ui.floorOpen=false;if(menu==='service'&&g.orders[0])announcedOrders.add(g.orders[0]);if(menu!=='service'&&(g.playing||g.closing)&&!g.paused)g.act('pause',{reason:'menu'});dirty=true;};
@@ -167,23 +167,46 @@ export async function startGame({root,assetsBase='./FastGame/art/',assets:predec
     if(settlement?.key!==key)settlement={key,restored:key!==freshSettlement||!g.journey.settledSession,view:'summary',details:false,tracks:Object.create(null)};
     return settlement;
   };
-  function mobileResults(){
-    const j=g.journey,s=settlementState(),m=g.metrics();
+  function settlementBand(){
+    const j=g.journey,m=g.metrics();
     const show=m.show||Campaign.show(j.booking?.showId);
     const venue=g.owner===2?t('Pet Sounds','\ud3ab\uc0ac\uc6b4\uc988'):name(ownerVenue(g.owner));
     const freewill=t('Freewill','\ud504\ub9ac\uc70c'),july=t('JulyWantsMore','\uc904\ub77c\uc774\uc6d0\uce20\ubaa8\uc5b4');
     const band=show?.id==='freewill'?freewill:show?.id==='july'?july:show?.id==='double'?freewill+' \u00d7 '+july:name(show);
     const concert=show?.id==='double'?t('Double bill','\ud569\ub3d9 \uacf5\uc5f0'):show?t('Live show','\uacf5\uc5f0'):'';
+    return {venue,band,concert};
+  }
+  function settlementBandLine({venue,band,concert},includeVenue=true){
     const bandLine=band?` <span aria-hidden="true">\u00b7</span> <strong class="settlement-band">${esc(band)}</strong>${concert?' '+concert:''}`:'';
+    return (includeVenue?esc(venue):'')+bandLine;
+  }
+  function settlementStars(){
+    const j=g.journey;
     const stars=Math.max(0,Math.min(3,Number(j.resultStars)||0));
     const starMarkup=`<div class="settlement-rating" aria-label="${esc(stars+t(' out of 3 stars',' / 3 \ubcc4\uc810'))}"><span class="settlement-star-list" aria-hidden="true">${[1,2,3].map(i=>`<span class="settlement-star ${i<=stars?'is-earned is-landed':''}" data-star="${i}"><span class="settlement-star-mark">\u2605</span>${i<=stars?'<span class="settlement-star-ring"></span><span class="settlement-star-sparks"></span>':''}</span>`).join('')}</span><b aria-hidden="true">${stars} / 3</b></div>`;
-    const isTicket=s.view==='ticket',title=isTicket?t('Ticket settlement','\ud2f0\ucf13 \uc815\uc0b0'):`${j.day}${t(' Day \u00b7 Last Call','\uc77c \ucc28 \u00b7 \uc601\uc5c5 \ub9c8\uac10')}`;
+    return starMarkup;
+  }
+  function settlementTicketAmounts(){
+    const j=g.journey;
     const fee=Math.max(0,j.resultArtistFee||0),net=Number(j.resultTicketIncome)||0,gross=Number(j.resultTicketGross)||(net+fee);
-    const header=`<header class="settlement-head"><div><h1 id="mobile-settlement-title" tabindex="-1">${esc(title)}</h1><div class="settlement-subtitle">${esc(venue)}${bandLine}</div></div><div class="settlement-head-right">${starMarkup}${isTicket?'':button('ui:settings',t('Settings','\uc124\uc815'),{},'class="settlement-settings"')}</div></header>`;
+    return {fee,net,gross};
+  }
+  function settlementTicketBody({band}){
+    const j=g.journey,{fee,net,gross}=settlementTicketAmounts();
+    return `<div class="settlement-ticket-grid"><div class="settlement-ticket-card"><span>${t('Gross ticket sales','\ud2f0\ucf13 \ucd1d\ub9e4\ucd9c')}</span>${settlementNumber('gross',gross,'money',100,670)}<small>${t('Attendance: ','\uc785\uc7a5 \uad00\uac1d ')}${settlementNumber('attendance',j.resultAttendance,'guests',140,570,'b')}</small></div><div class="settlement-ticket-card is-deduction"><span>${t('Artist fee','\ucd9c\uc5f0\ub8cc')}</span>${settlementNumber('artistFee',-fee,'money',310,650)}<small>${band?`<strong class="settlement-band">${esc(band)}</strong> \u00b7 `:''}${t('Artist payout','\uc9c0\uae09\uc561')}</small></div><div class="settlement-ticket-card is-net"><span>${t('Net ticket settlement','\ud2f0\ucf13 \uc21c\uc815\uc0b0')}</span>${settlementNumber('net',net,'money',670,540)}<small>${t('Gross ticket sales minus artist fee','\ud2f0\ucf13 \ucd1d\ub9e4\ucd9c\uc5d0\uc11c \ucd9c\uc5f0\ub8cc \ucc28\uac10')}</small></div></div>`;
+  }
+  function settlementTicketFooter(){
+    return `<footer class="settlement-ticket-footer"><span>${t('The show rating is the same as in Last Call.','\uacf5\uc5f0 \ubcc4\uc810\uc740 \uc601\uc5c5 \ub9c8\uac10 \uacb0\uacfc\uc640 \ub3d9\uc77c\ud569\ub2c8\ub2e4.')}</span>${button('ui:settlementSummary',t('Back to Last Call','\uc601\uc5c5 \ub9c8\uac10\uc73c\ub85c'),{},'class="settlement-primary"')}</footer>`;
+  }
+  function mobileResults(){
+    const j=g.journey,s=settlementState(),{venue,...band}=settlementBand();
+    const lineup={venue,...band},bandLine=settlementBandLine(lineup),starMarkup=settlementStars();
+    const isTicket=s.view==='ticket',title=isTicket?t('Ticket settlement','\ud2f0\ucf13 \uc815\uc0b0'):`${j.day}${t(' Day \u00b7 Last Call','\uc77c \ucc28 \u00b7 \uc601\uc5c5 \ub9c8\uac10')}`;
+    const header=`<header class="settlement-head"><div><h1 id="mobile-settlement-title" tabindex="-1">${esc(title)}</h1><div class="settlement-subtitle">${bandLine}</div></div><div class="settlement-head-right">${starMarkup}${isTicket?'':button('ui:settings',t('Settings','\uc124\uc815'),{},'class="settlement-settings"')}</div></header>`;
     let content,footer;
     if(isTicket){
-      content=`<div class="settlement-ticket-grid"><div class="settlement-ticket-card"><span>${t('Gross ticket sales','\ud2f0\ucf13 \ucd1d\ub9e4\ucd9c')}</span>${settlementNumber('gross',gross,'money',100,670)}<small>${t('Attendance: ','\uc785\uc7a5 \uad00\uac1d ')}${settlementNumber('attendance',j.resultAttendance,'guests',140,570,'b')}</small></div><div class="settlement-ticket-card is-deduction"><span>${t('Artist fee','\ucd9c\uc5f0\ub8cc')}</span>${settlementNumber('artistFee',-fee,'money',310,650)}<small>${band?`<strong class="settlement-band">${esc(band)}</strong> \u00b7 `:''}${t('Artist payout','\uc9c0\uae09\uc561')}</small></div><div class="settlement-ticket-card is-net"><span>${t('Net ticket settlement','\ud2f0\ucf13 \uc21c\uc815\uc0b0')}</span>${settlementNumber('net',net,'money',670,540)}<small>${t('Gross ticket sales minus artist fee','\ud2f0\ucf13 \ucd1d\ub9e4\ucd9c\uc5d0\uc11c \ucd9c\uc5f0\ub8cc \ucc28\uac10')}</small></div></div>`;
-      footer=`<footer class="settlement-ticket-footer"><span>${t('The show rating is the same as in Last Call.','\uacf5\uc5f0 \ubcc4\uc810\uc740 \uc601\uc5c5 \ub9c8\uac10 \uacb0\uacfc\uc640 \ub3d9\uc77c\ud569\ub2c8\ub2e4.')}</span>${button('ui:settlementSummary',t('Back to Last Call','\uc601\uc5c5 \ub9c8\uac10\uc73c\ub85c'),{},'class="settlement-primary"')}</footer>`;
+      content=settlementTicketBody(band);
+      footer=settlementTicketFooter();
     }else{
       const goals=g.goals(),targets=g.goalTargets(),labels=[t('Serve orders','\uc8fc\ubb38 \uc81c\uacf5'),t('Perfect pours','\uc9c1\uc811 \ud37c\ud399\ud2b8'),t('Best combo','\ucd5c\uace0 \ucf64\ubcf4')],stage=Campaign.stage(completedNights());
       const goalRows=goals.map((v,i)=>`<div class="settlement-goal"><i class="${v>=targets[i]?'is-done':''}" aria-label="${v>=targets[i]?t('Done','\uc644\ub8cc'):t('Missed','\ubbf8\ub2ec\uc131')}">${v>=targets[i]?'\u2713':'\u2013'}</i><span>${labels[i]}</span><span class="settlement-goal-value">${settlementNumber('goal'+i,v,'',100+i*45,480,'b')} / ${targets[i]}</span></div>`).join('');
@@ -198,7 +221,7 @@ export async function startGame({root,assetsBase='./FastGame/art/',assets:predec
     return `<div class="screen-shade"><section class="modal-ref mobile-results" data-settlement-view="${s.view}" role="dialog" aria-modal="true" aria-labelledby="mobile-settlement-title">${header}${content}${footer}</section></div>`;
   }
   function wakeSettlementSound(){
-    if(!mobileSettlement.matches||settlementReduce.matches||g.journey.musicPauseIntent)return;
+    if(settlementReduce.matches||g.journey.musicPauseIntent||orientationBlocked)return;
     const Context=window.AudioContext||window.webkitAudioContext;
     if(!Context)return;
     try{
@@ -264,7 +287,7 @@ export async function startGame({root,assetsBase='./FastGame/art/',assets:predec
     if(clock.done)settlementNodes.finished=true;
   }
   function bindSettlementMotion(){
-    const modal=ref.querySelector('.mobile-results');
+    const modal=ref.querySelector('[data-settlement-view]');
     settlementNodes=modal?{modal,numbers:[...modal.querySelectorAll('.settlement-count')],stars:[...modal.querySelectorAll('.settlement-star.is-earned')],rating:modal.querySelector('.settlement-rating>b')}:null;
     if(!settlementNodes)return;
     syncSettlementMotion();
@@ -274,10 +297,24 @@ export async function startGame({root,assetsBase='./FastGame/art/',assets:predec
   function settlementMediaChanged(){dirty=true;}
   mobileSettlement.addEventListener('change',settlementMediaChanged);
   function results(){
-    const j=g.journey,m=g.metrics(),show=m.show||Campaign.show(j.booking?.showId),stage=Campaign.stage(completedNights());
-    const campaign=j.booking?.deskVersion===2;
-    const ticketSettlement=campaign?`<div class="result-ticket-ledger"><span>${t('GROSS TICKETS','티켓 총매출')} <b>${money(j.resultTicketGross)}</b></span><span>${t('ARTIST FEE','출연료')} <b>−${money(j.resultArtistFee)}</b></span><span>${t('NET TICKETS','티켓 순정산')} <b>${money(j.resultTicketIncome)}</b></span></div>`:`<div class="result-progress">${t('TICKETS','티켓')} ${money(j.resultTicketIncome)}</div>`;
-    return `<div class="screen-shade"><section class="modal-ref results-ref ${campaign?'campaign-results':''}">${button('ui:settings',t('SETTINGS','설정'),{},'class="settings-entry"')}<h1>${j.day}${t(' DAY / LAST CALL','일 차 / 영업 마감')}</h1>${show?`<div class="result-show-name">${esc(name(show))}</div>`:''}<div class="results-rank">${j.score.toLocaleString()}${t(' POINTS / BEST COMBO x','점 / 최고 콤보 x')}${j.bestCombo} / ${t('PERFECT POURS ','퍼펙트 ')}${j.manualPerfects}</div><div class="stars">${[1,2,3].map(i=>`<span style="color:${i<=j.resultStars?'#f7cf6d':'#404a5e'}">★</span>`).join('')}</div><div class="result-goals">${g.goals().map((v,i)=>`<div class="result-goal" style="color:${v>=g.goalTargets()[i]?'#8ced94':'#b3c4de'}">${v>=g.goalTargets()[i]?t('DONE','완료'):t('MISSED','미달성')}　${[t('SERVE ORDERS','주문 제공'),t('MANUAL PERFECTS','직접 따르기 퍼펙트'),t('BEST COMBO','최고 콤보')][i]} ${v}/${g.goalTargets()[i]}</div>`).join('')}</div><div class="result-stats">${[[t('NIGHT PROFIT','오늘의 수익'),money(j.resultProfit,true)],[t('GUESTS SERVED','응대한 손님'),j.resultServed],[t('XP EARNED','획득 경험치'),'+'+j.resultXP]].map(([label,value])=>`<div><span>${label}</span><strong>${value}</strong></div>`).join('')}</div>${ticketSettlement}<div class="result-progress">${t('BONUS','보너스')} ${money(j.resultBonus,true)} / ${t('GUESTS','관객')} ${j.resultAttendance} / ${t('FLOOR BONUS','홀 미션 보너스')} ${money(j.resultFloorBonus)}</div><div class="result-record">${j.resultNewRecord?t('NEW HIGH SCORE!','최고 점수 경신!'):t('BEST SCORE ','최고 점수 ')+j.bestScore.toLocaleString()}</div>${campaign?`<div class="result-growth">${esc(completedNights()===1?t('UNLOCKED: July Wants More, your first staff hire and level-one facilities. Invest at tomorrow’s desk.','해금 완료: 줄라이원츠모어 · 첫 직원 고용 · 시설 1레벨. 다음 낮 기획실에서 투자하세요.'):completedNights()===2?t('UNLOCKED: promoter and the double bill with Sound & Lights Lv.1.','해금 완료: 홍보 직원 · 음향·조명 1레벨 구매 시 합동 공연.'):growthHint(stage))}</div>`:''}<div class="result-actions">${button('retry',t('PLAN THIS DAY AGAIN','이날 다시 기획'))}${button('next',t('PLAN NEXT DAY','다음 날 낮 기획'))}${button('lobby',t('BACK TO LOBBY','로비로 돌아가기'))}</div><div class="result-saved">${t('PROGRESS SAVED / STAFF AND FACILITY INVESTMENTS ARE AVAILABLE AT YOUR DAYTIME DESK','진행 상황 저장 완료 / 다음 낮 기획실에서 직원과 시설에 투자할 수 있습니다.')}</div></section></div>`;
+    const j=g.journey,s=settlementState(),band=settlementBand(),bandline=settlementBandLine(band),stars=settlementStars();
+    const goalNames=[t('SERVE ORDERS','\uc8fc\ubb38 \uc81c\uacf5'),t('MANUAL PERFECTS','\uc9c1\uc811 \ub530\ub974\uae30 \ud37c\ud399\ud2b8'),t('BEST COMBO','\ucd5c\uace0 \ucf64\ubcf4')];
+    const launchLabel=s.view==='ticket'?t('Ticket settlement','\ud2f0\ucf13 \uc815\uc0b0'):`${j.day}${t(' DAY / LAST CALL','\uc77c \ucc28 / \uc601\uc5c5 \ub9c8\uac10')}`;
+    const title=`<h1 id="pc-settlement-title" tabindex="-1">${esc(launchLabel)}</h1><div class="result-show-name">${bandline}</div>`;
+    const wrap=(body,cls='')=>`<div class="screen-shade"><section class="modal-ref results-ref desktop-results ${cls}" data-settlement-view="${s.view}" role="dialog" aria-modal="true" aria-labelledby="pc-settlement-title">${body}</section></div>`;
+    if(s.view==='ticket')return wrap(`<header class="settlement-head"><div>${title}</div>${stars}</header>${settlementTicketBody(band)}${settlementTicketFooter()}`,'desktop-ticket');
+    const campaign=j.booking?.deskVersion===2,stage=Campaign.stage(completedNights()),targets=g.goalTargets();
+    const n=(key,val,kind='',delay=100,duration=590)=>settlementNumber(key,val,kind,delay,duration,'b');
+    const rank=`${n('score',j.score)}${t(' POINTS / BEST COMBO x','\uc810 / \ucd5c\uace0 \ucf64\ubcf4 x')}${n('combo',j.bestCombo)} / ${t('PERFECT POURS ','\ud37c\ud399\ud2b8 ')}${n('perfect',j.manualPerfects)}`;
+    const goals=g.goals().map((v,i)=>`<div class="result-goal" style="color:${v>=targets[i]?'#8ced94':'#b3c4de'}">${v>=targets[i]?t('DONE','\uc644\ub8cc'):t('MISSED','\ubbf8\ub2ec\uc131')} &nbsp; ${goalNames[i]} <span class="desktop-goal-count">${n('goal'+i,v,'',100+i*45,480)} / ${targets[i]}</span></div>`).join('');
+    const row=(label,key,val,kind,delay,duration)=>`<div><span>${label}</span>${settlementNumber(key,val,kind,delay,duration)}</div>`;
+    const stats=row(t('NIGHT PROFIT','\uc624\ub298\uc758 \uc218\uc775'),'profit',j.resultProfit,'signed',120,760)+row(t('ORDERS SERVED','\uc644\ub8cc \uc8fc\ubb38 \uc218'),'orders',j.resultServed,'',130,510)+row(t('XP EARNED','\ud68d\ub4dd \uacbd\ud5d8\uce58'),'xp',j.resultXP,'xp',200,640);
+    const {fee,net,gross}=settlementTicketAmounts();
+    const ledger=campaign?`<div class="result-ticket-ledger"><span>${t('GROSS TICKETS','\ud2f0\ucf13 \ucd1d\ub9e4\ucd9c')} ${n('gross',gross,'money')}</span><span class="is-deduction">${t('ARTIST FEE','\ucd9c\uc5f0\ub8cc')} ${n('artistFee',-fee,'money',200,610)}</span><span class="is-net">${t('NET TICKETS','\ud2f0\ucf13 \uc21c\uc815\uc0b0')} ${n('net',net,'money',300,580)}</span></div>`:`<div class="result-progress">${t('TICKETS','\ud2f0\ucf13')} ${n('net',net,'money',300,580)}</div>`;
+    const progress=`<div class="result-progress">${t('BONUS','\ubcf4\ub108\uc2a4')} ${n('bonus',j.resultBonus,'signed',140,640)} / ${t('GUESTS','\uad00\uac1d')} ${n('attendance',j.resultAttendance,'',200,640)} / ${t('FLOOR BONUS','\ud640 \ubbf8\uc158 \ubcf4\ub108\uc2a4')} ${n('floorBonus',j.resultFloorBonus,'money',260,640)}</div>`;
+    const growth=campaign?`<div class="result-growth">${esc(completedNights()===1?t('UNLOCKED: July Wants More, your first staff hire and level-one facilities. Invest at tomorrow\u2019s desk.','\ud574\uae08 \uc644\ub8cc: \uc904\ub77c\uc774\uc6d0\uce20\ubaa8\uc5b4 \u00b7 \uccab \uc9c1\uc6d0 \uace0\uc6a9 \u00b7 \uc2dc\uc124 1\ub808\ubca8. \ub2e4\uc74c \ub0ae \uae30\ud68d\uc2e4\uc5d0\uc11c \ud22c\uc790\ud558\uc138\uc694.'):completedNights()===2?t('UNLOCKED: promoter and the double bill with Sound & Lights Lv.1.','\ud574\uae08 \uc644\ub8cc: \ud64d\ubcf4 \uc9c1\uc6d0 \u00b7 \uc74c\ud5a5\u00b7\uc870\uba85 1\ub808\ubca8 \uad6c\ub9e4 \uc2dc \ud569\ub3d9 \uacf5\uc5f0.'):growthHint(stage))}</div>`:'';
+    const actions=`<div class="result-actions">${button('retry',t('PLAN THIS DAY AGAIN','\uc774\ub0a0 \ub2e4\uc2dc \uae30\ud68d'))}${button('next',t('PLAN NEXT DAY','\ub2e4\uc74c \ub0a0 \ub0ae \uae30\ud68d'))}${button('lobby',t('BACK TO LOBBY','\ub85c\ube44\ub85c \ub3cc\uc544\uac00\uae30'))}</div>`;
+    return wrap(`${button('ui:settings',t('SETTINGS','\uc124\uc815'),{},'class="settings-entry"')}${title}<div class="results-rank">${rank}</div>${stars}<div class="result-goals">${goals}</div><div class="result-stats">${stats}</div>${ledger}${button('ui:settlementTicket',t('Ticket settlement \u203a','\ud2f0\ucf13 \uc815\uc0b0 \u203a'),{},'class="desktop-ticket-link"')}${progress}<div class="result-record">${j.resultNewRecord?t('NEW HIGH SCORE!','\ucd5c\uace0 \uc810\uc218 \uacbd\uc2e0!'):t('BEST SCORE ','\ucd5c\uace0 \uc810\uc218 ')+n('best',j.bestScore)}</div>${growth}${actions}<div class="result-saved">${t('PROGRESS SAVED / STAFF AND FACILITY INVESTMENTS ARE AVAILABLE AT YOUR DAYTIME DESK','\uc9c4\ud589 \uc0c1\ud669 \uc800\uc7a5 \uc644\ub8cc / \ub2e4\uc74c \ub0ae \uae30\ud68d\uc2e4\uc5d0\uc11c \uc9c1\uc6d0\uacfc \uc2dc\uc124\uc5d0 \ud22c\uc790\ud560 \uc218 \uc788\uc2b5\ub2c8\ub2e4.')}</div>`,campaign?'campaign-results':'');
   }
   function pause(){return `<div class="screen-shade pause-shade"><section class="modal-ref pause-ref"><h1>${t('SERVICE PAUSED','일시정지')}</h1><p>${t('Return to the floor, or save this night for later.','영업을 계속하거나 저장 후 나중에 이어서 할 수 있습니다.')}</p>${button('resume',t('RETURN TO THE FLOOR','영업으로 돌아가기'))}${button('lobby',t('SAVE & LOBBY','저장 후 로비로'))}${button('ui:settings',t('SETTINGS','설정'))}</section></div>`;}
   function settings(){return `<div class="screen-shade settings-shade"><section class="modal-ref settings-ref"><h1>${t('SETTINGS','설정')}</h1><h2>${t('LANGUAGE','언어')}</h2><div class="language-choices">${button('language','한국어',{language:'ko'},`class="${g.language==='ko'?'selected':''}"`)}${button('language','English',{language:'en'},`class="${g.language==='en'?'selected':''}"`)}</div><div class="settings-game-actions">${button('ui:fullscreen',t('FULL SCREEN','전체 화면'))}${g.playing||g.closing?button('ui:holdPause',t('PAUSE THE GAME','게임 일시 정지')):''}</div><p>${t('Changes apply immediately and are saved for next time.','언어는 즉시 적용되며 다음 실행에도 유지됩니다.')}</p>${button('ui:close',t('RETURN','돌아가기'),{},'class="close"')}</section></div>`;}
@@ -414,7 +451,7 @@ export async function startGame({root,assetsBase='./FastGame/art/',assets:predec
       case'settings':openMenu('settings');break;
       case'settlementTicket':
       case'settlementSummary':
-        if(g.phase==='results'&&mobileSettlement.matches){settlementState().view=action==='settlementTicket'?'ticket':'summary';settlementFocus=true;}
+        if(g.phase==='results'){settlementState().view=action==='settlementTicket'?'ticket':'summary';settlementFocus=true;}
         break;
       case'settlementDetails':
         if(g.phase==='results'&&mobileSettlement.matches){const s=settlementState();s.details=!s.details;settlementFocus=true;}
@@ -448,7 +485,7 @@ export async function startGame({root,assetsBase='./FastGame/art/',assets:predec
   function handleAction(action,p={}){if(orientationBlocked&&action!=='ui:fullscreen')return;if((viewMode.viewing||viewMode.transitioning)&&!['ui:viewMode','ui:musicPrevious','ui:musicNext','ui:musicToggle','playlist','ui:fullscreen','ui:settings'].includes(action)&&!(ui.menu==='settings'&&['ui:close','language','ui:holdPause'].includes(action))&&!(action==='ui:liveTab'&&p.tab==='music'))return;if(action.startsWith('ui:'))uiAction(action.slice(3),p);else{if(action==='deskWork')dayDesk.focus(p.task===1?'phone':'monitor');if(['menuItem','prepare'].includes(action)&&ui.menu==='service')closeMenu();if(['lobby','next','retry','start','continue','resume'].includes(action))ui.menu=null;const result=run(action,p);if(action==='menuItem'&&!result.success&&result.code==='wrong_item')ui.pendingService=true;if(action==='playlist'&&allowedTracks().includes(p.index)){run('musicState',{paused:false});music.select();}}if(action!=='ui:viewMode')wakeAudio();}
   const clickHandler=e=>{const b=e.target.closest('[data-action]');if(!b||!host.contains(b)||b.disabled)return;if(e.isTrusted&&b.dataset.action!=='ui:musicToggle')wakeSettlementSound();handleAction(b.dataset.action,JSON.parse(b.dataset.payload||'{}'));};
   const changeHandler=e=>{if(orientationBlocked)return;if(e.target.matches('[data-pet-menu-group]')){if(PET_SOUNDS_MENU_GROUPS.some(group=>group.id===e.target.value)){ui.petMenuGroup=e.target.value;const list=css.querySelector('.pet-catalog-scroll');if(list)list.scrollTop=0;dirty=true;}return;}if(e.target.matches('[data-desk-selected]')){dayDesk.focus('monitor');run('deskSelect',{selected:e.target.checked});}};
-  const keyHandler=e=>{if(orientationBlocked||viewMode.transitioning)return;if(viewMode.viewing){if(ui.menu==='settings'&&e.key==='Escape'&&!e.repeat){e.preventDefault();closeMenu();}return;}if(g.closing&&g.farewellPending)return;if(e.repeat||e.ctrlKey||e.metaKey||e.altKey||/^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName))return;const key=e.key.toLowerCase();if(key===' '&&e.target.closest?.('.mobile-results button'))return;if([' ','p','m','h','e','c','f','1','2','3','4','5','6','escape'].includes(key))e.preventDefault();if(key==='c'||key==='f')handleAction('quick',{kind:key==='c'?1:2});else if(key===' '){if(g.pour)handleAction('pourStop');}else if(/^[1-6]$/.test(key))handleAction('menuItem',{item:+key-1});else if(key==='e')handleAction('prepare');else if(key==='m')uiAction('service',{});else if(key==='h')uiAction('floor',{});else if(key==='p'||key==='escape'){if(ui.menu){const service=ui.menu==='service';closeMenu();if(service&&key==='p')handleAction('pause');}else if(ui.floorOpen){ui.floorOpen=false;dirty=true;}else if(g.phase==='guide')handleAction('lobby');else handleAction(g.paused?'resume':'pause');}};
+  const keyHandler=e=>{if(orientationBlocked||viewMode.transitioning)return;if(viewMode.viewing){if(ui.menu==='settings'&&e.key==='Escape'&&!e.repeat){e.preventDefault();closeMenu();}return;}if(g.closing&&g.farewellPending)return;if(e.repeat||e.ctrlKey||e.metaKey||e.altKey||/^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName))return;const key=e.key.toLowerCase();if(key===' '&&e.target.closest?.('[data-settlement-view] button'))return;if([' ','p','m','h','e','c','f','1','2','3','4','5','6','escape'].includes(key))e.preventDefault();if(key==='c'||key==='f')handleAction('quick',{kind:key==='c'?1:2});else if(key===' '){if(g.pour)handleAction('pourStop');}else if(/^[1-6]$/.test(key))handleAction('menuItem',{item:+key-1});else if(key==='e')handleAction('prepare');else if(key==='m')uiAction('service',{});else if(key==='h')uiAction('floor',{});else if(key==='p'||key==='escape'){if(ui.menu){const service=ui.menu==='service';closeMenu();if(service&&key==='p')handleAction('pause');}else if(ui.floorOpen){ui.floorOpen=false;dirty=true;}else if(g.phase==='guide')handleAction('lobby');else handleAction(g.paused?'resume':'pause');}};
   function wakeAudio(){
     if(orientationBlocked){music.suspend();return;}
     if(!['playing','closing','guide','results'].includes(g.phase)){
