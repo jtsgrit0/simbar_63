@@ -4,7 +4,16 @@ import {walkable,reserved,FF_LAYOUT,FREEBIRD_LAYOUT} from './navigation.js';
 const TAU=Math.PI*2,MIN_SPACING=.42;
 const whole=(value,min=0,max=1e9)=>Math.trunc(Math.max(min,Math.min(max,Number.isFinite(+value)?+value:min)));
 const ownerIndex=owner=>Number.isInteger(owner)&&owner>=0&&owner<3?owner:2;
-const names=['Mina','Jae','Sora','Noel','Dani','Yuna','Theo','Ari','Ivy','Rin'];
+const nameGroups=[
+  ["\uae40\uc11c\uc5f0","\ubc15\uc9c0\ud6c8","\uc774\ubbfc\uc900","\ucd5c\uc720\uc9c4","\uc815\ud558\ub298","\ud55c\uc9c0\uc6b0","\uc624\uc608\ub9b0","\uac15\ud604\uc6b0","\uc724\uc218\ube48","\uc784\ub3c4\uc724","\uc1a1\uc9c0\ubbfc","\uc870\ub2e4\uc740"],
+  ["Oliver Bennett","Amelia Clarke","Alfie Turner","Poppy Hughes","Freddie Walker","Isla Campbell","Arthur Davies","Florence Reed","Ivy Morgan","Harry Wilson","Maisie Fletcher","Theo Brooks"],
+  ["Maya Johnson","Jordan Rivera","Riley Carter","Zoe Mitchell","Ethan Parker","Avery Coleman","Miles Dawson","Nora Brooks","Sofia Ramirez","Caleb Foster","Taylor Reed","Morgan Hayes"],
+  ["Lena M\u00fcller","Jonas Weber","Clara Fischer","Lukas Wagner","Emilia Becker","Noah Hoffmann","Mila Schulz","Felix Braun","Lea Klein","Oskar Neumann","Ida Kr\u00fcger","Anton Berg"],
+  ["Camille Laurent","Hugo Bernard","L\u00e9a Dubois","Louis Moreau","Manon Petit","Jules Lef\u00e8vre","In\u00e8s Girard","Arthur Roux","Emma Fournier","Lucie Simon","Ma\u00ebl Fontaine","Chlo\u00e9 Garnier"],
+  ["Luc\u00eda Moreno","Mateo Vega","Carmen Ruiz","Pablo Mart\u00edn","Noa Romero","Alba Navarro","Hugo Morales","Irene Santos","Diego Rojas","Vega Castillo","Elena Le\u00f3n","Adri\u00e1n Serrano"],
+  ["Yui Tanaka","Ren Nakamura","Sora Ito","Hana Suzuki","Haru Sato","Aoi Kato","Yuna Yamamoto","Yuto Mori","Rin Ishikawa","Nao Fujita","Mio Watanabe","Kei Hayashi"],
+  ["Sofia Rossi","Luca Romano","Giulia Marino","Matteo Costa","Alice Ricci","Marco Bruno","Elena Gallo","Pietro Conti","Anna Leone","Nico Rizzo","Chiara Greco","Leo Ferrari"]
+];
 const wardrobes=['Casual','Suit','Beach','Worker','Farmer','Adventurer','Casual2','Punk'];
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.z-b.z);
 const layoutFor=owner=>owner===0?FREEBIRD_LAYOUT:owner===1?FF_LAYOUT:null;
@@ -15,6 +24,17 @@ const hash=(...values)=>{
   return value||1;
 };
 const random=seed=>()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
+function guestNames({owner=2,day=1,session=1,nameSeed=0}={}){
+  const next=random(hash(owner,day,session,nameSeed,'guest-names'));
+  const shuffle=items=>{
+    const copy=items.slice();
+    for(let i=copy.length-1;i>0;i--){const j=Math.floor(next()*(i+1));[copy[i],copy[j]]=[copy[j],copy[i]];}
+    return copy;
+  };
+  const pools=nameGroups.map(shuffle),deck=[];
+  for(let i=0;i<pools[0].length;i++)deck.push(...shuffle(pools).map(pool=>pool[i]));
+  return deck;
+}
 const round=value=>Math.round(value*10000)/10000;
 const facing=(x,z)=>Math.atan2(5.75-x,3.5-z);
 
@@ -56,12 +76,12 @@ function standingBehavior(owner,showId,next){
   return roll<.18?'listen':roll<.48?'sway':roll<.83?'headbang':'cheer';
 }
 
-function build({owner=2,attendance=0,showId='freewill',day=1,session=1}={}){
+function build({owner=2,attendance=0,showId='freewill',day=1,session=1,nameSeed=0}={}){
   owner=ownerIndex(owner);
   const profile=AUDIENCE_VENUES[owner],total=whole(attendance,0,profile.capacity),seed=hash(owner,day,session,showId),next=random(seed),layout=layoutFor(owner),actors=[];
-  const candidates=floorCandidates(owner,seed^0x9e3779b9);
+  const candidates=floorCandidates(owner,seed^0x9e3779b9),names=guestNames({owner,day,session,nameSeed});
   const make=(id,role,slot,point,behavior,extra={})=>{
-    const descriptor={id,name:names[slot%names.length]||'Guest',role,slot,audienceVersion:1,behavior,behaviorPhase:round(next()*TAU),animationSpeed:round(.72+next()*.56),
+    const descriptor={id,name:names[actors.length]||'Guest',role,slot,audienceVersion:1,behavior,behaviorPhase:round(next()*TAU),animationSpeed:round(.72+next()*.56),
       x:point.x,z:point.z,y:0,homeX:point.x,homeZ:point.z,targetX:point.x,targetZ:point.z,facing:point.facing??facing(point.x,point.z),
       moving:false,action:behavior,visible:true,_path:[],_pathAt:0,_wait:round(2+next()*5),...extra};
     if(layout){descriptor.layout=layout.id;descriptor.layoutVersion=layout.version;}
@@ -175,13 +195,17 @@ function safePoint({owner=0,actor,actors=[],day=1,session=1}={}){
     .filter(p=>clearAudiencePoint(p,actors.filter(a=>a!==actor))).sort((a,b)=>distance(a,actor)-distance(b,actor))[0]||null;
 }
 
-function arrival({owner=2,showId='freewill',day=1,session=1,serial=1,actors=[]}={}){
+function arrival({owner=2,showId='freewill',day=1,session=1,serial=1,actors=[],nameSeed=0}={}){
   owner=ownerIndex(owner);const seed=hash(owner,day,session,serial,'arrival'),next=random(seed),layout=layoutFor(owner);
   const candidates=floorCandidates(owner,seed);
   const ordered=owner===0?[...candidates.filter(point=>point.zone==='front-floor'&&point.x>=.6),...candidates.filter(point=>point.zone!=='front-floor'||point.x<.6)]:candidates;
   const point=ordered.find(point=>clearAudiencePoint(point,actors));if(!point)return null;
   const slot=300+serial,behavior=standingBehavior(owner,showId,next);
-  return{id:`arrival-${session}-${serial}`,name:names[slot%names.length],role:'guest',slot,audienceVersion:1,
+  const used=new Set(actors.filter(actor=>actor.visible!==false).map(actor=>actor.name));
+  const names=guestNames({owner,day,session,nameSeed});
+  const offset=(Math.max(1,serial)-1)%names.length;
+  const name=names.slice(offset).concat(names.slice(0,offset)).find(candidate=>!used.has(candidate))||names[offset];
+  return{id:`arrival-${session}-${serial}`,name,role:'guest',slot,audienceVersion:1,
     audienceArrival:true,audienceZone:point.zone,behavior,behaviorPhase:round(next()*TAU),animationSpeed:round(.72+next()*.56),
     x:point.x,z:point.z,y:0,homeX:point.x,homeZ:point.z,targetX:point.x,targetZ:point.z,facing:facing(point.x,point.z),
     moving:false,action:behavior,visible:true,_path:[],_pathAt:0,_wait:3,
@@ -195,5 +219,5 @@ export const Audience={
   demand:owner=>AUDIENCE_VENUES[ownerIndex(owner)].demandMultiplier,
   isAudience:actor=>!!actor&&['guest','seated','support','surfer'].includes(actor.role),
   wardrobe:actor=>actor.styleKey||wardrobes[((actor.slot||0)%wardrobes.length+wardrobes.length)%wardrobes.length],
-  build,arrival,frontTarget,safePoint
+  build,arrival,frontTarget,safePoint,guestNames
 };
