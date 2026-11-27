@@ -46,9 +46,10 @@ export async function startGame({root,assetsBase='./FastGame/art/',assets:predec
   const bandAtlases=predecoded.bandAtlases||Object.fromEntries(await Promise.all(bandModels.bands.map(async band=>[band.id,await loadImage(asset(band.file))])));
   const festivalAtlases=predecoded.festivalAtlases||Object.fromEntries(await Promise.all(Object.entries(festivalModels.atlases).map(async([key,definition])=>[key,await loadImage(asset(definition.file))])));
   const [inspectors,inspectionModels,venueFeatures,venueFeatureModels]=await Promise.all([predecoded.inspectors||loadImage(asset('inspectors.png')),predecoded.inspectionModels||loadMetadata('inspection-models.json'),predecoded.venueFeatures||loadImage(asset('venue-features.png')),predecoded.venueFeatureModels||loadMetadata('venue-features.json')]);
-  const [patronSheet,patronRigs]=await Promise.all([predecoded.patronSheet||loadImage(asset('audience/patrons.png')),predecoded.patronRigs||loadMetadata('audience/patrons.json')]);
-  if(patronSheet.width!==640||patronSheet.height!==640||patronRigs.length!==100)throw new Error('Invalid audience model pack.');
-  const assets={patronSheet,patronRigs,albumCovers:{},female,ff,pet,seoul,venue,venues,backdrops,propImages,bandModels,bandAtlases,festivalModels,festivalAtlases,inspectors,inspectionModels,venueFeatures,venueFeatureModels,venueMetas:{...predecoded.venueMetas,ff:ffVenueMeta,freebird:freebirdVenueMeta},sprites:predecoded.sprites||atlases.animation,atlases,spriteMeta,venueMeta};
+  const patronMeta=await loadMetadata('audience/whole-models.json');
+  const patronSheets=await Promise.all(patronMeta.pages.map(file=>loadImage(asset('audience/'+file))));
+  const patronArt=new Map(patronMeta.entries.map(({id,page,...entry})=>[id,{...entry,image:patronSheets[page]}]));
+  const assets={patronArt,albumCovers:{},female,ff,pet,seoul,venue,venues,backdrops,propImages,bandModels,bandAtlases,festivalModels,festivalAtlases,inspectors,inspectionModels,venueFeatures,venueFeatureModels,venueMetas:{...predecoded.venueMetas,ff:ffVenueMeta,freebird:freebirdVenueMeta},sprites:predecoded.sprites||atlases.animation,atlases,spriteMeta,venueMeta};
   await document.fonts.load('16px SimBarUI');
   const g=new SimBarGame();
   const host=document.createElement('div');host.className='fast-game';host.setAttribute('aria-label','SimBar');

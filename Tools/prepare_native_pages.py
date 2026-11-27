@@ -22,8 +22,8 @@ SOURCE = TEMPLATE / "FastGame"
 MODULES = ("boot.js", "game.js", "core.js", "world.js", "booking.js", "floor.js",
            "navigation.js", "catalog.js", "playlist.js", "legacy-save.js", "daily-poster.js", "music.js", "play-tracker.js", "play-stats.js", "play-stats-config.js", "aftershow.js", "album-art.js", "daydesk.js", "owner-venues.js", "band-models.js", "campaign.js", "audience.js", "festival.js", "spectator-feedback.js", "inspection.js", "view-mode.js", "background-loop.js", "drunk-incident.js", "patron-models.js")
 ESSENTIAL_IMAGES = ("owner-female.png", "owner-ff.png", "owner-pet.png", "seoul.png", "seoul-freebird.png", "seoul-ff.png", "venue.png", "venue-freebird.png", "venue-ff.png", "standing-table.png", "standing-stool.png", "band-freewill.png", "band-july.png", "festival-gestures.png", "festival-vocals.png", "festival-surf.png", "freebird-arch.png", "freebird-wall-table.png", "cocktail-glass.png")
-ESSENTIAL_IMAGES += ("inspectors.png", "venue-features.png", "audience/patrons.png")
-ESSENTIAL_METADATA = ("venue.json", "sprites.json", "venue-ff.json", "venue-freebird.json", "band-models.json", "festival-models.json", "inspection-models.json", "venue-features.json", "audience/patrons.json")
+ESSENTIAL_IMAGES += ("inspectors.png", "venue-features.png")
+ESSENTIAL_METADATA = ("venue.json", "sprites.json", "venue-ff.json", "venue-freebird.json", "band-models.json", "festival-models.json", "inspection-models.json", "venue-features.json", "audience/whole-models.json")
 DEFERRED_IMAGES = ("office/desk-jessy.png", "office/desk-edison.png", "office/desk-jaiden.png")
 ICONS = ("setup", "cash", "fans", "time", "staff", "guestsati", "perrform", "upgrades", "guest", "events")
 EXCLUDED = {"index.html", "runtime-manifest.json", "package.json", "package-lock.json",
@@ -50,13 +50,19 @@ def runtime_bytes(path):
 
 
 def essential_images(source):
+    crowd_file = source / "art/audience/whole-models.json"
+    crowd_pages = json.loads(crowd_file.read_text(encoding="utf-8")).get("pages")
+    if (not isinstance(crowd_pages, list) or not crowd_pages or
+            any(not isinstance(name, str) or not re.fullmatch(r"whole-patrons-[0-9]+\.png", name) for name in crowd_pages)):
+        raise ValueError("Invalid crowd atlas filenames.")
+    crowd = tuple("audience/" + name for name in crowd_pages)
     metadata = source / "art/sprites.json"
     if not metadata.is_file():
         raise FileNotFoundError("Native runtime is incomplete: art/sprites.json")
     data = json.loads(metadata.read_text(encoding="utf-8"))
     atlases = data.get("atlases")
     if not atlases:
-        return ESSENTIAL_IMAGES + ("sprites.png",)
+        return ESSENTIAL_IMAGES + crowd + ("sprites.png",)
     if not isinstance(atlases, dict):
         raise ValueError("Sprite atlases must be an object of local PNG assets.")
     names = []
@@ -66,7 +72,7 @@ def essential_images(source):
                 or ".." in Path(name).parts or Path(name).is_absolute()):
             raise ValueError("Sprite atlas paths must stay inside the local art folder.")
         names.append(name)
-    return ESSENTIAL_IMAGES + tuple(sorted(set(names)))
+    return ESSENTIAL_IMAGES + crowd + tuple(sorted(set(names)))
 
 
 def runtime_files(source):

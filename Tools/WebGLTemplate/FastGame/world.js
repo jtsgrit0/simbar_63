@@ -2,7 +2,7 @@
  * The HUD-free venue plate is static art; live actor behavior and effects remain
  * in core.js. Employee movement, guest exit, paper debt and rewards are unchanged. */
 import {ownerVenue} from './owner-venues.js';
-import {audienceIdentity,patronMotion,drawPatronModel} from './patron-models.js';
+import {audienceIdentity,authoredFrame,drawWholePatron} from './patron-models.js';
 import {menuForOwner} from './petsounds-menu.js';
 import {performingRoster,performingFrame,bandPerformanceProfile} from './band-models.js';
 const REF_W=960,REF_H=558,ORTHO=8.4;
@@ -497,15 +497,15 @@ export function createWorld(canvas,{assets={},getState=()=>({})}={}){
     const p=actorPoint(a,finite(a.y)),ground=actorPoint(a,role==='surfer'||a.festivalLead?0:finite(a.y)),surf=(action==='surf'||role==='surfer')&&finite(a.y)>.1;
     const liftedSurfer=a.festivalLead&&a.festivalLiftReady&&finite(a.y)>.05;
     if(!seatFor(a)?.hideShadow&&(role!=='drummer'||action!=='perform'))ellipse(ctx,ground.x,ground.y+1,liftedSurfer?12:Math.round(4*(jump?.shadow||1)),liftedSurfer?2:1,liftedSurfer||jump?'#16182348':'#16182360');
-    const appearance=audienceIdentity(a,state.owner,state.journey?.crowdSeed||state.journey?.session),rig=appearance!=null?assets.patronRigs?.[appearance]:null;
-    const atlas=rig?null:festivalAtlasFrame(a,state)||atlasFrame(a,a.festivalLead&&action==='surf'?'surfer':role,action,frame,state,frozen?0:jump?.frame??(action==='highfive'?pose.frameOverride:pose.festivalAction==='skank'?1:null),band&&action==='perform'?bandTime:pose.animationSeconds),meta=atlas?.meta||{},entry=atlas?.entry||{},size=entry.drawHeight||meta.drawHeight||40;
+    const appearance=audienceIdentity(a,state.owner),art=assets.patronArt?.get(appearance);
+    const full=art?authoredFrame(a,pose,action,pixelFacing(a,role,action,state),active,art.sheet):null;
+    const atlas=full?null:festivalAtlasFrame(a,state)||atlasFrame(a,a.festivalLead&&action==='surf'?'surfer':role,action,frame,state,frozen?0:jump?.frame??(action==='highfive'?pose.frameOverride:pose.festivalAction==='skank'?1:null),band&&action==='perform'?bandTime:pose.animationSeconds),meta=atlas?.meta||{},entry=atlas?.entry||{},size=entry.drawHeight||meta.drawHeight||40;
     const varied=!!pose.kind,bob=!band&&active?(varied?pose.bob:['dance','mosh','slam'].includes(action)?Math.round(Math.sin(seconds*5+hash(a.id)%17)*.6):0):0;
     ctx.save();ctx.translate(Math.round(p.x+(active?pose.sway:0)),Math.round(p.y+bob-(jump?.lift||0)-(active?pose.lift||0:0)));if(active&&pose.lean)ctx.rotate(pose.lean);
-    if(surf&&!entry.horizontal){ctx.rotate(-Math.PI/2);ctx.translate(0,-7);}
-    if(rig){
-      const motion=patronMotion(a,pose,action,{active,seated:role==='seated'||role==='barseated'});
-      drawPatronModel(ctx,assets.patronSheet,rig,appearance,pixelFacing(a,role,action,state),motion);
-      if(active&&pose.phoneLight)drawPhoneLight(a,role,action,pose,size,state);
+    if(surf&&!entry.horizontal&&!full?.horizontal){ctx.rotate(-Math.PI/2);ctx.translate(0,-7);}
+    if(full){
+      if(!drawWholePatron(ctx,art,full))throw new Error('Missing verified patron frame');
+      if(active&&pose.phoneLight&&full.clip!=='flash')drawPhoneLight(a,role,action,pose,size,state);
     }else if(atlas){const scale=size/atlas.sh,dw=entry.drawWidth||meta.drawWidth||atlas.sw*scale,dh=size,footX=entry.footX??meta.footX??atlas.sw/2,footY=entry.footY??meta.footY??atlas.sh,dx=Math.round(-footX*dw/atlas.sw),dy=Math.round(-footY*dh/atlas.sh);if(atlas.flip)ctx.scale(-1,1);if(active&&pose.festivalAction==='skank')drawSkankFrame(atlas,dx,dy,Math.round(dw),Math.round(dh),pose);else ctx.drawImage(atlas.sheet,atlas.sx,atlas.sy,atlas.sw,atlas.sh,dx,dy,Math.round(dw),Math.round(dh));if(active&&pose.phoneLight)drawPhoneLight(a,role,action,pose,size,state);}
     else throw new Error('No pixel character atlas entry for '+role);
     ctx.restore();
