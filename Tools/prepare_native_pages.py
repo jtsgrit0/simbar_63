@@ -30,6 +30,11 @@ EXCLUDED = {"index.html", "runtime-manifest.json", "package.json", "package-lock
             "golden-fixtures.json", "world-pixel.js"}
 EXCLUDED_PARTS = {"fixtures", "tests", "node_modules", "__pycache__"}
 VERSION = re.compile(r"[0-9a-f]{16}")
+DAYDESK_AUDIO = frozenset({
+    "daydesk-audio/jessy-alt-rock.m4a",
+    "daydesk-audio/edison-metal.m4a",
+    "daydesk-audio/jaiden-jazz.m4a",
+})
 
 
 def digest(path):
@@ -75,7 +80,8 @@ def runtime_files(source):
                 or any(part in EXCLUDED_PARTS for part in relative.parts)
                 or path.name.startswith(("test_", "tests_"))):
             continue
-        if path.suffix not in {".js", ".css", ".woff2", ".png", ".json", ".txt"}:
+        if path.suffix not in {".js", ".css", ".woff2", ".png", ".json", ".txt"}\
+                and relative.as_posix() not in DAYDESK_AUDIO:
             continue
         # Keep retained former atlases in authoring, but the immutable runtime
         # contains only current manifest sheets plus essential venue/owner art.
