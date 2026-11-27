@@ -1,10 +1,52 @@
 import {clamp,int} from './booking.js';
 const f=Math.fround;
+
+const EVENT_PROFILES=Object.freeze([
+  {id:'inspection-first',inspection:48,guest:120,paper:[[0,27],[1,102]]},
+  {id:'guest-first',inspection:109,guest:47,paper:[[1,30],[0,86]]},
+  {id:'quiet-show',inspection:0,guest:0,paper:[[0,42],[1,118]]},
+  {id:'late-guest',inspection:0,guest:107,paper:[[1,35],[0,73],[1,128]]},
+  {id:'late-inspection',inspection:120,guest:0,paper:[[0,34],[1,65],[0,95]]},
+  {id:'mid-inspection',inspection:76,guest:0,paper:[[1,32],[0,122]]}
+]);
+const EARLY_EVENT_PROFILES=Object.freeze([
+  {id:'early-inspection-first',inspection:59,guest:117,paper:[[0,28],[1,100]]},
+  {id:'early-guest-first',inspection:86,guest:44,paper:[[1,32],[0,124]]},
+  {id:'early-light',inspection:73,guest:0,paper:[[0,38],[1,119]]}
+]);
+const eventMix32=value=>{
+  let n=value>>>0;
+  n=Math.imul(n^(n>>>16),0x7feb352d);
+  n=Math.imul(n^(n>>>15),0x846ca68b);
+  return (n^(n>>>16))>>>0;
+};
+
 export const Challenges={None:0,Cleanup:1,Guest:2,GuestPresses:8,GuestSeconds:6,CleanupPresses:10,CleanupSeconds:7,CleanupPulseWork:32,MinimumPressInterval:.06,
-  newState(seed,elapsed=0){
+
+  eventPlan(seed,{day=1}={}){
+    if(!Number.isInteger(day)||day<1||!Number.isInteger(seed))return null;
+    const get=(salt)=>eventMix32((seed>>>0)^salt);
+    const inspectionRequired=day<3,profiles=inspectionRequired?EARLY_EVENT_PROFILES:EVENT_PROFILES;
+    const profile=profiles[get(0x92d68ca2)%profiles.length];
+    const jitter=(at,salt)=>at?at+(get(salt)%9)-4:0;
+    return {id:profile.id,inspectionRequired,inspectionAt:jitter(profile.inspection,0x7179cace),guestAt:jitter(profile.guest,0xb898801a),
+      papers:profile.paper.map(([kind,at],i)=>[kind,jitter(at,0xdca560ab+i)])};
+  },
+  newState(seed,elapsed=0,eventPlan=null){
     const s={version:1,seed:(seed&0x7fffffff)||1,paperCount:0,paperFired:0,paperKind0:0,paperKind1:0,paperKind2:0,paperAt0:0,paperAt1:0,paperAt2:0,
       guestScheduled:false,guestFired:false,guestAt:0,activeKind:0,activeStage:0,presses:0,secondsLeft:0,cooldown:0,cleanupWorkBudget:0,pressAge:0,timeouts:0,completedRounds:0};
-    if(!Number.isFinite(elapsed)||elapsed>=165)return s;elapsed=Math.max(0,elapsed);let random=s.seed>>>0;
+    if(!Number.isFinite(elapsed)||elapsed>=165)return s;
+    elapsed=Math.max(0,elapsed);
+    if(eventPlan){
+      s.eventMix=true;
+      const papers=eventPlan.papers.filter(([,at])=>at>=elapsed+8);
+      s.paperCount=papers.length;
+      papers.forEach(([kind,at],i)=>{s['paperKind'+i]=kind;s['paperAt'+i]=at;});
+      const guestAt=eventPlan.guestAt;
+      if(guestAt>=Math.max(40,elapsed+8)){s.guestScheduled=true;s.guestAt=guestAt;}
+      return s;
+    }
+    let random=s.seed>>>0;
     const next=()=>random=(Math.imul(random,1664525)+1013904223)>>>0;
     const between=(a,b)=>f(a+f(f(b-a)*f((next()&0xffffff)/16777215)));
     const min=Math.max(20,elapsed+8);
@@ -27,10 +69,14 @@ export const Challenges={None:0,Cleanup:1,Guest:2,GuestPresses:8,GuestSeconds:6,
     s.timeouts=int(s.timeouts);s.completedRounds=int(s.completedRounds);
     if(s.activeKind!==1&&s.activeKind!==2)this.clear(s);else{s.activeStage=int(s.activeStage,0,s.activeKind===2?2:1000);s.presses=int(s.presses,0,(s.activeKind===1?10:8)-1);s.secondsLeft=clamp(s.secondsLeft,0,s.activeKind===1?7:6);}
   },
-  advance(s,elapsed,running=true){
+  advance(s,elapsed,running=true,{canSpawnGuest=true}={}){
     const out={confetti:0,tissue:0,guest:false};if(!s)return out;this.sanitize(s);if(!running||!Number.isFinite(elapsed)||elapsed<0)return out;
     while(s.paperFired<s.paperCount&&s['paperAt'+s.paperFired]<=elapsed){if(s['paperKind'+s.paperFired]===0)out.confetti++;else out.tissue++;s.paperFired++;}
-    if(s.guestScheduled&&!s.guestFired&&s.guestAt<=elapsed){s.guestFired=true;out.guest=true;}return out;
+    if(s.guestScheduled&&!s.guestFired&&s.guestAt<=elapsed){
+      if(!s.eventMix||canSpawnGuest){s.guestFired=true;out.guest=true;}
+      else if(elapsed>=Math.min(146,s.guestAt+22))s.guestFired=true;
+    }
+    return out;
   },
   start(s,kind,stage=0){if(!s||(kind!==1&&kind!==2))return false;this.sanitize(s);if(s.activeKind||s.cooldown>0)return false;s.activeKind=kind;s.activeStage=int(stage,0,kind===2?2:1000);s.presses=0;s.secondsLeft=kind===1?7:6;s.pressAge=.06;return true;},
   tick(s,dt,running=true){

@@ -41,7 +41,7 @@ const mixScheduleSeed=(seed,owner,day,session,kind)=>{
 };
 const defaults=()=>({version:1,money:650,fans:0,satisfaction:0,performance:0,clock:18,playlist:0,pours:0,staff:[0,0,0],upgrades:[0,0,0],wageTimer:60,wageDebt:0,
   activeEvent:-1,eventRemaining:0,eventStartPours:0,eventFanTimer:0,cooldowns:[0,0,0],completedEvents:0,autoServeTimer:12,promoterTimer:0,journeyJson:''});
-const newJourney=()=>({version:1,day:1,challenge:false,tutorialComplete:false,guideStep:0,guidePending:false,inProgress:false,session:0,settledSession:0,settlementPending:false,secondsLeft:180,guestNameSeed:0,
+const newJourney=()=>({version:1,day:1,challenge:false,tutorialComplete:false,guideStep:0,guidePending:false,inProgress:false,session:0,settledSession:0,settlementPending:false,secondsLeft:180,guestNameSeed:0,crowdSeed:0,
   score:0,combo:0,bestCombo:0,manualPerfects:0,orders:0,mistakes:0,successfulEvents:0,manualStreak:0,feverSeconds:0,feverCharge:0,openingCash:650,drinkIncome:0,xp:0,bestScore:0,bestStars:0,completedNights:0,
   resultStars:0,resultServed:0,resultXP:0,resultBonus:0,resultProfit:0,resultNewRecord:false,booking:null,bookingCareer:Booking.newCareer(),dayOpeningCash:0,hasDayOpeningCash:false,resultTicketIncome:0,resultAttendance:0,
   floorMissions:Floor.newState(),floorClosing:false,afterShow:null,musicPauseSession:0,musicPaused:false,musicPauseIntent:false,resultFloorBonus:0,resultFloorTasks:0,resultTicketGross:0,resultArtistFee:0,campaignSecondSet:false,
@@ -273,7 +273,7 @@ export class SimBarGame{
     return true;
   }
   _sanitizeJourney(){
-    const j=this.journey;j.petDeskHistory=LaterDesk.sanitizeHistory(j.petDeskHistory);j.version=1;j.day=int(j.day,1,9999);j.session=int(j.session);j.guestNameSeed=Number.isInteger(j.guestNameSeed)?j.guestNameSeed>>>0:0;j.settledSession=int(j.settledSession,0,j.session);j.secondsLeft=finite(j.secondsLeft,180,0,180);
+    const j=this.journey;j.petDeskHistory=LaterDesk.sanitizeHistory(j.petDeskHistory);j.version=1;j.day=int(j.day,1,9999);j.session=int(j.session);j.guestNameSeed=Number.isInteger(j.guestNameSeed)?j.guestNameSeed>>>0:0;j.crowdSeed=Number.isInteger(j.crowdSeed)?j.crowdSeed>>>0:0;j.settledSession=int(j.settledSession,0,j.session);j.secondsLeft=finite(j.secondsLeft,180,0,180);
     for(const key of ['score','combo','bestCombo','manualPerfects','orders','mistakes','successfulEvents','manualStreak','xp','bestScore','completedNights','resultServed','resultXP','resultBonus','resultTicketGross','resultArtistFee'])j[key]=int(j[key],0,1e8);
     j.bestCombo=Math.max(j.bestCombo,j.combo);j.orders=Math.max(j.orders,j.manualPerfects);j.guideStep=int(j.guideStep,0,2);j.feverSeconds=clamp(j.feverSeconds,0,12);j.feverCharge=clamp(j.feverCharge,0,1);j.resultStars=int(j.resultStars,0,3);j.bestStars=int(j.bestStars,0,3);
     j.openingCash=finite(j.openingCash,this.state.money,0,1e9);j.resultProfit=finite(j.resultProfit,0,-1e9,1e9);j.floorMissions={...Floor.newState(),...(j.floorMissions||{})};Floor.sanitize(j.floorMissions);
@@ -441,16 +441,18 @@ export class SimBarGame{
     // continue/reload; explicit test seeds retain their authored sequence.
     const scheduleSeed=this._deterministicSeed?undefined:freshScheduleSeed();
     j.guestNameSeed=mixScheduleSeed(scheduleSeed??this._seed,this.owner,j.day,j.session,0x676e616d);
+    j.crowdSeed=scheduleSeed===undefined?0:mixScheduleSeed(scheduleSeed,this.owner,j.day,j.session,0x63726f77);
+    const eventPlan=scheduleSeed===undefined?null:Challenges.eventPlan(mixScheduleSeed(scheduleSeed,this.owner,j.day,j.session,0x65766e74),{day:j.day});
     for(const k of ['score','combo','bestCombo','manualPerfects','orders','mistakes','successfulEvents','manualStreak','feverSeconds','feverCharge','drinkIncome','resultStars','resultServed','resultXP','resultBonus','resultProfit','resultTicketIncome','resultAttendance','resultFloorBonus','resultFloorTasks','resultTicketGross','resultArtistFee'])j[k]=0;
-    j.resultNewRecord=false;j.campaignSecondSet=false;j.festival=Festival.create();j.openingCash=j.hasDayOpeningCash?j.dayOpeningCash:this.state.money;j.guideStep=0;j.guidePending=!j.tutorialComplete;j.floorMissions=Floor.newState();this._ensureReaction(scheduleSeed===undefined?undefined:mixScheduleSeed(scheduleSeed,this.owner,j.day,j.session,0x666c6f6f));
+    j.resultNewRecord=false;j.campaignSecondSet=false;j.festival=Festival.create();j.openingCash=j.hasDayOpeningCash?j.dayOpeningCash:this.state.money;j.guideStep=0;j.guidePending=!j.tutorialComplete;j.floorMissions=Floor.newState();this._ensureReaction(scheduleSeed===undefined?undefined:mixScheduleSeed(scheduleSeed,this.owner,j.day,j.session,0x666c6f6f),eventPlan);
     this.state.clock=18;this.state.satisfaction=0;this.state.performance=0;
     j.feedback=SpectatorFeedback.create({session:j.session,owner:this.owner});
-    j.inspection=Inspection.create({session:j.session,day:j.day,owner:this.owner,seed:scheduleSeed===undefined?this._seed:mixScheduleSeed(scheduleSeed,this.owner,j.day,j.session,0x70617472)});
+    j.inspection=Inspection.create({session:j.session,day:j.day,owner:this.owner,seed:scheduleSeed===undefined?this._seed:mixScheduleSeed(scheduleSeed,this.owner,j.day,j.session,0x70617472),eventPlan});
     if(Booking.isCampaign(j.booking)){const tracks=this.metrics().allowedTracks;if(j.booking.showId==='double'||!tracks.includes(this.state.playlist))this.state.playlist=tracks[0]??0;}
     this._buildActors();this._refreshFeedback();this.crew=[];this.escort=null;this.effects=[];this.pour=null;this._seedOrders(Encore.effect(j.booking)?.item,LaterDesk.enabled(j.booking));this._requestTimer=3*(j.challenge?.72:1.18)*this.metrics().orderIntervalMultiplier;
     this.phase=j.guidePending?'guide':'playing';this.paused=j.guidePending;this.pauseReason=this.paused?'guide':'';this._say('영업 시작! 주문과 공연을 멋지게 운영해 보세요.','The show is open! Serve guests and keep the crowd glowing.');
   }
-  _ensureReaction(scheduleSeed){if(!this.floor.reaction){const gameplaySeed=Math.floor(this._random()*0x7fffffff)||1;this.floor.reaction=Challenges.newState(scheduleSeed??gameplaySeed,180-this.journey.secondsLeft);}}
+  _ensureReaction(scheduleSeed,eventPlan=null){if(!this.floor.reaction){const gameplaySeed=Math.floor(this._random()*0x7fffffff)||1;this.floor.reaction=Challenges.newState(scheduleSeed??gameplaySeed,180-this.journey.secondsLeft,eventPlan);}}
   _festivalEligible(actor,id){return ['guest','seated'].includes(actor.role)&&actor.visible!==false&&!actor.drunkIncident&&!actor.moving&&
     !['queue','return','arrive','to-stage','exit','escorted'].includes(actor.action)&&
     (id!=='skank'||actor.role==='guest'&&!actor.seat&&!actor.waitingSeat);}
@@ -511,7 +513,7 @@ export class SimBarGame{
     else for(const actor of this.actors)if(actor.festivalSerial===state.serial)actor.festivalRemaining=state.remaining;
     if(state.arrivalCredit<1||state.arrivalRetry>0||this.festival.liveAttendance>=Audience.capacity(this.owner))return;
     state.arrivalRetry=.8;
-    const serial=state.arrivalSerial+1,actor=Audience.arrival({owner:this.owner,showId:this.journey.booking?.showId,day:this.journey.day,session:this.journey.session,serial,actors:this.actors,nameSeed:this.journey.guestNameSeed});
+    const serial=state.arrivalSerial+1,actor=Audience.arrival({owner:this.owner,showId:this.journey.booking?.showId,day:this.journey.day,session:this.journey.session,serial,actors:this.actors,nameSeed:this.journey.guestNameSeed,crowdSeed:this.journey.crowdSeed});
     if(!actor)return;
     const entry=Audience.profile(this.owner).entry||point(8.7,-5.4);
     if(!this._walkable(entry,false,false)||this.actors.some(a=>a.visible&&a.role!=='band'&&distance(a,entry)<.5))return;
@@ -553,7 +555,7 @@ export class SimBarGame{
     for(let serial=1;serial<=requested;serial++){
       const id=`arrival-${this.journey.session}-${serial}`,saved=savedActors?.find(a=>a.id===id&&a.audienceArrival===true&&a.audienceVersion===Audience.version&&a.role==='guest'
         &&Number.isFinite(a.x)&&Number.isFinite(a.z)&&Math.abs(a.x)<20&&Math.abs(a.z)<20);
-      const actor=saved?{...saved}:Audience.arrival({owner:this.owner,showId:this.journey.booking?.showId,day:this.journey.day,session:this.journey.session,serial,actors:this.actors,nameSeed:this.journey.guestNameSeed});
+      const actor=saved?{...saved}:Audience.arrival({owner:this.owner,showId:this.journey.booking?.showId,day:this.journey.day,session:this.journey.session,serial,actors:this.actors,nameSeed:this.journey.guestNameSeed,crowdSeed:this.journey.crowdSeed});
       if(!actor)break;this.actors.push(actor);restored++;
     }
     state.arrivals=restored;state.arrivalSerial=restored;
@@ -608,7 +610,12 @@ export class SimBarGame{
     this.orders=[];
     if(this._usesAudience()){
       const pool=this.actors.filter(a=>this._orderGuest(a));
+      const {crowdSeed,day,session}=this.journey;
       for(let i=0;i<Math.min(3,pool.length);i++){
+        if(crowdSeed){
+          const at=i+mixScheduleSeed(crowdSeed,this.owner,day,session,0x6f726465+i)%(pool.length-i);
+          [pool[i],pool[at]]=[pool[at],pool[i]];
+        }
         const item=this._orderItem();
         this._assignOrder(pool[i].id,i===0&&Number.isInteger(firstItem)&&(!recommendOnly||this._random()<.5)?firstItem:item);
       }
@@ -659,7 +666,7 @@ export class SimBarGame{
     else if(kind==='done')this._say('단속반이 지나갔어요. 다시 자유롭게 공연에 호응하세요!','The inspectors have left. Crowd actions are available again!',4);
   }
   _inspectionTick(dt){
-    const notices=Inspection.tick(this.journey.inspection,dt,{actors:this.actors,owner:this.owner,playing:this.playing,showElapsed:180-this.journey.secondsLeft,canEnter:!this.escort||this.escort.phase==='return'});
+    const notices=Inspection.tick(this.journey.inspection,dt,{actors:this.actors,owner:this.owner,playing:this.playing,showElapsed:180-this.journey.secondsLeft,canEnter:!this.escort||this.escort.phase==='return',canBegin:!this.floor.guestActive&&!this.drunkIncidentPending&&!this.escort});
     if(!this.inspection.freezePerformers)for(const actor of this.actors){
       if(!actor._inspectionPose)continue;
       actor.facing=actor._inspectionPose.facing;actor.y=this.playing||actor.role==='band'?actor._inspectionPose.y:0;delete actor._inspectionPose;
@@ -698,7 +705,7 @@ export class SimBarGame{
   }
   _floorTick(dt){
     this._ensureReaction();const r=this.reaction,f=this.floor;
-    if(this.playing&&!this.inspection.freezePerformers){const due=Challenges.advance(r,180-this.journey.secondsLeft,true);for(let i=0;i<due.confetti;i++)this._paper(0);for(let i=0;i<due.tissue;i++)this._paper(1);if(due.guest&&!f.guestSpawned){Floor.spawnGuest(f,this.journey.day%10);this._ensureGuest();this._say('손님 안내 미션! F 키나 버튼을 빠르게 연타하세요.','Guest assistance! Rapidly tap F or the button.');}}
+    if(this.playing&&!this.inspection.freezePerformers){const due=Challenges.advance(r,180-this.journey.secondsLeft,true,{canSpawnGuest:!['warning','patrol','exiting'].includes(this.journey.inspection.phase)});for(let i=0;i<due.confetti;i++)this._paper(0);for(let i=0;i<due.tissue;i++)this._paper(1);if(due.guest&&!f.guestSpawned){Floor.spawnGuest(f,this.journey.day%10);this._ensureGuest();this._say('손님 안내 미션! F 키나 버튼을 빠르게 연타하세요.','Guest assistance! Rapidly tap F or the button.');}}
     this._ensureCleanup();this._tickFloorActors(dt);
     const timeout=Challenges.tick(r,dt,!(this.inspection.freezePerformers&&(r.activeKind===2||f.guestActive)));if(timeout.timedOut){if(f.guestActive)this._feedbackDisappointment(this.actors.find(a=>a.id==='assisted-guest')?.assistedSourceId||'assisted-guest','unsafe',.3);this._say('시간을 놓쳤어요. 잠시 뒤 다시 연타로 대응하세요!','Time ran out. A new response window will appear shortly.');if(timeout.kind===Challenges.Guest&&Floor.missGuest(f))this._startDrunkIncident();}
     if(this.closing){const ready=this.cleanupReadyWorkers,before=f.cleaned,workDt=ready?Math.min(dt,r.cleanupWorkBudget/(ready*3)):0,result=Floor.tick(f,workDt,ready,true);r.cleanupWorkBudget=Math.max(0,r.cleanupWorkBudget-(f.cleaned-before));if(r.cleanupWorkBudget<.001)r.cleanupWorkBudget=0;if(result.cleanupFinished){this.journey.score+=150;this._say('직원 청소 미션 완료!','Staff cleanup mission complete!');}}
@@ -782,7 +789,7 @@ export class SimBarGame{
     if(this._usesAudience()){
       const p=this.journey.booking,m=Booking.forecast(p);
       this.actors=this.actors.filter(a=>!Audience.isAudience(a));
-      this.actors.push(...Audience.build({owner:m.venueOwner,attendance:m.attendance,showId:p.showId,day:p.day,session:this.journey.session,nameSeed:this.journey.guestNameSeed}));
+      this.actors.push(...Audience.build({owner:m.venueOwner,attendance:m.attendance,showId:p.showId,day:p.day,session:this.journey.session,nameSeed:this.journey.guestNameSeed,crowdSeed:this.journey.crowdSeed}));
     }
     this._restoreFestivalArrivals(savedActors);
     if(layoutForOwner(this.owner)||this.owner===2)this._applyOwnerLayout({reset:true});

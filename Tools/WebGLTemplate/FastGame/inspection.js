@@ -32,9 +32,11 @@ function watchPosts(actors,owner){
 
 export const Inspection=Object.freeze({
   version:1,
-  create({session=0,day=1,owner=0,seed=1}={}){
-    return{version:1,session,phase:session?'scheduled':'done',triggerAt:55+hash(`${seed}:${day}:${session}:${owner}`)%36,
-      serial:0,warningRemaining:0,patrolElapsed:0,holdRemaining:8,frozenSeconds:0,posts:[],officers:[]};
+  create({session=0,day=1,owner=0,seed=1,eventPlan=null}={}){
+    const triggerAt=eventPlan?eventPlan.inspectionAt:55+hash(`${seed}:${day}:${session}:${owner}`)%36;
+    return{version:1,session,phase:session&&triggerAt?'scheduled':'done',triggerAt,
+      serial:0,warningRemaining:0,patrolElapsed:0,holdRemaining:8,frozenSeconds:0,posts:[],officers:[],
+      ...(eventPlan?{eventMix:true,inspectionRequired:eventPlan.inspectionRequired===true}: {})};
   },
   sanitize(value,context={}){
     const base=this.create(context),v=value&&typeof value==='object'?value:{};
@@ -42,6 +44,11 @@ export const Inspection=Object.freeze({
     const state={...base,...v,version:1,session:base.session};
     state.phase=PHASES.has(v.phase)?v.phase:base.phase;
     state.triggerAt=clamp(v.triggerAt,25,150);state.serial=Math.trunc(clamp(v.serial,0,1));
+    if(v.eventMix===true){
+      state.eventMix=true;
+      state.inspectionRequired=v.inspectionRequired===true;
+      if(v.triggerAt===0&&state.serial===0){state.triggerAt=0;state.phase='done';}
+    }else{delete state.eventMix;delete state.inspectionRequired;}
     state.warningRemaining=clamp(v.warningRemaining,0,3);state.patrolElapsed=clamp(v.patrolElapsed,0,1e5);
     state.holdRemaining=clamp(v.holdRemaining,0,8);state.frozenSeconds=clamp(v.frozenSeconds,0,1e6);
     state.posts=Array.isArray(v.posts)&&v.posts.length===3&&v.posts.every(p=>p&&Number.isFinite(p.x)&&Number.isFinite(p.z)&&Math.abs(p.x)<9.2&&Math.abs(p.z)<5.85)?v.posts.map(p=>({x:p.x,z:p.z})):POSTS.map(p=>({...p}));
@@ -96,9 +103,13 @@ export const Inspection=Object.freeze({
     for(const a of actors.filter(a=>a.role==='inspector'&&a.status==='waiting')){a.status='left';a.visible=false;}
     this.sync(state,actors);
   },
-  tick(state,dt,{actors,owner,playing,showElapsed,canEnter=true}={}){
+  tick(state,dt,{actors,owner,playing,showElapsed,canEnter=true,canBegin=true}={}){
     const notices=[],wasPresent=this.present(state,actors);
-    if(state.phase==='scheduled'&&playing&&showElapsed>=state.triggerAt&&this.begin(state))notices.push('warning');
+    if(state.phase==='scheduled'&&playing&&showElapsed>=state.triggerAt){
+      const late=state.eventMix&&showElapsed>Math.min(146,state.triggerAt+24);
+      if(late&&!state.inspectionRequired)state.phase='done';
+      else if((!state.eventMix||canBegin||late)&&this.begin(state))notices.push('warning');
+    }
     if(state.phase==='warning'){
       state.warningRemaining=Math.max(0,state.warningRemaining-dt);
       if(!state.warningRemaining&&canEnter){state.phase='patrol';state.posts=watchPosts(actors,owner);this.restore(state,actors,owner);}

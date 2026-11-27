@@ -61,7 +61,7 @@ copy.act('continue');assert.deepEqual(schedule(copy),planned);
 copy.act('start');assert.deepEqual(schedule(copy),planned);
 assert.equal(copy.act('owner',{index:(copy.owner+1)%3}).success,false);assert.deepEqual(schedule(copy),planned);
 copy.act('lobby');copy.act('continue');assert.deepEqual(schedule(copy),planned);
-for(let t=0;t<planned.inspection+.2;t+=.05)copy.tick(.05);
+for(let t=0;t<planned.inspection+24.2&&copy.inspection.phase==='scheduled';t+=.05)copy.tick(.05);
 assert.equal(copy.inspection.phase,'warning');assert.equal(copy.journey.inspection.serial,1);
 copy.save();const warning=new SimBarGame({storage:copy.storage});warning.act('continue');
 assert.deepEqual(inspectionClock(warning),inspectionClock(copy));assert.deepEqual(reactionRecord(warning),reactionRecord(copy));

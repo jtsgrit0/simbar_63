@@ -15,6 +15,33 @@ const nameGroups=[
   ["Sofia Rossi","Luca Romano","Giulia Marino","Matteo Costa","Alice Ricci","Marco Bruno","Elena Gallo","Pietro Conti","Anna Leone","Nico Rizzo","Chiara Greco","Leo Ferrari"]
 ];
 const wardrobes=['Casual','Suit','Beach','Worker','Farmer','Adventurer','Casual2','Punk'];
+// Use the colors already authored in both walking and gesture atlases.
+const wardrobeWeights=[
+  [3,1,1,2,1,3,2,4],
+  [2,1,1,3,1,3,2,6],
+  [4,3,1,1,1,2,4,1]
+];
+function wardrobeFor(owner,role,id,seed){
+  const weights=role==='seated'?[wardrobeWeights[owner][0],wardrobeWeights[owner][1]]:wardrobeWeights[owner];
+  let draw=random(hash('crowd-look',seed,owner,id))()*weights.reduce((sum,weight)=>sum+weight,0);
+  return wardrobes[weights.findIndex(weight=>(draw-=weight)<0)]||wardrobes[0];
+}
+const crowdFocus=[
+  [[5.8,-3.6],[3.4,-1.4],[-5.7,-2.2]],
+  [[4.7,-2.6],[1.8,-.8],[-4.4,-2.3],[-5.8,3.5]],
+  [[5.7,-2.6],[2.0,-2.5],[5.9,-.1],[.3,.4]]
+];
+function orderFloor(points,owner,seed){
+  if(!seed)return points;
+  const anchors=crowdFocus[owner];
+  const [x,z]=anchors[Math.floor(random(hash('crowd-focus',seed,owner))()*anchors.length)];
+  return points.map(p=>{
+    const dx=p.x-x,dz=p.z-z;
+    const affinity=1+3.1*Math.exp(-(dx*dx+dz*dz)/8.2);
+    const variation=random(hash('crowd-point',seed,p.x,p.z,p.zone))();
+    return {...p,priority:(.12+p.score*.28+variation*.72)/affinity};
+  }).sort((a,b)=>a.priority-b.priority||a.z-b.z||a.x-b.x);
+}
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.z-b.z);
 const layoutFor=owner=>owner===0?FREEBIRD_LAYOUT:owner===1?FF_LAYOUT:null;
 const originalQueue=[[-1.5,-1.75],[-.85,-2.25],[-.15,-2.7],[.6,-3.1],[1.4,-3.5],[2.2,-3.7],[3,-4]].map(([x,z])=>({x,z}));
@@ -76,14 +103,18 @@ function standingBehavior(owner,showId,next){
   return roll<.18?'listen':roll<.48?'sway':roll<.83?'headbang':'cheer';
 }
 
-function build({owner=2,attendance=0,showId='freewill',day=1,session=1,nameSeed=0}={}){
+function build({owner=2,attendance=0,showId='freewill',day=1,session=1,nameSeed=0,crowdSeed=0}={}){
+  return buildCrowd({owner,attendance,showId,day,session,nameSeed,crowdSeed});
+}
+function buildCrowd({owner,attendance,showId,day,session,nameSeed,crowdSeed},legacyOrder=false){
   owner=ownerIndex(owner);
   const profile=AUDIENCE_VENUES[owner],total=whole(attendance,0,profile.capacity),seed=hash(owner,day,session,showId),next=random(seed),layout=layoutFor(owner),actors=[];
-  const candidates=floorCandidates(owner,seed^0x9e3779b9),names=guestNames({owner,day,session,nameSeed});
+  const candidates=orderFloor(floorCandidates(owner,seed^0x9e3779b9),owner,legacyOrder?0:crowdSeed),names=guestNames({owner,day,session,nameSeed});
   const make=(id,role,slot,point,behavior,extra={})=>{
     const descriptor={id,name:names[actors.length]||'Guest',role,slot,audienceVersion:1,behavior,behaviorPhase:round(next()*TAU),animationSpeed:round(.72+next()*.56),
       x:point.x,z:point.z,y:0,homeX:point.x,homeZ:point.z,targetX:point.x,targetZ:point.z,facing:point.facing??facing(point.x,point.z),
       moving:false,action:behavior,visible:true,_path:[],_pathAt:0,_wait:round(2+next()*5),...extra};
+    if(crowdSeed&&(role==='guest'||role==='seated'))descriptor.styleKey=wardrobeFor(owner,role,id,crowdSeed);
     if(layout){descriptor.layout=layout.id;descriptor.layoutVersion=layout.version;}
     actors.push(descriptor);return descriptor;
   };
@@ -167,6 +198,8 @@ function build({owner=2,attendance=0,showId='freewill',day=1,session=1,nameSeed=
     if(actors.length>=total)break;
     place(point);
   }
+  // At capacity an unlucky greedy ordering must not reduce the paid crowd.
+  if(actors.length!==total&&crowdSeed&&!legacyOrder)return buildCrowd({owner,attendance,showId,day,session,nameSeed,crowdSeed},true);
   if(actors.length!==total)throw new Error(`Audience floor ${profile.key} has ${actors.length} safe slots for ${total} guests`);
   return actors;
 }
@@ -195,9 +228,9 @@ function safePoint({owner=0,actor,actors=[],day=1,session=1}={}){
     .filter(p=>clearAudiencePoint(p,actors.filter(a=>a!==actor))).sort((a,b)=>distance(a,actor)-distance(b,actor))[0]||null;
 }
 
-function arrival({owner=2,showId='freewill',day=1,session=1,serial=1,actors=[],nameSeed=0}={}){
+function arrival({owner=2,showId='freewill',day=1,session=1,serial=1,actors=[],nameSeed=0,crowdSeed=0}={}){
   owner=ownerIndex(owner);const seed=hash(owner,day,session,serial,'arrival'),next=random(seed),layout=layoutFor(owner);
-  const candidates=floorCandidates(owner,seed);
+  const candidates=orderFloor(floorCandidates(owner,seed),owner,crowdSeed);
   const ordered=owner===0?[...candidates.filter(point=>point.zone==='front-floor'&&point.x>=.6),...candidates.filter(point=>point.zone!=='front-floor'||point.x<.6)]:candidates;
   const point=ordered.find(point=>clearAudiencePoint(point,actors));if(!point)return null;
   const slot=300+serial,behavior=standingBehavior(owner,showId,next);
@@ -205,7 +238,9 @@ function arrival({owner=2,showId='freewill',day=1,session=1,serial=1,actors=[],n
   const names=guestNames({owner,day,session,nameSeed});
   const offset=(Math.max(1,serial)-1)%names.length;
   const name=names.slice(offset).concat(names.slice(0,offset)).find(candidate=>!used.has(candidate))||names[offset];
-  return{id:`arrival-${session}-${serial}`,name,role:'guest',slot,audienceVersion:1,
+  const id=`arrival-${session}-${serial}`;
+  return{id,name,role:'guest',slot,audienceVersion:1,
+    ...(crowdSeed?{styleKey:wardrobeFor(owner,'guest',id,crowdSeed)}:{}),
     audienceArrival:true,audienceZone:point.zone,behavior,behaviorPhase:round(next()*TAU),animationSpeed:round(.72+next()*.56),
     x:point.x,z:point.z,y:0,homeX:point.x,homeZ:point.z,targetX:point.x,targetZ:point.z,facing:facing(point.x,point.z),
     moving:false,action:behavior,visible:true,_path:[],_pathAt:0,_wait:3,
