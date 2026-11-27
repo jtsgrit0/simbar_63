@@ -15,6 +15,7 @@ import {createDrunkIncident,sanitizeDrunkIncident,syncDrunkIncident,restoreDrunk
 export {catalog,Booking,Floor,Challenges};
 export const SAVE_KEY='SimBar.Operations.v1';
 const OWNER_KEY='SimBar.Owner',LANGUAGE_KEY='SimBar.Language';
+const VENUE_SAVE_IDS=['freebird','ff','pet-sounds'];
 const clone=value=>JSON.parse(JSON.stringify(value));
 const finite=(n,fallback,a,b)=>Number.isFinite(+n)?clamp(+n,a,b):fallback;
 const round=n=>{const f=Math.floor(n),r=n-f;return r===.5?(f%2===0?f:f+1):Math.round(n);};
@@ -71,6 +72,7 @@ export class SimBarGame{
     try{this.storage=storage??globalThis.localStorage;}catch{this.storage=null;}
     this._deterministicSeed=seed!=null;
     this._seed=((seed??(Date.now()^Math.floor(Math.random()*0x7fffffff)))>>>0)||1;
+    this._initialSeed=this._seed;this._otherVenueSaves=Object.create(null);
     this.state=defaults();this.journey=newJourney();this.phase='lobby';this.paused=true;this.pauseReason='lobby';
     this.owner=0;this.language='ko';this.orders=[];this.pour=null;this.effects=[];this.actors=[];this.crew=[];this.escort=null;
     this.selectedItem=0;this.lastQuality=null;this.lastResult={success:true,code:'ready'};this._message=['',''];this._messageTimer=0;this.elapsed=0;this._autosave=0;this._requestTimer=4;this._inputGuard=0;this._eventSerial=0;this._loading=false;this._musicPlaybackActive=null;
@@ -159,20 +161,34 @@ export class SimBarGame{
   _random(){this._seed=(Math.imul(this._seed,1664525)+1013904223)>>>0;return this._seed/4294967296;}
   _say(ko,en,seconds=3){this._message=[ko,en];this._messageTimer=seconds;}
   _notify(){this.revision=(this.revision||0)+1;this.onchange?.(this);}
-  save(){
+  _snapshot(){
     syncDrunkIncident(this.floor.guestIncident,this.actors);
     syncAfterShow(this.journey.afterShow,this.actors);
     Inspection.sync(this.journey.inspection,this.actors);
     this.state.journeyJson=JSON.stringify(this.journey);
     this.state.native={version:1,seed:this._seed,elapsed:this.elapsed,orders:this.orders,actors:this.actors,crew:this.crew,escort:this.escort,requestTimer:this._requestTimer,selectedItem:this.selectedItem,eventSerial:this._eventSerial};
-    this._put(SAVE_KEY,JSON.stringify(this.state));return!this.saveError;
+    return this.state;
   }
-  exportSave(){this.save();return JSON.stringify(this.state);}
+  _serializedSave(){
+    return JSON.stringify({...this._snapshot(),venueSaveId:VENUE_SAVE_IDS[this.owner],otherVenueSaves:this._otherVenueSaves});
+  }
+  save(){
+    this._put(SAVE_KEY,this._serializedSave());return!this.saveError;
+  }
+  exportSave(){const raw=this._serializedSave();this._put(SAVE_KEY,raw);return raw;}
   importSave(raw,{save=true}={}){
+    return this._restoreSave(raw,{save});
+  }
+  _restoreSave(raw,{save=false,switchOwner=null}={}){
     try{
-      const data=typeof raw==='string'?JSON.parse(raw):clone(raw);if(!data||data.version!==1)return false;
+      const payload=typeof raw==='string'?JSON.parse(raw):clone(raw);if(!payload||payload.version!==1)return false;
+      const {venueSaveId,otherVenueSaves,...data}=payload;
       this.setViewServiceActive(false);this.setViewClosingActive(false);
-      const ownerId=this._get(OWNER_KEY),savedOwner=catalog.owners.findIndex(o=>o.id===ownerId);if(savedOwner>=0)this.owner=savedOwner;
+      const embeddedOwner=VENUE_SAVE_IDS.indexOf(venueSaveId);
+      const ownerId=this._get(OWNER_KEY),savedOwner=catalog.owners.findIndex(o=>o.id===ownerId);
+      if(switchOwner!==null)this.owner=switchOwner;
+      else if(embeddedOwner>=0)this.owner=embeddedOwner;
+      else if(savedOwner>=0)this.owner=savedOwner;
       const savedLanguage=this._get(LANGUAGE_KEY);if(savedLanguage==='en'||savedLanguage==='ko')this.language=savedLanguage;
       const base=defaults();this.state={...base,...data};
       for(const [key,a,b] of [['money',0,1e9],['fans',0,1e7],['satisfaction',0,1],['performance',0,1],['clock',18,24],['wageTimer',.1,60],['autoServeTimer',.1,12],['promoterTimer',0,20]])this.state[key]=finite(data[key],base[key],a,b);
@@ -184,6 +200,17 @@ export class SimBarGame{
       this.journey={...newJourney(),...j};this._sanitizeJourney();
       if(this.journey.inProgress&&this._usesAudience())this.owner=this.journey.booking.lockedMetrics.venueOwner;
       else if(this.journey.inProgress&&this.journey.festival.actionsUsed>0&&Number.isInteger(this.journey.festival.venueOwner))this.owner=this.journey.festival.venueOwner;
+      if(switchOwner===null){
+        this._otherVenueSaves=Object.create(null);
+        // A legacy shared save belongs to its active venue only.
+        if(embeddedOwner>=0)for(const id of VENUE_SAVE_IDS){
+          const entry=otherVenueSaves?.[id];
+          if(id!==VENUE_SAVE_IDS[this.owner]&&entry?.version===1){
+            const {venueSaveId:ignoredId,otherVenueSaves:ignoredSlots,...snapshot}=entry;
+            this._otherVenueSaves[id]=snapshot;
+          }
+        }
+      }
       this._buildActors(data.native?.version===1&&Array.isArray(data.native.actors)&&data.native.actors.length<100?data.native.actors:null);this.orders=[];this.crew=[];this.escort=null;this.pour=null;this.effects=[];
       if(Booking.isCampaign(this.journey.booking)&&this.journey.booking.locked){const tracks=this.metrics().allowedTracks;if(!tracks.includes(this.state.playlist))this.state.playlist=tracks[0]??0;}
       const n=data.native;let restoredEmptyQueue=false;
@@ -222,8 +249,23 @@ export class SimBarGame{
       if(!this.orders.length&&!restoredEmptyQueue&&this.journey.inProgress&&!this.journey.floorClosing)this._seedOrders();
       if(this.floor.guestSpawned&&(!this.floor.guestComplete||this.actors.some(a=>a.id==='assisted-guest'&&a.visible!==false)))this._ensureGuest();
       this._refreshFeedback();
-      this.phase='lobby';this.paused=true;this.pauseReason='lobby';if(save)this.save();this._notify();return true;
+      this.phase='lobby';this.paused=true;this.pauseReason='lobby';
+      if(switchOwner===null){if(save)this.save();this._notify();}
+      return true;
     }catch{return false;}
+  }
+  _switchVenue(owner){
+    const previous=VENUE_SAVE_IDS[this.owner],next=VENUE_SAVE_IDS[owner];
+    const outgoing=clone(this._snapshot());
+    const tutorialComplete=this.journey.tutorialComplete;
+    const target=this._otherVenueSaves[next]??defaults();
+    this._seed=this._initialSeed;this.elapsed=0;this._autosave=0;this._requestTimer=4;this.selectedItem=0;
+    this._inputGuard=0;this._eventSerial=0;this.lastQuality=null;this._say('','');
+    if(!this._restoreSave(target,{switchOwner:owner}))return false;
+    this.journey.tutorialComplete=tutorialComplete;
+    this._otherVenueSaves[previous]=outgoing;
+    delete this._otherVenueSaves[next];
+    return true;
   }
   _sanitizeJourney(){
     const j=this.journey;j.version=1;j.day=int(j.day,1,9999);j.session=int(j.session);j.settledSession=int(j.settledSession,0,j.session);j.secondsLeft=finite(j.secondsLeft,180,0,180);
@@ -254,11 +296,9 @@ export class SimBarGame{
     switch(type){
       case'owner':{
         if(this.phase!=='lobby'||!Number.isInteger(idx)||idx<0||idx>2)return this._done(false);
-        if(j.inProgress&&(this._usesAudience()||j.festival.actionsUsed>0)&&idx!==this.owner)return this._done(false,'venue_locked');
-        const previous=this.owner;this.owner=idx;this._put(OWNER_KEY,catalog.owners[idx].id);
-        if(previous!==idx){
-          if(this._activePlan()&&Booking.isCampaign(j.booking))Booking.refreshCampaignContext(j.booking,this._campaignContext());
-          this._applyOwnerLayout({reset:true});this._routeOrders();
+        if(idx!==this.owner){
+          if(j.inProgress||j.settlementPending)return this._done(false,'venue_locked');
+          if(!this._switchVenue(idx))return this._done(false);
         }
         break;
       }
@@ -349,7 +389,9 @@ export class SimBarGame{
     }
     if(!this.playing)this.setViewServiceActive(false);
     if(!this.closing)this.setViewClosingActive(false);
-    this.lastResult=r;this.save();this._notify();return r;
+    this.lastResult=r;const saved=this.save();
+    if(type==='owner'&&saved)this._put(OWNER_KEY,catalog.owners[this.owner].id);
+    this._notify();return r;
   }
   _done(success,code='unavailable'){const r={success,code};this.lastResult=r;if(!success)this._say(...(messages[code]||messages.unavailable));this._notify();return r;}
   _activePlan(){const p=this.journey.booking;return!!(p&&!p.locked&&!p.completed&&p.day===this.journey.day);}
