@@ -1,0 +1,1061 @@
+{
+  "version": 4,
+  "defaultAtlas": "wardrobe",
+  "frameWidth": 64,
+  "frameHeight": 64,
+  "columns": 4,
+  "drawHeight": 54,
+  "footX": 32,
+  "footY": 60,
+  "atlases": {
+    "wardrobe": {
+      "file": "wardrobe.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "columns": 4,
+      "directionColumns": {
+        "FR": 0,
+        "BR": 1,
+        "BL": 2,
+        "FL": 3
+      }
+    },
+    "walk": {
+      "file": "walk.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "columns": 4,
+      "directionColumns": {
+        "FR": 0,
+        "BR": 1,
+        "BL": 2,
+        "FL": 3
+      }
+    },
+    "pit": {
+      "file": "pit.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "columns": 4,
+      "directionColumns": {
+        "FR": 0,
+        "BR": 1,
+        "BL": 2,
+        "FL": 3
+      }
+    },
+    "poses": {
+      "file": "poses.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "columns": 4,
+      "directionColumns": {
+        "FR": 0,
+        "BR": 1,
+        "BL": 2,
+        "FL": 3
+      }
+    },
+    "guestSocial": {
+      "file": "v4-guest-social.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "columns": 8
+    },
+    "bandPerformanceSinger": {
+      "file": "v4-band-singer-performance.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "columns": 8
+    },
+    "bandPerformanceGuitarist": {
+      "file": "v4-band-guitar-performance.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "columns": 8
+    },
+    "bandPerformanceBassist": {
+      "file": "v4-band-bass-performance.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "columns": 8
+    },
+    "bandPerformanceDrummer": {
+      "file": "v4-band-drums-performance.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "columns": 8
+    },
+    "bandWalk": {
+      "file": "v4-band-walk.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "columns": 4
+    },
+    "bandJump": {
+      "file": "v4-band-jump.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "columns": 8
+    },
+    "bandGreetA": {
+      "file": "v4-band-greet-a.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "columns": 8
+    },
+    "bandGreetB": {
+      "file": "v4-band-greet-b.png",
+      "frameWidth": 64,
+      "frameHeight": 64,
+      "columns": 8
+    },
+    "orders": {
+      "file": "order-icons.png",
+      "frameWidth": 32,
+      "frameHeight": 32,
+      "columns": 6
+    }
+  },
+  "roles": {
+    "guest": {
+      "atlas": "wardrobe",
+      "styles": [
+        "Casual",
+        "Suit",
+        "Beach",
+        "Worker",
+        "Farmer",
+        "Adventurer",
+        "Casual2",
+        "Punk"
+      ],
+      "variantStyles": {
+        "Casual": 0,
+        "Suit": 1,
+        "Beach": 2,
+        "Worker": 3,
+        "Farmer": 4,
+        "Adventurer": 5,
+        "Casual2": 6,
+        "Punk": 7
+      },
+      "actions": {
+        "walk": {
+          "atlasFrames": [
+            "wardrobe",
+            "walk"
+          ]
+        },
+        "dance": {
+          "atlas": "pit"
+        },
+        "mosh": {
+          "atlas": "pit"
+        },
+        "slam": {
+          "atlas": "pit"
+        },
+        "highfive": {
+          "atlas": "guestSocial",
+          "variantStyles": {
+            "Casual": 0,
+            "Suit": 4,
+            "Beach": 8,
+            "Worker": 12,
+            "Farmer": 16,
+            "Adventurer": 20,
+            "Casual2": 24,
+            "Punk": 28
+          },
+          "directionRowOffsets": {
+            "FR": 0,
+            "BR": 1,
+            "BL": 2,
+            "FL": 3
+          },
+          "frameColumns": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "frameCount": 4,
+          "progressFrames": true,
+          "fps": 8
+        },
+        "hug": {
+          "atlas": "guestSocial",
+          "variantStyles": {
+            "Casual": 0,
+            "Suit": 4,
+            "Beach": 8,
+            "Worker": 12,
+            "Farmer": 16,
+            "Adventurer": 20,
+            "Casual2": 24,
+            "Punk": 28
+          },
+          "directionRowOffsets": {
+            "FR": 0,
+            "BR": 1,
+            "BL": 2,
+            "FL": 3
+          },
+          "frameColumns": [
+            4,
+            5,
+            6,
+            7
+          ],
+          "frameCount": 4,
+          "progressFrames": true,
+          "fps": 8
+        }
+      }
+    },
+    "barseated": {
+      "atlas": "poses",
+      "row": 1,
+      "styles": [
+        "Casual2",
+        "Punk"
+      ],
+      "variantStyles": {
+        "Casual2": 1,
+        "Punk": 2
+      }
+    },
+    "seated": {
+      "atlas": "poses",
+      "row": 3,
+      "styles": [
+        "Casual",
+        "Suit"
+      ],
+      "variantStyles": {
+        "Casual": 3,
+        "Suit": 4
+      }
+    },
+    "bartender": {
+      "atlas": "wardrobe",
+      "style": "Suit",
+      "row": 1,
+      "drawHeight": 58,
+      "actions": {
+        "walk": {
+          "atlasFrames": [
+            "wardrobe",
+            "walk"
+          ]
+        },
+        "serve": {
+          "atlas": "poses",
+          "row": 0
+        },
+        "clean": {
+          "atlas": "poses",
+          "row": 0
+        }
+      }
+    },
+    "server": {
+      "atlas": "wardrobe",
+      "style": "Suit",
+      "row": 1,
+      "drawHeight": 58,
+      "actions": {
+        "walk": {
+          "atlasFrames": [
+            "wardrobe",
+            "walk"
+          ]
+        },
+        "serve": {
+          "atlas": "poses",
+          "row": 0
+        },
+        "clean": {
+          "atlas": "poses",
+          "row": 0
+        }
+      }
+    },
+    "hired-0": {
+      "atlas": "wardrobe",
+      "style": "Suit",
+      "row": 1,
+      "drawHeight": 58,
+      "actions": {
+        "walk": {
+          "atlasFrames": [
+            "wardrobe",
+            "walk"
+          ]
+        },
+        "serve": {
+          "atlas": "poses",
+          "row": 0
+        },
+        "clean": {
+          "atlas": "poses",
+          "row": 0
+        }
+      }
+    },
+    "hired-1": {
+      "atlas": "wardrobe",
+      "style": "Worker",
+      "row": 3,
+      "drawHeight": 58,
+      "actions": {
+        "walk": {
+          "atlasFrames": [
+            "wardrobe",
+            "walk"
+          ]
+        },
+        "clean": {
+          "atlas": "pit"
+        }
+      }
+    },
+    "hired-2": {
+      "atlas": "wardrobe",
+      "style": "Adventurer",
+      "row": 5,
+      "drawHeight": 58,
+      "actions": {
+        "walk": {
+          "atlasFrames": [
+            "wardrobe",
+            "walk"
+          ]
+        },
+        "clean": {
+          "atlas": "pit"
+        }
+      }
+    },
+    "singer": {
+      "atlas": "bandWalk",
+      "style": "Punk",
+      "row": 0,
+      "actions": {
+        "perform": {
+          "atlas": "bandPerformanceSinger",
+          "directionRows": {
+            "FR": 0,
+            "BR": 1,
+            "BL": 2,
+            "FL": 3
+          },
+          "direction": "FL",
+          "frameColumns": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "fps": 8
+        },
+        "walk": {
+          "atlas": "bandWalk",
+          "directionRows": {
+            "FR": 0,
+            "BR": 1,
+            "BL": 2,
+            "FL": 3
+          },
+          "frameColumns": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "fps": 8
+        },
+        "exit": {
+          "atlas": "bandWalk",
+          "directionRows": {
+            "FR": 0,
+            "BR": 1,
+            "BL": 2,
+            "FL": 3
+          },
+          "frameColumns": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "fps": 8
+        },
+        "idle": {
+          "atlas": "bandWalk",
+          "directionRows": {
+            "FR": 0,
+            "BR": 1,
+            "BL": 2,
+            "FL": 3
+          },
+          "frameColumns": [
+            0
+          ]
+        },
+        "aftershow-wait": {
+          "atlas": "bandWalk",
+          "directionRows": {
+            "FR": 0,
+            "BR": 1,
+            "BL": 2,
+            "FL": 3
+          },
+          "frameColumns": [
+            0
+          ]
+        },
+        "highfive": {
+          "atlas": "bandGreetA",
+          "directionRows": {
+            "FR": 0,
+            "BR": 1,
+            "BL": 2,
+            "FL": 3
+          },
+          "frameColumns": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "frameCount": 4,
+          "progressFrames": true,
+          "fps": 8
+        },
+        "hug": {
+          "atlas": "bandGreetA",
+          "directionRows": {
+            "FR": 0,
+            "BR": 1,
+            "BL": 2,
+            "FL": 3
+          },
+          "frameColumns": [
+            4,
+            5,
+            6,
+            7
+          ],
+          "frameCount": 4,
+          "progressFrames": true,
+          "fps": 8
+        }
+      },
+      "directionRows": {
+        "FR": 0,
+        "BR": 1,
+        "BL": 2,
+        "FL": 3
+      },
+      "frameColumns": [
+        0
+      ]
+    },
+    "guitarist": {
+      "atlas": "bandWalk",
+      "style": "Casual2",
+      "row": 4,
+      "actions": {
+        "perform": {
+          "atlas": "bandPerformanceGuitarist",
+          "directionRows": {
+            "FR": 0,
+            "BR": 1,
+            "BL": 2,
+            "FL": 3
+          },
+          "direction": "FR",
+          "frameColumns": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "fps": 8
+        },
+        "walk": {
+          "atlas": "bandWalk",
+          "directionRows": {
+            "FR": 4,
+            "BR": 5,
+            "BL": 6,
+            "FL": 7
+          },
+          "frameColumns": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "fps": 8
+        },
+        "exit": {
+          "atlas": "bandWalk",
+          "directionRows": {
+            "FR": 4,
+            "BR": 5,
+            "BL": 6,
+            "FL": 7
+          },
+          "frameColumns": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "fps": 8
+        },
+        "idle": {
+          "atlas": "bandWalk",
+          "directionRows": {
+            "FR": 4,
+            "BR": 5,
+            "BL": 6,
+            "FL": 7
+          },
+          "frameColumns": [
+            0
+          ]
+        },
+        "aftershow-wait": {
+          "atlas": "bandWalk",
+          "directionRows": {
+            "FR": 4,
+            "BR": 5,
+            "BL": 6,
+            "FL": 7
+          },
+          "frameColumns": [
+            0
+          ]
+        },
+        "highfive": {
+          "atlas": "bandGreetA",
+          "directionRows": {
+            "FR": 4,
+            "BR": 5,
+            "BL": 6,
+            "FL": 7
+          },
+          "frameColumns": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "frameCount": 4,
+          "progressFrames": true,
+          "fps": 8
+        },
+        "hug": {
+          "atlas": "bandGreetA",
+          "directionRows": {
+            "FR": 4,
+            "BR": 5,
+            "BL": 6,
+            "FL": 7
+          },
+          "frameColumns": [
+            4,
+            5,
+            6,
+            7
+          ],
+          "frameCount": 4,
+          "progressFrames": true,
+          "fps": 8
+        },
+        "jump": {
+          "atlas": "bandJump",
+          "direction": "FR",
+          "directionRows": {
+            "FR": 0,
+            "BR": 1,
+            "BL": 2,
+            "FL": 3
+          },
+          "frameColumns": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "fps": 8
+        }
+      },
+      "directionRows": {
+        "FR": 4,
+        "BR": 5,
+        "BL": 6,
+        "FL": 7
+      },
+      "frameColumns": [
+        0
+      ]
+    },
+    "bassist": {
+      "atlas": "bandWalk",
+      "style": "Punk",
+      "row": 8,
+      "actions": {
+        "perform": {
+          "atlas": "bandPerformanceBassist",
+          "directionRows": {
+            "FR": 0,
+            "BR": 1,
+            "BL": 2,
+            "FL": 3
+          },
+          "direction": "FL",
+          "frameColumns": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "fps": 8
+        },
+        "walk": {
+          "atlas": "bandWalk",
+          "directionRows": {
+            "FR": 8,
+            "BR": 9,
+            "BL": 10,
+            "FL": 11
+          },
+          "frameColumns": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "fps": 8
+        },
+        "exit": {
+          "atlas": "bandWalk",
+          "directionRows": {
+            "FR": 8,
+            "BR": 9,
+            "BL": 10,
+            "FL": 11
+          },
+          "frameColumns": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "fps": 8
+        },
+        "idle": {
+          "atlas": "bandWalk",
+          "directionRows": {
+            "FR": 8,
+            "BR": 9,
+            "BL": 10,
+            "FL": 11
+          },
+          "frameColumns": [
+            0
+          ]
+        },
+        "aftershow-wait": {
+          "atlas": "bandWalk",
+          "directionRows": {
+            "FR": 8,
+            "BR": 9,
+            "BL": 10,
+            "FL": 11
+          },
+          "frameColumns": [
+            0
+          ]
+        },
+        "highfive": {
+          "atlas": "bandGreetB",
+          "directionRows": {
+            "FR": 0,
+            "BR": 1,
+            "BL": 2,
+            "FL": 3
+          },
+          "frameColumns": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "frameCount": 4,
+          "progressFrames": true,
+          "fps": 8
+        },
+        "hug": {
+          "atlas": "bandGreetB",
+          "directionRows": {
+            "FR": 0,
+            "BR": 1,
+            "BL": 2,
+            "FL": 3
+          },
+          "frameColumns": [
+            4,
+            5,
+            6,
+            7
+          ],
+          "frameCount": 4,
+          "progressFrames": true,
+          "fps": 8
+        },
+        "jump": {
+          "atlas": "bandJump",
+          "direction": "FL",
+          "directionRows": {
+            "FR": 4,
+            "BR": 5,
+            "BL": 6,
+            "FL": 7
+          },
+          "frameColumns": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "fps": 8
+        }
+      },
+      "directionRows": {
+        "FR": 8,
+        "BR": 9,
+        "BL": 10,
+        "FL": 11
+      },
+      "frameColumns": [
+        0
+      ]
+    },
+    "drummer": {
+      "atlas": "bandWalk",
+      "style": "Punk",
+      "row": 12,
+      "drawHeight": 52,
+      "actions": {
+        "perform": {
+          "atlas": "bandPerformanceDrummer",
+          "directionRows": {
+            "FR": 0,
+            "BR": 1,
+            "BL": 2,
+            "FL": 3
+          },
+          "direction": "FL",
+          "frameColumns": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "fps": 8
+        },
+        "walk": {
+          "atlas": "bandWalk",
+          "directionRows": {
+            "FR": 12,
+            "BR": 13,
+            "BL": 14,
+            "FL": 15
+          },
+          "frameColumns": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "fps": 8
+        },
+        "exit": {
+          "atlas": "bandWalk",
+          "directionRows": {
+            "FR": 12,
+            "BR": 13,
+            "BL": 14,
+            "FL": 15
+          },
+          "frameColumns": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "fps": 8
+        },
+        "idle": {
+          "atlas": "bandWalk",
+          "directionRows": {
+            "FR": 12,
+            "BR": 13,
+            "BL": 14,
+            "FL": 15
+          },
+          "frameColumns": [
+            0
+          ]
+        },
+        "aftershow-wait": {
+          "atlas": "bandWalk",
+          "directionRows": {
+            "FR": 12,
+            "BR": 13,
+            "BL": 14,
+            "FL": 15
+          },
+          "frameColumns": [
+            0
+          ]
+        },
+        "highfive": {
+          "atlas": "bandGreetB",
+          "directionRows": {
+            "FR": 4,
+            "BR": 5,
+            "BL": 6,
+            "FL": 7
+          },
+          "frameColumns": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "frameCount": 4,
+          "progressFrames": true,
+          "fps": 8
+        },
+        "hug": {
+          "atlas": "bandGreetB",
+          "directionRows": {
+            "FR": 4,
+            "BR": 5,
+            "BL": 6,
+            "FL": 7
+          },
+          "frameColumns": [
+            4,
+            5,
+            6,
+            7
+          ],
+          "frameCount": 4,
+          "progressFrames": true,
+          "fps": 8
+        }
+      },
+      "directionRows": {
+        "FR": 12,
+        "BR": 13,
+        "BL": 14,
+        "FL": 15
+      },
+      "frameColumns": [
+        0
+      ]
+    },
+    "support": {
+      "atlas": "wardrobe",
+      "styles": [
+        "Casual",
+        "Suit",
+        "Beach",
+        "Worker",
+        "Farmer",
+        "Adventurer",
+        "Casual2",
+        "Punk"
+      ],
+      "variantStyles": {
+        "Casual": 0,
+        "Suit": 1,
+        "Beach": 2,
+        "Worker": 3,
+        "Farmer": 4,
+        "Adventurer": 5,
+        "Casual2": 6,
+        "Punk": 7
+      },
+      "actions": {
+        "support": {
+          "atlas": "pit"
+        },
+        "walk": {
+          "atlasFrames": [
+            "wardrobe",
+            "walk"
+          ]
+        },
+        "highfive": {
+          "atlas": "guestSocial",
+          "variantStyles": {
+            "Casual": 0,
+            "Suit": 4,
+            "Beach": 8,
+            "Worker": 12,
+            "Farmer": 16,
+            "Adventurer": 20,
+            "Casual2": 24,
+            "Punk": 28
+          },
+          "directionRowOffsets": {
+            "FR": 0,
+            "BR": 1,
+            "BL": 2,
+            "FL": 3
+          },
+          "frameColumns": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "frameCount": 4,
+          "progressFrames": true,
+          "fps": 8
+        },
+        "hug": {
+          "atlas": "guestSocial",
+          "variantStyles": {
+            "Casual": 0,
+            "Suit": 4,
+            "Beach": 8,
+            "Worker": 12,
+            "Farmer": 16,
+            "Adventurer": 20,
+            "Casual2": 24,
+            "Punk": 28
+          },
+          "directionRowOffsets": {
+            "FR": 0,
+            "BR": 1,
+            "BL": 2,
+            "FL": 3
+          },
+          "frameColumns": [
+            4,
+            5,
+            6,
+            7
+          ],
+          "frameCount": 4,
+          "progressFrames": true,
+          "fps": 8
+        }
+      }
+    },
+    "surfer": {
+      "atlas": "wardrobe",
+      "style": "Casual",
+      "row": 0,
+      "actions": {
+        "surf": {
+          "atlas": "poses",
+          "row": 7,
+          "horizontal": true,
+          "footX": 32,
+          "footY": 32
+        },
+        "highfive": {
+          "atlas": "guestSocial",
+          "variantStyles": {
+            "Casual": 0,
+            "Suit": 4,
+            "Beach": 8,
+            "Worker": 12,
+            "Farmer": 16,
+            "Adventurer": 20,
+            "Casual2": 24,
+            "Punk": 28
+          },
+          "directionRowOffsets": {
+            "FR": 0,
+            "BR": 1,
+            "BL": 2,
+            "FL": 3
+          },
+          "frameColumns": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "frameCount": 4,
+          "progressFrames": true,
+          "fps": 8
+        },
+        "hug": {
+          "atlas": "guestSocial",
+          "variantStyles": {
+            "Casual": 0,
+            "Suit": 4,
+            "Beach": 8,
+            "Worker": 12,
+            "Farmer": 16,
+            "Adventurer": 20,
+            "Casual2": 24,
+            "Punk": 28
+          },
+          "directionRowOffsets": {
+            "FR": 0,
+            "BR": 1,
+            "BL": 2,
+            "FL": 3
+          },
+          "frameColumns": [
+            4,
+            5,
+            6,
+            7
+          ],
+          "frameCount": 4,
+          "progressFrames": true,
+          "fps": 8
+        }
+      }
+    }
+  }
+}
