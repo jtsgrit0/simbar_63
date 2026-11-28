@@ -8,8 +8,8 @@ import {launchPreparedDesk} from './native_test_workflow.mjs';
 const art=new URL('./WebGLTemplate/FastGame/art/audience/',import.meta.url);
 const meta=JSON.parse(fs.readFileSync(new URL('whole-models.json',art)));
 const ids=new Set(patronPools.flat());
-assert.deepEqual(patronPools, [[1,4,5,9,14,15,26,53,94],[6,7,8,10,12,13,27,44],[2,3,11,16,18,19,20,21,22,23,33,57]]);
-assert.equal(ids.size,29);
+assert.deepEqual(patronPools, [[1,4,5,9,14,15,26,53,94],[6,7,8,10,12,13,17,27,44],[2,3,11,16,18,19,20,21,22,23,33,57]]);
+assert.equal(ids.size,30);
 assert.deepEqual(new Set(meta.entries.map(e=>e.id)),ids);
 assert.equal(meta.entries.length,ids.size);
 const dims=meta.pages.map(f=>{const b=fs.readFileSync(new URL(f,art));return [b.readUInt32BE(16),b.readUInt32BE(20)];});
@@ -51,4 +51,17 @@ for(let owner=0;owner<3;owner++){
   assert.deepEqual(models(restored),before);
   assert.equal(restored.journey.festival.activeId,'horns');
 }
+
+const scheduledSurfer={role:'surfer',behavior:'surf',y:1.85};
+const activeSurf={festivalAction:'surf'};
+const surfFrame=(a,p={},action='surf')=>authoredFrame(a,p,action,'FR',true,4);
+const timedFrame=surfFrame(scheduledSurfer);
+assert.equal(timedFrame.clip,'surf');
+assert.equal(timedFrame.horizontal,true);
+assert.equal(surfFrame({...scheduledSurfer,y:0},{},'listen').clip,'idle');
+assert.equal(surfFrame({role:'guest',festivalLead:true,festivalLiftReady:true,y:1},activeSurf).clip,'surf');
+assert.equal(surfFrame({role:'guest',festivalLead:true,festivalLiftReady:false,y:1},activeSurf).clip,'horns');
+assert.equal(surfFrame({role:'guest',y:1},activeSurf).clip,'horns');
+assert.equal(surfFrame({role:'support',festivalSupport:true},activeSurf).clip,'support');
+assert.equal(surfFrame({role:'seated',y:1},activeSurf).clip,'seatedReaction');
 console.log('Native audience model metadata, frame bounds, festival actions, role safety, walk-ins and save migration passed.');

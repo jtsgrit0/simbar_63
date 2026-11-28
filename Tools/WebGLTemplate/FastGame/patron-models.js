@@ -1,4 +1,4 @@
-const sets=Object.freeze([[1,4,5,9,14,15,26,53,94],[6,7,8,10,12,13,27,44],[2,3,11,16,18,19,20,21,22,23,33,57]].map(Object.freeze));
+const sets=Object.freeze([[1,4,5,9,14,15,26,53,94],[6,7,8,10,12,13,17,27,44],[2,3,11,16,18,19,20,21,22,23,33,57]].map(Object.freeze));
 export const patronPools=sets;
 const roles=new Set(['seated','guest','support','surfer','assisted']);
 function rank(key,seed){
@@ -27,12 +27,13 @@ const baseRows=Object.freeze({walk:[0,1],sit:[2,3],seatedReaction:[2,3],horns:[4
 const extraRows=Object.freeze({slam:[1,0],mosh:[1,1],surf:[1,2],support:[1,3],jump:[1,4],airguitar:[1,5],sing:[2,0],encore:[2,1],dance:[2,2],skank:[2,3],flash:[2,4],highfive:[2,5],hug:[3,0]});
 export function authoredFrame(a,pose,action,dir,active,sheetCount=1){
   const back=dir.startsWith('B'),flip=dir.endsWith('L'),seated=(a.role==='seated'&&!a.moving&&action!=='walk'),gesture=pose.festivalAction||pose.kind||action;
+  const timedLift=!pose.festivalAction&&a.role==='surfer'&&a.behavior==='surf'&&action==='surf'&&a.y>0;
   let clip=aliases[gesture]||gesture;
   if(!active)clip=seated?'sit':'idle';
   else if(action==='walk'&&gesture!=='skank')clip='walk';
   else if(seated)clip=gesture==='flash'?'sit':pose.festivalAction?'seatedReaction':'sit';
   else if(gesture==='surf'&&a.festivalSupport)clip='support';
-  else if(gesture==='surf'&&(!a.festivalLead||!a.festivalLiftReady||!(a.y>.05)))clip='horns';
+  else if(gesture==='surf'&&!timedLift&&(!a.festivalLead||!a.festivalLiftReady||!(a.y>.05)))clip='horns';
   let sheet=0,row,col=0,horizontal=false,fps=6,frames=4;
   if(extraRows[clip]&&sheetCount>extraRows[clip][0]){
     [sheet,row]=extraRows[clip];horizontal=clip==='surf';
