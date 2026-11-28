@@ -78,6 +78,34 @@ function orderFloor(points,owner,seed){
   }).sort((a,b)=>a.priority-b.priority||a.z-b.z||a.x-b.x);
 }
 const distance=(a,b)=>Math.hypot(a.x-b.x,a.z-b.z);
+// Change the shape of the standing crowd, not its size or reserved seats.
+// A broader show rewards space between small groups even at the same turnout.
+const crowdSpread=[
+  {reach:1.55,pressure:.19,frontShare:.68},
+  {reach:2.15,pressure:.45,frontShare:.62},
+  {reach:2.75,pressure:.78,frontShare:.56}
+];
+const spreadFor=(owner,seed)=>seed?crowdSpread[hash('crowd-spread',owner,seed)%crowdSpread.length]:null;
+function spaceScore(point,actors,spread,useHomes=false){
+  const radius=spread.reach,r2=radius*radius;
+  let near=0;
+  for(const a of actors){
+    if(a.visible===false||!['guest','seated','support','surfer'].includes(a.role))continue;
+    const x=useHomes&&Number.isFinite(a.homeX)?a.homeX:a.x,z=useHomes&&Number.isFinite(a.homeZ)?a.homeZ:a.z;
+    const d2=(point.x-x)**2+(point.z-z)**2;
+    if(d2<r2)near+=1-d2/r2;
+  }
+  return near*spread.pressure;
+}
+function spaciousPoint(points,actors,spread,eligible,useHomes=false,extra=()=>0){
+  let best=null,bestScore=Infinity;
+  for(const p of points){
+    if(!eligible(p))continue;
+    const score=p.priority+spaceScore(p,actors,spread,useHomes)+extra(p);
+    if(score<bestScore){best=p;bestScore=score;}
+  }
+  return best;
+}
 const layoutFor=owner=>owner===0?FREEBIRD_LAYOUT:owner===1?FF_LAYOUT:null;
 const originalQueue=[[-1.5,-1.75],[-.85,-2.25],[-.15,-2.7],[.6,-3.1],[1.4,-3.5],[2.2,-3.7],[3,-4]].map(([x,z])=>({x,z}));
 const hash=(...values)=>{
@@ -144,7 +172,8 @@ function build({owner=2,attendance=0,showId='freewill',day=1,session=1,nameSeed=
 function buildCrowd({owner,attendance,showId,day,session,nameSeed,crowdSeed},legacyOrder=false){
   owner=ownerIndex(owner);
   const profile=AUDIENCE_VENUES[owner],total=whole(attendance,0,profile.capacity),seed=hash(owner,day,session,showId),next=random(seed),layout=layoutFor(owner),actors=[];
-  const candidates=orderFloor(floorCandidates(owner,seed^0x9e3779b9),owner,legacyOrder?0:crowdSeed),names=guestNames({owner,day,session,nameSeed});
+  const layoutSeed=legacyOrder?0:crowdSeed,spread=spreadFor(owner,layoutSeed);
+  const candidates=orderFloor(floorCandidates(owner,seed^0x9e3779b9),owner,layoutSeed),names=guestNames({owner,day,session,nameSeed});
   const make=(id,role,slot,point,behavior,extra={})=>{
     const descriptor={id,name:names[actors.length]||'Guest',role,slot,audienceVersion:1,behavior,behaviorPhase:round(next()*TAU),animationSpeed:round(.72+next()*.56),
       x:point.x,z:point.z,y:0,homeX:point.x,homeZ:point.z,targetX:point.x,targetZ:point.z,facing:point.facing??facing(point.x,point.z),
@@ -204,35 +233,40 @@ function buildCrowd({owner,attendance,showId,day,session,nameSeed,crowdSeed},leg
       .sort((a,b)=>distance(a,actor)-distance(b,actor))[0];
     if(target){actor.seatStageTarget={x:target.x,z:target.z};frontReservations.push(target);}
   }
+  const canPlace=point=>actors.length<total
+    &&frontReservations.every(target=>distance(point,target)>=.78)
+    &&actors.every(actor=>distance(actor,point)>=MIN_SPACING);
   const place=point=>{
-    if(actors.length>=total)return false;
-    if(frontReservations.some(target=>distance(point,target)<.78))return false;
-    if(actors.some(actor=>distance(actor,point)<MIN_SPACING))return false;
+    if(!canPlace(point))return false;
     const slot=guestSlot++,id=slot<16?'patron-'+slot:'audience-'+slot;
     make(id,'guest',slot,point,standingBehavior(owner,showId,next),{audienceZone:point.zone});
     return true;
+  };
+  const fill=(limit,accept)=>{
+    let placed=0;
+    if(spread){
+      while(placed<limit&&actors.length<total){
+        const point=spaciousPoint(candidates,actors,spread,p=>accept(p)&&canPlace(p));
+        if(!point)break;
+        place(point);placed++;
+      }
+    }else for(const point of candidates){
+      if(placed>=limit||actors.length>=total)break;
+      if(accept(point)&&place(point))placed++;
+    }
+    return placed;
   };
   if(owner===0){
     // Retain a few people in the social area, while placing most of the room
     // in front of the stage. Fixed mosh/surf performers count toward the front.
     const waiting=actors.filter(a=>a.waitingSeat).length;
     const social=Math.min(3,Math.floor(total*.15),Math.max(0,total-actors.length));
-    let placed=0;
-    for(const point of candidates){
-      if(placed>=social||actors.length>=total)break;
-      if(point.zone==='left-social'&&place(point))placed++;
-    }
-    const desired=Math.min(Math.ceil(total*.7),total-waiting-placed);
-    let inFront=actors.filter(a=>!a.waitingSeat&&a.x>=.6&&a.z<2).length;
-    for(const point of candidates){
-      if(inFront>=desired||actors.length>=total)break;
-      if(point.zone==='front-floor'&&point.x>=.6&&place(point))inFront++;
-    }
+    const placed=fill(social,p=>p.zone==='left-social');
+    const desired=Math.min(Math.ceil(total*(spread?.frontShare??.7)),total-waiting-placed);
+    const inFront=actors.filter(a=>!a.waitingSeat&&a.x>=.6&&a.z<2).length;
+    fill(desired-inFront,p=>p.zone==='front-floor'&&p.x>=.6);
   }
-  for(const point of candidates){
-    if(actors.length>=total)break;
-    place(point);
-  }
+  fill(total-actors.length,()=>true);
   // At capacity an unlucky greedy ordering must not reduce the paid crowd.
   if(actors.length!==total&&crowdSeed&&!legacyOrder)return buildCrowd({owner,attendance,showId,day,session,nameSeed,crowdSeed},true);
   if(actors.length!==total)throw new Error(`Audience floor ${profile.key} has ${actors.length} safe slots for ${total} guests`);
@@ -268,7 +302,10 @@ function arrival({owner=2,showId='freewill',day=1,session=1,serial=1,actors=[],n
   owner=ownerIndex(owner);const seed=hash(owner,day,session,serial,'arrival'),next=random(seed),layout=layoutFor(owner);
   const candidates=orderFloor(floorCandidates(owner,seed),owner,crowdSeed);
   const ordered=owner===0?[...candidates.filter(point=>point.zone==='front-floor'&&point.x>=.6),...candidates.filter(point=>point.zone!=='front-floor'||point.x<.6)]:candidates;
-  const point=ordered.find(point=>clearAudiencePoint(point,actors));if(!point)return null;
+  const spread=spreadFor(owner,crowdSeed);
+  const clear=point=>clearAudiencePoint(point,actors);
+  const point=spread?spaciousPoint(candidates,actors,spread,clear,true,p=>owner===0&&p.zone!=='front-floor'?.16:0):ordered.find(clear);
+  if(!point)return null;
   const slot=300+serial,behavior=standingBehavior(owner,showId,next);
   const used=new Set(actors.filter(actor=>actor.visible!==false).map(actor=>actor.name));
   const names=guestNames({owner,day,session,nameSeed});

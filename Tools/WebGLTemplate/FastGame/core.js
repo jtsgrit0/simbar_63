@@ -489,19 +489,23 @@ export class SimBarGame{
   }
   _formFestivalSurf(eligible){
     const floor=eligible.filter(a=>a.role==='guest'&&!a.seat&&this._walkable(a,false,true));let best=null;
-    for(const lead of floor){
-      const nearest=floor.filter(a=>a!==lead).sort((a,b)=>distance(a,lead)-distance(b,lead)).slice(0,3);
-      if(nearest.length<3||nearest.some(a=>distance(a,lead)>2.1))continue;
-      const team=[lead,...nearest];
-      for(let turn=0;turn<8;turn++){
-        const angle=turn*Math.PI/4,slots=[[-.55,-.15],[.55,-.15],[0,.57]].map(([x,z])=>point(lead.x+x*Math.cos(angle)-z*Math.sin(angle),lead.z+x*Math.sin(angle)+z*Math.cos(angle)));
-        if(slots.some(p=>!this._walkable(p,false,true)||this.actors.some(a=>a.visible&&a.role!=='band'&&!team.includes(a)&&distance(a,p)<.43)))continue;
-        const available=nearest.slice(),supporters=slots.map(target=>{
-          available.sort((a,b)=>distance(a,target)-distance(b,target));return{actor:available.shift(),target};
-        });
-        const score=supporters.reduce((sum,member)=>sum+distance(member.actor,member.target),0)+distance(lead,point(5,-2))*.02;
-        if(!best||score<best.score)best={lead,supporters,score};
+    // Keep the regular nearby team; allow a wider search only on an open floor.
+    for(const reach of [2.1,3.25]){
+      for(const lead of floor){
+        const nearest=floor.filter(a=>a!==lead).sort((a,b)=>distance(a,lead)-distance(b,lead)).slice(0,3);
+        if(nearest.length<3||nearest.some(a=>distance(a,lead)>reach))continue;
+        const team=[lead,...nearest];
+        for(let turn=0;turn<8;turn++){
+          const angle=turn*Math.PI/4,slots=[[-.55,-.15],[.55,-.15],[0,.57]].map(([x,z])=>point(lead.x+x*Math.cos(angle)-z*Math.sin(angle),lead.z+x*Math.sin(angle)+z*Math.cos(angle)));
+          if(slots.some(p=>!this._walkable(p,false,true)||this.actors.some(a=>a.visible&&a.role!=='band'&&!team.includes(a)&&distance(a,p)<.43)))continue;
+          const available=nearest.slice(),supporters=slots.map(target=>{
+            available.sort((a,b)=>distance(a,target)-distance(b,target));return{actor:available.shift(),target};
+          });
+          const score=supporters.reduce((sum,member)=>sum+distance(member.actor,member.target),0)+distance(lead,point(5,-2))*.02;
+          if(!best||score<best.score)best={lead,supporters,score};
+        }
       }
+      if(best)break;
     }
     if(!best)return;
     best.lead.festivalLead=true;best.lead.festivalLiftReady=false;best.lead.festivalLiftElapsed=0;
