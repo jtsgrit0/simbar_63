@@ -1,4 +1,4 @@
-const sets=Object.freeze([[1,5,9,15,26,53,94],[6,7,8,10,12,27,44],[3,11,16,18,33,57]].map(Object.freeze));
+const sets=Object.freeze([[1,5,9,15,26,53,94],[6,7,8,10,12,27,44],[2,3,11,16,18,20,22,33,57]].map(Object.freeze));
 export const patronPools=sets;
 const roles=new Set(['seated','guest','support','surfer','assisted']);
 function rank(key,seed){
