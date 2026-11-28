@@ -80,7 +80,7 @@ const old=JSON.parse(opening),j=JSON.parse(old.journeyJson);j.floorMissions=Floo
 const legacy=restore(old);assert.deepEqual(counters(legacy),[1,1,56]);assert.equal(legacy.effects.length,2);assert.equal(legacy.floor.cleanupActive,true);
 j.afterShow.completed=true;j.afterShow.departureStarted=true;j.afterShow.members.forEach(m=>m.phase='gone');j.afterShow.audience.forEach(a=>a.phase='gone');old.journeyJson=JSON.stringify(j);
 const completed=restore(old);assert.deepEqual(counters(completed),[0,0,0]);assert.equal(completed.effects.length,0);assert.equal(completed.floor.finaleEnsured,true);assert(completed.farewellPending);
-completed.act('farewellAck');assert.equal(completed.phase,'results');assert.equal(completed.journey.resultFloorBonus,0);
+completed.tick(.05);assert.equal(completed.phase,'results');assert.equal(completed.journey.resultFloorBonus,0);
 const historical=restore(completed.exportSave());assert.equal(historical.phase,'results');assert.deepEqual(counters(historical),[0,0,0]);assert.equal(historical.effects.length,0);
 
 console.log('PASS: random mid-set schedule retained, both missing finale kinds create real effects/debt, cleanup C runs during greetings without starving behind F, idempotent closing/save migrations and once-only cleanup reward');

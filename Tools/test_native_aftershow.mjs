@@ -21,7 +21,7 @@ assert.equal(g.journey.afterShow.audience.length,31,'The eleven seated listeners
 const visited=new Map(BAND_MEMBERS.map(id=>[id,new Set()]));
 const seats=g.actors.filter(a=>a.role==='seated').map(a=>({id:a.id,x:a.x,z:a.z}));
 let previous=new Map(g.actors.map(a=>[a.id,{x:a.x,z:a.z,y:a.y}]));
-for(let t=0;t<240&&!g.farewellPending;t+=.05){
+for(let t=0;t<240&&g.phase!=='results';t+=.05){
   g.tick(.05);
   const state=g.journey.afterShow;
   if(state.departureStarted)assert(state.members.every(m=>m.greeting===2),'Departure began before all four musicians finished both greetings');
@@ -46,11 +46,9 @@ for(let t=0;t<240&&!g.farewellPending;t+=.05){
   if(g.reaction.activeKind)g.act('quick',{kind:g.reaction.activeKind});
   if(g.afterShowPending)assert.equal(g.journey.settledSession,0,'Receipt paid before the band exited');
 }
-assert(g.farewellPending,JSON.stringify(g.journey.afterShow));
-assert.equal(g.phase,'closing');assert.equal(g.paused,true);assert.equal(g.pauseReason,'farewell');
-assert.equal(g.state.money,wallet,'Receipt paid before farewell popup was acknowledged');
-const snapshot=g.exportSave(),clock=g.elapsed;g.tick(5);assert.equal(g.elapsed,clock);g.act('resume');assert.equal(g.paused,true);
-assert(g.journey.afterShow.audience.every(a=>a.phase==='gone'),'All stage-front guests must exit before the popup');
+assert.equal(g.phase,'results');assert.equal(g.farewellPending,false);
+assert.equal(g.journey.afterShow.noticeAcknowledged,true);
+assert(g.journey.afterShow.audience.every(a=>a.phase==='gone'),'All stage-front guests must exit before settlement');
 for(const fan of g.journey.afterShow.audience){
   const a=g.actors.find(a=>a.id===fan.id);
   assert(Math.hypot(a.x-EXIT_POINT.x,a.z-EXIT_POINT.z)<=.181,'Audience disappeared away from the exit');
@@ -62,17 +60,21 @@ for(const id of BAND_MEMBERS){
   for(const phase of ['stage','approach','highfive','hug','exit','gone'])assert(visited.get(id).has(phase),`${id} missed ${phase}`);
   const a=g.actors.find(a=>a.id===id);assert.equal(a.visible,false);assert(Math.hypot(a.x-8.8,a.z+5.55)<.22);
 }
-const pending=new SimBarGame({storage:g.storage});pending.act('continue');assert(pending.farewellPending);assert.equal(pending.pauseReason,'farewell');assert.equal(pending.journey.musicPaused,false);
+const paid=g.state.money,nights=g.journey.completedNights;
+const pending=new SimBarGame({storage:g.storage});pending.act('continue');assert.equal(pending.phase,'results');assert.equal(pending.journey.musicPaused,false);
 assert(pending.journey.afterShow.audience.every(item=>pending.actors.find(a=>a.id===item.id).visible===false));
-g.act('farewellAck');assert.equal(g.phase,'results');assert.equal(g.journey.afterShow.noticeAcknowledged,true);
-const paid=g.state.money;g.act('farewellAck');assert.equal(g.state.money,paid);
+pending.tick(5);assert.equal(pending.state.money,paid);assert.equal(pending.journey.completedNights,nights);
 
-// A popup may arrive while staff still need a reaction. Acknowledging it
-// resumes that mission; it must not skip cleanup or pay an early receipt.
-const concurrent=new SimBarGame({storage:{getItem:()=>null,setItem(){}}});concurrent.importSave(snapshot);concurrent.act('continue');
-concurrent.floor.litter=40;concurrent.floor.cleaned=0;concurrent.floor.cleanupActive=false;concurrent.floor.cleanupComplete=false;
-concurrent.act('pause',{reason:'menu'});assert.equal(concurrent.pauseReason,'farewell','An external pause replaced the modal pause reason');
-concurrent.act('farewellAck');assert.equal(concurrent.phase,'closing');assert.equal(concurrent.paused,false);assert.equal(concurrent.journey.settledSession,0);
+// Restore an older save stopped at the removed popup, with cleanup still due.
+const oldPopup=JSON.parse(g.exportSave()),legacyJourney=JSON.parse(oldPopup.journeyJson);
+legacyJourney.inProgress=true;legacyJourney.floorClosing=true;legacyJourney.settledSession=0;
+legacyJourney.afterShow.noticeAcknowledged=false;
+Object.assign(legacyJourney.floorMissions,{litter:40,cleaned:0,cleanupActive:false,cleanupComplete:false,cleanupRewardClaimed:false});
+oldPopup.journeyJson=JSON.stringify(legacyJourney);
+const concurrent=new SimBarGame({storage:storage()});assert(concurrent.importSave(oldPopup));concurrent.act('continue');
+assert.equal(concurrent.phase,'closing');assert.equal(concurrent.paused,false);assert(concurrent.floorTasksPending);assert.equal(concurrent.journey.settledSession,0);
+concurrent.act('pause',{reason:'menu'});assert.equal(concurrent.pauseReason,'menu');concurrent.tick(1);assert.equal(concurrent.journey.settledSession,0);
+concurrent.act('resume');concurrent.tick(.05);assert.equal(concurrent.farewellPending,false);assert.equal(concurrent.journey.settledSession,0);
 finish(concurrent);assert.equal(concurrent.phase,'results');assert.equal(concurrent.floorTasksPending,false);
 
 // Saving during an actual gesture preserves the partner, position and elapsed
@@ -205,4 +207,4 @@ upgraded.act('next');launchPreparedDesk(upgraded);assert.equal(upgraded.journey.
 const nextAudience=upgraded.actors.filter(a=>a.audienceVersion===1);
 assert.equal(nextAudience.length,upgraded.metrics().attendance);
 assert(nextAudience.every(a=>a.visible),'A new night did not restore its newly booked audience');
-console.log('PASS: eight physical greetings and four musicians retain their barrier; other listeners leave concurrently; surfer lowering, acknowledged popup, persisted music, save migration, cleanup and once-only settlement');
+console.log('PASS: eight physical greetings and four musicians retain their barrier; other listeners leave concurrently; surfer lowering, no extra popup, persisted music, save migration, cleanup and once-only settlement');

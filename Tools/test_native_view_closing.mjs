@@ -66,11 +66,17 @@ try{
   g.setViewClosingActive(false);assert.equal(g.viewClosingActive,false);const rounds=g.reaction.completedRounds;for(let i=0;i<800&&g.reaction.cleanupWorkBudget>EPS;i++)g.tick(DT);assert.equal(g.reaction.completedRounds,rounds,'Leaving view mode generated another automatic response');if(!g.floor.cleanupComplete){const cleaned=g.floor.cleaned;g.tick(1);assert.equal(g.floor.cleaned,cleaned,'Manual mode cleaned without a new pulse');}
   for(let i=0;i<6000&&g.phase!=='results';i++){g.tick(DT);if(g.reaction.activeKind)g.act('quick',{kind:g.reaction.activeKind});if(g.farewellPending)g.act('farewellAck');}assert.equal(g.phase,'results');assert.equal(stats.autoAcknowledgements,0);assert.equal(stats.manualAcknowledgements,1);evidence.pauseExitReloadAndManualReturn=true;
  }
- // A saved hidden farewell may be paused with cleanup still outstanding.
- // Enabling the flag has no synchronous side effects; the next tick resumes
- // only its farewell pause, while an explicit focus pause remains respected.
+ // Older saves once stopped at a manual popup. Restore a supported
+ // legacy state and respect focus pause while cleanup remains outstanding.
  {
-  const source=night(2);end(source);for(let i=0;i<6000&&!source.farewellPending;i++)source.tick(DT);assert(source.farewellPending&&source.paused);assert(source.floorTasksPending);assert.equal(source.floor.cleaned,0);source.save();const g=new SimBarGame({storage:source.storage,seed:31});g.act('continue');assert(g.farewellPending&&g.paused);assert.equal(g.viewClosingActive,false);const stats=observe(g);g.setViewClosingActive(true);assert(g.farewellPending&&g.paused,'The setter performed work before the game tick');g.act('pause',{reason:'focus'});const elapsed=g.elapsed;g.tick(1);assert.equal(g.elapsed,elapsed);assert.equal(g.pauseReason,'focus');g.act('resume');evidence.savedFarewellPaused=automatic(g,{stats});assert(evidence.savedFarewellPaused.sweepFrames>0);
+  const source=night(2);end(source);for(let i=0;i<6000&&!source.journey.afterShow.completed;i++)source.tick(DT);
+  assert(source.journey.afterShow.completed&&source.floorTasksPending);assert.equal(source.floor.cleaned,0);
+  source.journey.afterShow.noticeAcknowledged=false;source.save();
+  const g=new SimBarGame({storage:source.storage,seed:31});g.act('continue');
+  assert(g.farewellPending&&!g.paused);assert.equal(g.viewClosingActive,false);
+  const stats=observe(g);g.setViewClosingActive(true);assert(g.farewellPending&&!g.paused,'The setter performed work before the game tick');
+  g.act('pause',{reason:'focus'});const elapsed=g.elapsed;g.tick(1);assert.equal(g.elapsed,elapsed);assert.equal(g.pauseReason,'focus');assert(g.farewellPending);
+  g.act('resume');evidence.savedFarewellPaused=automatic(g,{stats});assert(evidence.savedFarewellPaused.sweepFrames>0);
  }
  // The former Petsounds day-five gather stall must finish under the same
  // unattended tick path, retaining the actual final hug and a single receipt.

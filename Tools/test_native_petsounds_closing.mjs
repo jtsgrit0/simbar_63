@@ -34,7 +34,7 @@ for(;seconds<150&&g.phase!=='results';seconds+=.05){
   }
   if(g.farewellPending){acknowledgements++;g.act('farewellAck');}
 }
-assert(hug,'The pending second greeting was skipped');assert.equal(acknowledgements,1);
+assert(hug,'The pending second greeting was skipped');assert.equal(acknowledgements,0);
 assert.equal(g.phase,'results');assert(after.members.every(m=>m.greeting===2&&m.phase==='gone'));
 assert(after.audience.every(a=>a.phase==='gone'));assert.equal(after.noticeAcknowledged,true);
 const receipt=[g.state.money,g.journey.xp,g.journey.completedNights];g.save();

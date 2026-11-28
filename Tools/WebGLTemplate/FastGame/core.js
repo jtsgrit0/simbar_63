@@ -129,7 +129,6 @@ export class SimBarGame{
   get floorTasksPending(){return Floor.remaining(this.floor)>0||this.floor.guestActive||!this.guestExitFinished||this.staffReturnPending||this.inspection.active||this.drunkIncidentPending;}
   get afterShowPending(){return !this.journey.afterShow?.completed;}
   get farewellPending(){return this.journey.inProgress&&this.journey.floorClosing&&!!this.journey.afterShow?.completed&&!this.journey.afterShow.noticeAcknowledged&&!this.drunkIncidentPending;}
-  get showFarewell(){return this.farewellPending;}
   goalTargets(){const p=this.journey.booking;return Booking.isCampaign(p)?Campaign.targets(p.campaignStage,this.journey.challenge):this.journey.challenge?[20,7,8]:[12,4,5];}
   purchaseGate(type,index){return Booking.isCampaign(this.journey.booking)?Campaign.purchaseGate(type,index,this.state.upgrades[index]+1,this.journey.completedNights):{allowed:true,requiredNights:0};}
   _campaignContext(){return{venueOwner:this.owner,completedNights:this.journey.completedNights,fans:this.state.fans,upgrades:this.state.upgrades,career:this.journey.bookingCareer};}
@@ -315,7 +314,6 @@ export class SimBarGame{
       case'farewellAck':
         if(!this.closing||!this.farewellPending)return this._done(false);
         j.afterShow.noticeAcknowledged=true;
-        if(this.pauseReason==='farewell'){this.paused=false;this.pauseReason='';}
         if(!this.floorTasksPending&&!this.afterShowPending)this._settleNight();
         break;
       case'start':if(j.inProgress||this._activePlan())return this.act('continue');if(j.settledSession>0&&j.session===j.settledSession)j.day=int(j.day+1,1,9999);this._planning(!!p.challenge);break;
@@ -332,8 +330,8 @@ export class SimBarGame{
       case'next':if(this.phase!=='results'||j.inProgress)return this._done(false);j.day=int(j.day+1,1,9999);this._planning(j.challenge);break;
       case'retry':if(this.phase!=='results'||j.inProgress)return this._done(false);this._planning(j.challenge);break;
       case'lobby':this.pour=null;this.phase='lobby';this.paused=true;this.pauseReason='lobby';break;
-      case'pause':if(this.playing||this.closing){this.paused=true;this.pauseReason=this.farewellPending&&!this.viewClosingActive?'farewell':p.reason||'pause';}break;
-      case'resume':if(this.playing||this.closing){this.paused=this.farewellPending;this.pauseReason=this.paused?'farewell':'';}break;
+      case'pause':if(this.playing||this.closing){this.paused=true;this.pauseReason=p.reason||'pause';}break;
+      case'resume':if(this.playing||this.closing){this.paused=false;this.pauseReason='';}break;
       case'guide':if(this.phase!=='guide')return this._done(false);if(j.guideStep<2)j.guideStep++;else{j.tutorialComplete=true;j.guidePending=false;this.phase='playing';this.paused=false;this.pauseReason='';}break;
       case'deskSelect':case'deskWork':
         if(this.phase!=='planning')return this._done(false);
@@ -679,9 +677,6 @@ export class SimBarGame{
   _step(dt){
     if(!this.playing)this.setViewServiceActive(false);
     if(!this.closing)this.setViewClosingActive(false);
-    // Only the automatic farewell pause belongs to unattended closing. Focus,
-    // menu and explicit pauses must still stop the same game-time work.
-    if(this.viewClosingActive&&this.farewellPending&&(!this.paused||this.pauseReason==='farewell'))this.act('farewellAck');
     if(this.paused||(!this.playing&&!this.closing))return;this.elapsed+=dt;this._inputGuard=Math.max(0,this._inputGuard-dt);this._messageTimer-=dt;if(this._messageTimer<=0)this._message=['',''];
     const j=this.journey,s=this.state;this.effects=this.effects.filter(e=>this.elapsed-e.time<8);
     const inspectionWasActive=this.inspection.active;
@@ -702,7 +697,7 @@ export class SimBarGame{
       if(this.orders[0]?.patience<=0&&!this.pour){const missed=this.orders.shift();this._feedbackDisappointment(missed.id,'timeout');s.fans=Math.max(0,s.fans-3);this._mistake();this._routeOrders();this._say('손님이 주문을 받지 못하고 떠났어요.','A guest left without their order.');}
     }
     this._tickActors(dt);if(!frozen)tickDrunkIncident(this.floor.guestIncident,this.actors,dt);if(this.playing&&!frozen)this._feedbackTick(dt);if(this.closing&&!frozen)tickAfterShow(j.afterShow,this.actors,dt);
-    if(this.farewellPending){if(this.viewClosingActive)this.act('farewellAck');else{this.paused=true;this.pauseReason='farewell';this.save();}}
+    if(this.closing&&this.farewellPending)this.act('farewellAck');
     if(!this.playing&&!this.closing)return;
     this._floorTick(dt);this._autosave+=dt;if(this._autosave>=3){this._autosave=0;this.save();}
   }
@@ -726,8 +721,6 @@ export class SimBarGame{
     this.orders=this.orders.filter(order=>!ids.has(order.id));if(this.pour&&ids.has(this.pour.orderId))this.pour=null;
     if(this._viewServiceOrder&&ids.has(this._viewServiceOrder.id)){this._viewServiceOrder=null;this._viewServiceTimer=3;}
     this._routeOrders();syncAfterShow(this.journey.afterShow,this.actors);
-    // A newly started incident must finish before the farewell confirmation.
-    if(this.drunkIncidentPending&&this.paused&&this.pauseReason==='farewell'){this.paused=false;this.pauseReason='';}
   }
   _emitPaper(kind,result){if(!result.success)return;this.state.fans+=result.fanGain;this.effects.push({kind,serial:++this._eventSerial,time:this.elapsed});this._say(kind===0?'밴드가 깜짝 꽃가루 퍼포먼스를 했어요!':'관객 위로 휴지가 날립니다!',kind===0?'The band unexpectedly throws confetti!':'Tissue streamers fly over the crowd!');}
   _quick(kind){
@@ -753,7 +746,7 @@ export class SimBarGame{
     // missing kinds before staff claim cleanup, while greetings are starting.
     for(const burst of Floor.ensureFinale(this.floor,!j.afterShow.completed&&j.session!==j.settledSession))this._emitPaper(burst.kind,burst);
     this._ensureCleanup();
-    this.paused=this.farewellPending;this.pauseReason=this.paused?'farewell':'';
+    this.paused=false;this.pauseReason='';
     this._say('공연이 끝났어요. C 청소·F 손님 안내 미션을 마쳐 주세요.','Show over. Finish C cleanup and F guest assistance.');
   }
   _ensureCleanup(){

@@ -36,8 +36,8 @@ for(let owner=0;owner<3;owner++){
   }
   if(g.farewellPending){acknowledgements++;g.act('farewellAck');}if(g.reaction.activeKind)g.act('quick',{kind:g.reaction.activeKind});
  }
- assert.equal(g.phase,'results',JSON.stringify({owner,remaining:state.audience.filter(a=>a.phase!=='gone')}));assert.equal(gestures.size,BAND_MEMBERS.length*2);assert(state.members.every(m=>m.greeting===2&&m.phase==='gone'));assert(state.audience.every(a=>a.phase==='gone'));assert.equal(acknowledgements,1);assert(maxSimultaneous>=4);assert.equal(g.floorTasksPending,false);
+ assert.equal(g.phase,'results',JSON.stringify({owner,remaining:state.audience.filter(a=>a.phase!=='gone')}));assert.equal(gestures.size,BAND_MEMBERS.length*2);assert(state.members.every(m=>m.greeting===2&&m.phase==='gone'));assert(state.audience.every(a=>a.phase==='gone'));assert.equal(acknowledgements,0);assert(maxSimultaneous>=4);assert.equal(g.floorTasksPending,false);
  const receipt=[g.cash,g.journey.xp,g.journey.completedNights];g.save();const receiptGame=new SimBarGame({storage:g.storage,seed:17});receiptGame.act('continue');receiptGame.tick(1);receiptGame._settleNight();assert.deepEqual([receiptGame.cash,receiptGame.journey.xp,receiptGame.journey.completedNights],receipt);
  outcomes.push({owner,capacity:Audience.capacity(owner),seconds:g.elapsed-started,earlyFormerMoving,maxSimultaneous,maxStep,gestures:gestures.size,savedParallelResume:restored,acknowledgements,onceOnlyReceipt:true});
 }
-console.log(JSON.stringify({passed:true,checks:['faster simultaneous actual movement','all three maximum-capacity rooms','eight physical gestures and original durations','band/greeting barrier','continuous travel and real-door exits','mid-parallel pause/save/continue','one farewell and once-only receipt'],outcomes},null,2));
+console.log(JSON.stringify({passed:true,checks:['faster simultaneous actual movement','all three maximum-capacity rooms','eight physical gestures and original durations','band/greeting barrier','continuous travel and real-door exits','mid-parallel pause/save/continue','no separate farewell input and once-only receipt'],outcomes},null,2));
